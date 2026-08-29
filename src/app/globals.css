@@ -30,3 +30,51 @@ div[class*="min-h-[calc(100vh-8rem)]"]{margin:0!important;min-height:100vh!impor
   body:has(nav[aria-label="Mobile teacher navigation"]) [role="tablist"] button{min-width:44px;min-height:44px;padding-inline:14px}
   body:has(nav[aria-label="Mobile teacher navigation"]) form>div:last-child{gap:10px}
 }
+
+/* Admin has a denser mobile rhythm than the learning portals. */
+@media(max-width:767px){
+  [data-admin-shell] main{padding:18px 16px 24px}
+  [data-admin-shell] main>header{margin-bottom:18px;gap:16px}
+  [data-admin-shell] main>header h1{font-size:1.75rem;line-height:1.15;letter-spacing:-.025em}
+  [data-admin-shell] main>header p{margin-top:6px;font-size:.9375rem;line-height:1.45}
+  [data-admin-shell] main>header>div+*{width:100%}
+  [data-admin-shell] main>header>div+*>a,
+  [data-admin-shell] main>header>div+*>button{min-height:48px;width:100%}
+  [data-admin-shell] main>header>div+*>div{width:100%;gap:8px}
+  [data-admin-shell] main>header>div+*>div>*{min-height:48px;flex:1}
+  [data-admin-shell] main input,
+  [data-admin-shell] main select,
+  [data-admin-shell] main textarea{font-size:16px}
+  [data-admin-shell] main form{gap:16px}
+  [data-admin-shell] main form>div:last-child{flex-wrap:wrap;gap:8px}
+  [data-admin-shell] main form>div:last-child>*{min-height:48px;flex:1}
+  [data-admin-shell] main article,
+  [data-admin-shell] main section{scroll-margin-top:72px}
+  [data-admin-shell] main article[class*="p-5"],
+  [data-admin-shell] main section[class*="p-5"]{padding:16px}
+  [data-admin-shell] main [role="tablist"]{margin-inline:-16px;padding-inline:16px;gap:2px}
+  [data-admin-shell] main [role="tablist"] button{min-height:44px;padding-inline:14px}
+  [data-admin-shell] main [class*="grid gap-4"],
+  [data-admin-shell] main [class*="grid gap-5"],
+  [data-admin-shell] main [class*="space-y-5"]{row-gap:16px}
+  [data-admin-shell] main>div.mb-4.flex.flex-col{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  [data-admin-shell] main>div.mb-4.flex.flex-col>label{grid-column:1/-1}
+  [data-admin-shell] main>div.mb-4.flex.flex-col>select{min-width:0;width:100%}
+  [data-admin-shell] main>div.mb-4.flex.flex-col>button{min-height:44px;padding-inline:14px}
+  [data-admin-shell] main>div.mb-4.flex.flex-col>button:before{content:"";display:inline-block;width:17px;height:17px;margin-right:7px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 21v-7'/%3E%3Cpath d='M4 10V3'/%3E%3Cpath d='M12 21v-9'/%3E%3Cpath d='M12 8V3'/%3E%3Cpath d='M20 21v-5'/%3E%3Cpath d='M20 12V3'/%3E%3Cpath d='M1 14h6'/%3E%3Cpath d='M9 8h6'/%3E%3Cpath d='M17 16h6'/%3E%3C/svg%3E") center/contain no-repeat}
+  [data-admin-shell] main>div.grid.gap-3.md\:hidden>a{padding:16px}
+  [data-admin-shell] main>div.grid.gap-3.md\:hidden>a>div{align-items:flex-start;gap:12px}
+  [data-admin-shell] main>div.grid.gap-3.md\:hidden>a>div span{flex:none;white-space:nowrap}
+  [data-admin-shell] main>div.grid.gap-3.md\:hidden>a p{margin-top:6px;line-height:1.35}
+  [data-admin-shell] main>div.mt-4.flex.items-center.justify-between{gap:12px}
+  [data-admin-shell] main>div.mt-4.flex.items-center.justify-between button{min-height:40px;padding-inline:12px}
+  [data-admin-shell] main article>div.mt-4.flex{flex-wrap:wrap;gap:8px}
+  [data-admin-shell] main article>div.mt-4.flex>*{min-height:44px;flex:1}
+  [data-admin-shell] main .rounded-full{white-space:nowrap}
+}
+
+@media(min-width:768px) and (max-width:1023px){
+  [data-admin-shell] main{padding:24px}
+  [data-admin-shell] main table{min-width:860px}
+  [data-admin-shell] main>div.hidden.md\:block{overflow-x:auto}
+}
