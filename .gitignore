@@ -43,3 +43,5 @@ next-env.d.ts
 # Local Stitch design-reference exports
 /Teachers ui/
 /Teachers ui.zip
+/admin ui/
+/admin ui.zip
