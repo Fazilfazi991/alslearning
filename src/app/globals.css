@@ -6,3 +6,4 @@
 .benefits-marquee{margin-inline:calc((100vw - 100%)/-2);overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}.benefits-marquee-track{display:flex;width:max-content;animation:benefits-marquee 28s linear infinite}@keyframes benefits-marquee{to{transform:translateX(-50%)}}@media(prefers-reduced-motion:reduce){.benefits-marquee{margin-inline:0;overflow-x:auto;mask-image:none}.benefits-marquee-track{animation:none}.benefits-marquee-track>[aria-hidden="true"]{display:none}}
 [role="tablist"]{scrollbar-width:none}[role="tablist"]::-webkit-scrollbar{display:none}
 [aria-label="Lesson video player"]>div{background-image:linear-gradient(rgba(10,18,40,.18),rgba(10,18,40,.35)),url('/images/courses/diagnostic-enzyme-markers.webp')!important;background-size:cover;background-position:center}
+div[class*="min-h-[calc(100vh-8rem)]"]{margin:0!important;min-height:100vh!important;overflow-x:hidden}
