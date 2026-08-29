@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="space-y-5"><div className="skeleton h-52 rounded-2xl"/><div className="grid gap-3 md:grid-cols-3">{[1,2,3].map(x=><div key={x} className="skeleton h-32 rounded-2xl"/>)}</div></div>}

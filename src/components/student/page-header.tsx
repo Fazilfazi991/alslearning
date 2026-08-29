@@ -1,0 +1,1 @@
+export function PageHeader({eyebrow,title,description}:{eyebrow?:string;title:string;description:string}){return <header className="mb-7"><p className="eyebrow">{eyebrow??"Student portal"}</p><h2 className="mt-2 text-3xl font-extrabold tracking-tight">{title}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{description}</p></header>}
