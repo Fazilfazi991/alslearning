@@ -7,3 +7,26 @@
 [role="tablist"]{scrollbar-width:none}[role="tablist"]::-webkit-scrollbar{display:none}
 [aria-label="Lesson video player"]>div{background-image:linear-gradient(rgba(10,18,40,.18),rgba(10,18,40,.35)),url('/images/courses/diagnostic-enzyme-markers.webp')!important;background-size:cover;background-position:center}
 div[class*="min-h-[calc(100vh-8rem)]"]{margin:0!important;min-height:100vh!important;overflow-x:hidden}
+
+@media(max-width:767px){
+  body:has(nav[aria-label="Mobile teacher navigation"]) main{padding:20px 16px 28px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>header{margin-bottom:24px;gap:16px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>header>div+*{width:100%}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>header>div+*>a,
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>header>div+*>button,
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>header>a,
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>header>button{width:100%}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main a,
+  body:has(nav[aria-label="Mobile teacher navigation"]) main button{min-height:40px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main article a,
+  body:has(nav[aria-label="Mobile teacher navigation"]) main section a{display:inline-flex;min-width:40px;align-items:center;justify-content:center}
+  body:has(nav[aria-label="Mobile teacher navigation"]) [aria-label^="More actions"]{width:40px;height:40px;display:grid;place-items:center}
+  body:has(nav[aria-label="Mobile teacher navigation"]) [aria-label^="Delete module"]{width:40px;height:40px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) nav[aria-label="Mobile teacher navigation"]{height:72px;padding-bottom:env(safe-area-inset-bottom)}
+  body:has(nav[aria-label="Mobile teacher navigation"]) nav[aria-label="Mobile teacher navigation"] a,
+  body:has(nav[aria-label="Mobile teacher navigation"]) nav[aria-label="Mobile teacher navigation"] button{min-height:64px;gap:4px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>div.grid.gap-5>nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) main>div.grid.gap-5>nav button{min-height:44px;padding:8px 10px;border-radius:6px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) [role="tablist"] button{min-width:44px;min-height:44px;padding-inline:14px}
+  body:has(nav[aria-label="Mobile teacher navigation"]) form>div:last-child{gap:10px}
+}
