@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Academy - Mobile Homepage</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#ffffff",
+                    "on-primary-container": "#ffc0d9",
+                    "tertiary-fixed-dim": "#b2c5ff",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#564149",
+                    "on-primary-fixed-variant": "#8b0358",
+                    "surface": "#faf8ff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f3f3fd",
+                    "tertiary": "#263f7b",
+                    "surface-dim": "#d9d9e3",
+                    "on-secondary-fixed": "#380039",
+                    "secondary-fixed": "#ffd6f7",
+                    "on-tertiary-fixed-variant": "#2b4480",
+                    "primary-container": "#a4226c",
+                    "primary": "#830053",
+                    "tertiary-fixed": "#dae2ff",
+                    "on-tertiary-fixed": "#001848",
+                    "on-tertiary-container": "#c1d0ff",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#897179",
+                    "inverse-on-surface": "#f0f0fa",
+                    "secondary": "#894586",
+                    "background": "#faf8ff",
+                    "inverse-primary": "#ffafd1",
+                    "surface-bright": "#faf8ff",
+                    "surface-container": "#ededf7",
+                    "on-primary-fixed": "#3d0024",
+                    "inverse-surface": "#2e3038",
+                    "surface-tint": "#aa2871",
+                    "surface-container-highest": "#e2e2ec",
+                    "on-secondary-container": "#7b3979",
+                    "tertiary-container": "#3f5794",
+                    "outline-variant": "#dcbfc9",
+                    "secondary-container": "#fdabf4",
+                    "primary-fixed": "#ffd8e6",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#ffafd1",
+                    "surface-variant": "#e2e2ec",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#191b23",
+                    "secondary-fixed-dim": "#fdabf4",
+                    "on-background": "#191b23",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e7e7f2",
+                    "on-secondary-fixed-variant": "#6e2d6c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "gutter": "24px",
+                    "stack-md": "16px",
+                    "margin-desktop": "64px",
+                    "container-max": "1280px",
+                    "margin-mobile": "20px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "label-sm": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "label-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg-mobile": [
+                            "Plus Jakarta Sans"
+                    ]
+            },
+            "fontSize": {
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "60px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+    }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #F8F9FC; /* Fallback */
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .action-gradient {
+            background: linear-gradient(135deg, #830053 0%, #263f7b 100%);
+        }
+        .glass-shadow {
+            box-shadow: 0px 12px 32px rgba(42, 67, 127, 0.08);
+        }
+        
+        /* Mobile horizontal scroll snapping */
+        .snap-x-mandatory {
+            scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+            scroll-snap-align: center;
+        }
+        
+        /* Hide scrollbar for cleaner mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md overflow-x-hidden">
+<!-- Top Navigation (Mobile Version) -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/20 shadow-sm px-margin-mobile py-4 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img alt="ALS Logo" class="h-8 w-8 object-contain rounded-md" src="https://lh3.googleusercontent.com/aida/AEtjO1VD48AqIi2yu7kN-PN4vTBZw5gSFAsTFMzrD3FHq6Coz14kMbxIVXOpHwpYGM09x1WOva0xDV4aR8shlIHIOVimEXVwhix5Ws-OhtFzQsbiX3rqn1FXIz34E8Vc0YBQWiz8VfBMaR0y7agI4rvDZ7IzcbcW_0jZMFiYZb6J4PqualGa2InLxbUCn066dv-Ug5GqLN1qPlNFv6Z1DUBKHOah-V_-XDNBzFuQO-qOA2ySIGPSsMbXyzrdjJg"/>
+<span class="font-headline-md text-headline-md font-bold text-primary">ALS Academy</span>
+</div>
+<button class="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</header>
+<!-- Main Content Area - Padding for fixed header -->
+<main class="pt-[80px] pb-stack-lg flex flex-col gap-stack-lg px-margin-mobile max-w-container-max mx-auto">
+<!-- Hero Section (Mobile Portrait) -->
+<section class="flex flex-col gap-stack-md pt-stack-md">
+<div class="glass-panel rounded-xl p-6 glass-shadow flex flex-col gap-4 relative overflow-hidden">
+<!-- Decorative background blob -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-fixed-dim/30 rounded-full blur-2xl z-0 pointer-events-none"></div>
+<div class="z-10 flex flex-col gap-2">
+<span class="font-label-md text-label-md text-primary tracking-widest uppercase">Continue Learning</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Advanced Molecular Diagnostics</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Module 4: PCR Techniques in Clinical Settings</p>
+</div>
+<!-- Video Placeholder -->
+<div class="w-full aspect-video bg-surface-container-high rounded-lg relative overflow-hidden group cursor-pointer mt-2 z-10" data-alt="A highly detailed and realistic view inside a state-of-the-art clinical laboratory. The scene shows glowing high-tech PCR machines and digital displays with molecular data, illuminated by bright, cool, clean laboratory lighting. The aesthetic is modern, analytical, and professional, blending corporate high-fidelity UI vibes with clinical rigor. Bright whites, soft grays, and deep blue screens dominate the palette." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD8uEOvCHJ6oOLYHOY_kZmV_WJ9umHOp7aYte3fo7kOD3HPWs1BoRVOgGnkE3jdhaa8ZhnloartZDKId4jBvpan2C3_LPsU_yoB1jeSQA4xU08xOjM70P9DKUy3xHhMgYgHtpfmQSR-QdqdB_h-gyp4WlXYyBFIkRzkRS36JzRJ5Juo6MfPXnoxWFs4hOKIR8T8UqG9KwY-6ZTuxZLGG9twAjKxkPurPqaJVtY6gkpHdhHZritZsS6M')">
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+<div class="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl ml-1" data-icon="play_arrow" data-weight="fill">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-2 right-2 bg-black/70 text-white font-label-sm text-label-sm px-2 py-1 rounded">12:45</div>
+</div>
+<!-- Up Next Sidebar Moved Underneath for Mobile -->
+<div class="mt-4 flex flex-col gap-3 z-10 border-t border-outline-variant/30 pt-4">
+<h3 class="font-label-md text-label-md text-on-surface-variant font-semibold">Up Next</h3>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 transition-colors cursor-pointer border border-transparent hover:border-outline-variant/50">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl" data-icon="article">article</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-label-sm text-label-sm text-on-surface truncate">Reading: Primer Design</h4>
+<p class="text-xs text-on-surface-variant">10 min read</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 transition-colors cursor-pointer border border-transparent hover:border-outline-variant/50">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl" data-icon="quiz">quiz</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-label-sm text-label-sm text-on-surface truncate">Quiz: Module 4 Assessment</h4>
+<p class="text-xs text-on-surface-variant">15 Questions</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Vertical Learning Journey (Mobile) -->
+<section class="flex flex-col gap-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Your Journey</h2>
+<div class="relative pl-6 flex flex-col gap-6 border-l-2 border-surface-container-high ml-4">
+<!-- Completed Node -->
+<div class="relative">
+<div class="absolute -left-[35px] top-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center ring-4 ring-background">
+<span class="material-symbols-outlined text-white text-sm" data-icon="check" data-weight="fill">check</span>
+</div>
+<div class="glass-panel rounded-lg p-4 opacity-70">
+<span class="font-label-sm text-label-sm text-primary">Completed</span>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface mt-1">Introduction to Clinical Pathology</h4>
+</div>
+</div>
+<!-- Active Node -->
+<div class="relative">
+<div class="absolute -left-[35px] top-1 w-6 h-6 rounded-full action-gradient flex items-center justify-center ring-4 ring-primary/20 shadow-[0_0_10px_rgba(131,0,83,0.5)]">
+<div class="w-2 h-2 rounded-full bg-white"></div>
+</div>
+<div class="glass-panel rounded-lg p-4 border-l-4 border-l-primary glass-shadow">
+<span class="font-label-sm text-label-sm text-primary">In Progress • 65%</span>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface mt-1">Advanced Molecular Diagnostics</h4>
+<!-- Slim Progress Bar -->
+<div class="w-full h-1.5 bg-primary/10 rounded-full mt-3 overflow-hidden">
+<div class="h-full action-gradient w-[65%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Locked Node -->
+<div class="relative">
+<div class="absolute -left-[35px] top-1 w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center ring-4 ring-background">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="lock">lock</span>
+</div>
+<div class="glass-panel rounded-lg p-4 opacity-50 filter grayscale-[50%]">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Locked</span>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface mt-1">Next-Gen Sequencing Fundamentals</h4>
+</div>
+</div>
+</div>
+</section>
+<!-- Swipeable Course Cards (Mobile) -->
+<section class="flex flex-col gap-4 -mx-margin-mobile">
+<div class="px-margin-mobile flex justify-between items-end">
+<h2 class="font-headline-md text-headline-md text-on-surface">Recommended</h2>
+<a class="font-label-md text-label-md text-primary hover:underline" href="#">View All</a>
+</div>
+<div class="flex overflow-x-auto gap-4 px-margin-mobile pb-4 snap-x-mandatory no-scrollbar">
+<!-- Course Card 1 -->
+<div class="snap-center shrink-0 w-[280px] glass-panel rounded-xl overflow-hidden glass-shadow flex flex-col group">
+<div class="w-full h-32 relative overflow-hidden" data-alt="A pristine, brightly lit laboratory workbench featuring a modern microscope and scattered glass slides. The background is a soft, blurred clinical environment emphasizing clean white and sterile steel textures. The mood is highly professional, academic, and focused, employing the brand's light mode aesthetic with subtle hints of deep blue and berry tones in the ambient reflections." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAicPTHlsnfjxuJ9_P6meDDwK4u2asWFSOG4xFt98WouyKkh5wi92v_uAQOlaaYXS5fvX9E1d7YAyyV8kijUtZP7hk9Dc9tyybwV4nqTLUbMMzHyKpDhHJfMqiOXGBUacuJa2TZZF7xM83L_jOSJyooQg5y8gDhkiL48TUd4Kue4GEl4ZLY3BtuDZjJrWV-SuxuIjHj9cd27nkFxsG8YzWcLGJjgX7KCfWbbj8oTPaV0uPhQyeUVjp6')">
+<div class="absolute top-2 left-2 bg-secondary/90 backdrop-blur text-white font-label-sm text-label-sm px-2 py-1 rounded">Microbiology</div>
+</div>
+<div class="p-4 flex flex-col flex-1 gap-2">
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg leading-tight group-hover:text-primary transition-colors">Clinical Bacteriology Essentials</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm line-clamp-2">Master the identification of common human pathogens in a clinical setting.</p>
+<div class="mt-auto pt-4 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span> 8h 30m
+                            </span>
+<button class="w-8 h-8 rounded-full border-1.5 border-tertiary text-tertiary flex items-center justify-center hover:bg-tertiary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Course Card 2 -->
+<div class="snap-center shrink-0 w-[280px] glass-panel rounded-xl overflow-hidden glass-shadow flex flex-col group">
+<div class="w-full h-32 relative overflow-hidden" data-alt="Abstract macro photography of fluid samples in sleek, high-end laboratory test tubes. The lighting is crisp and surgical, catching reflections on the curved glass. The color palette focuses on deep analytical blues and striking berry pink accents against a bright, airy light-mode background, conveying a sense of cutting-edge scientific research and high-fidelity data analysis." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDorxlaVa747m0-euupda28yFsfbkgDsAgbNEiBXZVUavVDdSnkT_q9u9Uc6k2peiralOz506HSVjyUlhbnsneT6HexuTrUqENTltplAuvE5f4fCoNC4Gg6e8AOAEF38_QzKG4FjBI8f4kAEI-IRSqiXDobn9B--QTMMorlcCyhUEt2z0Kv2YXbaoIAZh4yku0UMk2b4_RA0Go6sHuD6mQVhDuEt4l5OkzI_YgfdAWWrbHX-MinT2VJ')">
+<div class="absolute top-2 left-2 bg-secondary/90 backdrop-blur text-white font-label-sm text-label-sm px-2 py-1 rounded">Hematology</div>
+</div>
+<div class="p-4 flex flex-col flex-1 gap-2">
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg leading-tight group-hover:text-primary transition-colors">Advanced Blood Cell Morphology</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm line-clamp-2">Detailed analysis of abnormal blood smears and diagnostic implications.</p>
+<div class="mt-auto pt-4 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span> 12h 15m
+                            </span>
+<button class="w-8 h-8 rounded-full border-1.5 border-tertiary text-tertiary flex items-center justify-center hover:bg-tertiary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Compact Live Classes (Mobile) -->
+<section class="flex flex-col gap-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Upcoming Live Sessions</h2>
+<div class="flex flex-col gap-3">
+<!-- Class Card 1 -->
+<div class="glass-panel p-4 rounded-xl flex items-center gap-4">
+<div class="w-14 h-14 rounded-lg bg-surface-container-high flex flex-col items-center justify-center flex-shrink-0 border border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold">Oct</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">24</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-label-md text-label-md text-on-surface truncate">Q&amp;A: Immunology Case Studies</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">10:00 AM • Dr. Sarah Jenkins</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="notifications_none">notifications_none</span>
+</button>
+</div>
+<!-- Class Card 2 -->
+<div class="glass-panel p-4 rounded-xl flex items-center gap-4">
+<div class="w-14 h-14 rounded-lg bg-surface-container-high flex flex-col items-center justify-center flex-shrink-0 border border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold">Oct</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">26</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-label-md text-label-md text-on-surface truncate">Lab Safety Protocol Updates</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">2:00 PM • Prof. M. Chen</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="notifications_none">notifications_none</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component Generated from JSON -->
+<footer class="bg-surface-container-low border-t border-outline-variant/30 full-width w-full py-stack-lg px-margin-mobile grid grid-cols-1 gap-gutter mx-auto text-center md:text-left mt-8">
+<div class="flex flex-col gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">ALS Academy</span>
+<div class="flex flex-wrap justify-center md:justify-start gap-4">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary underline transition-all" href="#">Learning</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary underline transition-all" href="#">Company</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary underline transition-all" href="#">Support</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary underline transition-all" href="#">Legal</a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-4">© 2024 Academy for Laboratory Science. All rights reserved.</p>
+</div>
+</footer>
+</body></html>

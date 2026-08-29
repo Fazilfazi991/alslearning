@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="fixed inset-0 z-50 bg-surface p-4"><div className="skeleton h-14 rounded-xl"/><div className="mx-auto mt-5 max-w-5xl"><div className="skeleton aspect-video rounded-xl"/><div className="skeleton mt-6 h-9 w-2/3 rounded"/><div className="skeleton mt-4 h-24 rounded-xl"/></div></div>}

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Student Portal - Progress</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#faf8ff",
+                        "surface-main": "#FAF8FF",
+                        "on-secondary-fixed": "#380039",
+                        "on-secondary-container": "#7b3979",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "on-surface-variant": "#564149",
+                        "outline-variant": "#dcbfc9",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e1ed",
+                        "surface-container-high": "#e7e7f3",
+                        "on-secondary-fixed-variant": "#6e2d6c",
+                        "tertiary-fixed": "#dae2ff",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f0f0fb",
+                        "surface-container-low": "#f3f3fe",
+                        "chart-grid": "#E2E2EC",
+                        "verification-gold": "#C5A059",
+                        "tertiary-container": "#3f5794",
+                        "secondary-fixed": "#ffd6f7",
+                        "inverse-surface": "#2e3039",
+                        "error-container": "#ffdad6",
+                        "primary": "#830053",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#e1e1ed",
+                        "inverse-primary": "#ffafd1",
+                        "on-primary-fixed": "#3d0024",
+                        "surface-tint": "#aa2871",
+                        "secondary-container": "#fdabf4",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "tertiary": "#263f7b",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d9d9e4",
+                        "background": "#faf8ff",
+                        "on-tertiary-container": "#c1d0ff",
+                        "on-background": "#191b23",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#faf8ff",
+                        "secondary": "#894586",
+                        "live-indicator": "#BA1A1A",
+                        "outline": "#897179",
+                        "primary-fixed-dim": "#ffafd1",
+                        "surface-container": "#ededf8",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "on-surface": "#191b23",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#ffc0d9",
+                        "on-tertiary-fixed": "#001848",
+                        "primary-fixed": "#ffd8e6",
+                        "primary-container": "#a4226c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "base": "4px",
+                        "container-max": "1280px",
+                        "margin-desktop": "64px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "mono-data": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "mono-data": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(250, 248, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 12px 32px rgba(42, 67, 127, 0.08);
+        }
+        
+        .progress-gradient {
+            background: linear-gradient(90deg, #A4226C 0%, #773575 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="hidden lg:flex flex-col h-screen py-stack-lg px-stack-md border-r border-outline-variant/30 h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-surface-container-low dark:bg-inverse-surface shadow-md z-40">
+<div class="mb-stack-lg flex items-center gap-stack-sm px-stack-md">
+<span class="material-symbols-outlined text-primary text-[32px]" style="font-variation-settings: 'FILL' 1;">biotech</span>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary truncate">ALS</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate">Excellence in Clinical Practice</p>
+</div>
+</div>
+<div class="flex-1 space-y-stack-sm">
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 hover:translate-x-1 transition-all duration-300 rounded-lg cursor-pointer active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 hover:translate-x-1 transition-all duration-300 rounded-lg cursor-pointer active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">live_tv</span>
+<span class="font-label-md text-label-md">Live Classes</span>
+</a>
+<a class="flex items-center gap-stack-md bg-primary-container text-on-primary-container dark:bg-primary-container dark:text-on-primary-container rounded-lg px-stack-md py-3 font-semibold shadow-sm hover:translate-x-1 transition-all duration-300 cursor-pointer active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-md text-label-md">My Progress</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 hover:translate-x-1 transition-all duration-300 rounded-lg cursor-pointer active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span class="font-label-md text-label-md">Achievements</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 hover:translate-x-1 transition-all duration-300 rounded-lg cursor-pointer active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="mt-auto space-y-stack-sm pt-stack-md border-t border-outline-variant/30">
+<button class="w-full bg-secondary-container text-on-secondary-container font-label-md text-label-md py-3 rounded-lg hover:bg-secondary-fixed transition-colors">
+                Upgrade to Premium
+            </button>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 rounded-lg" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 lg:ml-64 bg-surface min-h-screen">
+<!-- TopNavBar (Mobile only for layout simplification in this view, though JSON says full width top) -->
+<header class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-b border-on-surface/10 shadow-sm docked full-width top-0 sticky z-50 lg:hidden">
+<div class="flex justify-between items-center w-full px-margin-mobile py-4 mx-auto">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Student Portal</span>
+<div class="flex items-center gap-stack-md text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer">menu</span>
+</div>
+</div>
+</header>
+<div class="p-margin-mobile lg:p-margin-desktop max-w-container-max mx-auto space-y-stack-lg">
+<!-- Header Section -->
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-stack-sm">My Progress Analytics</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Track your clinical competency and coursework completion.</p>
+</div>
+<!-- Key Metrics Overview (Bento Grid) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<!-- Metric 1 -->
+<div class="glass-panel rounded-xl p-stack-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-stack-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Courses Enrolled</span>
+<div class="w-8 h-8 rounded-full bg-secondary-container/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm">library_books</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-primary">4</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="glass-panel rounded-xl p-stack-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-stack-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Lessons Completed</span>
+<div class="w-8 h-8 rounded-full bg-tertiary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-sm">check_circle</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-tertiary">32</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-1">/ 48</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="glass-panel rounded-xl p-stack-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-stack-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Quiz Average</span>
+<div class="w-8 h-8 rounded-full bg-verification-gold/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-verification-gold text-sm">workspace_premium</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface">94<span class="text-2xl">%</span></span>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-[14px]">trending_up</span>
+<span class="font-label-sm text-label-sm text-primary">+2.4% this week</span>
+</div>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="glass-panel rounded-xl p-stack-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-stack-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Study Time (Wk)</span>
+<div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">timer</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface">12<span class="text-2xl">h</span> 45<span class="text-2xl">m</span></span>
+</div>
+</div>
+</div>
+<!-- Main Analytics & Progress Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Left Column: Chart & Topic Performance -->
+<div class="lg:col-span-2 space-y-gutter">
+<!-- Learning Activity Chart -->
+<div class="glass-panel rounded-xl p-stack-lg">
+<div class="flex justify-between items-center mb-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface">Learning Activity</h3>
+<button class="font-label-md text-label-md text-primary flex items-center gap-1 hover:bg-surface-variant/50 px-3 py-1.5 rounded-lg transition-colors">
+                                This Week <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+<!-- Pseudo Bar Chart -->
+<div class="h-64 flex items-end justify-between gap-2 px-stack-sm border-b border-chart-grid pb-2">
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container/30 rounded-t-sm h-12 group-hover:bg-primary-container/50 transition-colors relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mon</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container/30 rounded-t-sm h-24 group-hover:bg-primary-container/50 transition-colors relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tue</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full progress-gradient rounded-t-sm h-48 relative shadow-[0_0_15px_rgba(164,34,108,0.3)]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-on-primary font-mono-data text-mono-data px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">4.2 hrs</div>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">Wed</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container/30 rounded-t-sm h-32 group-hover:bg-primary-container/50 transition-colors relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Thu</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container/30 rounded-t-sm h-16 group-hover:bg-primary-container/50 transition-colors relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Fri</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container/30 rounded-t-sm h-8 group-hover:bg-primary-container/50 transition-colors relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sat</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container/30 rounded-t-sm h-10 group-hover:bg-primary-container/50 transition-colors relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sun</span>
+</div>
+</div>
+</div>
+<!-- Topic Performance Progress Bars -->
+<div class="glass-panel rounded-xl p-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-stack-lg">Topic Performance</h3>
+<div class="space-y-stack-md">
+<!-- Skill 1 -->
+<div>
+<div class="flex justify-between items-center mb-stack-sm">
+<span class="font-label-md text-label-md text-on-surface">Clinical Enzymology</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">88%</span>
+</div>
+<div class="h-[6px] w-full bg-primary-container/10 rounded-full overflow-hidden">
+<div class="h-full progress-gradient rounded-full w-[88%]"></div>
+</div>
+</div>
+<!-- Skill 2 -->
+<div>
+<div class="flex justify-between items-center mb-stack-sm">
+<span class="font-label-md text-label-md text-on-surface">Diagnostic Hematology</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">64%</span>
+</div>
+<div class="h-[6px] w-full bg-primary-container/10 rounded-full overflow-hidden">
+<div class="h-full progress-gradient rounded-full w-[64%]"></div>
+</div>
+</div>
+<!-- Skill 3 -->
+<div>
+<div class="flex justify-between items-center mb-stack-sm">
+<span class="font-label-md text-label-md text-on-surface">Molecular Diagnostics</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">92%</span>
+</div>
+<div class="h-[6px] w-full bg-primary-container/10 rounded-full overflow-hidden">
+<div class="h-full progress-gradient rounded-full w-[92%]"></div>
+</div>
+</div>
+<!-- Skill 4 -->
+<div>
+<div class="flex justify-between items-center mb-stack-sm">
+<span class="font-label-md text-label-md text-on-surface">Immunology Foundations</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">45%</span>
+</div>
+<div class="h-[6px] w-full bg-primary-container/10 rounded-full overflow-hidden">
+<div class="h-full progress-gradient rounded-full w-[45%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Course Cards & Recommendations -->
+<div class="space-y-gutter">
+<h3 class="font-headline-md text-headline-md text-on-surface">Active Courses</h3>
+<!-- Course Card 1 -->
+<div class="glass-panel rounded-xl p-stack-md hover:shadow-[0_8px_24px_rgba(42,67,127,0.12)] transition-shadow cursor-pointer">
+<div class="flex gap-stack-sm mb-stack-md">
+<div class="w-12 h-12 rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A highly detailed close-up of a modern laboratory microscope lens focusing on a brightly illuminated glass slide. The aesthetic is clean, professional, and clinical light-mode. Soft white lighting with subtle deep blue and berry pink reflections on the glass. The mood is analytical and precise." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSQXpore3LviMwbNiwcpsMnWcLPu38zB-buBQrmP6fPNTEwHARlkesh57kftJLaYOh1FC9TeHCAFlE8W9SAIw4P6p8uFxfaI0ty64LzmPBwvph4m7vyeKEkaQDkP0uRbAifPtEJXKf3YjopoVxlhkxDo7XBvBcA-CgrdjbyS_nRaGOTTduBoilntXQJzNyfvGjM6ZTFxo2_Q9iortAuES5b3e0uULE4VIRpqJhWCvgshtjvOWXmw-w"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface line-clamp-1">Advanced Hematology</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Module 4: Coagulation Pathways</p>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Progress</span>
+<span class="font-mono-data text-mono-data text-on-surface">75%</span>
+</div>
+<div class="h-[6px] w-full bg-primary-container/10 rounded-full overflow-hidden">
+<div class="h-full progress-gradient rounded-full w-[75%]"></div>
+</div>
+</div>
+</div>
+<!-- Course Card 2 -->
+<div class="glass-panel rounded-xl p-stack-md hover:shadow-[0_8px_24px_rgba(42,67,127,0.12)] transition-shadow cursor-pointer border border-tertiary-container/30">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-1 bg-live-indicator/10 px-2 py-0.5 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-live-indicator animate-pulse"></div>
+<span class="font-label-sm text-label-sm text-live-indicator">LIVE NOW</span>
+</div>
+</div>
+<div class="flex gap-stack-sm mb-stack-md">
+<div class="w-12 h-12 rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A detailed image of a sterile clinical laboratory workspace featuring a modern centrifuge machine in motion. Bright, crisp white lighting dominates, with subtle pink and blue metallic accents. The style is highly professional, clean, and modern light-mode. The atmosphere is active and focused." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSnnkLxZG14UW3AfrC40dbEJyXGmL_kd29lqPtatws-YEE1tR11BhY4dJZXHZQqCXH4-MclcpKnuWprxxc56zl8sjpJGzkm74K8BJrM-Uhb7F44Ty9Dh0fRj9BxF9wGr89xZNrbQViqIeC9ojai9Fj_24HNj9gqENg-Dj_U2M-iUXQxN_Bczn-3bQOyxPttsKuadVBvEFf60MlbRD26LuepaL_udxqqB2GXmiZcbGi60X8iWAAtuzG"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface line-clamp-1">Clinical Chemistry II</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Dr. Aris Thorne</p>
+</div>
+</div>
+<button class="w-full bg-surface-container-high text-on-surface font-label-md text-label-md py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
+                            Join Session <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Recommended Review -->
+<div class="glass-panel rounded-xl p-stack-md bg-secondary-container/10 border-outline-variant/50 mt-stack-lg">
+<div class="flex items-start gap-stack-sm">
+<span class="material-symbols-outlined text-secondary mt-1">lightbulb</span>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Recommended Review</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mb-stack-md">Based on your recent quiz scores, reviewing 'Immunology Foundations' could improve your overall competency standing.</p>
+<button class="text-secondary font-label-md text-label-md hover:underline flex items-center gap-1">
+                                    Start Review Module <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

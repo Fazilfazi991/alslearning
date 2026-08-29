@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Academy - Master Laboratory Science</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#ffc0d9",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#564149",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "surface": "#faf8ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f3f3fd",
+                        "tertiary": "#263f7b",
+                        "surface-dim": "#d9d9e3",
+                        "on-secondary-fixed": "#380039",
+                        "secondary-fixed": "#ffd6f7",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "primary-container": "#a4226c",
+                        "primary": "#830053",
+                        "tertiary-fixed": "#dae2ff",
+                        "on-tertiary-fixed": "#001848",
+                        "on-tertiary-container": "#c1d0ff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#897179",
+                        "inverse-on-surface": "#f0f0fa",
+                        "secondary": "#894586",
+                        "background": "#faf8ff",
+                        "inverse-primary": "#ffafd1",
+                        "surface-bright": "#faf8ff",
+                        "surface-container": "#ededf7",
+                        "on-primary-fixed": "#3d0024",
+                        "inverse-surface": "#2e3038",
+                        "surface-tint": "#aa2871",
+                        "surface-container-highest": "#e2e2ec",
+                        "on-secondary-container": "#7b3979",
+                        "tertiary-container": "#3f5794",
+                        "outline-variant": "#dcbfc9",
+                        "secondary-container": "#fdabf4",
+                        "primary-fixed": "#ffd8e6",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#ffafd1",
+                        "surface-variant": "#e2e2ec",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#191b23",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "on-background": "#191b23",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e7e7f2",
+                        "on-secondary-fixed-variant": "#6e2d6c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "gutter": "24px",
+                        "stack-md": "16px",
+                        "margin-desktop": "64px",
+                        "container-max": "1280px",
+                        "margin-mobile": "20px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 4px 24px rgba(42, 67, 127, 0.05);
+        }
+        .action-gradient {
+            background: linear-gradient(135deg, #A4226C 0%, #2A437F 100%);
+        }
+        .action-gradient-text {
+            background: linear-gradient(135deg, #A4226C 0%, #2A437F 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased pt-[88px]">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto bg-surface/80 dark:bg-surface-container/80 backdrop-blur-xl bg-white/40 dark:bg-black/40 border-b border-white/20 dark:border-outline/20 shadow-sm">
+<div class="flex items-center gap-4">
+<img alt="ALS Academy Logo" class="h-10 w-10 object-contain rounded-lg" src="https://lh3.googleusercontent.com/aida/AEtjO1VD48AqIi2yu7kN-PN4vTBZw5gSFAsTFMzrD3FHq6Coz14kMbxIVXOpHwpYGM09x1WOva0xDV4aR8shlIHIOVimEXVwhix5Ws-OhtFzQsbiX3rqn1FXIz34E8Vc0YBQWiz8VfBMaR0y7agI4rvDZ7IzcbcW_0jZMFiYZb6J4PqualGa2InLxbUCn066dv-Ug5GqLN1qPlNFv6Z1DUBKHOah-V_-XDNBzFuQO-qOA2ySIGPSsMbXyzrdjJg"/>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Academy</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 font-body-md text-body-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2" href="#">Home</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-body-md text-body-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2" href="#">Courses</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-body-md text-body-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2" href="#">About</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-body-md text-body-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2" href="#">How It Works</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-body-md text-body-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2" href="#">Contact</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden md:block font-label-md text-label-md text-tertiary hover:text-tertiary-container transition-colors">Sign In</button>
+<button class="action-gradient text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 duration-150">Explore Courses</button>
+</div>
+</header>
+<main class="w-full">
+<!-- Hero Section -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg md:py-24 grid md:grid-cols-2 gap-gutter items-center min-h-[80vh]">
+<div class="flex flex-col gap-6 z-10">
+<div class="inline-flex items-center gap-2 bg-surface-container-high px-3 py-1.5 rounded-full w-fit">
+<span class="material-symbols-outlined text-primary text-sm">science</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Premium EdTech Platform</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-background max-w-xl">Master Laboratory Science. <br/><span class="action-gradient-text">Build Your Future.</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Bridge the gap between academic theory and clinical practice with expert-led, interactive courses designed for modern scientific professionals.</p>
+<div class="flex flex-wrap items-center gap-4 mt-4">
+<button class="action-gradient text-on-primary font-label-md text-label-md px-8 py-3.5 rounded-full hover:shadow-xl hover:shadow-primary/25 transition-all">Explore Courses</button>
+<button class="border-[1.5px] border-tertiary text-tertiary font-label-md text-label-md px-8 py-3.5 rounded-full hover:bg-tertiary/5 transition-all">See How It Works</button>
+</div>
+<div class="flex items-center gap-4 mt-6 text-on-surface-variant">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="Close-up portrait of a female laboratory science student in a modern bright lab setting. Professional lighting, premium quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn8Pk-WnfcL1aTOAZoUl1eQSz4PhhmUu9QMNc1KvWAquwcfYHj_JPvcGlhKtBuMODGrJLajLdjQMgewOWlT3z4iWxFFchkyxX3mwwILNmazipuCW7vsa4cUZ6OLa0P_bcMPM-SNaCAWuBl_DTVZbVNiL_JweXZel-yTUyTx2cuXXC7REZbeuAlewYIZ86GFr7AWhD6cIrGSkfDQqH_B4zMaZ2RowUIulWpVk6fpntOGpuhB0Ba2Izg"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="Portrait of a male scientist looking thoughtful in a bright modern educational setting. Soft natural light, high definition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB47nkpUzHViXFqieTP-F22AVY26FSQkrNzMLkN1EqrrxMhuw8DsNfwwTnNmnzJMZMaXWC9PCQspkBVdO9NKpUL-59xicN06IGhYqSXwovuYRWxqPqcpR4oqTjZx5aT6H0n1GgtPErO0bqX9g5D8OE51AuefrCPMCDLPyyI-sFigrHll9MF52prefHz4dadzVHByO28sbkUBYWTTPyHhMRI9O6-zuftnOV-a3rVm1bFwznlaDM-LAdX"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="Close up of a clinical professional wearing a white coat, soft background blur, professional headshot style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDza2qgHT-Ch0caaGf9nf6x508qd0aeSN1y-t7UrvaxIJoJlKtw0hrNST1E0MRCgwRzTPH5bgf0PGmfquBRx6_c9QViWFbwia-1Oj1WTu2nGmPB3zakjUH3TJ2KF3TGqeX4bcPfRfO-nsefgj6YMCtLXCVOFTKVVDbwVZNsLHU50i3_Uhyc0oWbu8VG7DQ4mfsdC8nmUn_RWrBt2es4hj6stfWSap622EMMvf4lk31d_puQb003dIb6"/>
+</div>
+<span class="font-label-sm text-label-sm">1,000+ learners • Expert-led courses</span>
+</div>
+</div>
+<div class="relative h-[500px] w-full rounded-2xl overflow-hidden shadow-2xl shadow-tertiary/10">
+<img alt="ALS Premium Platform Experience" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Vg49MEVpqLUx6XVqL146bf0Ta-4ck-I89KLoOruNIcyyW6o1NlqZZn79bXwPmYUpI6AE1JAj9pZ7_S2dy4506NnR8JCidnLNZDimHkhKSgeC-s-LfYDUknZR7b130KgqtHzIExtLMv1TVOtplu262tEKBPB8D-1IoTlIzlJu5Bp4IYkyJ8Z8QCZvClWPJ_ARx34coceXt6T0zKb47OSGcynUlCYNNxzCxC4xzCWUk_iPBESQV_otFPlLU"/>
+<!-- Mock UI Overlays -->
+<div class="absolute bottom-6 left-6 right-6 glass-panel p-4 rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">biotech</span>
+</div>
+<div class="flex-1">
+<h3 class="font-label-md text-label-md text-on-background">Clinical Biochemistry</h3>
+<div class="flex justify-between text-[10px] text-on-surface-variant mb-1 mt-1">
+<span>Progress</span>
+<span class="font-bold">72%</span>
+</div>
+<div class="w-full h-1.5 bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full action-gradient w-[72%] rounded-full"></div>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-1">Next: Enzymes &amp; Diagnostic Applications</p>
+</div>
+<button class="w-10 h-10 rounded-full action-gradient flex items-center justify-center shrink-0 text-white shadow-lg">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+</button>
+</div>
+<div class="absolute top-6 right-6 glass-panel px-3 py-2 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm font-bold">Expert Badge</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-container-max mx-auto bg-surface-container-low dark:bg-inverse-surface border-t border-outline-variant/30 dark:border-outline/20">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<img alt="ALS Academy Logo" class="h-8 w-8 object-contain rounded-lg" src="https://lh3.googleusercontent.com/aida/AEtjO1VD48AqIi2yu7kN-PN4vTBZw5gSFAsTFMzrD3FHq6Coz14kMbxIVXOpHwpYGM09x1WOva0xDV4aR8shlIHIOVimEXVwhix5Ws-OhtFzQsbiX3rqn1FXIz34E8Vc0YBQWiz8VfBMaR0y7agI4rvDZ7IzcbcW_0jZMFiYZb6J4PqualGa2InLxbUCn066dv-Ug5GqLN1qPlNFv6Z1DUBKHOah-V_-XDNBzFuQO-qOA2ySIGPSsMbXyzrdjJg"/>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Academy</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Bridging the gap between theory and clinical excellence.</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-4">© 2024 Academy for Laboratory Science. All rights reserved.</p>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-label-md text-label-md font-bold text-on-background mb-2">Learning</h4>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Courses</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Live Classes</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Assessments</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Certifications</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-label-md text-label-md font-bold text-on-background mb-2">Company</h4>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">About Us</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Faculty</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Careers</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Contact</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-label-md text-label-md font-bold text-on-background mb-2">Legal</h4>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Cookie Policy</a>
+</div>
+</footer>
+</body></html>

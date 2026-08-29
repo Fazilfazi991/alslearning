@@ -1,0 +1,1 @@
+import{CardSkeleton}from"@/components/ui/states";export default function Loading(){return <div className="mx-auto max-w-[1220px]"><div className="skeleton h-28 rounded-2xl"/><div className="mt-6 grid gap-5 md:grid-cols-3"><CardSkeleton/><CardSkeleton/><CardSkeleton/></div></div>}

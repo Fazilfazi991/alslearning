@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Academy - Master Laboratory Science</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#ededf7",
+                        "on-tertiary-container": "#c1d0ff",
+                        "on-background": "#191b23",
+                        "outline": "#897179",
+                        "on-surface-variant": "#564149",
+                        "surface-dim": "#d9d9e3",
+                        "on-primary-fixed": "#3d0024",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "primary-fixed-dim": "#ffafd1",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#ffafd1",
+                        "surface-container-high": "#e7e7f2",
+                        "tertiary-fixed": "#dae2ff",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#191b23",
+                        "surface-variant": "#e2e2ec",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e2e2ec",
+                        "primary-fixed": "#ffd8e6",
+                        "surface-bright": "#faf8ff",
+                        "surface-container-low": "#f3f3fd",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "primary": "#830053",
+                        "secondary": "#894586",
+                        "on-secondary-fixed": "#380039",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#6e2d6c",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#001848",
+                        "outline-variant": "#dcbfc9",
+                        "inverse-surface": "#2e3038",
+                        "secondary-container": "#fdabf4",
+                        "tertiary-container": "#3f5794",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffd6f7",
+                        "on-primary-container": "#ffc0d9",
+                        "surface-tint": "#aa2871",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "surface": "#faf8ff",
+                        "tertiary": "#263f7b",
+                        "inverse-on-surface": "#f0f0fa",
+                        "background": "#faf8ff",
+                        "on-secondary-container": "#7b3979",
+                        "primary-container": "#a4226c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "gutter": "24px",
+                        "stack-md": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "64px",
+                        "stack-lg": "32px",
+                        "container-max": "1280px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .action-gradient {
+            background: linear-gradient(135deg, theme('colors.primary'), theme('colors.secondary'));
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 12px 32px rgba(42, 67, 127, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pt-20">
+<!-- TopNavBar -->
+<header class="bg-surface/80 dark:bg-surface-container/80 backdrop-blur-xl docked full-width top-0 bg-white/40 dark:bg-black/40 border-b border-white/20 dark:border-outline/20 shadow-sm fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-4">
+<img alt="ALS Academy Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfzW7RPUnRAfSsjS1C11TsCb6wN-Y43MzK2IYmScm49C6Pd5rpDGye_S1h0_CpxvW1jS7dSnIPGjZdKYw_qjYvx2-mgW9_yaYx-MT5xo9O18QbEUpuWph-NnPui5edycXH3a3taZofKd8B3-yzea9-rsx6Y-vry6ghScbAWVNayqvxtjEwmF9XVe5pHz5oORP-8MjviB2lZXp_0Wm-yWuVDTeMQqK7U-bpo3aYT2ZE9u7_1v9OyEYb"/>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Academy</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 font-label-md text-label-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2" href="#">Home</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-label-md text-label-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">Courses</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-label-md text-label-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">About</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-label-md text-label-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">How It Works</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-label-md text-label-md hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">Contact</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden md:block font-label-md text-label-md text-tertiary hover:bg-surface-variant px-4 py-2 rounded-lg transition-colors">Sign In</button>
+<button class="action-gradient text-on-primary font-label-md text-label-md px-6 py-2 rounded-lg shadow-sm hover:shadow-md transition-shadow">Explore Courses</button>
+</div>
+</header>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg md:py-24 grid grid-cols-1 md:grid-cols-2 gap-gutter items-center">
+<div class="flex flex-col gap-stack-md">
+<h1 class="font-display-lg text-display-lg text-primary-container">Master Laboratory Science. <br/>Build Your Future.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Learn from experts, master practical concepts, prepare for examinations and progress confidently in your laboratory science career.</p>
+<div class="flex flex-wrap gap-4 mt-4">
+<button class="action-gradient text-on-primary font-label-md text-label-md px-8 py-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">Explore Courses</button>
+<button class="border-2 border-tertiary text-tertiary font-label-md text-label-md px-8 py-3 rounded-lg hover:bg-tertiary hover:text-on-tertiary transition-colors">Student Login</button>
+</div>
+</div>
+<div class="relative w-full aspect-[1.79] rounded-xl overflow-hidden shadow-lg">
+<img alt="Scientific Hero Illustration" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCHIzX-9ZZuL7vY7X2Xmac1IosHGjUQMyxSeWVsSUYurE5EXJ8U9AmUFcH9gDRYEaepohOshRC-9agJv04-SkbJttNCSNxYJUs_awZuDP_EFR22RABYjc_SbH-XoJ0I9EgSzPOMp83p4dXFkFTJg9rl1Teh6TAEJOgE6QGriCOdn6YM2S2XXI383u39mYthcwL1YRNU2zyc3zb3IHp4aDe3omo48q83V7OIk1YHH-r41uFQbNJHzrt"/>
+</div>
+</section>
+<!-- Trust Metrics -->
+<section class="bg-surface-container-low py-stack-md border-y border-outline-variant/30">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-gutter text-center">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span class="font-headline-md text-headline-md text-on-surface">1,000+</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Learners</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-headline-md text-headline-md text-on-surface">Expert</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Faculty</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-3xl" style="font-variation-settings: 'FILL' 1;">biotech</span>
+<span class="font-headline-md text-headline-md text-on-surface">Practical</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Learning</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+<span class="font-headline-md text-headline-md text-on-surface">Career</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Focused</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-inverse-surface border-t border-outline-variant/30 dark:border-outline/20 w-full py-stack-lg px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-container-max mx-auto">
+<div class="col-span-1 md:col-span-1 flex flex-col gap-4">
+<div class="flex items-center gap-4">
+<img alt="ALS Academy Logo" class="h-6 w-6 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfzW7RPUnRAfSsjS1C11TsCb6wN-Y43MzK2IYmScm49C6Pd5rpDGye_S1h0_CpxvW1jS7dSnIPGjZdKYw_qjYvx2-mgW9_yaYx-MT5xo9O18QbEUpuWph-NnPui5edycXH3a3taZofKd8B3-yzea9-rsx6Y-vry6ghScbAWVNayqvxtjEwmF9XVe5pHz5oORP-8MjviB2lZXp_0Wm-yWuVDTeMQqK7U-bpo3aYT2ZE9u7_1v9OyEYb"/>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Academy</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 Academy for Laboratory Science. All rights reserved.</p>
+</div>
+<div class="flex flex-col gap-2">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Learning</a>
+</div>
+<div class="flex flex-col gap-2">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Company</a>
+</div>
+<div class="flex flex-col gap-2">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Support</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Legal</a>
+</div>
+</footer>
+</body></html>

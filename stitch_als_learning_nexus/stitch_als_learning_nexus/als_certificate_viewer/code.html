@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Certificate Detail - Academy for Laboratory Science</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#faf8ff",
+                        "surface-main": "#FAF8FF",
+                        "on-secondary-fixed": "#380039",
+                        "on-secondary-container": "#7b3979",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "on-surface-variant": "#564149",
+                        "outline-variant": "#dcbfc9",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e1ed",
+                        "surface-container-high": "#e7e7f3",
+                        "on-secondary-fixed-variant": "#6e2d6c",
+                        "tertiary-fixed": "#dae2ff",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f0f0fb",
+                        "surface-container-low": "#f3f3fe",
+                        "chart-grid": "#E2E2EC",
+                        "verification-gold": "#C5A059",
+                        "tertiary-container": "#3f5794",
+                        "secondary-fixed": "#ffd6f7",
+                        "inverse-surface": "#2e3039",
+                        "error-container": "#ffdad6",
+                        "primary": "#830053",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#e1e1ed",
+                        "inverse-primary": "#ffafd1",
+                        "on-primary-fixed": "#3d0024",
+                        "surface-tint": "#aa2871",
+                        "secondary-container": "#fdabf4",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "tertiary": "#263f7b",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d9d9e4",
+                        "background": "#faf8ff",
+                        "on-tertiary-container": "#c1d0ff",
+                        "on-background": "#191b23",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#faf8ff",
+                        "secondary": "#894586",
+                        "live-indicator": "#BA1A1A",
+                        "outline": "#897179",
+                        "primary-fixed-dim": "#ffafd1",
+                        "surface-container": "#ededf8",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "on-surface": "#191b23",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#ffc0d9",
+                        "on-tertiary-fixed": "#001848",
+                        "primary-fixed": "#ffd8e6",
+                        "primary-container": "#a4226c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "base": "4px",
+                        "container-max": "1280px",
+                        "margin-desktop": "64px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "mono-data": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "mono-data": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 12px 32px rgba(42, 67, 127, 0.08);
+        }
+        .cert-border {
+            border: 2px double #C5A059;
+            position: relative;
+        }
+        .verified-stamp {
+            transform: rotate(-15deg);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col">
+<!-- Top Navigation from Shared Components -->
+<nav class="docked full-width top-0 sticky z-50 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-b border-on-surface/10 shadow-sm transition-colors duration-300">
+<div class="flex justify-between items-center w-full px-margin-desktop py-stack-sm max-w-container-max mx-auto h-[72px]">
+<!-- Brand -->
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Student Portal</span>
+</div>
+<!-- Navigation Links (Desktop) -->
+<div class="hidden md:flex items-center gap-gutter h-full">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary h-full flex items-center px-2 cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="font-body-md text-body-md">Classroom</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary h-full flex items-center px-2 cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="font-body-md text-body-md">Resources</span>
+</a>
+<a class="text-primary dark:text-primary-fixed-dim font-semibold border-b-2 border-primary h-full flex items-center px-2 cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="font-body-md text-body-md">Certificates</span>
+</a>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-stack-md">
+<button class="hidden md:flex items-center justify-center bg-primary text-on-primary hover:bg-surface-tint rounded-full px-stack-md py-2 font-label-md text-label-md transition-colors duration-200 cursor-pointer active:scale-95">
+                    Go Live
+                </button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 p-2 rounded-full hover:bg-surface-container-high cursor-pointer active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 p-2 rounded-full hover:bg-surface-container-high cursor-pointer active:scale-95">
+<span class="material-symbols-outlined" data-icon="help" style="font-variation-settings: 'FILL' 0;">help</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-surface-variant overflow-hidden border border-outline-variant cursor-pointer active:scale-95 transition-transform duration-200">
+<img alt="Student Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a medical student in a crisp white lab coat, standing in a brightly lit modern laboratory setting. The lighting is clean and clinical, with soft blue and white hues reflecting off glass equipment in the blurred background. High-key lighting, highly detailed, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfxvPKvPuGIk_ED1Tr8tJXVgF6LjP0XblKdUpbWinN5OJQ6ZPv7vVPrwL2u_XRdTTSSZMITXT5mibkQIjxF1EMCemgbfchIj59b4SdWkFQAAAjUomGyXa7pou9euiP8jWDg-9SIvSqNX7Nh_XN9qDe4oV4l0VdrmsbWriMuKDExMI5fDIjt6Dvdq-XiBhcV_gmC9ELcHUfHDX5HbY0zRwM9KST4gxombGAX9tKlgrALnqoJHJVUUnm"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col md:flex-row max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-stack-lg gap-gutter h-[calc(100vh-72px)] overflow-hidden">
+<!-- Side Navigation (Web Only) -->
+<aside class="hidden lg:flex flex-col h-full py-stack-lg px-stack-md border-r border-outline-variant/30 bg-surface-container-low dark:bg-inverse-surface w-64 flex-shrink-0 shadow-md">
+<div class="mb-stack-lg px-stack-md">
+<div class="h-12 w-12 rounded bg-primary-container flex items-center justify-center mb-stack-sm">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">science</span>
+</div>
+<h2 class="font-headline-md text-headline-md font-bold text-primary">Academy for Laboratory Science</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-base">Excellence in Clinical Practice</p>
+</div>
+<nav class="flex-grow flex flex-col gap-stack-sm">
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="live_tv">live_tv</span>
+<span class="font-label-md text-label-md">Live Classes</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-md text-label-md">My Progress</span>
+</a>
+<a class="flex items-center gap-stack-md bg-primary-container text-on-primary-container dark:bg-primary-container dark:text-on-primary-container rounded-lg px-stack-md py-3 font-semibold shadow-sm hover:translate-x-1 transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-md text-label-md">Achievements</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant dark:text-surface-variant px-stack-md py-3 hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-stack-sm pt-stack-lg border-t border-outline-variant/30">
+<button class="w-full py-2 px-4 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-colors duration-200 shadow-sm mb-stack-md">Upgrade to Premium</button>
+<a class="flex items-center gap-stack-md text-on-surface-variant px-stack-md py-2 hover:bg-surface-variant/50 rounded-lg transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant px-stack-md py-2 hover:bg-surface-variant/50 rounded-lg transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Certificate Preview Area -->
+<div class="flex-grow flex flex-col xl:flex-row gap-gutter overflow-y-auto pr-2 pb-stack-lg">
+<!-- The Certificate Canvas -->
+<div class="flex-grow flex items-center justify-center p-stack-lg glass-panel rounded-xl">
+<!-- Actual Certificate Document -->
+<div class="bg-surface-container-lowest w-full max-w-[800px] aspect-[1.414/1] (A4 Landscape approx) p-stack-lg md:p-margin-desktop shadow-lg cert-border flex flex-col relative overflow-hidden">
+<!-- Decorative Background Pattern -->
+<div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#830053 1px, transparent 1px); background-size: 20px 20px;"></div>
+<!-- Header -->
+<div class="text-center mb-stack-lg relative z-10 flex flex-col items-center">
+<div class="h-16 w-16 mb-stack-sm">
+<!-- SVG Placeholder for Logo -->
+<svg class="w-full h-full text-primary fill-current" viewbox="0 0 100 100">
+<path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" opacity="0.2"></path>
+<path d="M50 15 L80 30 L80 70 L50 85 L20 70 L20 30 Z"></path>
+<circle cx="50" cy="50" fill="#FAF8FF" r="15"></circle>
+</svg>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Academy for Laboratory Science</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-base uppercase tracking-widest">Certificate of Completion</p>
+</div>
+<!-- Body -->
+<div class="text-center flex-grow flex flex-col justify-center relative z-10 space-y-stack-md">
+<p class="font-body-lg text-body-lg text-on-surface-variant">This is to certify that</p>
+<h2 class="font-headline-lg text-headline-lg text-on-surface border-b border-outline-variant inline-block pb-base px-stack-lg mx-auto">Ameen Mohammed</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">has successfully completed the advanced course in</p>
+<h3 class="font-headline-md text-headline-md text-secondary">Clinical Biochemistry</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">demonstrating exceptional proficiency and analytical rigor.</p>
+</div>
+<!-- Footer & Signatures -->
+<div class="mt-stack-lg flex justify-between items-end relative z-10">
+<!-- Date -->
+<div class="text-center w-48">
+<p class="font-body-md text-body-md text-on-surface border-b border-outline-variant pb-base">October 24, 2023</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-base uppercase tracking-wider">Date of Issue</p>
+</div>
+<!-- Verification Seal & QR -->
+<div class="flex flex-col items-center justify-center gap-stack-sm relative">
+<div class="w-24 h-24 rounded-full border-4 border-verification-gold flex items-center justify-center verified-stamp bg-surface-container-lowest shadow-sm z-20">
+<span class="font-label-md text-label-md text-verification-gold font-bold uppercase tracking-widest text-center leading-tight">ALS<br/>Verified</span>
+</div>
+<div class="w-16 h-16 bg-white p-1 shadow-sm border border-outline-variant absolute -bottom-8 -right-8 z-10">
+<!-- QR Code Placeholder -->
+<svg class="w-full h-full fill-on-surface" viewbox="0 0 100 100">
+<rect fill="none" height="30" stroke="currentColor" stroke-width="5" width="30" x="10" y="10"></rect>
+<rect fill="none" height="30" stroke="currentColor" stroke-width="5" width="30" x="60" y="10"></rect>
+<rect fill="none" height="30" stroke="currentColor" stroke-width="5" width="30" x="10" y="60"></rect>
+<rect height="10" width="10" x="20" y="20"></rect>
+<rect height="10" width="10" x="70" y="20"></rect>
+<rect height="10" width="10" x="20" y="70"></rect>
+<path d="M60 60 h10 v10 h-10 z M75 60 h15 v10 h-15 z M60 75 h15 v15 h-15 z"></path>
+</svg>
+</div>
+</div>
+<!-- Signature -->
+<div class="text-center w-48">
+<div class="border-b border-outline-variant pb-base h-12 flex items-end justify-center">
+<!-- Signature Image Placeholder -->
+<img alt="Director Signature" class="h-8 opacity-80" data-alt="A highly detailed, elegant handwritten signature in dark blue ink on a pure white background. The signature should look professional, authoritative, and fluid, reminiscent of a medical director's sign-off. High contrast, clean lines, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgxnuRwN8UPm_a1y8rI-4YIfIViRwygU4GrxVbi8YIPdBxW8wNvXiKwuS3N0n21A2KSvg71XyxpopWdjIeZaQuyso-EmfmsaIP48lfqGu5sMqMOZtp9Nxo8MCjx9pK78d4V7c7zbiIrO507QvRoFpxHuZmWTg53uSvMmmBoyTp83f7PbHBiKj1yMzxfI9ouDpMHKXsoP2xYMFdFnG2Z3PGUs2BYRZ0FIM-khz6j6AAznq7hvsTbLhS"/>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-base uppercase tracking-wider">Dr. Sarah Jenkins</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-70">Program Director</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Panel -->
+<div class="w-full xl:w-80 flex-shrink-0 flex flex-col gap-stack-md">
+<div class="glass-panel p-stack-md rounded-xl flex flex-col gap-stack-md">
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold border-b border-outline-variant pb-stack-sm">Certificate Actions</h3>
+<button class="w-full flex items-center justify-center gap-stack-sm bg-primary text-on-primary py-3 px-4 rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-colors shadow-sm active:scale-95">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                        Download PDF
+                    </button>
+<button class="w-full flex items-center justify-center gap-stack-sm bg-surface-container-high text-on-surface py-3 px-4 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors border border-outline-variant/50 active:scale-95">
+<span class="material-symbols-outlined" data-icon="print">print</span>
+                        Print Certificate
+                    </button>
+<button class="w-full flex items-center justify-center gap-stack-sm bg-surface-container-high text-on-surface py-3 px-4 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors border border-outline-variant/50 active:scale-95">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+                        Share to LinkedIn
+                    </button>
+</div>
+<div class="glass-panel p-stack-md rounded-xl flex flex-col gap-stack-sm">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-base">Verification Details</h4>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-label-sm text-label-sm text-on-surface-variant">ID</span>
+<span class="font-mono-data text-mono-data text-on-surface">ALS-CB-2023-8942</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Issued</span>
+<span class="font-mono-data text-mono-data text-on-surface">Oct 24, 2023</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Status</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span> Valid
+                        </span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

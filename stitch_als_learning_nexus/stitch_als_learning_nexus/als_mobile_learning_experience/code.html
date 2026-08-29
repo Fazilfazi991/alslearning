@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>ALS Learning Player</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#ffafd1",
+                        "outline-variant": "#dcbfc9",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e2e2ec",
+                        "on-secondary-container": "#7b3979",
+                        "on-background": "#191b23",
+                        "surface-container": "#ededf7",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#dae2ff",
+                        "background": "#faf8ff",
+                        "on-surface": "#191b23",
+                        "tertiary-container": "#3f5794",
+                        "surface-variant": "#e2e2ec",
+                        "surface": "#faf8ff",
+                        "inverse-surface": "#2e3038",
+                        "on-primary": "#ffffff",
+                        "primary": "#830053",
+                        "on-tertiary-fixed": "#001848",
+                        "on-secondary-fixed-variant": "#6e2d6c",
+                        "outline": "#897179",
+                        "inverse-on-surface": "#f0f0fa",
+                        "on-surface-variant": "#564149",
+                        "secondary-fixed": "#ffd6f7",
+                        "surface-dim": "#d9d9e3",
+                        "on-error": "#ffffff",
+                        "secondary": "#894586",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#ffc0d9",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "on-tertiary-container": "#c1d0ff",
+                        "primary-container": "#a4226c",
+                        "surface-container-low": "#f3f3fd",
+                        "on-secondary-fixed": "#380039",
+                        "on-primary-fixed": "#3d0024",
+                        "surface-tint": "#aa2871",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "surface-container-high": "#e7e7f2",
+                        "secondary-container": "#fdabf4",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "surface-bright": "#faf8ff",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#263f7b",
+                        "inverse-primary": "#ffafd1",
+                        "primary-fixed": "#ffd8e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "64px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "4px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar for tabs */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased w-[390px] mx-auto h-[844px] overflow-hidden relative shadow-2xl">
+<!-- Top App Bar (Compact Mobile) -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-14 z-50 bg-surface/80 backdrop-blur-xl border-b border-white/40 sticky top-0">
+<div class="flex items-center gap-2">
+<button aria-label="Go back" class="p-2 -ml-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md text-primary font-bold text-lg">ALS</h1>
+</div>
+<div class="flex items-center gap-2">
+<button aria-label="Notifications" class="p-2 text-on-surface-variant hover:text-primary transition-colors" data-icon="notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button aria-label="Profile" class="p-2 -mr-2 text-on-surface-variant hover:text-primary transition-colors" data-icon="person">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="h-[calc(100%-56px-72px)] overflow-y-auto pb-24">
+<!-- Video Player Section -->
+<section class="w-full aspect-video bg-black relative group">
+<img alt="Video thumbnail" class="w-full h-full object-cover opacity-80" data-alt="A professional high-fidelity digital illustration of a laboratory setting with a microscope and scientific data overlay. The scene is illuminated by soft, cool white lighting, creating a bright, modern, and clinical aesthetic. The color palette features deep blacks, crisp whites, and vibrant berry accents. The mood is analytical and state-of-the-art." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF92QPiWZgtWkIGn8jaxQZRn4RwiPIcHyZzea7XX3QHanCAqGrtdqBC0zAr_5icZyvGjQln8R720TXpHXEoZ05Y98UrsibQoJPfBHLH8dBOMGjUaiJFZJC2_84y5T_UKamJTEa7mPlkjViDQS89GiYgZkPXrRJ2hC9rQ6c6ClA3I8kX70UdwZaC7yShUbily3qwYw_BsMAO4uxeiFlVHsXzZMp2xvuKYsoExFe7j1OmRZ2nvOo0zzs"/>
+<!-- Video Controls Overlay -->
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+<button class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-colors shadow-lg border border-white/30">
+<span class="material-symbols-outlined icon-filled text-white text-4xl ml-1">play_arrow</span>
+</button>
+</div>
+<!-- Progress Bar inside Video -->
+<div class="absolute bottom-0 left-0 w-full h-1 bg-white/30">
+<div class="h-full bg-primary w-[72%]"></div>
+</div>
+</section>
+<!-- Lesson Info -->
+<section class="px-margin-mobile pt-stack-md pb-stack-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-sm font-label-sm text-secondary uppercase tracking-wider">Module 2: Cellular Basis</span>
+<span class="text-label-sm font-label-sm text-primary-container font-medium">72% Complete</span>
+</div>
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile text-on-background mb-4">Diagnostic Enzyme Markers</h2>
+</section>
+<!-- Tabs -->
+<nav class="px-margin-mobile border-b border-surface-variant mb-stack-md flex gap-6 overflow-x-auto no-scrollbar">
+<button class="pb-3 text-label-md font-label-md text-primary font-bold border-b-2 border-primary whitespace-nowrap">Overview</button>
+<button class="pb-3 text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Notes</button>
+<button class="pb-3 text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Resources</button>
+</nav>
+<!-- Tab Content: Overview -->
+<section class="px-margin-mobile space-y-stack-md">
+<p class="text-body-md font-body-md text-on-surface-variant">
+                In this clinical lesson, we analyze key diagnostic enzyme markers used in clinical chemistry. Understanding their kinetics and tissue specificity is crucial for accurate diagnosis of hepatic and cardiac conditions.
+            </p>
+<div class="bg-surface-container-low/80 backdrop-blur-xl rounded-xl p-stack-md border border-white/40 shadow-sm">
+<h3 class="text-label-md font-label-md font-bold mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">insights</span>
+                    Key Objectives
+                </h3>
+<ul class="space-y-3 mt-3">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined icon-filled text-secondary text-lg mt-0.5">check_circle</span>
+<span class="text-body-md font-body-md text-on-background text-sm">Differentiate between AST and ALT clinical significance.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined icon-filled text-secondary text-lg mt-0.5">check_circle</span>
+<span class="text-body-md font-body-md text-on-background text-sm">Interpret elevated enzyme levels in hepatic panels.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined icon-filled text-secondary text-lg mt-0.5">check_circle</span>
+<span class="text-body-md font-body-md text-on-background text-sm">Understand the principles of kinetic enzyme assays.</span>
+</li>
+</ul>
+</div>
+<div class="h-8"></div> <!-- Spacer for bottom area -->
+</section>
+</main>
+<!-- Sticky Next Lesson Button -->
+<div class="absolute bottom-0 left-0 w-full bg-surface/90 backdrop-blur-xl border-t border-white/40 p-margin-mobile z-40 pb-6">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white py-4 rounded-xl font-label-md text-label-md flex justify-center items-center gap-2 shadow-[0_4px_12px_rgba(131,0,83,0.3)] active:scale-95 transition-transform">
+            Next Lesson: Hepatic Profiles
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Course Contents Button (Floating Action for Bottom Sheet) -->
+<button aria-label="Course Contents" class="absolute bottom-28 right-margin-mobile w-12 h-12 bg-surface-container-high rounded-full shadow-lg flex items-center justify-center border border-white/40 text-on-surface hover:bg-surface-container-highest transition-colors z-30">
+<span class="material-symbols-outlined">format_list_bulleted</span>
+</button>
+</body></html>

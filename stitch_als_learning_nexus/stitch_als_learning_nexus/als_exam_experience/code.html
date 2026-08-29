@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Biochemistry Final Assessment - Question 12</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#001848",
+                        "outline": "#887179",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#ff88c0",
+                        "success-emerald": "#059669",
+                        "on-secondary-fixed-variant": "#2b4480",
+                        "inverse-surface": "#2f3035",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-surface": "#1a1b20",
+                        "surface-container-low": "#f4f3fa",
+                        "secondary": "#445c9a",
+                        "background": "#faf8ff",
+                        "outline-variant": "#dbbfc9",
+                        "secondary-container": "#a2bafe",
+                        "status-flagged": "#A4226C",
+                        "tertiary-container": "#830053",
+                        "secondary-fixed-dim": "#b2c5ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e3e1e8",
+                        "on-secondary": "#ffffff",
+                        "warning-amber": "#F59E0B",
+                        "on-primary-container": "#ff88c0",
+                        "tertiary": "#5b0038",
+                        "inverse-primary": "#ffafd1",
+                        "error-warm-red": "#DC2626",
+                        "surface-bright": "#faf8ff",
+                        "surface-tint": "#a92a71",
+                        "primary": "#5b0038",
+                        "error": "#ba1a1a",
+                        "surface": "#faf8ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#304985",
+                        "on-primary-fixed-variant": "#890958",
+                        "primary-fixed-dim": "#ffafd1",
+                        "on-tertiary-fixed-variant": "#8b0358",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#3d0024",
+                        "surface-variant": "#e3e1e8",
+                        "tertiary-fixed-dim": "#ffafd1",
+                        "secondary-fixed": "#dae2ff",
+                        "surface-container": "#efedf4",
+                        "on-primary-fixed": "#3d0024",
+                        "surface-container-high": "#e9e7ee",
+                        "status-unanswered": "#D9D9E3",
+                        "primary-container": "#830053",
+                        "surface-dim": "#dbd9e0",
+                        "inverse-on-surface": "#f2f0f7",
+                        "on-background": "#1a1b20",
+                        "primary-fixed": "#ffd8e6",
+                        "on-surface-variant": "#554149",
+                        "status-answered": "#2A437F",
+                        "tertiary-fixed": "#ffd8e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "option-padding": "20px",
+                        "container-tight": "800px",
+                        "assessment-gap": "48px",
+                        "sidebar-width": "320px"
+                    },
+                    "fontFamily": {
+                        "assessment-question-mobile": ["\"Source Serif 4\""],
+                        "assessment-question": ["\"Source Serif 4\""],
+                        "option-text": ["Plus Jakarta Sans"],
+                        "meta-label": ["Plus Jakarta Sans"],
+                        "exam-header": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "assessment-question-mobile": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "assessment-question": ["22px", { "lineHeight": "34px", "fontWeight": "400" }],
+                        "option-text": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "meta-label": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "exam-header": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #dbd9e0; /* surface-dim */
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pt-16 pb-20 md:pb-0 md:pr-[320px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-3 bg-surface/80 backdrop-blur-xl border-b border-surface-variant h-16 shadow-none">
+<div class="flex items-center gap-4">
+<span class="font-exam-header text-exam-header font-bold text-primary">ALS Assessment</span>
+<div class="hidden md:block h-6 w-px bg-surface-variant mx-2"></div>
+<span class="hidden md:block font-body-md text-on-surface-variant font-medium">Clinical Biochemistry Final Assessment</span>
+</div>
+<div class="flex items-center gap-6">
+<span class="font-meta-label text-meta-label text-on-surface-variant">Question 12 of 50</span>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[20px]">timer</span>
+<span class="font-option-text text-option-text">42:18</span>
+</div>
+<div class="hidden md:flex items-center gap-1 text-success-emerald">
+<span class="material-symbols-outlined text-[16px]">cloud_done</span>
+<span class="font-meta-label text-meta-label">Auto Saved</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">help</span>
+</button>
+<img alt="Student Avatar" class="w-8 h-8 rounded-full border border-surface-variant object-cover" data-alt="A small, professional headshot avatar of a focused medical student taking an exam, modern studio lighting, high resolution, minimalist grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuH6PpXf9L8iFHufXTH782lw2C0EHN_EmtXSYXb2vr6aFkkbQvZlty9hiABD3saQ4464qnbyoi0Q5LdUcjt95rai0x1mDvD7uJoupL6kmwFcL21kcYpzTURpKK6ANbGMSLv7f5kD3SMM30RKGlGjPeZ41gjW-bkGREzXVPVS0-R6oJtGYyfx0RncMi7POd9WRv_7lWNsmDUPl1P7vrSpNqcI_3CEbSctMxNGXl1vihpbHCEYW1YF_L"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex justify-center w-full mt-8 md:mt-12 px-4 md:px-8">
+<div class="w-full max-w-container-tight flex flex-col mb-24 md:mb-32">
+<!-- Progress Indicator (Top of viewport, under header) -->
+<div class="fixed top-16 left-0 w-full h-1 z-40 bg-surface-variant">
+<div class="h-full bg-gradient-to-r from-secondary to-status-answered w-[24%]"></div>
+</div>
+<!-- Question Stem -->
+<div class="mb-assessment-gap">
+<h1 class="font-assessment-question-mobile text-assessment-question-mobile md:font-assessment-question md:text-assessment-question text-on-surface">
+                    Which enzyme is considered more liver-specific when evaluating hepatocellular injury?
+                </h1>
+</div>
+<!-- Options -->
+<div class="flex flex-col gap-4">
+<!-- Option A -->
+<button class="w-full text-left bg-surface-container-lowest border border-surface-dim hover:bg-surface-container-low rounded-lg p-option-padding flex items-start gap-4 group transition-colors duration-200 focus:outline-none focus-visible:ring-3 focus-visible:ring-status-answered/20">
+<div class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full border border-surface-variant text-on-surface-variant group-hover:bg-surface font-option-text text-option-text">
+                        A
+                    </div>
+<div class="flex-grow pt-1">
+<span class="font-option-text text-option-text text-on-surface">AST (Aspartate Aminotransferase)</span>
+</div>
+</button>
+<!-- Option B (Selected) -->
+<button class="w-full text-left bg-status-answered/5 border-2 border-status-answered rounded-lg p-option-padding flex items-center gap-4 group transition-colors duration-200 focus:outline-none shadow-[0_2px_8px_rgba(42,67,127,0.08)] relative overflow-hidden">
+<div class="absolute inset-0 border-2 border-status-answered rounded-lg pointer-events-none"></div>
+<div class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-status-answered text-on-primary font-option-text text-option-text shadow-sm">
+                        B
+                    </div>
+<div class="flex-grow pt-0">
+<span class="font-option-text text-option-text text-on-surface font-semibold">ALT (Alanine Aminotransferase)</span>
+</div>
+<div class="flex-shrink-0 text-status-answered">
+<span class="material-symbols-outlined fill">check_circle</span>
+</div>
+</button>
+<!-- Option C -->
+<button class="w-full text-left bg-surface-container-lowest border border-surface-dim hover:bg-surface-container-low rounded-lg p-option-padding flex items-start gap-4 group transition-colors duration-200 focus:outline-none focus-visible:ring-3 focus-visible:ring-status-answered/20">
+<div class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full border border-surface-variant text-on-surface-variant group-hover:bg-surface font-option-text text-option-text">
+                        C
+                    </div>
+<div class="flex-grow pt-1">
+<span class="font-option-text text-option-text text-on-surface">CK (Creatine Kinase)</span>
+</div>
+</button>
+<!-- Option D -->
+<button class="w-full text-left bg-surface-container-lowest border border-surface-dim hover:bg-surface-container-low rounded-lg p-option-padding flex items-start gap-4 group transition-colors duration-200 focus:outline-none focus-visible:ring-3 focus-visible:ring-status-answered/20">
+<div class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full border border-surface-variant text-on-surface-variant group-hover:bg-surface font-option-text text-option-text">
+                        D
+                    </div>
+<div class="flex-grow pt-1">
+<span class="font-option-text text-option-text text-on-surface">LDH (Lactate Dehydrogenase)</span>
+</div>
+</button>
+</div>
+</div>
+</main>
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden md:flex fixed right-0 top-16 h-[calc(100vh-64px)] w-sidebar-width z-40 flex-col bg-surface-container-lowest border-l border-surface-variant p-4 shadow-sm">
+<div class="mb-6 flex flex-col gap-2">
+<h2 class="font-exam-header text-exam-header text-on-surface">Question Map</h2>
+<div class="flex items-center justify-between">
+<span class="font-meta-label text-meta-label text-on-surface-variant">11/50 Completed</span>
+<span class="font-meta-label text-meta-label text-status-flagged">3 Flagged</span>
+</div>
+<!-- Legend -->
+<div class="flex gap-4 mt-2">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded bg-status-answered"></div>
+<span class="text-[10px] uppercase tracking-wider font-semibold text-on-surface-variant">Answered</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded bg-status-unanswered border border-surface-variant"></div>
+<span class="text-[10px] uppercase tracking-wider font-semibold text-on-surface-variant">Unanswered</span>
+</div>
+</div>
+</div>
+<!-- Navigator Grid -->
+<div class="flex-grow overflow-y-auto sidebar-scroll pr-2">
+<div class="grid grid-cols-5 gap-2">
+<!-- Row 1 -->
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">1</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">2</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">3</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">4</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">5</button>
+<!-- Row 2 -->
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">6</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high relative overflow-hidden group">
+                    7
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-status-flagged rounded-bl-sm"></div>
+</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">8</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">9</button>
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">10</button>
+<!-- Row 3 -->
+<button class="h-10 rounded-md bg-status-answered text-on-primary font-option-text text-option-text shadow-sm hover:opacity-90">11</button>
+<!-- Current Question (12) -->
+<button class="h-10 rounded-md bg-surface-container-lowest border-2 border-status-answered text-status-answered font-option-text text-option-text font-bold shadow-[0_2px_4px_rgba(42,67,127,0.1)]">12</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">13</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">14</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">15</button>
+<!-- Row 4 -->
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">16</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">17</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high relative overflow-hidden group">
+                    18
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-status-flagged rounded-bl-sm"></div>
+</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">19</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">20</button>
+<!-- Skip to Row 6 to show another flagged -->
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">21</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">22</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">23</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">24</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">25</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">26</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">27</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">28</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high relative overflow-hidden group">
+                    29
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-status-flagged rounded-bl-sm"></div>
+</button>
+<button class="h-10 rounded-md bg-status-unanswered text-on-surface-variant font-option-text text-option-text hover:bg-surface-container-high">30</button>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-surface-variant">
+<button class="w-full py-3 px-4 bg-surface-container-low text-primary font-option-text text-option-text rounded-lg hover:bg-surface-container-high transition-colors font-semibold flex items-center justify-center gap-2">
+                Submit Exam
+            </button>
+</div>
+</aside>
+<!-- Bottom Actions (Glassmorphic) -->
+<div class="fixed bottom-0 left-0 w-full md:w-[calc(100%-320px)] bg-surface/80 backdrop-blur-3xl border-t border-surface-variant shadow-lg z-50 h-20 px-6 flex items-center justify-between">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-option-text text-option-text">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="hidden sm:inline">Previous</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-status-flagged hover:bg-surface-container-high transition-colors font-option-text text-option-text border border-status-flagged/20">
+<span class="material-symbols-outlined">flag</span>
+<span class="hidden sm:inline">Flag for Review</span>
+</button>
+<div class="flex items-center gap-4">
+<!-- Toast / Reassurance -->
+<div class="hidden lg:flex items-center gap-1.5 text-success-emerald opacity-0 animate-[fadeIn_0.5s_ease-out_forwards_1s]">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span class="font-meta-label text-meta-label">Answer saved</span>
+</div>
+<button class="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-status-answered text-on-primary hover:bg-on-secondary-fixed-variant transition-colors font-option-text text-option-text font-semibold shadow-md active:scale-95 duration-150">
+<span>Save &amp; Next</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Mobile Bottom Navigation (Visible only on small screens if needed, but per requirements we are using a focused action bar above for both) -->
+<style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body></html>

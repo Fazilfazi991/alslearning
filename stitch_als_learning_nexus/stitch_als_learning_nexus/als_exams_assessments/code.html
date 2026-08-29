@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Exams &amp; Assessments - Student Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#001848",
+                      "outline": "#887179",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-container": "#ff88c0",
+                      "success-emerald": "#059669",
+                      "on-secondary-fixed-variant": "#2b4480",
+                      "inverse-surface": "#2f3035",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-surface": "#1a1b20",
+                      "surface-container-low": "#f4f3fa",
+                      "secondary": "#445c9a",
+                      "background": "#faf8ff",
+                      "outline-variant": "#dbbfc9",
+                      "secondary-container": "#a2bafe",
+                      "status-flagged": "#A4226C",
+                      "tertiary-container": "#830053",
+                      "secondary-fixed-dim": "#b2c5ff",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#e3e1e8",
+                      "on-secondary": "#ffffff",
+                      "warning-amber": "#F59E0B",
+                      "on-primary-container": "#ff88c0",
+                      "tertiary": "#5b0038",
+                      "inverse-primary": "#ffafd1",
+                      "error-warm-red": "#DC2626",
+                      "surface-bright": "#faf8ff",
+                      "surface-tint": "#a92a71",
+                      "primary": "#5b0038",
+                      "error": "#ba1a1a",
+                      "surface": "#faf8ff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-container": "#304985",
+                      "on-primary-fixed-variant": "#890958",
+                      "primary-fixed-dim": "#ffafd1",
+                      "on-tertiary-fixed-variant": "#8b0358",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#3d0024",
+                      "surface-variant": "#e3e1e8",
+                      "tertiary-fixed-dim": "#ffafd1",
+                      "secondary-fixed": "#dae2ff",
+                      "surface-container": "#efedf4",
+                      "on-primary-fixed": "#3d0024",
+                      "surface-container-high": "#e9e7ee",
+                      "status-unanswered": "#D9D9E3",
+                      "primary-container": "#830053",
+                      "surface-dim": "#dbd9e0",
+                      "inverse-on-surface": "#f2f0f7",
+                      "on-background": "#1a1b20",
+                      "primary-fixed": "#ffd8e6",
+                      "on-surface-variant": "#554149",
+                      "status-answered": "#2A437F",
+                      "tertiary-fixed": "#ffd8e6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "option-padding": "20px",
+                      "container-tight": "800px",
+                      "assessment-gap": "48px",
+                      "sidebar-width": "320px"
+              },
+              "fontFamily": {
+                      "assessment-question-mobile": [
+                              "\"Source Serif 4\""
+                      ],
+                      "assessment-question": [
+                              "\"Source Serif 4\""
+                      ],
+                      "option-text": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "meta-label": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "exam-header": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "assessment-question-mobile": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "assessment-question": [
+                              "22px",
+                              {
+                                      "lineHeight": "34px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "option-text": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "meta-label": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.08em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "exam-header": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen">
+<!-- Header (Based on Shared Component style, modified for dashboard context) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface/80 backdrop-blur-xl border-b border-surface-variant">
+<div class="flex items-center gap-4">
+<span class="font-exam-header text-exam-header font-bold text-primary">Student Portal</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-variant">
+<img alt="Student Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a student, well-lit, corporate yet approachable, shallow depth of field, warm natural lighting, high quality portrait photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5fXYThFPEvpf7eq0gLtA90Y6UYusk7uTu_4B9u_0NVVJDwHpcryCHBNsGYh9KTqte3Ks0lBcowBCN6KCRjaJODyy_g5wBQRdWubMT5ePXkxlSk-IDPjCnf48DKuWERUA9yWIvbWr7m7tbLCSz7FTNjhE-LBGnNMMD1FtvVLfCsC2DN9XUrGnHMPtQuMWxmK8qh3RRu_4COt3gSucPtjf_WMcl9DcPIR_1xV0xUQkkWu6fN0-vngwi"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="pt-24 pb-20 px-6 max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+<!-- Content Canvas -->
+<div class="flex-1">
+<div class="mb-10">
+<h1 class="text-3xl font-exam-header text-on-surface mb-2">Exams &amp; Assessments</h1>
+<p class="text-on-surface-variant text-body-md">View upcoming exams, practice assessments and your previous results.</p>
+</div>
+<!-- Tabs -->
+<div class="flex gap-6 border-b border-surface-variant mb-8 overflow-x-auto no-scrollbar">
+<button class="pb-3 text-primary font-bold border-b-2 border-primary whitespace-nowrap">Upcoming</button>
+<button class="pb-3 text-on-surface-variant font-medium hover:text-primary transition-colors whitespace-nowrap">Available</button>
+<button class="pb-3 text-on-surface-variant font-medium hover:text-primary transition-colors whitespace-nowrap">Completed</button>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 gap-6">
+<!-- Upcoming Exam Card -->
+<div class="bg-surface-container-lowest border border-surface-dim rounded-xl p-6 hover:bg-surface-container-low transition-colors duration-200 shadow-sm flex flex-col md:flex-row gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-3 py-1 bg-primary/10 text-primary rounded-full font-meta-label text-meta-label">FINAL ASSESSMENT</span>
+<span class="flex items-center text-warning-amber text-sm font-medium gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span> Starts in 4 days</span>
+</div>
+<h2 class="text-xl font-exam-header text-on-surface mb-4">Clinical Biochemistry</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">DATE</p>
+<p class="font-medium">03 Sep 2026</p>
+</div>
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">TIME</p>
+<p class="font-medium">7:00 PM</p>
+</div>
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">DURATION</p>
+<p class="font-medium">60 Mins</p>
+</div>
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">QUESTIONS</p>
+<p class="font-medium">50</p>
+</div>
+</div>
+</div>
+<div class="flex items-end md:items-center md:border-l md:border-surface-variant md:pl-6">
+<button class="w-full md:w-auto px-6 py-3 bg-surface-variant text-on-surface-variant rounded-lg font-medium opacity-50 cursor-not-allowed">Enter Exam Room</button>
+</div>
+</div>
+<!-- Available Exam Card -->
+<div class="bg-surface-container-lowest border border-surface-dim rounded-xl p-6 hover:bg-surface-container-low transition-colors duration-200 shadow-sm flex flex-col md:flex-row gap-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full z-0"></div>
+<div class="flex-1 z-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-3 py-1 bg-secondary/10 text-secondary rounded-full font-meta-label text-meta-label">MODULE ASSESSMENT</span>
+</div>
+<h2 class="text-xl font-exam-header text-on-surface mb-4">Microbiology Essentials</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">QUESTIONS</p>
+<p class="font-medium">30</p>
+</div>
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">DURATION</p>
+<p class="font-medium">30 Mins</p>
+</div>
+<div>
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">ATTEMPTS</p>
+<p class="font-medium">1</p>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="event">event</span> Available until 05 Sep 2026</p>
+</div>
+<div class="flex items-end md:items-center md:border-l md:border-surface-variant md:pl-6 z-10">
+<button class="w-full md:w-auto px-6 py-3 bg-primary text-on-primary rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm">Start Assessment</button>
+</div>
+</div>
+<!-- Completed Exam Card -->
+<div class="bg-surface-container-lowest border border-surface-dim rounded-xl p-6 hover:bg-surface-container-low transition-colors duration-200 flex flex-col md:flex-row gap-6 opacity-80">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="flex items-center text-success-emerald text-sm font-medium gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span> Passed</span>
+</div>
+<h2 class="text-lg font-exam-header text-on-surface mb-2">Hematology Fundamentals - Module 02 Assessment</h2>
+<p class="text-sm text-on-surface-variant mb-4">Completed: 28 Aug 2026</p>
+</div>
+<div class="flex items-center md:justify-end gap-6 md:w-48">
+<div class="text-center">
+<p class="text-on-surface-variant font-meta-label text-meta-label mb-1">SCORE</p>
+<p class="text-2xl font-bold text-on-surface">84%</p>
+</div>
+<button class="p-3 bg-surface-variant text-on-surface rounded-full hover:bg-surface-dim transition-colors" title="View Results">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar (Based on Shared Components logic, adapted for generic dashboard info) -->
+<aside class="hidden md:block w-sidebar-width shrink-0">
+<div class="sticky top-24 bg-surface-container-lowest border border-surface-variant rounded-xl p-6 shadow-sm">
+<h3 class="font-exam-header text-exam-header mb-4">Study Progress</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span class="text-on-surface-variant">Modules Completed</span>
+<span class="font-medium text-on-surface">12/16</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-surface-variant">
+<p class="font-meta-label text-meta-label text-on-surface-variant mb-3">RESOURCES</p>
+<ul class="space-y-2">
+<li><a class="flex items-center gap-2 text-primary hover:underline text-sm" href="#"><span class="material-symbols-outlined text-[18px]" data-icon="library_books">library_books</span> Reference Materials</a></li>
+<li><a class="flex items-center gap-2 text-primary hover:underline text-sm" href="#"><span class="material-symbols-outlined text-[18px]" data-icon="support_agent">support_agent</span> Academic Support</a></li>
+</ul>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Bottom Nav for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-3xl border-t border-surface-variant flex justify-around items-center px-4 py-3 h-20 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-meta-label text-[10px]">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-xl px-6 py-2 shadow-sm scale-95 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="assignment">assignment</span>
+<span class="font-meta-label text-[10px]">Exams</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-meta-label text-[10px]">Profile</span>
+</button>
+</nav>
+</body></html>

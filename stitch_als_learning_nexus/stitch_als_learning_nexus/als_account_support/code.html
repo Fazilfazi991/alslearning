@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Student Portal - Settings &amp; Support</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#faf8ff",
+                      "surface-main": "#FAF8FF",
+                      "on-secondary-fixed": "#380039",
+                      "on-secondary-container": "#7b3979",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed-variant": "#2b4480",
+                      "on-surface-variant": "#564149",
+                      "outline-variant": "#dcbfc9",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#e1e1ed",
+                      "surface-container-high": "#e7e7f3",
+                      "on-secondary-fixed-variant": "#6e2d6c",
+                      "tertiary-fixed": "#dae2ff",
+                      "on-primary-fixed-variant": "#8b0358",
+                      "on-secondary": "#ffffff",
+                      "inverse-on-surface": "#f0f0fb",
+                      "surface-container-low": "#f3f3fe",
+                      "chart-grid": "#E2E2EC",
+                      "verification-gold": "#C5A059",
+                      "tertiary-container": "#3f5794",
+                      "secondary-fixed": "#ffd6f7",
+                      "inverse-surface": "#2e3039",
+                      "error-container": "#ffdad6",
+                      "primary": "#830053",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#e1e1ed",
+                      "inverse-primary": "#ffafd1",
+                      "on-primary-fixed": "#3d0024",
+                      "surface-tint": "#aa2871",
+                      "secondary-container": "#fdabf4",
+                      "tertiary-fixed-dim": "#b2c5ff",
+                      "tertiary": "#263f7b",
+                      "on-tertiary": "#ffffff",
+                      "surface-dim": "#d9d9e4",
+                      "background": "#faf8ff",
+                      "on-tertiary-container": "#c1d0ff",
+                      "on-background": "#191b23",
+                      "on-error-container": "#93000a",
+                      "surface-bright": "#faf8ff",
+                      "secondary": "#894586",
+                      "live-indicator": "#BA1A1A",
+                      "outline": "#897179",
+                      "primary-fixed-dim": "#ffafd1",
+                      "surface-container": "#ededf8",
+                      "secondary-fixed-dim": "#fdabf4",
+                      "on-surface": "#191b23",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#ffc0d9",
+                      "on-tertiary-fixed": "#001848",
+                      "primary-fixed": "#ffd8e6",
+                      "primary-container": "#a4226c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "stack-lg": "32px",
+                      "stack-md": "16px",
+                      "gutter": "24px",
+                      "base": "4px",
+                      "container-max": "1280px",
+                      "margin-desktop": "64px",
+                      "margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "mono-data": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #faf8ff; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 12px 32px rgba(42, 67, 127, 0.08);
+        }
+        .tab-active {
+            border-left-color: #a4226c;
+            background-color: #f3f3fe;
+            color: #830053;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-left-color: transparent;
+            color: #564149;
+        }
+        .tab-inactive:hover {
+            background-color: #f0f0fb;
+            color: #830053;
+        }
+        
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #a4226c;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #a4226c;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+        .toggle-label {
+            width: 3rem;
+            height: 1.5rem;
+            background-color: #e1e1ed;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .toggle-label:after {
+            content: '';
+            position: absolute;
+            top: 0.125rem;
+            left: 0.125rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .input-glow:focus {
+            box-shadow: 0 0 0 4px rgba(42, 67, 127, 0.1);
+            border-color: #3f5794;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-sm flex justify-between items-center w-full px-margin-desktop py-unit max-w-container-max mx-auto border-b border-on-surface/10 py-4">
+<div class="flex items-center gap-gutter">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Student Portal</span>
+<nav class="hidden md:flex gap-stack-lg ml-8">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary font-body-md text-body-md transition-colors duration-200 cursor-pointer active:scale-95" href="#">Classroom</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary font-body-md text-body-md transition-colors duration-200 cursor-pointer active:scale-95" href="#">Resources</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary font-body-md text-body-md transition-colors duration-200 cursor-pointer active:scale-95" href="#">Certificates</a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-colors duration-200 cursor-pointer active:scale-95">Go Live</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95 p-2 hover:bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-primary dark:text-primary-fixed-dim font-semibold border-b-2 border-primary transition-colors duration-200 cursor-pointer active:scale-95 p-2 hover:bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="Student Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a medical student in a clinical setting, soft natural lighting, high-fidelity corporate modern aesthetic, subtle lab background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5n2yCzZtWRi95kUWfLpJuJf0zzulm0MzKvBuTzOC1YY6xCdzjcTxW4whqSkGdLdn1hQ5eMvT_V9Yq-VjGfsSjz-6Cy072Kjvj4kp85IcwcGE2P42l0ztPuAcE5fIlsbpm9RCh9hbPv4AmxUs07hMDxsjRDzkj_UBVdw1ss69HmwHqKfgQ6wgneq7cH8uuanKmTZjwD7-wSSdQCEPrdOU8nNkfxPnhpGV33Em2PNRgh-HsNcnXqFZ1"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 max-w-container-max mx-auto w-full px-margin-desktop py-stack-lg gap-gutter">
+<!-- SideNavBar (Settings & Support Specific) -->
+<aside class="w-64 hidden lg:flex flex-col gap-stack-md">
+<div class="mb-stack-sm">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Settings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your account and preferences.</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-lg border-l-4 tab-inactive font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+                    Account
+                </a>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-lg border-l-4 tab-inactive font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">notifications</span>
+                    Notifications
+                </a>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-lg border-l-4 tab-inactive font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">security</span>
+                    Security
+                </a>
+<div class="my-2 border-t border-outline-variant/30"></div>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-lg border-l-4 tab-active font-label-md text-label-md transition-all duration-200" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+                    Help &amp; Support
+                </a>
+</nav>
+</aside>
+<!-- Main Content Area (Help & Support Active) -->
+<main class="flex-1 flex flex-col gap-stack-lg">
+<!-- Header -->
+<div class="flex flex-col gap-stack-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Help &amp; Support</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Find answers to common questions or reach out to our support team.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- FAQ Section -->
+<div class="lg:col-span-2 flex flex-col gap-stack-md">
+<!-- Search -->
+<div class="glass-panel rounded-xl p-4 flex items-center gap-stack-sm mb-4">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="w-full bg-transparent border-none font-body-md text-body-md text-on-surface focus:ring-0 placeholder-on-surface-variant/50 input-glow rounded-lg py-2 px-3" placeholder="Search for articles, exams, policies..." type="text"/>
+</div>
+<!-- FAQ Categories Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Category Card -->
+<div class="glass-panel rounded-xl p-6 hover:-translate-y-1 transition-transform duration-300 cursor-pointer border border-outline-variant/30 hover:border-primary/50">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2">Getting Started</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Portal navigation, initial setup, and basic troubleshooting.</p>
+</div>
+<!-- Category Card -->
+<div class="glass-panel rounded-xl p-6 hover:-translate-y-1 transition-transform duration-300 cursor-pointer border border-outline-variant/30 hover:border-primary/50">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2">Exams &amp; Assessments</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Submission guidelines, grading criteria, and proctoring info.</p>
+</div>
+<!-- Category Card -->
+<div class="glass-panel rounded-xl p-6 hover:-translate-y-1 transition-transform duration-300 cursor-pointer border border-outline-variant/30 hover:border-primary/50">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2">Certifications</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Verification processes, digital badges, and renewals.</p>
+</div>
+<!-- Category Card -->
+<div class="glass-panel rounded-xl p-6 hover:-translate-y-1 transition-transform duration-300 cursor-pointer border border-outline-variant/30 hover:border-primary/50">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">science</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2">Lab Protocols</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Safety manuals, equipment usage, and reporting procedures.</p>
+</div>
+</div>
+</div>
+<!-- Contact Form Sidebar -->
+<div class="lg:col-span-1">
+<div class="glass-panel rounded-xl p-6 flex flex-col gap-stack-md h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">mail</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Contact Support</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Need further assistance? Send us a message and we'll reply within 24 hours.</p>
+<form class="flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Subject</label>
+<select class="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface text-on-surface font-body-md text-body-md input-glow appearance-none">
+<option>Technical Issue</option>
+<option>Billing Inquiry</option>
+<option>Course Content</option>
+<option>Other</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Message</label>
+<textarea class="w-full border border-outline-variant rounded-lg px-3 py-2 bg-surface text-on-surface font-body-md text-body-md input-glow resize-none" placeholder="Describe your issue in detail..." rows="4"></textarea>
+</div>
+<button class="mt-4 bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-colors duration-200 w-full flex justify-center items-center gap-2" type="button">
+                                Submit Request
+                                <span class="material-symbols-outlined text-sm">send</span>
+</button>
+</form>
+</div>
+</div>
+</div>
+<!-- Quick Toggle Demo (Notifications preview) -->
+<div class="mt-stack-lg border-t border-outline-variant/30 pt-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-stack-md">Quick Notification Settings</h3>
+<div class="glass-panel rounded-xl p-6 flex flex-col gap-4 max-w-2xl">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Email Alerts</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Receive summaries of missed live classes and assignments.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 opacity-0" id="toggle-email" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-email"></label>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Mobile Push Notifications</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Real-time alerts for grade postings and urgent announcements.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 opacity-0" id="toggle-mobile" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle-mobile"></label>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

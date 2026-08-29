@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Academy - Clinical Biochemistry Course Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#897179",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d9d9e3",
+                        "on-secondary-fixed": "#380039",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "inverse-surface": "#2e3038",
+                        "tertiary-fixed": "#dae2ff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#ffd6f7",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "on-surface-variant": "#564149",
+                        "on-primary-container": "#ffc0d9",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#ffafd1",
+                        "background": "#faf8ff",
+                        "primary-container": "#a4226c",
+                        "surface-container-low": "#f3f3fd",
+                        "on-tertiary-fixed": "#001848",
+                        "primary-fixed": "#ffd8e6",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#ededf7",
+                        "primary": "#830053",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "surface": "#faf8ff",
+                        "secondary-container": "#fdabf4",
+                        "inverse-on-surface": "#f0f0fa",
+                        "surface-container-highest": "#e2e2ec",
+                        "secondary": "#894586",
+                        "surface-container-high": "#e7e7f2",
+                        "on-tertiary-container": "#c1d0ff",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "on-secondary-fixed-variant": "#6e2d6c",
+                        "surface-variant": "#e2e2ec",
+                        "tertiary-container": "#3f5794",
+                        "outline-variant": "#dcbfc9",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "on-primary-fixed": "#3d0024",
+                        "on-surface": "#191b23",
+                        "on-secondary-container": "#7b3979",
+                        "surface-bright": "#faf8ff",
+                        "tertiary": "#263f7b",
+                        "on-background": "#191b23",
+                        "inverse-primary": "#ffafd1",
+                        "surface-tint": "#aa2871"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "64px",
+                        "margin-mobile": "20px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 12px 32px rgba(42, 67, 127, 0.08);
+        }
+        .action-gradient {
+            background: linear-gradient(135deg, theme('colors.primary'), theme('colors.secondary'));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto bg-surface/80 dark:bg-surface-container/80 backdrop-blur-xl border-b border-white/20 dark:border-outline/20 shadow-sm">
+<div class="flex items-center gap-stack-lg">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Academy</span>
+<div class="hidden md:flex gap-gutter items-center">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">Home</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">Courses</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">About</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">How It Works</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors hover:bg-primary/5 dark:hover:bg-primary-fixed/10 rounded-lg px-2 py-1" href="#">Contact</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim hover:bg-primary/5 rounded-lg px-4 py-2 transition-colors">Explore Courses</button>
+<button class="font-label-md text-label-md action-gradient text-white rounded-lg px-4 py-2 shadow-[0_4px_14px_0_rgba(131,0,83,0.39)] hover:shadow-[0_6px_20px_rgba(131,0,83,0.23)] hover:scale-95 transition-all duration-150">Sign In</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow pt-[100px] pb-stack-lg px-margin-desktop max-w-container-max mx-auto w-full">
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column: Course Header & Progress -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-stack-lg">
+<!-- Course Header Hero -->
+<div class="glass-panel rounded-xl overflow-hidden relative">
+<div class="h-[280px] w-full bg-surface-container-highest relative">
+<img alt="Course Hero Image" class="w-full h-full object-cover opacity-80" data-alt="A high-fidelity microscopic view of complex biochemical molecular structures, glowing in subtle deep blue and soft berry hues, representing advanced clinical biochemistry. The lighting is sophisticated and pristine, echoing a state-of-the-art laboratory environment, maintaining a clean and modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtZ7oheguU38av3DsnW9xfEilP0PadXnzTKXoQqGRdervtz266BWhQLSoyftFeWFr7ZDIUXKTzbLPcPsllNHmqSO7BJ75WB3aSjgvoxPesvQMmnoZjaWzygT7mQN9jKPNM-2c_SgPUku5WnAD5h7UlcCiIBf_J1QWFl8l_TjVG5V7HbvzvGmgZjOBlpVhvL-awBnd1xhEGeaEvgNuqaz6NOzNWI9sjh1gVal04R0Iikxjz5c8J8mrA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-stack-lg w-full">
+<span class="inline-block bg-primary text-white font-label-sm text-label-sm px-2 py-1 rounded-full mb-2">Intermediate</span>
+<h1 class="font-display-lg text-display-lg text-white mb-2">Clinical Biochemistry</h1>
+<div class="flex items-center gap-4 text-white/90">
+<span class="flex items-center gap-1 font-body-md text-body-md"><span class="material-symbols-outlined" style="font-size: 20px;">person</span> Dr. Sarah Jenkins</span>
+<span class="w-1 h-1 bg-white/50 rounded-full"></span>
+<span class="flex items-center gap-1 font-body-md text-body-md"><span class="material-symbols-outlined" style="font-size: 20px;">schedule</span> 14h 30m</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Progress & Continue CTA -->
+<div class="glass-panel rounded-xl p-stack-lg flex flex-col sm:flex-row items-center justify-between gap-stack-md">
+<div class="flex-1 w-full">
+<div class="flex justify-between items-end mb-2">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Course Progress</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">22 of 31 lessons completed</p>
+</div>
+<span class="font-headline-md text-headline-md text-primary">72%</span>
+</div>
+<div class="w-full h-1.5 bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full action-gradient w-[72%] rounded-full"></div>
+</div>
+</div>
+<button class="w-full sm:w-auto font-label-md text-label-md action-gradient text-white rounded-lg px-8 py-4 shadow-[0_4px_14px_0_rgba(131,0,83,0.39)] hover:shadow-[0_6px_20px_rgba(131,0,83,0.23)] hover:scale-95 transition-all duration-150 flex items-center justify-center gap-2 whitespace-nowrap">
+                        Continue Learning <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Course Content Tabs (Simplified for visually appealing structure) -->
+<div class="glass-panel rounded-xl p-stack-lg flex flex-col gap-stack-md">
+<h3 class="font-headline-md text-headline-md text-on-surface border-b border-outline-variant/30 pb-4">Course Modules</h3>
+<!-- Accordion Item: Completed -->
+<div class="border border-outline-variant/50 rounded-lg overflow-hidden">
+<div class="bg-surface-container-low p-4 flex justify-between items-center cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Module 01: Introduction to Enzymes</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">5/5 Lessons • 1h 20m</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Accordion Item: Current -->
+<div class="border-2 border-primary/30 rounded-lg overflow-hidden shadow-sm">
+<div class="bg-surface-container p-4 flex justify-between items-center cursor-pointer border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Module 03: Metabolic Pathways</h4>
+<p class="font-label-sm text-label-sm text-primary font-medium">1/4 Lessons • 45m left</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">expand_less</span>
+</div>
+<div class="bg-white/50 p-2 flex flex-col gap-1">
+<div class="flex items-center justify-between p-3 rounded-md bg-surface-container-highest cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface line-through opacity-70">3.1 Glycolysis Overview</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">15m</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-primary/20 cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">play_circle</span>
+<span class="font-body-md text-body-md text-primary font-medium">3.2 The Citric Acid Cycle</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary bg-primary/10 px-2 py-0.5 rounded">In Progress</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar (Resources & Assessments) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-stack-lg">
+<!-- Resources Tab -->
+<div class="glass-panel rounded-xl p-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">folder</span> Resources
+                    </h3>
+<ul class="flex flex-col gap-3">
+<li class="flex items-center justify-between p-3 rounded-lg border border-outline-variant/30 hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">picture_as_pdf</span>
+<span class="font-body-md text-body-md text-on-surface">Module 1-2 Study Guide</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">download</span>
+</li>
+<li class="flex items-center justify-between p-3 rounded-lg border border-outline-variant/30 hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">picture_as_pdf</span>
+<span class="font-body-md text-body-md text-on-surface">Pathway Reference Chart</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">download</span>
+</li>
+</ul>
+</div>
+<!-- Assessments List -->
+<div class="glass-panel rounded-xl p-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">assignment</span> Assessments
+                    </h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Quiz 01: Enzymes &amp; Kinetics</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Score: 92%</p>
+</div>
+</div>
+<div class="w-full h-px bg-outline-variant/30"></div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-on-surface-variant mt-1">radio_button_unchecked</span>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-medium">Quiz 03: Metabolic Pathways</h4>
+<button class="mt-2 font-label-sm text-label-sm text-primary border border-primary rounded px-3 py-1 hover:bg-primary/5 transition-colors">Start Quiz</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-container-max mx-auto bg-surface-container-low dark:bg-inverse-surface border-t border-outline-variant/30 dark:border-outline/20 mt-auto">
+<div class="flex flex-col gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ALS Academy</span>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant mt-4">© 2024 Academy for Laboratory Science. All rights reserved.</p>
+</div>
+<div class="flex flex-col gap-2">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Learning</a>
+</div>
+<div class="flex flex-col gap-2">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Company</a>
+</div>
+<div class="flex flex-col gap-2">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Support</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim underline transition-all" href="#">Legal</a>
+</div>
+</footer>
+</body></html>

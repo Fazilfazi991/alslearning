@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Learning Player - Understanding Bilirubin Metabolism</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#ffdad6",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#ffafd1",
+                      "outline-variant": "#dcbfc9",
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#e2e2ec",
+                      "on-secondary-container": "#7b3979",
+                      "on-background": "#191b23",
+                      "surface-container": "#ededf7",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed": "#dae2ff",
+                      "background": "#faf8ff",
+                      "on-surface": "#191b23",
+                      "tertiary-container": "#3f5794",
+                      "surface-variant": "#e2e2ec",
+                      "surface": "#faf8ff",
+                      "inverse-surface": "#2e3038",
+                      "on-primary": "#ffffff",
+                      "primary": "#830053",
+                      "on-tertiary-fixed": "#001848",
+                      "on-secondary-fixed-variant": "#6e2d6c",
+                      "outline": "#897179",
+                      "inverse-on-surface": "#f0f0fa",
+                      "on-surface-variant": "#564149",
+                      "secondary-fixed": "#ffd6f7",
+                      "surface-dim": "#d9d9e3",
+                      "on-error": "#ffffff",
+                      "secondary": "#894586",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#ffc0d9",
+                      "secondary-fixed-dim": "#fdabf4",
+                      "on-tertiary-container": "#c1d0ff",
+                      "primary-container": "#a4226c",
+                      "surface-container-low": "#f3f3fd",
+                      "on-secondary-fixed": "#380039",
+                      "on-primary-fixed": "#3d0024",
+                      "surface-tint": "#aa2871",
+                      "on-tertiary-fixed-variant": "#2b4480",
+                      "surface-container-high": "#e7e7f2",
+                      "secondary-container": "#fdabf4",
+                      "tertiary-fixed-dim": "#b2c5ff",
+                      "surface-bright": "#faf8ff",
+                      "on-primary-fixed-variant": "#8b0358",
+                      "on-tertiary": "#ffffff",
+                      "tertiary": "#263f7b",
+                      "inverse-primary": "#ffafd1",
+                      "primary-fixed": "#ffd8e6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "64px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "unit": "4px",
+                      "stack-lg": "32px",
+                      "stack-md": "16px",
+                      "margin-mobile": "20px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "60px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .action-gradient {
+            background: linear-gradient(135deg, #830053 0%, #a4226c 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl docked full-width top-0 border-b border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center w-full px-margin-desktop h-16 z-50 fixed">
+<div class="flex items-center gap-stack-md">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">ALS Learning Player</span>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 pt-16">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col bg-surface-container-low/80 dark:bg-surface-container-highest/10 backdrop-blur-xl border-r border-white/40 shadow-md docked left-0 h-full w-80 fixed left-0 top-16 h-[calc(100vh-64px)] overflow-y-auto p-stack-md">
+<div class="mb-stack-lg p-stack-md glass-panel rounded-xl">
+<h2 class="text-headline-md font-headline-md text-primary font-bold mb-unit">Clinical Foundations</h2>
+<div class="flex items-center gap-stack-sm mb-stack-sm">
+<div class="h-1.5 flex-1 bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full action-gradient w-[65%] rounded-full"></div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">65%</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Course progress indicator</p>
+</div>
+<nav class="flex-1 flex flex-col gap-unit">
+<a class="flex items-center gap-stack-md p-stack-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high/50 hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="text-label-md font-label-md">Module 1: Introduction</span>
+</a>
+<a class="flex items-center gap-stack-md p-stack-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high/50 hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="microscope">smb_share</span>
+<span class="text-label-md font-label-md">Module 2: Cellular Basis</span>
+</a>
+<a class="flex items-center gap-stack-md p-stack-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high/50 hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="biotech">biotech</span>
+<span class="text-label-md font-label-md">Module 3: Lab Safety</span>
+</a>
+<a class="flex items-center gap-stack-md p-stack-sm rounded-lg text-primary font-bold border-r-4 border-primary bg-primary-fixed/20 hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="science" style="font-variation-settings: 'FILL' 1;">science</span>
+<span class="text-label-md font-label-md">Module 4: Understanding Bilirubin Metabolism</span>
+</a>
+<a class="flex items-center gap-stack-md p-stack-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high/50 hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="quiz">quiz</span>
+<span class="text-label-md font-label-md">Knowledge Check</span>
+</a>
+<a class="flex items-center gap-stack-md p-stack-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high/50 hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+<span class="text-label-md font-label-md">Course Summary</span>
+</a>
+</nav>
+<button class="mt-stack-lg w-full py-stack-sm px-stack-md action-gradient text-on-primary rounded-lg text-label-md font-label-md shadow-[0_4px_12px_rgba(131,0,83,0.3)] hover:opacity-90 transition-opacity">
+                Continue Learning
+            </button>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-80 bg-background min-h-screen">
+<article class="max-w-[800px] mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg md:py-margin-desktop">
+<header class="mb-stack-lg">
+<span class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-sm font-label-sm mb-stack-md">Module 04</span>
+<h1 class="text-display-lg font-display-lg text-on-surface mb-stack-sm">Understanding Bilirubin Metabolism</h1>
+<div class="flex items-center gap-stack-sm text-on-surface-variant text-label-md font-label-md">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>15 min read</span>
+</div>
+</header>
+<div class="prose prose-lg max-w-none text-body-lg font-body-lg text-on-surface-variant space-y-stack-md">
+<p>Bilirubin is a yellowish pigment that is made during the normal breakdown of red blood cells. Bilirubin passes through the liver and is eventually excreted out of the body. Understanding this pathway is crucial for diagnosing various hepatic and hematologic conditions.</p>
+<div class="glass-panel p-stack-md rounded-xl border-l-4 border-tertiary my-stack-lg bg-tertiary-fixed/30">
+<div class="flex items-center gap-stack-sm text-tertiary mb-stack-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+<span class="text-label-md font-label-md font-bold uppercase tracking-wider">Key Concept</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface m-0">The liver is responsible for conjugating bilirubin, making it water-soluble so it can be excreted in bile. Elevated levels of unconjugated (indirect) bilirubin typically indicate pre-hepatic issues, while elevated conjugated (direct) bilirubin suggests hepatic or post-hepatic issues.</p>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface mt-stack-lg mb-stack-md">The Pathway of Breakdown</h2>
+<p>When senescent red blood cells are destroyed by macrophages, predominantly in the spleen, hemoglobin is broken down into heme and globin. The heme ring is then opened by heme oxygenase to form biliverdin, which is subsequently reduced by biliverdin reductase to yield unconjugated bilirubin.</p>
+<figure class="my-stack-lg">
+<img class="w-full h-auto rounded-xl shadow-md border border-outline-variant/30 object-cover aspect-video" data-alt="A clean, modern scientific diagram illustrating the bilirubin metabolism pathway. The diagram shows the breakdown of red blood cells in the spleen, the transport of unconjugated bilirubin to the liver via albumin, conjugation in the liver, and excretion into the intestine. The style is high-fidelity, using the corporate modern color palette of deep blue, crisp white, and berry accents. The background is a light, translucent glassmorphic style to match the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPckHmVhEJrxBKAM5JRNy1kMuesgreKNLWQLxoo1TFQqS1ey8ZnIP4txCayHSN0udsrGbffXhk7pRKDZe5YCG1iZy_8yBBk5xFd_axb1j2EYGo6ONBJ3BOqz5qOgaHgO2QfnNlFuhB6M7MToEFcDyYLE0KsmzJ_gMe0q65c0ejIAf9AY1A3ozUmmb8W-jrfHaW6KNsxfXjdzdi_jouvMlKRP0fFnoHCPTvsRXUaqHVvfY7BkF6LQoK"/>
+<figcaption class="text-center text-label-sm font-label-sm text-on-surface-variant mt-stack-sm">Fig 1. Overview of the Bilirubin Metabolism Pathway.</figcaption>
+</figure>
+<h2 class="text-headline-lg font-headline-lg text-on-surface mt-stack-lg mb-stack-md">Hepatic Processing</h2>
+<p>Unconjugated bilirubin is lipophilic and must be transported in the blood bound to albumin. Upon reaching the liver, it dissociates from albumin and enters hepatocytes. Inside the hepatocyte, it is conjugated with glucuronic acid by the enzyme UDP-glucuronosyltransferase (UGT1A1), rendering it water-soluble.</p>
+<div class="glass-panel p-stack-md rounded-xl border-l-4 border-primary my-stack-lg bg-primary-fixed/30">
+<div class="flex items-center gap-stack-sm text-primary mb-stack-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+<span class="text-label-md font-label-md font-bold uppercase tracking-wider">Clinical Note</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface m-0">Gilbert's Syndrome is a common, benign, hereditary condition characterized by mildly elevated levels of unconjugated bilirubin. It is caused by a genetic mutation that leads to reduced activity of the UGT1A1 enzyme.</p>
+</div>
+<p>Following conjugation, direct bilirubin is secreted into the bile canaliculi, flows through the biliary tree, and enters the intestine. In the intestine, bacterial flora reduce it to urobilinogen, which is either excreted in feces as stercobilin (giving stool its characteristic brown color) or reabsorbed and excreted by the kidneys as urobilin (giving urine its yellow color).</p>
+</div>
+<!-- Navigation Buttons -->
+<div class="flex flex-col sm:flex-row justify-between items-center mt-margin-desktop pt-stack-lg border-t border-outline-variant/50 gap-stack-md">
+<button class="w-full sm:w-auto px-stack-lg py-stack-sm rounded-lg border-[1.5px] border-tertiary text-tertiary text-label-md font-label-md hover:bg-tertiary-fixed/30 transition-colors flex items-center justify-center gap-stack-sm">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                        Previous Lesson
+                    </button>
+<button class="w-full sm:w-auto px-stack-lg py-stack-sm rounded-lg action-gradient text-on-primary text-label-md font-label-md shadow-[0_4px_12px_rgba(131,0,83,0.3)] hover:opacity-90 transition-opacity flex items-center justify-center gap-stack-sm">
+                        Next Lesson
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</article>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant flex flex-col md:flex-row justify-between items-center px-margin-desktop py-stack-md w-full relative z-10 md:ml-80 w-auto">
+<p class="text-label-sm font-label-sm text-secondary dark:text-secondary-fixed mb-stack-sm md:mb-0">© 2024 Academy for Laboratory Science. Precision in Education.</p>
+<div class="flex gap-stack-md">
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Resources</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Feedback</a>
+</div>
+</footer>
+</body></html>

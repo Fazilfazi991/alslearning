@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Learning Player</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#ffafd1",
+                        "outline-variant": "#dcbfc9",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e2e2ec",
+                        "on-secondary-container": "#7b3979",
+                        "on-background": "#191b23",
+                        "surface-container": "#ededf7",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#dae2ff",
+                        "background": "#faf8ff",
+                        "on-surface": "#191b23",
+                        "tertiary-container": "#3f5794",
+                        "surface-variant": "#e2e2ec",
+                        "surface": "#faf8ff",
+                        "inverse-surface": "#2e3038",
+                        "on-primary": "#ffffff",
+                        "primary": "#830053",
+                        "on-tertiary-fixed": "#001848",
+                        "on-secondary-fixed-variant": "#6e2d6c",
+                        "outline": "#897179",
+                        "inverse-on-surface": "#f0f0fa",
+                        "on-surface-variant": "#564149",
+                        "secondary-fixed": "#ffd6f7",
+                        "surface-dim": "#d9d9e3",
+                        "on-error": "#ffffff",
+                        "secondary": "#894586",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#ffc0d9",
+                        "secondary-fixed-dim": "#fdabf4",
+                        "on-tertiary-container": "#c1d0ff",
+                        "primary-container": "#a4226c",
+                        "surface-container-low": "#f3f3fd",
+                        "on-secondary-fixed": "#380039",
+                        "on-primary-fixed": "#3d0024",
+                        "surface-tint": "#aa2871",
+                        "on-tertiary-fixed-variant": "#2b4480",
+                        "surface-container-high": "#e7e7f2",
+                        "secondary-container": "#fdabf4",
+                        "tertiary-fixed-dim": "#b2c5ff",
+                        "surface-bright": "#faf8ff",
+                        "on-primary-fixed-variant": "#8b0358",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#263f7b",
+                        "inverse-primary": "#ffafd1",
+                        "primary-fixed": "#ffd8e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "64px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "4px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .action-gradient {
+            background: linear-gradient(135deg, #830053 0%, #a4226c 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen relative flex flex-col">
+<!-- Subtle Background Shader -->
+<div class="fixed inset-0 z-0 opacity-10 pointer-events-none mix-blend-multiply">
+<!-- STITCH_SHADER_START:ANIMATION_15 class="absolute inset-0 w-full h-full" -->
+<div class="absolute inset-0 w-full h-full" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_15" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_15');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+
+void main() {
+    vec2 uv = v_texCoord;
+    float time = u_time * 0.2;
+    
+    // Create a subtle, slow-moving scientific "pulse" or "fluid" background
+    // Using simple sine waves to mimic molecular fluid motion
+    vec3 color1 = vec3(0.643, 0.133, 0.424); // #A4226C - Berry
+    vec3 color2 = vec3(0.467, 0.208, 0.459); // #773575 - Purple
+    vec3 color3 = vec3(0.165, 0.263, 0.498); // #2A437F - Deep Blue
+    vec3 bg = vec3(0.98, 0.98, 1.0);         // #F8F9FC - Light BG
+    
+    float noise = sin(uv.x * 10.0 + time) * cos(uv.y * 10.0 - time);
+    noise += sin(uv.y * 5.0 + time * 1.5) * 0.5;
+    
+    vec3 finalColor = mix(bg, color1, clamp(noise * 0.03, 0.0, 1.0));
+    finalColor = mix(finalColor, color3, clamp(sin(uv.x * 3.0 - time) * 0.02, 0.0, 1.0));
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_15 -->
+</div>
+<!-- TopAppBar -->
+<header class="bg-surface/80 border-b border-white/40 shadow-sm flex justify-between items-center w-full px-margin-desktop h-16 z-50 sticky top-0 glass-panel">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center rounded-full p-2 hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">ALS Learning Player</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex flex-col items-end">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Clinical Foundations</span>
+<div class="flex items-center gap-2">
+<div class="w-32 h-[6px] bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full action-gradient w-[72%]"></div>
+</div>
+<span class="text-label-sm font-label-sm font-bold text-primary">72%</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center rounded-full p-2 hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center rounded-full p-2 hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 flex flex-col lg:flex-row relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-md gap-stack-lg">
+<!-- Video Player Area (Left) -->
+<section class="flex-1 flex flex-col gap-stack-md min-w-0">
+<!-- 16:9 Video Container -->
+<div class="w-full aspect-video rounded-xl overflow-hidden shadow-md bg-inverse-surface relative group">
+<img class="w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="A professional medical laboratory setting. A scientist in a white coat is presenting scientific data related to diagnostic enzyme markers on a large digital screen. The lighting is bright, high-key, and sterile, typical of a modern research facility. The overall color palette is cool, with crisp whites, stainless steel greys, and vibrant accents of deep blue and berry red from the digital charts. High fidelity, corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0GaNnW35uH8D1h-duo3Tm2H8E2s8EMb53UlfLSbZ6-DbNo9mNvAW_H3TViQFSIqdv4y_70tkqh3lrg_H9J9ormu3y9pxg5kCPkcwRKFbJ2CPS1nSykKmsAWkBsK7qoE90ucf9mOVUJysWg1uuFN4rXbT1P5aLFfC9kuoh1J-piM_0i-17LhBGkre1004P9O8JMixzapMO4klW6J0kilYk7HPEBQos5FnFtHaCQTyyKvQbKnIEySHo"/>
+<!-- Play Overlay -->
+<div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+<button class="w-16 h-16 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-primary text-4xl ml-1" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<!-- Video Controls (Simulated Bottom Bar) -->
+<div class="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-black/80 to-transparent flex items-center px-4 gap-4 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-xl" data-icon="play_arrow">play_arrow</span>
+<div class="flex-1 h-1 bg-white/30 rounded-full cursor-pointer relative">
+<div class="absolute left-0 top-0 h-full bg-primary w-1/3 rounded-full"></div>
+<div class="absolute left-1/3 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow"></div>
+</div>
+<span class="text-xs font-mono">07:24 / 22:00</span>
+<span class="material-symbols-outlined text-xl" data-icon="volume_up">volume_up</span>
+<span class="material-symbols-outlined text-xl" data-icon="fullscreen">fullscreen</span>
+</div>
+</div>
+<!-- Video Metadata & Actions -->
+<div class="glass-panel p-stack-md rounded-xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-1">3.4 Diagnostic Enzyme Markers</h2>
+<div class="flex items-center gap-2 text-on-surface-variant text-label-md font-label-md">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+<span>22 min</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant mx-1"></span>
+<span>Module 03: Lab Safety &amp; Protocols</span>
+</div>
+</div>
+<button class="action-gradient text-white px-6 py-3 rounded-lg font-label-md text-label-md shadow-[0_4px_12px_rgba(131,0,83,0.3)] hover:shadow-[0_6px_16px_rgba(131,0,83,0.4)] transition-all flex items-center gap-2 shrink-0">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                    Mark as Complete
+                </button>
+</div>
+<!-- Tabs Section -->
+<div class="mt-stack-sm flex flex-col gap-stack-md">
+<div class="flex gap-6 border-b border-outline-variant overflow-x-auto pb-1">
+<button class="text-primary font-label-md text-label-md border-b-2 border-primary pb-2 whitespace-nowrap">Overview</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md pb-2 whitespace-nowrap">Notes</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md pb-2 whitespace-nowrap">Resources</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md pb-2 whitespace-nowrap">Transcript</button>
+</div>
+<div class="glass-panel p-stack-md rounded-xl shadow-sm min-h-[200px]">
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+                        In this lesson, we explore the critical role of diagnostic enzyme markers in clinical settings. You will learn to identify key enzymes such as AST, ALT, and ALP, understand their normal physiological functions, and analyze what elevated or decreased levels indicate regarding tissue damage or disease states. We will focus specifically on interpreting these markers within the context of hepatic and cardiac profiles.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Sidebar / Course Contents (Right) -->
+<aside class="w-full lg:w-80 flex-shrink-0 flex flex-col gap-stack-md">
+<div class="glass-panel rounded-xl shadow-sm overflow-hidden flex flex-col h-full max-h-[calc(100vh-128px)] sticky top-[88px]">
+<div class="p-4 border-b border-outline-variant bg-surface-container-lowest/50">
+<h3 class="text-headline-md font-headline-md text-on-surface text-lg">Course Contents</h3>
+</div>
+<div class="overflow-y-auto flex-1">
+<!-- Module 1 (Collapsed) -->
+<div class="border-b border-outline-variant">
+<button class="w-full p-4 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold text-left">Module 01: Introduction</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- Module 2 (Collapsed) -->
+<div class="border-b border-outline-variant">
+<button class="w-full p-4 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold text-left">Module 02: Cellular Basis</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- Module 3 (Expanded) -->
+<div class="border-b border-outline-variant bg-surface-container-lowest/30">
+<button class="w-full p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/40" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold text-left">Module 03: Lab Safety &amp; Protocols</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="expand_less">expand_less</span>
+</button>
+<div class="flex flex-col pb-2">
+<!-- Lesson 3.1 -->
+<div class="pl-12 pr-4 py-3 flex items-center justify-between hover:bg-surface-container-low/50 cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant line-through">3.1 Sterilization Techniques</span>
+<span class="text-xs text-on-surface-variant/70">15 min</span>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Lesson 3.2 -->
+<div class="pl-12 pr-4 py-3 flex items-center justify-between hover:bg-surface-container-low/50 cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant line-through">3.2 PPE Standards</span>
+<span class="text-xs text-on-surface-variant/70">10 min</span>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Lesson 3.3 -->
+<div class="pl-12 pr-4 py-3 flex items-center justify-between hover:bg-surface-container-low/50 cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant line-through">3.3 Biohazard Disposal</span>
+<span class="text-xs text-on-surface-variant/70">18 min</span>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Lesson 3.4 (Active) -->
+<div class="pl-11 pr-4 py-3 flex items-center justify-between bg-primary-fixed/30 border-l-4 border-primary cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-primary font-bold">3.4 Diagnostic Enzyme Markers</span>
+<span class="text-xs text-primary/80">22 min</span>
+</div>
+<div class="w-4 h-4 rounded-full border-2 border-primary relative flex items-center justify-center">
+<div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Module 4 (Collapsed) -->
+<div class="border-b border-outline-variant">
+<button class="w-full p-4 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant/40" data-icon="lock">lock</span>
+<span class="text-label-md font-label-md text-on-surface-variant font-semibold text-left">Knowledge Check</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Footer (Suppressed for immersive learning experience as per "Destination" Rule / Linear flow implied by lesson player, but included minimalist version if needed) -->
+</body></html>

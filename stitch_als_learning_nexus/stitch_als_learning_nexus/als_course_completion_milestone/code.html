@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALS Learning Player - Course Completion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#ffdad6",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#ffafd1",
+                      "outline-variant": "#dcbfc9",
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#e2e2ec",
+                      "on-secondary-container": "#7b3979",
+                      "on-background": "#191b23",
+                      "surface-container": "#ededf7",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed": "#dae2ff",
+                      "background": "#faf8ff",
+                      "on-surface": "#191b23",
+                      "tertiary-container": "#3f5794",
+                      "surface-variant": "#e2e2ec",
+                      "surface": "#faf8ff",
+                      "inverse-surface": "#2e3038",
+                      "on-primary": "#ffffff",
+                      "primary": "#830053",
+                      "on-tertiary-fixed": "#001848",
+                      "on-secondary-fixed-variant": "#6e2d6c",
+                      "outline": "#897179",
+                      "inverse-on-surface": "#f0f0fa",
+                      "on-surface-variant": "#564149",
+                      "secondary-fixed": "#ffd6f7",
+                      "surface-dim": "#d9d9e3",
+                      "on-error": "#ffffff",
+                      "secondary": "#894586",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#ffc0d9",
+                      "secondary-fixed-dim": "#fdabf4",
+                      "on-tertiary-container": "#c1d0ff",
+                      "primary-container": "#a4226c",
+                      "surface-container-low": "#f3f3fd",
+                      "on-secondary-fixed": "#380039",
+                      "on-primary-fixed": "#3d0024",
+                      "surface-tint": "#aa2871",
+                      "on-tertiary-fixed-variant": "#2b4480",
+                      "surface-container-high": "#e7e7f2",
+                      "secondary-container": "#fdabf4",
+                      "tertiary-fixed-dim": "#b2c5ff",
+                      "surface-bright": "#faf8ff",
+                      "on-primary-fixed-variant": "#8b0358",
+                      "on-tertiary": "#ffffff",
+                      "tertiary": "#263f7b",
+                      "inverse-primary": "#ffafd1",
+                      "primary-fixed": "#ffd8e6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "64px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "unit": "4px",
+                      "stack-lg": "32px",
+                      "stack-md": "16px",
+                      "margin-mobile": "20px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+              },
+              "backgroundImage": {
+                "action-gradient": "linear-gradient(135deg, #830053 0%, #263f7b 100%)",
+                "celebration-gradient": "linear-gradient(135deg, rgba(131, 0, 83, 0.05) 0%, rgba(38, 63, 123, 0.1) 100%)"
+              },
+              "boxShadow": {
+                "glass": "0 8px 32px 0 rgba(42, 67, 127, 0.05)",
+                "glow": "0 4px 20px 0 rgba(131, 0, 83, 0.2)"
+              }
+            }
+          }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/80 backdrop-blur-[20px] border border-white/40 shadow-glass;
+            }
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+<!-- Decorative Scientific Background Pattern (Subtle) -->
+<div class="fixed inset-0 pointer-events-none z-0 opacity-30" style="background-image: radial-gradient(#897179 1px, transparent 1px); background-size: 32px 32px;"></div>
+<div class="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-primary-fixed/30 blur-[100px] pointer-events-none z-0"></div>
+<div class="fixed bottom-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-tertiary-fixed/30 blur-[100px] pointer-events-none z-0"></div>
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-b border-white/40 dark:border-white/10 shadow-sm flex justify-between items-center w-full px-margin-desktop h-16 z-50 sticky top-0">
+<div class="flex items-center gap-4">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">ALS Learning Player</span>
+</div>
+<div class="flex items-center gap-gutter hidden md:flex">
+<!-- Navigation Suppressed for Completion Screen per Intent Logic -->
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-2xl" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow z-10 flex flex-col items-center justify-center p-margin-desktop relative w-full max-w-container-max mx-auto">
+<!-- Completion Container -->
+<div class="glass-panel rounded-2xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden relative">
+<!-- Left Side: Celebration & Stats -->
+<div class="p-stack-lg flex-1 flex flex-col justify-center relative bg-celebration-gradient">
+<div class="mb-stack-md flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-3xl" data-icon="school" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="text-label-md font-label-md uppercase tracking-wider">Course Completed</span>
+</div>
+<h1 class="text-display-lg font-display-lg text-primary mb-2">Congratulations, Ameen</h1>
+<p class="text-headline-md font-headline-md text-on-surface-variant mb-stack-lg">You have mastered <strong>Clinical Biochemistry</strong>.</p>
+<!-- Stats Bento Grid -->
+<div class="grid grid-cols-2 gap-stack-md mb-stack-lg">
+<div class="bg-white/60 rounded-xl p-4 border border-white/50 flex flex-col items-start shadow-sm">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="check_circle">check_circle</span>
+<span class="text-headline-md font-headline-md text-on-surface">100%</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Complete</span>
+</div>
+<div class="bg-white/60 rounded-xl p-4 border border-white/50 flex flex-col items-start shadow-sm">
+<span class="material-symbols-outlined text-tertiary mb-2" data-icon="menu_book">menu_book</span>
+<span class="text-headline-md font-headline-md text-on-surface">31</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Lessons</span>
+</div>
+<div class="bg-white/60 rounded-xl p-4 border border-white/50 flex flex-col items-start shadow-sm">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="quiz">quiz</span>
+<span class="text-headline-md font-headline-md text-on-surface">8</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Quizzes</span>
+</div>
+<div class="bg-white/60 rounded-xl p-4 border border-white/50 flex flex-col items-start shadow-sm">
+<span class="material-symbols-outlined text-tertiary mb-2" data-icon="schedule">schedule</span>
+<span class="text-headline-md font-headline-md text-on-surface">14</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Hours Learning</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-wrap gap-4 mt-auto">
+<button class="bg-action-gradient text-white text-label-md font-label-md px-6 py-3 rounded-lg shadow-glow hover:opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="workspace_premium">workspace_premium</span>
+                        View Certificate
+                    </button>
+<button class="border-[1.5px] border-tertiary text-tertiary text-label-md font-label-md px-6 py-3 rounded-lg hover:bg-tertiary-fixed/30 transition-colors flex items-center gap-2 bg-white/50">
+<span class="material-symbols-outlined" data-icon="reviews">reviews</span>
+                        Review Course
+                    </button>
+</div>
+</div>
+<!-- Right Side: Certificate Preview -->
+<div class="md:w-[400px] bg-surface-container-low p-stack-lg flex flex-col items-center justify-center border-l border-white/50 relative">
+<div class="absolute top-4 right-4 bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm px-3 py-1 rounded-full shadow-sm flex items-center gap-1 z-10">
+<span class="material-symbols-outlined text-sm" data-icon="lock_open">lock_open</span>
+                    Unlocked
+                </div>
+<div class="w-full aspect-[4/3] bg-white rounded-xl shadow-glass border border-outline-variant p-6 flex flex-col items-center justify-center text-center relative overflow-hidden transform rotate-2 hover:rotate-0 transition-transform duration-500">
+<!-- Certificate Mockup Details -->
+<div class="absolute inset-0 border-4 border-double border-surface-container-highest m-2 rounded-lg pointer-events-none"></div>
+<span class="material-symbols-outlined text-4xl text-primary mb-2 opacity-80" data-icon="verified">verified</span>
+<h3 class="text-headline-md font-headline-md text-tertiary mb-1" style="font-family: serif;">Certificate of Completion</h3>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-4">Academy for Laboratory Science</p>
+<p class="text-body-md font-body-md text-on-surface mb-2 font-medium">Ameen</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-2">has successfully completed</p>
+<p class="text-body-lg font-body-lg text-primary font-semibold mb-4">Clinical Biochemistry</p>
+<div class="flex justify-between w-full px-4 mt-auto">
+<div class="border-t border-outline-variant w-16 pt-1 text-[10px] text-on-surface-variant">Date</div>
+<div class="border-t border-outline-variant w-16 pt-1 text-[10px] text-on-surface-variant">Signature</div>
+</div>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-stack-md text-center max-w-[250px]">
+                    Your official certificate is ready. You can download it or share it directly to LinkedIn.
+                </p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant flex justify-between items-center px-margin-desktop py-stack-md w-full mt-auto z-50 relative">
+<span class="text-label-md font-bold text-primary dark:text-inverse-primary">ALS</span>
+<span class="text-label-sm font-label-sm text-secondary dark:text-secondary-fixed hidden sm:inline">© 2024 Academy for Laboratory Science. Precision in Education.</span>
+<div class="flex gap-6">
+<a class="text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-colors" href="#">Support</a>
+<a class="text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-colors" href="#">Resources</a>
+<a class="text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-colors" href="#">Feedback</a>
+</div>
+</footer>
+</body></html>
