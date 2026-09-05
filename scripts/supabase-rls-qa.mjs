@@ -282,30 +282,37 @@ try {
   await root
     .from("test_questions")
     .insert({ test_id: fixture.test, question_id: fixture.assignedQuestion });
-  response = await student
-    .from("test_attempts")
-    .insert({
-      test_id: fixture.test,
-      student_id: users.student,
-      question_order: [fixture.assignedQuestion],
-    })
-    .select("id")
-    .single();
+  response = await student.rpc("start_test_attempt", {
+    target_test: fixture.test,
+  });
   assert(
     "student_starts_eligible_attempt",
     !response.error,
     response.error?.message,
   );
   fixture.attempt = response.data.id;
+  const secondStart = await student.rpc("start_test_attempt", { target_test: fixture.test });
+  assert("multiple_tabs_share_active_attempt", !secondStart.error && secondStart.data.id === fixture.attempt, secondStart.error?.message);
+  const earlyReview = await student.rpc("get_test_review", { target_attempt: fixture.attempt });
+  assert("answer_review_hidden_before_submission", !earlyReview.error && earlyReview.data === null, earlyReview.error?.message);
   const { data: correctKey } = await root.from("question_answer_keys").select("option_id").eq("question_id", fixture.assignedQuestion).single();
-  check = await student
+  const directAnswer = await student
     .from("attempt_answers")
     .insert({
       attempt_id: fixture.attempt,
       question_id: fixture.assignedQuestion,
       selected_option_ids: [correctKey.option_id],
     });
+  assert("student_cannot_bypass_timed_answer_rpc", Boolean(directAnswer.error), directAnswer.error?.message);
+  check = await student.rpc("save_attempt_answer", {
+    target_attempt: fixture.attempt,
+    target_question: fixture.assignedQuestion,
+    option_ids: [correctKey.option_id],
+  });
   assert("student_answer_persists", !check.error, check.error?.message);
+  await root.from("test_attempts").update({ expires_at: new Date(Date.now()-1000).toISOString() }).eq("id", fixture.attempt);
+  const lateAnswer = await student.rpc("save_attempt_answer", { target_attempt: fixture.attempt, target_question: fixture.assignedQuestion, option_ids: [correctKey.option_id] });
+  assert("expired_attempt_rejects_answer_changes", Boolean(lateAnswer.error), lateAnswer.error?.message);
   const scored = await student.rpc("submit_test_attempt", {
     target_attempt: fixture.attempt,
   });
@@ -314,6 +321,10 @@ try {
     !scored.error && Number(scored.data) === 1,
     scored.error?.message || String(scored.data),
   );
+  const review = await student.rpc("get_test_review", { target_attempt: fixture.attempt });
+  assert("submitted_owner_receives_configured_review", !review.error && review.data?.correct === 1 && review.data?.answers?.length === 1, review.error?.message);
+  const outsiderReview = await outsider.rpc("get_test_review", { target_attempt: fixture.attempt });
+  assert("other_student_cannot_read_review", !outsiderReview.error && outsiderReview.data === null, outsiderReview.error?.message);
 
   response = await root
     .from("video_checkpoints")

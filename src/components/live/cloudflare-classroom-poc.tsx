@@ -20,17 +20,22 @@ type Message = {
   sender_id: string;
   profiles: { full_name: string }[];
 };
+type Poll={id:string;question_id:string;launched_at:string|null;closed_at:string|null;show_results:boolean;questions:{prompt:string;question_options:{id:string;content:string;display_order:number}[]}[];live_question_responses:{student_id:string;selected_option_ids:string[]}[]};
 export function CloudflareClassroomPoc({
   session,
   user,
   participant,
   initialMessages,
+  initialPolls,
+  availableQuestions,
   configured,
 }: {
   session: { id: string; title: string; faculty_id: string; status: string };
   user: User;
   participant: Participant;
   initialMessages: Message[];
+  initialPolls:Poll[];
+  availableQuestions:{id:string;prompt:string}[];
   configured: boolean;
 }) {
   const local = useRef<HTMLVideoElement>(null),
@@ -38,6 +43,8 @@ export function CloudflareClassroomPoc({
     recorder = useRef<MediaRecorder | null>(null),
     chunks = useRef<Blob[]>([]),
     [messages, setMessages] = useState(initialMessages),
+    [polls,setPolls]=useState(initialPolls),
+    [pollQuestion,setPollQuestion]=useState(""),
     [message, setMessage] = useState(""),
     [raised, setRaised] = useState(Boolean(participant?.raised_hand)),
     [recording, setRecording] = useState(false),
@@ -68,7 +75,10 @@ export function CloudflareClassroomPoc({
         },
         (payload) => setMessages((v) => [...v, payload.new as Message]),
       )
+      .on("postgres_changes",{event:"*",schema:"public",table:"live_questions",filter:`session_id=eq.${session.id}`},()=>void refreshPolls())
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"live_question_responses"},()=>void refreshPolls())
       .subscribe();
+    async function refreshPolls(){const{data}=await db.from("live_questions").select("id,question_id,launched_at,closed_at,show_results,questions(prompt,question_options(id,content,display_order)),live_question_responses(student_id,selected_option_ids)").eq("session_id",session.id).order("launched_at",{ascending:false});if(data)setPolls(data as unknown as Poll[])}
     const leave = () => {
       void db.rpc("set_live_presence", {
         target_session: session.id,
@@ -133,6 +143,9 @@ export function CloudflareClassroomPoc({
     if (e) setError(e.message);
     else setMessage("");
   }
+  async function launchPoll(){if(!pollQuestion)return;const{error:e}=await createClient().from("live_questions").insert({session_id:session.id,question_id:pollQuestion,launched_at:new Date().toISOString(),show_results:true});if(e)setError(e.message)}
+  async function closePoll(id:string){const{error:e}=await createClient().from("live_questions").update({closed_at:new Date().toISOString()}).eq("id",id);if(e)setError(e.message)}
+  async function answerPoll(id:string,option:string){const{error:e}=await createClient().from("live_question_responses").insert({live_question_id:id,student_id:user.id,selected_option_ids:[option]});if(e)setError(e.message)}
   function record() {
     if (!stream.current) return setError("Start local media before recording.");
     chunks.current = [];
@@ -277,6 +290,7 @@ export function CloudflareClassroomPoc({
             publishing tracks.
           </p>
         </section>
+        <section className="card mt-5 p-5"><h2 className="font-bold">Live polls</h2>{teacher&&<div className="mt-3 flex flex-col gap-2 sm:flex-row"><select className="min-h-11 flex-1 rounded border px-3" value={pollQuestion} onChange={e=>setPollQuestion(e.target.value)}><option value="">Select an assigned question</option>{availableQuestions.map(q=><option key={q.id} value={q.id}>{q.prompt}</option>)}</select><button onClick={()=>void launchPoll()} className="rounded bg-brand px-4 py-2 font-bold text-white">Launch poll</button></div>}<div className="mt-4 space-y-4">{polls.map(p=>{const question=p.questions[0],own=p.live_question_responses.some(r=>r.student_id===user.id);return <article className="rounded border p-4" key={p.id}><div className="flex justify-between gap-3"><b>{question?.prompt||"Poll question"}</b><span className="text-xs text-muted">{p.closed_at?"Closed":"Active"}</span></div><div className="mt-3 grid gap-2 sm:grid-cols-2">{question?.question_options.map(o=><button key={o.id} disabled={teacher||own||Boolean(p.closed_at)} onClick={()=>void answerPoll(p.id,o.id)} className="min-h-11 rounded border px-3 text-left disabled:opacity-60">{o.content}</button>)}</div><p className="mt-2 text-xs text-muted">{own?"Response received · ":""}{teacher||p.show_results?`${p.live_question_responses.length} responses`:"Results hidden"}</p>{teacher&&!p.closed_at&&<button onClick={()=>void closePoll(p.id)} className="mt-2 text-sm font-bold text-brand">Close poll</button>}</article>})}{!polls.length&&<p className="text-sm text-muted">No poll has been launched.</p>}</div></section>
       </div>
     </main>
   );

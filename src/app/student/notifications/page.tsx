@@ -1,1 +1,2 @@
-import{NotificationsPage}from"@/components/student/notifications-page";export default function Page(){return <NotificationsPage/>}
+import{NotificationsPage}from"@/components/student/notifications-page";import{createClient}from"@/lib/supabase/server";
+export default async function Page(){const db=await createClient();const{data,error}=await db.from("notifications").select("id,kind,title,body,href,read_at,created_at").order("created_at",{ascending:false}).limit(100);if(error)throw new Error(error.message);return <NotificationsPage initial={data||[]}/>}

@@ -88,7 +88,12 @@ function fail(error: { message: string } | null) {
   if (error) throw new Error(error.message);
 }
 export async function saveEnrollment(value: Record<string, unknown>) {
-  const { error } = await createClient().from("enrollments").upsert(value);
+  const db = createClient();
+  const id = typeof value.id === "string" ? value.id : null;
+  const mutation = id
+    ? db.from("enrollments").update(value).eq("id", id)
+    : db.from("enrollments").insert(value);
+  const { error } = await mutation;
   fail(error);
 }
 export async function setFacultyActive(id: string, is_active: boolean) {
@@ -134,14 +139,17 @@ export async function deleteContent(row: {
   storage_path?: string | null;
 }) {
   const db = createClient();
+  const [progress,checkpoints]=await Promise.all([db.from("video_progress").select("content_id",{count:"exact",head:true}).eq("content_id",row.id),db.from("video_checkpoints").select("id",{count:"exact",head:true}).eq("video_id",row.id)]);
+  fail(progress.error);fail(checkpoints.error);
+  if((progress.count||0)>0||(checkpoints.count||0)>0)throw new Error("This content has learning history or checkpoints. Archive it instead.");
+  const { error } = await db.from("learning_content").delete().eq("id", row.id);
+  fail(error);
   if (row.storage_bucket && row.storage_path) {
     const removed = await db.storage
       .from(row.storage_bucket)
       .remove([row.storage_path]);
     fail(removed.error);
   }
-  const { error } = await db.from("learning_content").delete().eq("id", row.id);
-  fail(error);
 }
 export async function uploadMaterial(file: File, path: string) {
   const db = createClient(),
@@ -151,6 +159,27 @@ export async function uploadMaterial(file: File, path: string) {
     .upload(path, file, { contentType: file.type, upsert: false });
   fail(result.error);
   return { bucket, path, mime_type: file.type, byte_size: file.size };
+}
+export async function replaceMaterial(
+  file: File,
+  row: { id: string; storage_bucket?: string | null; storage_path?: string | null },
+) {
+  const nextPath = `content/${row.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+  const uploaded = await uploadMaterial(file, nextPath);
+  try {
+    await saveContent({
+      id: row.id,
+      storage_bucket: uploaded.bucket,
+      storage_path: uploaded.path,
+      mime_type: uploaded.mime_type,
+      byte_size: uploaded.byte_size,
+    });
+  } catch (error) {
+    await createClient().storage.from(uploaded.bucket).remove([uploaded.path]);
+    throw error;
+  }
+  if (row.storage_bucket && row.storage_path)
+    fail((await createClient().storage.from(row.storage_bucket).remove([row.storage_path])).error);
 }
 export async function saveTest(
   value: Record<string, unknown>,

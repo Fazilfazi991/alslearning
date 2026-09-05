@@ -10,7 +10,7 @@ export default async function Page({
   const user = await requireRole(["admin", "teacher", "student"]),
     { sessionId } = await params,
     db = await createClient();
-  const [session, participant, messages] = await Promise.all([
+  const [session, participant, messages, polls, questions] = await Promise.all([
     db
       .from("live_sessions")
       .select("id,title,faculty_id,status")
@@ -31,6 +31,8 @@ export default async function Page({
       )
       .eq("session_id", sessionId)
       .order("created_at"),
+    db.from("live_questions").select("id,question_id,launched_at,closed_at,show_results,questions(prompt,question_options(id,content,display_order)),live_question_responses(student_id,selected_option_ids)").eq("session_id",sessionId).order("launched_at",{ascending:false}),
+    db.from("questions").select("id,prompt").eq("status","active").limit(100),
   ]);
   if (session.error) notFound();
   return (
@@ -39,6 +41,8 @@ export default async function Page({
       user={user}
       participant={participant.data}
       initialMessages={messages.data || []}
+      initialPolls={polls.data || []}
+      availableQuestions={questions.data || []}
       configured={Boolean(
         process.env.CF_REALTIME_APP_ID && process.env.CF_REALTIME_APP_SECRET,
       )}

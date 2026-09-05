@@ -2,6 +2,12 @@
 
 Date: 5 September 2026
 
+## R2 recording upload boundary
+
+The server-only contract in `src/lib/live-class/recording-storage.ts` models multipart start, short-lived signed part URLs, per-part ETags/checksums, completion, and abort. Clients retry individual chunks and persist only upload id, object key, part number, ETag, byte length, and checksum; R2 credentials never cross the server boundary.
+
+Objects use `recordings/YYYY/MM/{sessionId}/{recordingId}/teacher-composite.webm` and remain private. Playback/download must use an authorized short-lived signed URL. Required server variables are `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET`. No upload success can be tested or claimed until all are supplied.
+
 ## Measurement status
 
 No Cloudflare Realtime App credentials or R2 credentials are configured, so no SFU traffic has been generated and there are **no measured bitrate values yet**. Zeroes shown in the contained POC are explicitly not measurements. Monthly totals are therefore intentionally not fabricated.

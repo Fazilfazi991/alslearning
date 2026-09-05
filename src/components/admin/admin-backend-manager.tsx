@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   loadAdminData,
+  deleteContent,
   removeBatchFaculty,
   removeFacultyAssignment,
   saveBatchFaculty,
@@ -11,10 +12,11 @@ import {
   saveFacultyAssignment,
   saveTest,
   setFacultyActive,
+  replaceMaterial,
   uploadMaterial,
   type AdminData,
 } from "@/lib/admin-backend";
-type Mode = "enrollments" | "faculty" | "content" | "tests" | "checkpoints";
+export type BackendManagerMode = "enrollments" | "faculty" | "content" | "tests" | "checkpoints";
 type Row = Record<string, unknown>;
 const box = "rounded-xl border border-[#e6cbd5] bg-white p-5",
   input =
@@ -58,7 +60,7 @@ function Select({
     </label>
   );
 }
-export function AdminBackendManager({ mode }: { mode: Mode }) {
+export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
   const [data, setData] = useState<AdminData | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -135,12 +137,16 @@ type Props = {
 };
 function Enrollments({ data, busy, run }: Props) {
   const students = data.profiles.filter((x) => x.role === "student"),
+    [editing, setEditing] = useState(""),
     [student, setStudent] = useState(""),
     [program, setProgram] = useState(""),
     [batch, setBatch] = useState(""),
     [status, setStatus] = useState("active"),
+    [enrolledOn, setEnrolledOn] = useState(new Date().toISOString().slice(0,10)),
     [start, setStart] = useState(""),
-    [expiry, setExpiry] = useState("");
+    [expiry, setExpiry] = useState(""),
+    [noExpiry, setNoExpiry] = useState(true),
+    [validation, setValidation] = useState("");
   const names = new Map(
     data.profiles.map((x) => [x.id, x.full_name || x.email]),
   );
@@ -151,15 +157,19 @@ function Enrollments({ data, busy, run }: Props) {
         className={`${box} grid gap-4`}
         onSubmit={(e) => {
           e.preventDefault();
+          if(!noExpiry && !expiry){setValidation("Choose an access expiry or enable no-expiry.");return}
+          if(!noExpiry && start && new Date(expiry)<=new Date(start)){setValidation("Access expiry must be after access start.");return}
+          setValidation("");
           void run(() =>
             saveEnrollment({
+              ...(editing?{id:editing}:{}),
               student_id: student,
               program_id: program,
               batch_id: batch || null,
               status,
-              enrolled_on: new Date().toISOString().slice(0, 10),
-              access_starts_at: start ? new Date(start).toISOString() : null,
-              access_expires_at: expiry ? new Date(expiry).toISOString() : null,
+              enrolled_on: enrolledOn,
+              access_starts_at: start ? new Date(start).toISOString() : new Date(enrolledOn).toISOString(),
+              access_expires_at: noExpiry ? null : new Date(expiry).toISOString(),
             }),
           );
         }}
@@ -170,6 +180,7 @@ function Enrollments({ data, busy, run }: Props) {
           onChange={setStudent}
           items={students}
         />
+        <label className="text-xs font-bold uppercase text-muted">Enrollment date<input type="date" required className={`${input} mt-2`} value={enrolledOn} onChange={e=>setEnrolledOn(e.target.value)}/></label>
         <Select
           label="Program"
           value={program}
@@ -195,15 +206,17 @@ function Enrollments({ data, busy, run }: Props) {
             onChange={(e) => setStart(e.target.value)}
           />
         </label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={noExpiry} onChange={e=>setNoExpiry(e.target.checked)}/>No expiry</label>
         <label className="text-xs font-bold uppercase text-muted">
           Access expires (blank = no expiry)
           <input
             type="datetime-local"
             className={`${input} mt-2`}
-            value={expiry}
+            value={expiry} disabled={noExpiry}
             onChange={(e) => setExpiry(e.target.value)}
           />
         </label>
+        {validation&&<p role="alert" className="text-sm text-red-700">{validation}</p>}
         <label className="text-xs font-bold uppercase text-muted">
           Status
           <select
@@ -217,8 +230,9 @@ function Enrollments({ data, busy, run }: Props) {
           </select>
         </label>
         <button disabled={busy || !student || !program} className={button}>
-          Save enrollment
+          {editing?"Update enrollment":"Save enrollment"}
         </button>
+        {editing&&<button type="button" className="min-h-10 rounded border px-4 text-sm font-bold" onClick={()=>{setEditing("");setStudent("");setProgram("");setBatch("");setStatus("active");setEnrolledOn(new Date().toISOString().slice(0,10));setStart("");setExpiry("");setNoExpiry(true)}}>Cancel edit</button>}
       </form>
       <Rows
         empty="No enrollments yet."
@@ -227,21 +241,7 @@ function Enrollments({ data, busy, run }: Props) {
           primary: names.get(x.student_id) || "Student",
           secondary: programs.get(x.program_id) || "Program",
           meta: `${x.status} · ${x.access_expires_at ? new Date(x.access_expires_at).toLocaleDateString() : "No expiry"}`,
-          action: (
-            <button
-              className={button}
-              onClick={() =>
-                void run(() =>
-                  saveEnrollment({
-                    ...x,
-                    status: x.status === "active" ? "suspended" : "active",
-                  }),
-                )
-              }
-            >
-              {x.status === "active" ? "Suspend" : "Reactivate"}
-            </button>
-          ),
+          action: <div className="flex flex-wrap gap-2"><button className="min-h-10 rounded border px-3 text-sm font-bold" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?new Date(x.access_starts_at).toISOString().slice(0,16):"");setExpiry(x.access_expires_at?new Date(x.access_expires_at).toISOString().slice(0,16):"");setNoExpiry(!x.access_expires_at)}}>Edit</button><button className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
         }))}
       />
     </div>
@@ -249,6 +249,7 @@ function Enrollments({ data, busy, run }: Props) {
 }
 function Faculty({ data, busy, run }: Props) {
   const faculty = data.profiles.filter((x) => x.role === "teacher"),
+    [search,setSearch]=useState(""),
     [teacher, setTeacher] = useState(""),
     [program, setProgram] = useState(""),
     [subject, setSubject] = useState(""),
@@ -312,7 +313,8 @@ function Faculty({ data, busy, run }: Props) {
         </p>
       </form>
       <div className="space-y-4">
-        {faculty.map((person) => (
+        <input className={input} placeholder="Search faculty" value={search} onChange={e=>setSearch(e.target.value)}/>
+        {faculty.filter(person=>`${person.full_name||""} ${person.email||""}`.toLowerCase().includes(search.toLowerCase())).map((person) => (
           <section className={box} key={person.id}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -378,7 +380,7 @@ function Faculty({ data, busy, run }: Props) {
   );
 }
 function Content({ data, busy, run }: Props) {
-  const [title, setTitle] = useState(""),
+  const [editing,setEditing]=useState(""),[title, setTitle] = useState(""),
     [kind, setKind] = useState("video"),
     [url, setUrl] = useState(""),
     [program, setProgram] = useState(""),
@@ -389,13 +391,11 @@ function Content({ data, busy, run }: Props) {
     [status, setStatus] = useState("draft"),
     [download, setDownload] = useState(false),
     [file, setFile] = useState<File | null>(null),
-    [search, setSearch] = useState("");
+    [search, setSearch] = useState(""),[kindFilter,setKindFilter]=useState(""),[statusFilter,setStatusFilter]=useState("");
   const visible = useMemo(
     () =>
-      data.content.filter((x) =>
-        x.title.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [data.content, search],
+      data.content.filter((x) => x.title.toLowerCase().includes(search.toLowerCase())&&(!kindFilter||x.kind===kindFilter)&&(!statusFilter||x.status===statusFilter)),
+    [data.content, search,kindFilter,statusFilter],
   );
   return (
     <div className="grid gap-5 xl:grid-cols-[440px_1fr]">
@@ -404,14 +404,15 @@ function Content({ data, busy, run }: Props) {
         onSubmit={(e) => {
           e.preventDefault();
           void run(async () => {
-            const contentId = id();
+            const contentId = editing||id(),existing=data.content.find(x=>x.id===editing);
             let stored = {
               bucket: null as string | null,
               path: null as string | null,
               mime_type: null as string | null,
               byte_size: null as number | null,
             };
-            if (file) {
+            if(file&&existing?.storage_path){await replaceMaterial(file,existing);}
+            else if (file) {
               const uploaded = await uploadMaterial(
                 file,
                 `content/${contentId}/${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`,
@@ -433,12 +434,9 @@ function Content({ data, busy, run }: Props) {
                   : file.type.startsWith("image/")
                     ? "image"
                     : "document"
-                : "video",
-              external_url: file ? null : url,
-              storage_bucket: stored.bucket,
-              storage_path: stored.path,
-              mime_type: stored.mime_type,
-              byte_size: stored.byte_size,
+                : kind==="video"?"video":"document",
+              external_url: kind==="video" ? url : null,
+              ...(!editing||!existing?.storage_path?{storage_bucket:stored.bucket,storage_path:stored.path,mime_type:stored.mime_type,byte_size:stored.byte_size}:{}),
               program_id: program || null,
               subject_id: subject || null,
               chapter_id: chapter || null,
@@ -449,6 +447,7 @@ function Content({ data, busy, run }: Props) {
               status,
               display_order: data.content.length,
             });
+            setEditing("");setTitle("");setUrl("");setFile(null);
           });
         }}
       >
@@ -458,7 +457,7 @@ function Content({ data, busy, run }: Props) {
             className={`${input} mt-2`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            required
+            required={!editing}
           />
         </label>
         <label className="text-xs font-bold uppercase text-muted">
@@ -545,8 +544,9 @@ function Content({ data, busy, run }: Props) {
           className={button}
           disabled={busy || !title || !program || !subject}
         >
-          Save content
+          {editing?"Update content":"Save content"}
         </button>
+        {editing&&<button type="button" className="min-h-10 rounded border px-4 font-bold" onClick={()=>{setEditing("");setTitle("");setUrl("");setFile(null)}}>Cancel edit</button>}
       </form>
       <div>
         <input
@@ -555,6 +555,7 @@ function Content({ data, busy, run }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <div className="mb-4 grid gap-2 sm:grid-cols-2"><select className={input} value={kindFilter} onChange={e=>setKindFilter(e.target.value)}><option value="">All content types</option><option value="video">Videos</option><option value="pdf">PDFs</option><option value="document">Documents</option><option value="image">Images</option></select><select className={input} value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="">All statuses</option><option value="draft">Draft</option><option value="active">Published</option><option value="archived">Archived</option></select></div>
         <Rows
           empty="No videos or materials yet."
           rows={visible.map((x) => ({
@@ -562,8 +563,7 @@ function Content({ data, busy, run }: Props) {
             primary: x.title,
             secondary: x.kind,
             meta: x.status,
-            action: (
-              <button
+            action: (<div className="flex flex-wrap gap-2"><button className="min-h-10 rounded border px-3 text-sm font-bold" onClick={()=>{setEditing(x.id);setTitle(x.title);setKind(x.kind==="video"?"video":"file");setUrl(x.external_url||"");setProgram(x.program_id||"");setSubject(x.subject_id||"");setChapter(x.chapter_id||"");setTopic(x.topic_id||"");setFaculty(x.faculty_id||"");setStatus(x.status);setDownload(x.allow_download);setFile(null)}}>Edit</button><button
                 className={button}
                 onClick={() =>
                   void run(() =>
@@ -575,8 +575,7 @@ function Content({ data, busy, run }: Props) {
                 }
               >
                 {x.status === "active" ? "Archive" : "Publish"}
-              </button>
-            ),
+              </button><button className="min-h-10 rounded border px-3" disabled={x.display_order===0} onClick={()=>void run(()=>saveContent({id:x.id,display_order:Math.max(0,x.display_order-1)}))}>↑</button><button className="min-h-10 rounded border px-3" onClick={()=>void run(()=>saveContent({id:x.id,display_order:x.display_order+1}))}>↓</button>{x.status==="draft"&&<button className="min-h-10 rounded border border-red-200 px-3 text-red-700" onClick={()=>void run(()=>deleteContent(x))}>Delete</button>}</div>),
           }))}
         />
       </div>
@@ -591,6 +590,14 @@ function Tests({ data, busy, run }: Props) {
     [duration, setDuration] = useState(60),
     [negative, setNegative] = useState(0),
     [attempts, setAttempts] = useState(1),
+    [availableFrom,setAvailableFrom]=useState(""),
+    [availableUntil,setAvailableUntil]=useState(""),
+    [randomQuestions,setRandomQuestions]=useState(true),
+    [randomOptions,setRandomOptions]=useState(false),
+    [showResults,setShowResults]=useState(true),
+    [showAnswers,setShowAnswers]=useState(true),
+    [showExplanations,setShowExplanations]=useState(true),
+    [validation,setValidation]=useState(""),
     [selected, setSelected] = useState<string[]>([]);
   return (
     <div className="grid gap-5 xl:grid-cols-[440px_1fr]">
@@ -598,6 +605,9 @@ function Tests({ data, busy, run }: Props) {
         className={`${box} grid gap-4`}
         onSubmit={(e) => {
           e.preventDefault();
+          if(availableFrom&&availableUntil&&new Date(availableUntil)<=new Date(availableFrom)){setValidation("Availability end must be after its start.");return}
+          if(duration<1||attempts<1||negative<0){setValidation("Duration and attempts must be at least 1; negative marks cannot be below 0.");return}
+          setValidation("");
           void run(() =>
             saveTest(
               {
@@ -611,10 +621,13 @@ function Tests({ data, busy, run }: Props) {
                 total_marks: null,
                 default_negative_marks: negative,
                 max_attempts: attempts,
-                randomize_questions: true,
-                randomize_options: false,
-                show_answers: true,
-                show_explanations: true,
+                available_from:availableFrom?new Date(availableFrom).toISOString():null,
+                available_until:availableUntil?new Date(availableUntil).toISOString():null,
+                randomize_questions: randomQuestions,
+                randomize_options: randomOptions,
+                show_results:showResults,
+                show_answers: showAnswers,
+                show_explanations: showExplanations,
                 selection_mode: "manual",
                 status: "draft",
               },
@@ -684,6 +697,9 @@ function Tests({ data, busy, run }: Props) {
             onChange={(e) => setAttempts(+e.target.value)}
           />
         </label>
+        <label>Available from<input type="datetime-local" className={input} value={availableFrom} onChange={e=>setAvailableFrom(e.target.value)}/></label>
+        <label>Available until<input type="datetime-local" className={input} value={availableUntil} onChange={e=>setAvailableUntil(e.target.value)}/></label>
+        <div className="grid gap-2 sm:grid-cols-2">{[["Randomize questions",randomQuestions,setRandomQuestions],["Randomize options",randomOptions,setRandomOptions],["Show result",showResults,setShowResults],["Show answers",showAnswers,setShowAnswers],["Show explanations",showExplanations,setShowExplanations]].map(([label,value,setter])=><label className="flex items-center gap-2 text-sm" key={String(label)}><input type="checkbox" checked={value as boolean} onChange={e=>(setter as (value:boolean)=>void)(e.target.checked)}/>{String(label)}</label>)}</div>
         <fieldset className="max-h-64 overflow-y-auto rounded border p-3">
           <legend className="font-bold">
             Manual questions ({selected.length})
@@ -707,6 +723,7 @@ function Tests({ data, busy, run }: Props) {
               </label>
             ))}
         </fieldset>
+        {validation&&<p role="alert" className="text-sm text-red-700">{validation}</p>}
         <button
           className={button}
           disabled={busy || !title || !program || !selected.length}
