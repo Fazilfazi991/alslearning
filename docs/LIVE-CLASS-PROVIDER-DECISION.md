@@ -1,56 +1,68 @@
-# ALS live-class provider decision
+# ALS live-class architecture decision
 
 Date: 5 September 2026
 
 ## Decision
 
-Recommend **LiveKit Cloud** for the first production proof of concept, while preserving the existing `LiveClassProvider` boundary so ALS can switch to Zoom Video SDK if operational testing shows LiveKit does not meet classroom moderation needs.
+ALS will validate a low-cost native classroom built from **Next.js + Supabase + Cloudflare Realtime SFU + Cloudflare R2**. The previous LiveKit Cloud recommendation is withdrawn. No alternate conferencing SDK is part of this direction.
 
-No provider has been purchased or integrated in this batch.
+The production Join Class action remains disabled until the POC has passed media, permission, recording, failure-recovery and bandwidth acceptance tests.
 
-## Requirements
+## Responsibilities
 
-ALS needs browser-based two-way camera/microphone, teacher moderation, temporary student presenter rights, screen and PowerPoint sharing, shared video/audio, chat, recording, webhook-driven recording status, and mobile-browser support.
+| System | Responsibility |
+|---|---|
+| Next.js | Classroom UI, authenticated server boundary, Realtime API proxy and R2 signing endpoints |
+| Supabase Auth/Postgres/Realtime | Identities, trusted roles, batches, enrollment eligibility, schedules, presence, attendance, chat, polls, hand raising and publishing permissions |
+| Cloudflare Realtime SFU | WebRTC peer connections and forwarding explicitly selected audio/video/screen tracks |
+| Cloudflare R2 | Private class attachments, recording chunks/final recordings and other large objects |
 
-## Comparison
+Cloudflare Realtime deliberately supplies no room, participant, role or presence abstraction. ALS owns those concepts in Supabase and treats Cloudflare session/track IDs as ephemeral media routing state.
 
-| Provider | Fit | Advantages | Risks / cost notes |
-|---|---|---|---|
-| LiveKit Cloud | Recommended for POC | WebRTC-first SDK, explicit participant permissions, screen sharing, data channels for classroom events, webhook support, and composited/participant recording through Egress. Can also be self-hosted later. | More classroom UI and moderation behavior must be built by ALS. Current cloud pricing includes 5,000 WebRTC participant minutes and 60 shared recording/import minutes on the free tier; paid Ship begins at $50/month, with usage charges after allowances. |
-| Zoom Video SDK | Strong managed alternative | Mature host/manager roles, mute/remove/share controls, web/mobile SDKs, chat, screen and system-audio sharing, cloud recording, REST APIs, and webhooks. Familiar classroom behavior. | Video SDK and recording require a paid credit/storage plan. UI customization and browser/WASM requirements need a POC on ALS target devices. |
-| Daily | Viable fast-launch option | Good browser SDK, prebuilt UI option, recording, screen sharing, and lower implementation effort for an initial classroom. | Presenter/moderation workflows need validation against ALS's exact role model; pricing should be rechecked using expected participant minutes. |
-| 100ms | Viable role-oriented option | Role and permission model maps naturally to teacher/student/presenter, with recording and screen sharing. | Smaller ecosystem than Zoom; browser compatibility, recording output, support, and regional quality should be validated in a timed POC. |
+## Authentication and lifecycle
 
-## Why LiveKit first
+1. The browser authenticates with Supabase and requests a live-session join from Next.js.
+2. The server verifies active enrollment and access dates, or verifies that the user is the assigned teacher/admin.
+3. The server reads current publishing flags from `live_participants`; it never trusts a client-supplied role.
+4. Only the server holds the Cloudflare App ID/secret and calls `POST /apps/{appId}/sessions/new`.
+5. Each browser creates one `RTCPeerConnection`. Teacher tracks are published; student sessions normally subscribe only.
+6. Track discovery IDs are stored in short-lived application state and shared only with eligible members.
+7. Add/update/close/renegotiate calls are re-authorized. Leaving closes tracks/session state and records attendance.
 
-1. Its permission/token model maps cleanly to the existing server-side `teacher`, `student`, and `presenter` roles.
-2. Classroom polls and hand-raise events can use the same room data channel while canonical records remain in Supabase.
-3. Egress supports a webhook-driven `requested → recording → processing → ready/failed` lifecycle.
-4. It avoids coupling ALS academic data and authorization to a conferencing vendor.
-5. Its free allowance is sufficient for a technical POC before ALS approves paid usage.
+## Media and permission model
 
-## Required POC acceptance tests
+- Teacher: microphone, 720p camera and screen share.
+- Normal student: receive only; camera is disabled and microphone publishing starts disabled.
+- Audio grant: teacher sets `audio_publish_allowed`; the student may then request and publish microphone audio. Revocation closes the audio track, not merely the UI control.
+- Presenter grant: teacher sets `presenter` and `screen_publish_allowed`; the student may publish a screen track. Revocation closes it.
+- PowerPoint, images, browser tabs and applications use `getDisplayMedia`. System/tab audio availability depends on browser and operating system.
+- Camera and screen are separate video tracks. Simulcast should be evaluated for camera; screen content needs legibility-focused constraints and may not benefit from the same layers.
 
-- Chrome, Edge, Safari and Android/iOS browser joins.
-- Teacher can mute/remove users and revoke publish/screen-share permission.
-- A student can be promoted to presenter, share PowerPoint via screen sharing, include tab/system audio, then be demoted.
-- Teacher and presentation media continue simultaneously.
-- 25-50 participant classroom network test in the intended region.
-- Recording includes teacher, participating students and shared screen; signed webhook updates the Supabase recording row.
-- Recordings remain unavailable until processing is `ready` and an authorized teacher/admin publishes the linked content.
-- Cost projection using ALS's expected classes, duration, participant count and recording retention.
+## Bandwidth and TURN
 
-## Sources
+Cloudflare charges SFU/TURN egress from the edge to clients; publisher-to-Cloudflare traffic is not billed. As of this decision the published price is $0.05/GB with a shared 1,000 GB monthly SFU/TURN free tier. A broadcast classroom therefore grows approximately with `sum(received track bitrate) × receiver count × duration`. TURN can be necessary behind restrictive NAT/firewalls; Cloudflare STUN is free, and traffic crossing TURN plus SFU is not double charged.
 
-- [LiveKit pricing and included WebRTC/recording usage](https://livekit.com/pricing)
-- [LiveKit screen sharing](https://docs.livekit.io/transport/media/screenshare/)
-- [LiveKit Egress recording](https://docs.livekit.io/transport/media/ingress-egress/egress/)
-- [Zoom Video SDK features and platforms](https://developers.zoom.us/docs/video-sdk/)
-- [Zoom session roles and moderation](https://developers.zoom.us/docs/video-sdk/web/sessions/)
-- [Zoom screen sharing](https://developers.zoom.us/docs/video-sdk/web/share/)
-- [Zoom cloud recording](https://developers.zoom.us/docs/video-sdk/web/recording/)
-- [Daily Video SDK pricing](https://www.daily.co/pricing/video-sdk/)
+## Browser compatibility and constraints
 
-## Implementation boundary
+Realtime uses standards-based WebRTC, so target validation is required on current Chrome, Edge, Safari and Android/iOS browsers. Screen capture requires a secure context and an explicit user gesture. Browser/OS combinations vary in application-window selection and captured audio. Autoplay policies can require a receiver interaction before audio plays.
 
-Provider credentials must remain server-side. The application must mint short-lived join tokens only after validating the Supabase session, role, batch eligibility and live-session record. Provider webhooks must be signature-verified before recording state changes.
+Important operational constraints currently documented by Cloudflare include 50 Realtime API calls per second per session, 64 tracks per API call, practical track counts constrained by bandwidth, and garbage collection after 30 seconds without media packets. Realtime is a programmable SFU and does not provide ALS with a finished classroom SDK.
+
+## Recording direction and risk
+
+The initial experiment uses teacher-side `MediaRecorder` with five-second chunks. A production version must compose the desired screen/camera/audio output, upload chunks using authenticated R2 multipart operations, persist each part, retry failed uploads, finalize only after integrity checks and retain recoverable partial chunks. Closing the teacher tab, device changes, lost screen capture and long sessions are material risks. Browser recording is not accepted for production until long-duration interruption tests prove recovery. Cloudflare's WebSocket video egress is currently low-frame-rate and is not a substitute for classroom recording.
+
+## POC acceptance gate
+
+The credential-gated `/live-poc/[sessionId]` route is isolated from normal Join Class. Acceptance requires one teacher and five real receiver sessions, stable camera/audio/screen tracks, enforceable student audio/presenter revocation, persistent Supabase chat/polls/attendance, authorized R2 attachment flow, recoverable chunked recording and measured WebRTC statistics. No unmeasured or local-only result counts as an SFU pass.
+
+## Official sources
+
+- [Cloudflare Realtime SFU overview](https://developers.cloudflare.com/realtime/sfu/)
+- [Sessions and tracks](https://developers.cloudflare.com/realtime/sfu/sessions-tracks/)
+- [Connection API](https://developers.cloudflare.com/realtime/sfu/https-api/)
+- [Realtime SFU limits](https://developers.cloudflare.com/realtime/sfu/limits/)
+- [Simulcast](https://developers.cloudflare.com/realtime/sfu/simulcast/)
+- [Realtime pricing](https://developers.cloudflare.com/realtime/sfu/pricing/)
+- [R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/)
+- [R2 uploads and multipart guidance](https://developers.cloudflare.com/r2/objects/upload-objects/)

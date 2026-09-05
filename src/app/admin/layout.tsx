@@ -1,2 +1,3 @@
 import { requireRole } from "@/lib/auth";
-export default async function AdminLayout({children}:{children:React.ReactNode}){await requireRole(["admin"]);return children}
+import { LogoutButton } from "@/components/shared/logout-button";
+export default async function AdminLayout({children}:{children:React.ReactNode}){await requireRole(["admin"]);return <><LogoutButton className="fixed right-20 top-3 z-50 hidden min-h-10 items-center gap-2 rounded border bg-white px-3 text-sm font-bold sm:flex"/>{children}</>}

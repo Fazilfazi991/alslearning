@@ -1,2 +1,2 @@
-import type{Metadata}from"next";import{LearningPlayer}from"@/components/learning/learning-player";
-export const metadata:Metadata={title:"Diagnostic Enzyme Markers"};export default function LessonPage(){return <LearningPlayer/>}
+import{notFound}from"next/navigation";import{BackendLearningPlayer}from"@/components/learning/backend-learning-player";import{getLearningContent}from"@/lib/student-data";
+export default async function LessonPage({params}:{params:Promise<{lessonId:string}>}){const{lessonId}=await params,data=await getLearningContent(lessonId);if(!data)notFound();return <BackendLearningPlayer data={data}/>}

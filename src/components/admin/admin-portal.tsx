@@ -40,6 +40,7 @@ import {
   teacherCourses,
 } from "@/lib/mock-data/teacher-portal";
 import { AcademicWorkspaceManager } from "./academic-workspace";
+import { AdminBackendManager } from "./admin-backend-manager";
 const panel = "rounded-lg border border-[#e6cbd5] bg-white";
 const input =
   "min-h-11 w-full rounded border border-[#d8b8c4] bg-white px-3 text-sm";
@@ -552,6 +553,7 @@ function DataView({
     </>
   );
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- retained for legacy detail routes
 function Students() {
   const rows: Row[] = adminStudents.map((s) => ({
     id: s.id,
@@ -598,6 +600,7 @@ function Students() {
     </>
   );
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- retained for legacy detail routes
 function Teachers() {
   const rows: Row[] = adminTeachers.map((t) => ({
     id: t.id,
@@ -639,6 +642,7 @@ function Teachers() {
     </>
   );
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- retained for legacy detail routes
 function Courses() {
   const rows: Row[] = teacherCourses.map((c) => ({
     id: c.id,
@@ -2148,15 +2152,15 @@ export function AdminPortal() {
       </AdminShell>
     );
   let page: React.ReactNode = <Dashboard />;
-  if (path === "/admin/students") page = <Students />;
+  if (path === "/admin/students") page = <AdminBackendManager mode="enrollments" />;
   else if (path === "/admin/students/new") page = <CreateForm kind="Student" />;
   else if (path.startsWith("/admin/students/"))
     page = <EntityDetail type="Student" />;
-  else if (path === "/admin/teachers") page = <Teachers />;
+  else if (path === "/admin/teachers") page = <AdminBackendManager mode="faculty" />;
   else if (path === "/admin/teachers/new") page = <CreateForm kind="Teacher" />;
   else if (path.startsWith("/admin/teachers/"))
     page = <EntityDetail type="Teacher" />;
-  else if (path === "/admin/courses") page = <Courses />;
+  else if (path === "/admin/courses") page = <AdminBackendManager mode="content" />;
   else if (path === "/admin/courses/new") page = <CreateForm kind="Course" />;
   else if (path.startsWith("/admin/courses/"))
     page = <EntityDetail type="Course" />;
@@ -2170,8 +2174,8 @@ export function AdminPortal() {
   else if (path === "/admin/question-bank") page = <QuestionBank />;
   else if (path === "/admin/academic") page = <AcademicWorkspaceManager />;
   else if (path === "/admin/questions") page = <AcademicWorkspaceManager section="questions" />;
-  else if (path === "/admin/tests") page = <AcademicWorkspaceManager section="tests" />;
-  else if (path === "/admin/live-learning") page = <AcademicWorkspaceManager section="live" />;
+  else if (path === "/admin/tests") page = <AdminBackendManager mode="tests" />;
+  else if (path === "/admin/live-learning") page = <AdminBackendManager mode="checkpoints" />;
   else if (path === "/admin/payments") page = <Payments />;
   else if (path === "/admin/payments/new") page = <PaymentForm />;
   else if (path.startsWith("/admin/payments/")) page = <PaymentDetail />;

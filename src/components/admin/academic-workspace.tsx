@@ -1,70 +1,1004 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Archive, ArrowDown, ArrowUp, CheckCircle2, Download, FileSpreadsheet, Plus, Search, Settings2, Trash2, Upload, X } from "lucide-react";
-import { questionTemplateCsv, validateQuestionCsv, type ImportRow } from "@/lib/academic-import";
-import { archiveAcademicEntity,deleteAcademicEntity,deleteQuestion,importQuestions,loadAcademicWorkspace,persistEntityOrder,saveAcademicEntity,saveQuestion } from "@/lib/academic-repository";
-import type { AcademicEntity, AcademicEntityKind, AcademicQuestion, AcademicWorkspace, QuestionSource, QuestionType, RecordStatus } from "@/types/academic";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Archive,
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  Download,
+  FileSpreadsheet,
+  Plus,
+  Search,
+  Settings2,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
+import {
+  questionTemplateCsv,
+  validateQuestionCsv,
+  type ImportRow,
+} from "@/lib/academic-import";
+import {
+  archiveAcademicEntity,
+  deleteAcademicEntity,
+  deleteQuestion,
+  importQuestions,
+  loadAcademicWorkspace,
+  loadQuestionPage,
+  persistEntityOrder,
+  saveAcademicEntity,
+  saveQuestion,
+} from "@/lib/academic-repository";
+import type {
+  AcademicEntity,
+  AcademicEntityKind,
+  AcademicQuestion,
+  AcademicWorkspace,
+  QuestionSource,
+  QuestionType,
+  RecordStatus,
+} from "@/types/academic";
 
-const panel="rounded-lg border border-[#e6cbd5] bg-white";
-const input="min-h-11 w-full rounded border border-[#d8b8c4] bg-white px-3 text-sm";
-const primary="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-brand px-4 text-sm font-bold text-white hover:bg-brand-dark";
-const secondary="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-[#d8b8c4] bg-white px-4 text-sm font-bold text-deep-blue hover:border-brand";
-const kinds: {kind:AcademicEntityKind;label:string}[]=[
-  {kind:"exam",label:"Entrance Exams"},{kind:"program",label:"Programs"},{kind:"subject",label:"Subjects"},{kind:"chapter",label:"Chapters"},{kind:"topic",label:"Topics"},{kind:"batch",label:"Batches"},{kind:"video",label:"Videos"},{kind:"material",label:"Materials"},
+const panel = "rounded-lg border border-[#e6cbd5] bg-white";
+const input =
+  "min-h-11 w-full rounded border border-[#d8b8c4] bg-white px-3 text-sm";
+const primary =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded bg-brand px-4 text-sm font-bold text-white hover:bg-brand-dark";
+const secondary =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded border border-[#d8b8c4] bg-white px-4 text-sm font-bold text-deep-blue hover:border-brand";
+const kinds: { kind: AcademicEntityKind; label: string }[] = [
+  { kind: "exam", label: "Entrance Exams" },
+  { kind: "program", label: "Programs" },
+  { kind: "subject", label: "Subjects" },
+  { kind: "chapter", label: "Chapters" },
+  { kind: "topic", label: "Topics" },
+  { kind: "batch", label: "Batches" },
+  { kind: "video", label: "Videos" },
+  { kind: "material", label: "Materials" },
 ];
-const slugify=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
-export function AcademicWorkspaceManager({section="structure"}:{section?:"structure"|"questions"|"tests"|"live"}) {
-  const [workspace,setWorkspace]=useState<AcademicWorkspace>({entities:[],questions:[]});
-  const [loading,setLoading]=useState(true),[connectionError,setConnectionError]=useState("");
-  useEffect(()=>{let active=true;void loadAcademicWorkspace().then(data=>{if(active)setWorkspace(data)}).catch(error=>{if(active)setConnectionError(error instanceof Error?error.message:"Could not load academic data.")}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[]);
-  const update=(fn:(current:AcademicWorkspace)=>AcademicWorkspace)=>setWorkspace(current=>fn(current));
-  return <>
-    <header className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-brand">Academic infrastructure</p><h1 className="mt-2 text-2xl font-bold sm:text-3xl">{section==="questions"?"Question Bank":section==="tests"?"Tests & Assessment Rules":section==="live"?"Live & Recorded Classes":"Programs & Syllabus"}</h1><p className="mt-2 max-w-3xl text-sm text-muted">Configurable entrance-exam content backed by Supabase and database authorization policies.</p></div><span className="rounded-full bg-green-50 px-3 py-2 text-xs font-bold text-green-800">Supabase connected</span></header>
-    {loading&&<p className={`${panel} p-6 text-sm text-muted`}>Loading academic data…</p>}
-    {connectionError&&<p role="alert" className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-800">Backend error: {connectionError}</p>}
-    {!loading&&section==="structure"&&<Structure workspace={workspace} update={update}/>}
-    {section==="questions"&&<Questions workspace={workspace} update={update}/>} 
-    {section==="tests"&&<Tests/>}
-    {section==="live"&&<LiveArchitecture/>}
-  </>;
+export function AcademicWorkspaceManager({
+  section = "structure",
+}: {
+  section?: "structure" | "questions" | "tests" | "live";
+}) {
+  const [workspace, setWorkspace] = useState<AcademicWorkspace>({
+    entities: [],
+    questions: [],
+  });
+  const [loading, setLoading] = useState(true),
+    [connectionError, setConnectionError] = useState("");
+  useEffect(() => {
+    let active = true;
+    void loadAcademicWorkspace()
+      .then((data) => {
+        if (active) setWorkspace(data);
+      })
+      .catch((error) => {
+        if (active)
+          setConnectionError(
+            error instanceof Error
+              ? error.message
+              : "Could not load academic data.",
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  const update = useCallback((fn: (current: AcademicWorkspace) => AcademicWorkspace) =>
+    setWorkspace((current) => fn(current)),[]);
+  return (
+    <>
+      <header className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[.14em] text-brand">
+            Academic infrastructure
+          </p>
+          <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
+            {section === "questions"
+              ? "Question Bank"
+              : section === "tests"
+                ? "Tests & Assessment Rules"
+                : section === "live"
+                  ? "Live & Recorded Classes"
+                  : "Programs & Syllabus"}
+          </h1>
+          <p className="mt-2 max-w-3xl text-sm text-muted">
+            Configurable entrance-exam content backed by Supabase and database
+            authorization policies.
+          </p>
+        </div>
+        <span className="rounded-full bg-green-50 px-3 py-2 text-xs font-bold text-green-800">
+          Supabase connected
+        </span>
+      </header>
+      {loading && (
+        <p className={`${panel} p-6 text-sm text-muted`}>
+          Loading academic data…
+        </p>
+      )}
+      {connectionError && (
+        <p
+          role="alert"
+          className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-800"
+        >
+          Backend error: {connectionError}
+        </p>
+      )}
+      {!loading && section === "structure" && (
+        <Structure workspace={workspace} update={update} />
+      )}
+      {section === "questions" && (
+        <Questions workspace={workspace} update={update} />
+      )}
+      {section === "tests" && <Tests />}
+      {section === "live" && <LiveArchitecture />}
+    </>
+  );
 }
 
-function Structure({workspace,update}:{workspace:AcademicWorkspace;update:(fn:(x:AcademicWorkspace)=>AcademicWorkspace)=>void}){
-  const[kind,setKind]=useState<AcademicEntityKind>("program"),[search,setSearch]=useState(""),[editing,setEditing]=useState<AcademicEntity|null>(null);
-  const list=useMemo(()=>workspace.entities.filter(x=>x.kind===kind&&(`${x.name} ${x.slug}`).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.order-b.order),[workspace,kind,search]);
-  const archive=async(id:string)=>{const item=workspace.entities.find(x=>x.id===id);if(!item)return;await archiveAcademicEntity(item);update(x=>({...x,entities:x.entities.map(value=>value.id===id?{...value,status:value.status==="Archived"?"Active":"Archived"}:value)}))};
-  const remove=async(id:string)=>{const item=workspace.entities.find(x=>x.id===id);if(!item)return;await deleteAcademicEntity(item);update(x=>({...x,entities:x.entities.filter(value=>value.id!==id&&value.parentId!==id)}))};
-  const move=async(id:string,direction:-1|1)=>{const same=workspace.entities.filter(i=>i.kind===kind).sort((a,b)=>a.order-b.order),index=same.findIndex(i=>i.id===id),other=same[index+direction];if(!other)return;const changed=workspace.entities.map(i=>i.id===id?{...i,order:other.order}:i.id===other.id?{...i,order:same[index].order}:i);await persistEntityOrder(changed.filter(x=>x.kind===kind));update(x=>({...x,entities:changed}))};
-  return <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-    <nav className={`${panel} h-fit p-2`} aria-label="Academic content sections">{kinds.map(x=><button key={x.kind} onClick={()=>setKind(x.kind)} className={`flex min-h-11 w-full items-center justify-between rounded px-3 text-left text-sm font-bold ${kind===x.kind?"bg-brand/10 text-brand":"hover:bg-slate-50"}`}><span>{x.label}</span><span className="text-xs">{workspace.entities.filter(i=>i.kind===x.kind).length}</span></button>)}</nav>
-    <section className={`${panel} min-w-0 p-4 sm:p-6`}><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><label className="relative block flex-1"><Search className="absolute left-3 top-3 text-muted" size={17}/><span className="sr-only">Search</span><input value={search} onChange={e=>setSearch(e.target.value)} className={`${input} pl-10`} placeholder={`Search ${kinds.find(x=>x.kind===kind)?.label.toLowerCase()}…`}/></label><button className={primary} onClick={()=>setEditing({id:crypto.randomUUID(),kind,name:"",slug:"",status:"Draft",order:workspace.entities.filter(x=>x.kind===kind).length+1})}><Plus size={17}/>Add {kind}</button></div>
-      <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead className="border-b border-line text-xs uppercase tracking-wide text-muted"><tr><th className="p-3">Order</th><th className="p-3">Name</th><th className="p-3">Association</th><th className="p-3">Status</th><th className="p-3 text-right">Actions</th></tr></thead><tbody>{list.map(item=><tr key={item.id} className="border-b border-line last:border-0"><td className="p-3"><div className="flex"><button aria-label="Move up" onClick={()=>move(item.id,-1)} className="p-2"><ArrowUp size={15}/></button><button aria-label="Move down" onClick={()=>move(item.id,1)} className="p-2"><ArrowDown size={15}/></button></div></td><td className="p-3"><button className="font-bold text-deep-blue hover:text-brand" onClick={()=>setEditing(item)}>{item.name}</button><p className="text-xs text-muted">/{item.slug}</p></td><td className="p-3 text-muted">{workspace.entities.find(x=>x.id===item.parentId)?.name||"—"}</td><td className="p-3"><Status value={item.status}/></td><td className="p-3"><div className="flex justify-end"><button title="Archive" onClick={()=>archive(item.id)} className="p-2"><Archive size={17}/></button><button title="Delete draft" disabled={item.status!=="Draft"} onClick={()=>remove(item.id)} className="p-2 text-red-700 disabled:opacity-25"><Trash2 size={17}/></button></div></td></tr>)}</tbody></table>{!list.length&&<Empty text={`No ${kind}s match this view.`}/>}</div>
-    </section>{editing&&<EntityDialog entity={editing} choices={workspace.entities.filter(x=>x.id!==editing.id)} onClose={()=>setEditing(null)} onSave={async entity=>{await saveAcademicEntity(entity,workspace.entities);update(x=>({...x,entities:[...x.entities.filter(i=>i.id!==entity.id),entity]}));setEditing(null)}}/>}</div>
+function Structure({
+  workspace,
+  update,
+}: {
+  workspace: AcademicWorkspace;
+  update: (fn: (x: AcademicWorkspace) => AcademicWorkspace) => void;
+}) {
+  const [kind, setKind] = useState<AcademicEntityKind>("program"),
+    [search, setSearch] = useState(""),
+    [editing, setEditing] = useState<AcademicEntity | null>(null);
+  const list = useMemo(
+    () =>
+      workspace.entities
+        .filter(
+          (x) =>
+            x.kind === kind &&
+            `${x.name} ${x.slug}`.toLowerCase().includes(search.toLowerCase()),
+        )
+        .sort((a, b) => a.order - b.order),
+    [workspace, kind, search],
+  );
+  const archive = async (id: string) => {
+    const item = workspace.entities.find((x) => x.id === id);
+    if (!item) return;
+    await archiveAcademicEntity(item);
+    update((x) => ({
+      ...x,
+      entities: x.entities.map((value) =>
+        value.id === id
+          ? {
+              ...value,
+              status: value.status === "Archived" ? "Active" : "Archived",
+            }
+          : value,
+      ),
+    }));
+  };
+  const remove = async (id: string) => {
+    const item = workspace.entities.find((x) => x.id === id);
+    if (!item) return;
+    await deleteAcademicEntity(item);
+    update((x) => ({
+      ...x,
+      entities: x.entities.filter(
+        (value) => value.id !== id && value.parentId !== id,
+      ),
+    }));
+  };
+  const move = async (id: string, direction: -1 | 1) => {
+    const same = workspace.entities
+        .filter((i) => i.kind === kind)
+        .sort((a, b) => a.order - b.order),
+      index = same.findIndex((i) => i.id === id),
+      other = same[index + direction];
+    if (!other) return;
+    const changed = workspace.entities.map((i) =>
+      i.id === id
+        ? { ...i, order: other.order }
+        : i.id === other.id
+          ? { ...i, order: same[index].order }
+          : i,
+    );
+    await persistEntityOrder(changed.filter((x) => x.kind === kind));
+    update((x) => ({ ...x, entities: changed }));
+  };
+  return (
+    <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
+      <nav
+        className={`${panel} h-fit p-2`}
+        aria-label="Academic content sections"
+      >
+        {kinds.map((x) => (
+          <button
+            key={x.kind}
+            onClick={() => setKind(x.kind)}
+            className={`flex min-h-11 w-full items-center justify-between rounded px-3 text-left text-sm font-bold ${kind === x.kind ? "bg-brand/10 text-brand" : "hover:bg-slate-50"}`}
+          >
+            <span>{x.label}</span>
+            <span className="text-xs">
+              {workspace.entities.filter((i) => i.kind === x.kind).length}
+            </span>
+          </button>
+        ))}
+      </nav>
+      <section className={`${panel} min-w-0 p-4 sm:p-6`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <label className="relative block flex-1">
+            <Search className="absolute left-3 top-3 text-muted" size={17} />
+            <span className="sr-only">Search</span>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`${input} pl-10`}
+              placeholder={`Search ${kinds.find((x) => x.kind === kind)?.label.toLowerCase()}…`}
+            />
+          </label>
+          <button
+            className={primary}
+            onClick={() =>
+              setEditing({
+                id: crypto.randomUUID(),
+                kind,
+                name: "",
+                slug: "",
+                status: "Draft",
+                order:
+                  workspace.entities.filter((x) => x.kind === kind).length + 1,
+              })
+            }
+          >
+            <Plus size={17} />
+            Add {kind}
+          </button>
+        </div>
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full min-w-[680px] text-left text-sm">
+            <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
+              <tr>
+                <th className="p-3">Order</th>
+                <th className="p-3">Name</th>
+                <th className="p-3">Association</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((item) => (
+                <tr
+                  key={item.id}
+                  className="border-b border-line last:border-0"
+                >
+                  <td className="p-3">
+                    <div className="flex">
+                      <button
+                        aria-label="Move up"
+                        onClick={() => move(item.id, -1)}
+                        className="p-2"
+                      >
+                        <ArrowUp size={15} />
+                      </button>
+                      <button
+                        aria-label="Move down"
+                        onClick={() => move(item.id, 1)}
+                        className="p-2"
+                      >
+                        <ArrowDown size={15} />
+                      </button>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <button
+                      className="font-bold text-deep-blue hover:text-brand"
+                      onClick={() => setEditing(item)}
+                    >
+                      {item.name}
+                    </button>
+                    <p className="text-xs text-muted">/{item.slug}</p>
+                  </td>
+                  <td className="p-3 text-muted">
+                    {workspace.entities.find((x) => x.id === item.parentId)
+                      ?.name || "—"}
+                  </td>
+                  <td className="p-3">
+                    <Status value={item.status} />
+                  </td>
+                  <td className="p-3">
+                    <div className="flex justify-end">
+                      <button
+                        title="Archive"
+                        onClick={() => archive(item.id)}
+                        className="p-2"
+                      >
+                        <Archive size={17} />
+                      </button>
+                      <button
+                        title="Delete draft"
+                        disabled={item.status !== "Draft"}
+                        onClick={() => remove(item.id)}
+                        className="p-2 text-red-700 disabled:opacity-25"
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!list.length && <Empty text={`No ${kind}s match this view.`} />}
+        </div>
+      </section>
+      {editing && (
+        <EntityDialog
+          entity={editing}
+          choices={workspace.entities.filter((x) => x.id !== editing.id)}
+          onClose={() => setEditing(null)}
+          onSave={async (entity) => {
+            await saveAcademicEntity(entity, workspace.entities);
+            update((x) => ({
+              ...x,
+              entities: [
+                ...x.entities.filter((i) => i.id !== entity.id),
+                entity,
+              ],
+            }));
+            setEditing(null);
+          }}
+        />
+      )}
+    </div>
+  );
 }
 
-function EntityDialog({entity,choices,onClose,onSave}:{entity:AcademicEntity;choices:AcademicEntity[];onClose:()=>void;onSave:(x:AcademicEntity)=>Promise<void>}){
-  const[draft,setDraft]=useState(entity);const parentKinds:Partial<Record<AcademicEntityKind,AcademicEntityKind[]>>={program:["exam"],chapter:["subject"],topic:["subject","chapter"],batch:["program"],video:["program","subject","chapter","topic"],material:["program","subject","chapter","topic","video"]};const parents=choices.filter(x=>(parentKinds[draft.kind]||[]).includes(x.kind));
-  return <div className="fixed inset-0 z-60 grid place-items-center overflow-y-auto bg-black/45 p-4"><form onSubmit={e=>{e.preventDefault();onSave({...draft,slug:draft.slug||slugify(draft.name)})}} className={`${panel} w-full max-w-xl p-6`}><div className="flex items-center justify-between"><h2 className="text-xl font-bold">{entity.name?"Edit":"Add"} {entity.kind}</h2><button type="button" onClick={onClose} className="p-2"><X/></button></div><div className="mt-5 grid gap-4 sm:grid-cols-2"><Field label="Name"><input required className={input} value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value,slug:entity.slug?draft.slug:slugify(e.target.value)})}/></Field><Field label="Stable slug"><input required pattern="[a-z0-9-]+" className={input} value={draft.slug} onChange={e=>setDraft({...draft,slug:slugify(e.target.value)})}/></Field>{parents.length>0&&<Field label="Parent / association"><select className={input} value={draft.parentId||""} onChange={e=>setDraft({...draft,parentId:e.target.value||undefined})}><option value="">No parent</option>{parents.map(x=><option key={x.id} value={x.id}>{x.kind}: {x.name}</option>)}</select></Field>}<Field label="Status"><select className={input} value={draft.status} onChange={e=>setDraft({...draft,status:e.target.value as RecordStatus})}><option>Draft</option><option>Active</option><option>Archived</option></select></Field><div className="sm:col-span-2"><Field label="Description"><textarea className={`${input} min-h-24 py-3`} value={draft.description||""} onChange={e=>setDraft({...draft,description:e.target.value})}/></Field></div></div><div className="mt-6 flex justify-end gap-2"><button type="button" className={secondary} onClick={onClose}>Cancel</button><button className={primary}>Save draft</button></div></form></div>
+function EntityDialog({
+  entity,
+  choices,
+  onClose,
+  onSave,
+}: {
+  entity: AcademicEntity;
+  choices: AcademicEntity[];
+  onClose: () => void;
+  onSave: (x: AcademicEntity) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState(entity);
+  const parentKinds: Partial<Record<AcademicEntityKind, AcademicEntityKind[]>> =
+    {
+      program: ["exam"],
+      chapter: ["subject"],
+      topic: ["subject", "chapter"],
+      batch: ["program"],
+      video: ["program", "subject", "chapter", "topic"],
+      material: ["program", "subject", "chapter", "topic", "video"],
+    };
+  const parents = choices.filter((x) =>
+    (parentKinds[draft.kind] || []).includes(x.kind),
+  );
+  return (
+    <div className="fixed inset-0 z-60 grid place-items-center overflow-y-auto bg-black/45 p-4">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSave({ ...draft, slug: draft.slug || slugify(draft.name) });
+        }}
+        className={`${panel} w-full max-w-xl p-6`}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold">
+            {entity.name ? "Edit" : "Add"} {entity.kind}
+          </h2>
+          <button type="button" onClick={onClose} className="p-2">
+            <X />
+          </button>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field label="Name">
+            <input
+              required
+              className={input}
+              value={draft.name}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  name: e.target.value,
+                  slug: entity.slug ? draft.slug : slugify(e.target.value),
+                })
+              }
+            />
+          </Field>
+          <Field label="Stable slug">
+            <input
+              required
+              pattern="[a-z0-9-]+"
+              className={input}
+              value={draft.slug}
+              onChange={(e) =>
+                setDraft({ ...draft, slug: slugify(e.target.value) })
+              }
+            />
+          </Field>
+          {parents.length > 0 && (
+            <Field label="Parent / association">
+              <select
+                className={input}
+                value={draft.parentId || ""}
+                onChange={(e) =>
+                  setDraft({ ...draft, parentId: e.target.value || undefined })
+                }
+              >
+                <option value="">No parent</option>
+                {parents.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.kind}: {x.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
+          <Field label="Status">
+            <select
+              className={input}
+              value={draft.status}
+              onChange={(e) =>
+                setDraft({ ...draft, status: e.target.value as RecordStatus })
+              }
+            >
+              <option>Draft</option>
+              <option>Active</option>
+              <option>Archived</option>
+            </select>
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label="Description">
+              <textarea
+                className={`${input} min-h-24 py-3`}
+                value={draft.description || ""}
+                onChange={(e) =>
+                  setDraft({ ...draft, description: e.target.value })
+                }
+              />
+            </Field>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" className={secondary} onClick={onClose}>
+            Cancel
+          </button>
+          <button className={primary}>Save draft</button>
+        </div>
+      </form>
+    </div>
+  );
 }
 
-function Questions({workspace,update}:{workspace:AcademicWorkspace;update:(fn:(x:AcademicWorkspace)=>AcademicWorkspace)=>void}){
-  const[search,setSearch]=useState(""),[source,setSource]=useState("All"),[editor,setEditor]=useState(false),[importRows,setImportRows]=useState<ImportRow[]|null>(null);
-  const list=workspace.questions.filter(q=>(source==="All"||q.sourceType===source)&&(`${q.question} ${q.subject} ${q.topic||""}`).toLowerCase().includes(search.toLowerCase()));
-  const download=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([questionTemplateCsv()],{type:"text/csv"}));a.download="als-question-import-template.csv";a.click();URL.revokeObjectURL(a.href)};
-  const read=(file:File)=>file.text().then(text=>setImportRows(validateQuestionCsv(text).map(row=>{if(!row.valid||!row.value)return row;const errors:string[]=[];if(!workspace.entities.some(x=>x.kind==="exam"&&x.name===row.value?.exam))errors.push("exam does not match an existing entrance exam");if(!workspace.entities.some(x=>x.kind==="subject"&&x.name===row.value?.subject))errors.push("subject does not match an existing subject");if(row.value.chapter&&!workspace.entities.some(x=>x.kind==="chapter"&&x.name===row.value?.chapter))errors.push("chapter does not match an existing chapter");if(row.value.topic&&!workspace.entities.some(x=>x.kind==="topic"&&x.name===row.value?.topic))errors.push("topic does not match an existing topic");return errors.length?{...row,valid:false,errors,value:undefined}:row})));
-  const commit=async()=>{const valid=(importRows||[]).flatMap(r=>r.valid&&r.value?[r.value]:[]);await importQuestions(valid,workspace.entities);update(x=>({...x,questions:[...x.questions,...valid]}));setImportRows(null)};
-  return <section className={`${panel} p-4 sm:p-6`}><div className="flex flex-wrap gap-2"><button className={primary} onClick={()=>setEditor(true)}><Plus size={17}/>Add question</button><label className={`${secondary} cursor-pointer`}><Upload size={17}/>Validate CSV<input type="file" accept=".csv,text/csv" className="sr-only" onChange={e=>e.target.files?.[0]&&read(e.target.files[0])}/></label><button className={secondary} onClick={download}><Download size={17}/>Template</button></div><div className="mt-5 grid gap-3 sm:grid-cols-[1fr_200px]"><label className="relative"><Search className="absolute left-3 top-3 text-muted" size={17}/><input className={`${input} pl-10`} value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search question, subject or topic…"/></label><select className={input} value={source} onChange={e=>setSource(e.target.value)}><option>All</option><option>Standard</option><option>Previous exam</option><option>Recalled</option></select></div><div className="mt-5 space-y-3">{list.map(q=><article key={q.id} className="rounded-lg border border-line p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex flex-wrap gap-2 text-xs"><Status value={q.status}/><span className="rounded-full bg-slate-100 px-2 py-1 font-bold">{q.type}</span><span className="rounded-full bg-blue-50 px-2 py-1 font-bold text-deep-blue">{q.sourceType}</span></div><h3 className="mt-3 font-bold">{q.question}</h3><p className="mt-2 text-xs text-muted">{q.exam} · {q.subject}{q.topic?` · ${q.topic}`:""} · {q.marks} mark(s) / −{q.negativeMarks}</p></div><button onClick={()=>void deleteQuestion(q.id).then(()=>update(x=>({...x,questions:x.questions.filter(i=>i.id!==q.id)})))} aria-label="Delete question" className="p-2 text-red-700"><Trash2 size={17}/></button></div></article>)}{!list.length&&<Empty text="No questions have been added for this taxonomy yet."/>}</div>{editor&&<QuestionDialog onClose={()=>setEditor(false)} onSave={q=>{void saveQuestion(q,workspace.entities).then(()=>{update(x=>({...x,questions:[...x.questions,q]}));setEditor(false)})}}/>}{importRows&&<ImportReview rows={importRows} close={()=>setImportRows(null)} commit={()=>void commit()}/>}</section>
+function Questions({
+  workspace,
+  update,
+}: {
+  workspace: AcademicWorkspace;
+  update: (fn: (x: AcademicWorkspace) => AcademicWorkspace) => void;
+}) {
+  const [search, setSearch] = useState(""),
+    [source, setSource] = useState("All"),
+    [type, setType] = useState("All"),
+    [subjectId, setSubjectId] = useState(""),
+    [page, setPage] = useState(0),
+    [total, setTotal] = useState(0),
+    [editor, setEditor] = useState(false),
+    [importRows, setImportRows] = useState<ImportRow[] | null>(null);
+  const list = workspace.questions;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadQuestionPage(
+        workspace.entities,
+        page,
+        search,
+        source,
+        type,
+        subjectId,
+      ).then((result) => {
+        setTotal(result.count);
+        update((x) => ({ ...x, questions: result.questions }));
+      });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [page, search, source, type, subjectId, workspace.entities, update]);
+  const download = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(
+      new Blob([questionTemplateCsv()], { type: "text/csv" }),
+    );
+    a.download = "als-question-import-template.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  const read = (file: File) =>
+    file.text().then((text) =>
+      setImportRows(
+        validateQuestionCsv(text).map((row) => {
+          if (!row.valid || !row.value) return row;
+          const errors: string[] = [];
+          if (
+            !workspace.entities.some(
+              (x) => x.kind === "exam" && x.name === row.value?.exam,
+            )
+          )
+            errors.push("exam does not match an existing entrance exam");
+          if (
+            !workspace.entities.some(
+              (x) => x.kind === "subject" && x.name === row.value?.subject,
+            )
+          )
+            errors.push("subject does not match an existing subject");
+          if (
+            row.value.chapter &&
+            !workspace.entities.some(
+              (x) => x.kind === "chapter" && x.name === row.value?.chapter,
+            )
+          )
+            errors.push("chapter does not match an existing chapter");
+          if (
+            row.value.topic &&
+            !workspace.entities.some(
+              (x) => x.kind === "topic" && x.name === row.value?.topic,
+            )
+          )
+            errors.push("topic does not match an existing topic");
+          return errors.length
+            ? { ...row, valid: false, errors, value: undefined }
+            : row;
+        }),
+      ),
+    );
+  const commit = async () => {
+    const valid = (importRows || []).flatMap((r) =>
+      r.valid && r.value ? [r.value] : [],
+    );
+    await importQuestions(valid, workspace.entities);
+    update((x) => ({ ...x, questions: [...x.questions, ...valid] }));
+    setImportRows(null);
+  };
+  return (
+    <section className={`${panel} p-4 sm:p-6`}>
+      <div className="flex flex-wrap gap-2">
+        <button className={primary} onClick={() => setEditor(true)}>
+          <Plus size={17} />
+          Add question
+        </button>
+        <label className={`${secondary} cursor-pointer`}>
+          <Upload size={17} />
+          Validate CSV
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            className="sr-only"
+            onChange={(e) => e.target.files?.[0] && read(e.target.files[0])}
+          />
+        </label>
+        <button className={secondary} onClick={download}>
+          <Download size={17} />
+          Template
+        </button>
+      </div>
+      <div className="mt-5 grid gap-3 lg:grid-cols-4">
+        <label className="relative">
+          <Search className="absolute left-3 top-3 text-muted" size={17} />
+          <input
+            className={`${input} pl-10`}
+            value={search}
+            onChange={(e) => {setPage(0);setSearch(e.target.value)}}
+            placeholder="Search question text…"
+          />
+        </label>
+        <select
+          className={input}
+          value={source}
+          onChange={(e) => {setPage(0);setSource(e.target.value)}}
+        >
+          <option>All</option>
+          <option>Standard</option>
+          <option>Previous exam</option>
+          <option>Recalled</option>
+        </select>
+        <select className={input} value={type} onChange={(e)=>{setPage(0);setType(e.target.value)}} aria-label="Question type filter">
+          <option>All</option><option>Single-answer MCQ</option><option>Multiple-answer MCQ</option><option>True / False</option><option>Image-based MCQ</option><option>Case-based</option><option>Match-the-following</option>
+        </select>
+        <select className={input} value={subjectId} onChange={(e)=>{setPage(0);setSubjectId(e.target.value)}} aria-label="Subject filter"><option value="">All subjects</option>{workspace.entities.filter(x=>x.kind==="subject").map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select>
+      </div>
+      <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm"><span>{total?`${page*25+1}–${Math.min((page+1)*25,total)} of ${total}`:"0 questions"}</span><div className="flex gap-2"><button className={secondary} disabled={page===0} onClick={()=>setPage(x=>x-1)}>Previous</button><button className={secondary} disabled={(page+1)*25>=total} onClick={()=>setPage(x=>x+1)}>Next</button></div></div>
+      <div className="mt-5 space-y-3">
+        {list.map((q) => (
+          <article key={q.id} className="rounded-lg border border-line p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Status value={q.status} />
+                  <span className="rounded-full bg-slate-100 px-2 py-1 font-bold">
+                    {q.type}
+                  </span>
+                  <span className="rounded-full bg-blue-50 px-2 py-1 font-bold text-deep-blue">
+                    {q.sourceType}
+                  </span>
+                </div>
+                <h3 className="mt-3 font-bold">{q.question}</h3>
+                <p className="mt-2 text-xs text-muted">
+                  {q.exam} · {q.subject}
+                  {q.topic ? ` · ${q.topic}` : ""} · {q.marks} mark(s) / −
+                  {q.negativeMarks}
+                </p>
+              </div>
+              <button
+                onClick={() =>
+                  void deleteQuestion(q.id).then(() =>
+                    update((x) => ({
+                      ...x,
+                      questions: x.questions.filter((i) => i.id !== q.id),
+                    })),
+                  )
+                }
+                aria-label="Delete question"
+                className="p-2 text-red-700"
+              >
+                <Trash2 size={17} />
+              </button>
+            </div>
+          </article>
+        ))}
+        {!list.length && (
+          <Empty text="No questions have been added for this taxonomy yet." />
+        )}
+      </div>
+      {editor && (
+        <QuestionDialog
+          onClose={() => setEditor(false)}
+          onSave={(q) => {
+            void saveQuestion(q, workspace.entities).then(() => {
+              update((x) => ({ ...x, questions: [...x.questions, q] }));
+              setEditor(false);
+            });
+          }}
+        />
+      )}
+      {importRows && (
+        <ImportReview
+          rows={importRows}
+          close={() => setImportRows(null)}
+          commit={() => void commit()}
+        />
+      )}
+    </section>
+  );
 }
 
-function QuestionDialog({onClose,onSave}:{onClose:()=>void;onSave:(q:AcademicQuestion)=>void}){const[q,setQ]=useState({question:"",exam:"",subject:"",type:"Single-answer MCQ" as QuestionType,sourceType:"Standard" as QuestionSource,options:["","","",""],correct:"0",explanation:"",difficulty:"Medium" as const,marks:1,negativeMarks:0});return <div className="fixed inset-0 z-60 overflow-y-auto bg-black/45 p-4"><form onSubmit={e=>{e.preventDefault();onSave({id:crypto.randomUUID(),question:q.question,exam:q.exam,subject:q.subject,type:q.type,sourceType:q.sourceType,options:q.options.filter(Boolean),correctAnswers:[q.options[Number(q.correct)]],explanation:q.explanation,difficulty:q.difficulty,marks:q.marks,negativeMarks:q.negativeMarks,status:"Draft"})}} className={`${panel} mx-auto my-8 max-w-2xl p-6`}><div className="flex justify-between"><h2 className="text-xl font-bold">Add question</h2><button type="button" onClick={onClose}><X/></button></div><div className="mt-5 grid gap-4 sm:grid-cols-2"><Field label="Exam"><input required className={input} value={q.exam} onChange={e=>setQ({...q,exam:e.target.value})}/></Field><Field label="Subject"><input required className={input} value={q.subject} onChange={e=>setQ({...q,subject:e.target.value})}/></Field><Field label="Question type"><select className={input} value={q.type} onChange={e=>setQ({...q,type:e.target.value as QuestionType})}>{["Single-answer MCQ","Multiple-answer MCQ","True / False","Image-based MCQ","Case-based","Match-the-following"].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Source"><select className={input} value={q.sourceType} onChange={e=>setQ({...q,sourceType:e.target.value as QuestionSource})}><option>Standard</option><option>Previous exam</option><option>Recalled</option></select></Field><div className="sm:col-span-2"><Field label="Question"><textarea required className={`${input} min-h-24 py-3`} value={q.question} onChange={e=>setQ({...q,question:e.target.value})}/></Field></div>{q.options.map((value,i)=><Field key={i} label={`Option ${String.fromCharCode(65+i)}`}><div className="flex gap-2"><input className={input} value={value} onChange={e=>{const options=[...q.options];options[i]=e.target.value;setQ({...q,options})}}/><input type="radio" name="correct" value={i} checked={q.correct===String(i)} onChange={e=>setQ({...q,correct:e.target.value})} aria-label={`Mark option ${i+1} correct`}/></div></Field>)}<div className="sm:col-span-2"><Field label="Explanation"><textarea className={`${input} min-h-20 py-3`} value={q.explanation} onChange={e=>setQ({...q,explanation:e.target.value})}/></Field></div></div><div className="mt-6 flex justify-end gap-2"><button type="button" className={secondary} onClick={onClose}>Cancel</button><button className={primary}>Save question</button></div></form></div>}
+function QuestionDialog({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave: (q: AcademicQuestion) => void;
+}) {
+  const [q, setQ] = useState({
+    question: "",
+    exam: "",
+    subject: "",
+    type: "Single-answer MCQ" as QuestionType,
+    sourceType: "Standard" as QuestionSource,
+    options: ["", "", "", ""],
+    correct: "0",
+    explanation: "",
+    difficulty: "Medium" as const,
+    marks: 1,
+    negativeMarks: 0,
+  });
+  return (
+    <div className="fixed inset-0 z-60 overflow-y-auto bg-black/45 p-4">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSave({
+            id: crypto.randomUUID(),
+            question: q.question,
+            exam: q.exam,
+            subject: q.subject,
+            type: q.type,
+            sourceType: q.sourceType,
+            options: q.options.filter(Boolean),
+            correctAnswers: [q.options[Number(q.correct)]],
+            explanation: q.explanation,
+            difficulty: q.difficulty,
+            marks: q.marks,
+            negativeMarks: q.negativeMarks,
+            status: "Draft",
+          });
+        }}
+        className={`${panel} mx-auto my-8 max-w-2xl p-6`}
+      >
+        <div className="flex justify-between">
+          <h2 className="text-xl font-bold">Add question</h2>
+          <button type="button" onClick={onClose}>
+            <X />
+          </button>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field label="Exam">
+            <input
+              required
+              className={input}
+              value={q.exam}
+              onChange={(e) => setQ({ ...q, exam: e.target.value })}
+            />
+          </Field>
+          <Field label="Subject">
+            <input
+              required
+              className={input}
+              value={q.subject}
+              onChange={(e) => setQ({ ...q, subject: e.target.value })}
+            />
+          </Field>
+          <Field label="Question type">
+            <select
+              className={input}
+              value={q.type}
+              onChange={(e) =>
+                setQ({ ...q, type: e.target.value as QuestionType })
+              }
+            >
+              {[
+                "Single-answer MCQ",
+                "Multiple-answer MCQ",
+                "True / False",
+                "Image-based MCQ",
+                "Case-based",
+                "Match-the-following",
+              ].map((x) => (
+                <option key={x}>{x}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Source">
+            <select
+              className={input}
+              value={q.sourceType}
+              onChange={(e) =>
+                setQ({ ...q, sourceType: e.target.value as QuestionSource })
+              }
+            >
+              <option>Standard</option>
+              <option>Previous exam</option>
+              <option>Recalled</option>
+            </select>
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label="Question">
+              <textarea
+                required
+                className={`${input} min-h-24 py-3`}
+                value={q.question}
+                onChange={(e) => setQ({ ...q, question: e.target.value })}
+              />
+            </Field>
+          </div>
+          {q.options.map((value, i) => (
+            <Field key={i} label={`Option ${String.fromCharCode(65 + i)}`}>
+              <div className="flex gap-2">
+                <input
+                  className={input}
+                  value={value}
+                  onChange={(e) => {
+                    const options = [...q.options];
+                    options[i] = e.target.value;
+                    setQ({ ...q, options });
+                  }}
+                />
+                <input
+                  type="radio"
+                  name="correct"
+                  value={i}
+                  checked={q.correct === String(i)}
+                  onChange={(e) => setQ({ ...q, correct: e.target.value })}
+                  aria-label={`Mark option ${i + 1} correct`}
+                />
+              </div>
+            </Field>
+          ))}
+          <div className="sm:col-span-2">
+            <Field label="Explanation">
+              <textarea
+                className={`${input} min-h-20 py-3`}
+                value={q.explanation}
+                onChange={(e) => setQ({ ...q, explanation: e.target.value })}
+              />
+            </Field>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" className={secondary} onClick={onClose}>
+            Cancel
+          </button>
+          <button className={primary}>Save question</button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
-function ImportReview({rows,close,commit}:{rows:ImportRow[];close:()=>void;commit:()=>void}){const valid=rows.filter(x=>x.valid).length,invalid=rows.length-valid;return <div className="fixed inset-0 z-60 overflow-y-auto bg-black/45 p-4"><section className={`${panel} mx-auto my-8 max-w-3xl p-6`}><div className="flex justify-between"><div><h2 className="text-xl font-bold">Import validation</h2><p className="mt-1 text-sm text-muted">{valid} valid · {invalid} invalid · {rows.length} total</p></div><button onClick={close}><X/></button></div><div className="mt-5 max-h-[55vh] overflow-auto"><table className="w-full text-left text-sm"><thead><tr><th className="p-2">Row</th><th className="p-2">Status</th><th className="p-2">Question / errors</th></tr></thead><tbody>{rows.map(r=><tr key={r.row} className="border-t border-line"><td className="p-2">{r.row}</td><td className="p-2">{r.valid?<span className="text-green-700">Valid</span>:<span className="text-red-700">Invalid</span>}</td><td className="p-2">{r.valid?r.value?.question:r.errors.join("; ")}</td></tr>)}</tbody></table></div><div className="mt-6 flex justify-end gap-2"><button className={secondary} onClick={close}>Cancel</button><button className={primary} disabled={!valid} onClick={commit}>Import {valid} valid row(s)</button></div></section></div>}
+function ImportReview({
+  rows,
+  close,
+  commit,
+}: {
+  rows: ImportRow[];
+  close: () => void;
+  commit: () => void;
+}) {
+  const valid = rows.filter((x) => x.valid).length,
+    invalid = rows.length - valid;
+  return (
+    <div className="fixed inset-0 z-60 overflow-y-auto bg-black/45 p-4">
+      <section className={`${panel} mx-auto my-8 max-w-3xl p-6`}>
+        <div className="flex justify-between">
+          <div>
+            <h2 className="text-xl font-bold">Import validation</h2>
+            <p className="mt-1 text-sm text-muted">
+              {valid} valid · {invalid} invalid · {rows.length} total
+            </p>
+          </div>
+          <button onClick={close}>
+            <X />
+          </button>
+        </div>
+        <div className="mt-5 max-h-[55vh] overflow-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr>
+                <th className="p-2">Row</th>
+                <th className="p-2">Status</th>
+                <th className="p-2">Question / errors</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.row} className="border-t border-line">
+                  <td className="p-2">{r.row}</td>
+                  <td className="p-2">
+                    {r.valid ? (
+                      <span className="text-green-700">Valid</span>
+                    ) : (
+                      <span className="text-red-700">Invalid</span>
+                    )}
+                  </td>
+                  <td className="p-2">
+                    {r.valid ? r.value?.question : r.errors.join("; ")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button className={secondary} onClick={close}>
+            Cancel
+          </button>
+          <button className={primary} disabled={!valid} onClick={commit}>
+            Import {valid} valid row(s)
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
 
-function Tests(){return <ConfigCards title="One reusable test engine" items={["Mock, subject, chapter, topic, revision, daily and weekly categories","Manual or rule-generated question selection","Duration, attempts, marks and negative marking","Eligibility by program and batch","Randomized question and option order","Configurable answer and explanation release"]}/>}
-function LiveArchitecture(){return <ConfigCards title="Provider-ready live classroom" items={["Room lifecycle and provider IDs are modeled","Teacher moderation and student presenter privileges","Camera, microphone, screen and PowerPoint presentation sharing","Reusable live questions, quick polls and response capture","Recording states: recording, processing, ready and failed","Recordings require review, taxonomy and access scope before publishing"]} note="A production conferencing provider and credentials are required before audio/video, screen sharing and recording are genuinely operational."/>}
-function ConfigCards({title,items,note}:{title:string;items:string[];note?:string}){return <section className={`${panel} p-6`}><div className="flex items-center gap-3"><Settings2 className="text-brand"/><h2 className="text-xl font-bold">{title}</h2></div>{note&&<p className="mt-4 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">{note}</p>}<div className="mt-6 grid gap-3 sm:grid-cols-2">{items.map(x=><div key={x} className="flex gap-3 rounded-lg border border-line p-4 text-sm"><CheckCircle2 size={18} className="shrink-0 text-green-700"/>{x}</div>)}</div></section>}
-function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="block text-xs font-bold uppercase tracking-wide text-muted"><span className="mb-2 block">{label}</span>{children}</label>}
-function Status({value}:{value:RecordStatus}){return <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${value==="Active"?"bg-green-50 text-green-800":value==="Draft"?"bg-amber-50 text-amber-800":"bg-slate-100 text-slate-700"}`}>{value}</span>}
-function Empty({text}:{text:string}){return <div className="grid min-h-48 place-items-center text-center"><div><FileSpreadsheet className="mx-auto text-muted"/><p className="mt-3 font-bold">{text}</p><p className="mt-1 text-sm text-muted">Use Add or import validated content when it becomes available.</p></div></div>}
+function Tests() {
+  return (
+    <ConfigCards
+      title="One reusable test engine"
+      items={[
+        "Mock, subject, chapter, topic, revision, daily and weekly categories",
+        "Manual or rule-generated question selection",
+        "Duration, attempts, marks and negative marking",
+        "Eligibility by program and batch",
+        "Randomized question and option order",
+        "Configurable answer and explanation release",
+      ]}
+    />
+  );
+}
+function LiveArchitecture() {
+  return (
+    <ConfigCards
+      title="Provider-ready live classroom"
+      items={[
+        "Room lifecycle and provider IDs are modeled",
+        "Teacher moderation and student presenter privileges",
+        "Camera, microphone, screen and PowerPoint presentation sharing",
+        "Reusable live questions, quick polls and response capture",
+        "Recording states: recording, processing, ready and failed",
+        "Recordings require review, taxonomy and access scope before publishing",
+      ]}
+      note="A production conferencing provider and credentials are required before audio/video, screen sharing and recording are genuinely operational."
+    />
+  );
+}
+function ConfigCards({
+  title,
+  items,
+  note,
+}: {
+  title: string;
+  items: string[];
+  note?: string;
+}) {
+  return (
+    <section className={`${panel} p-6`}>
+      <div className="flex items-center gap-3">
+        <Settings2 className="text-brand" />
+        <h2 className="text-xl font-bold">{title}</h2>
+      </div>
+      {note && (
+        <p className="mt-4 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
+          {note}
+        </p>
+      )}
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {items.map((x) => (
+          <div
+            key={x}
+            className="flex gap-3 rounded-lg border border-line p-4 text-sm"
+          >
+            <CheckCircle2 size={18} className="shrink-0 text-green-700" />
+            {x}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block text-xs font-bold uppercase tracking-wide text-muted">
+      <span className="mb-2 block">{label}</span>
+      {children}
+    </label>
+  );
+}
+function Status({ value }: { value: RecordStatus }) {
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-xs font-bold ${value === "Active" ? "bg-green-50 text-green-800" : value === "Draft" ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-700"}`}
+    >
+      {value}
+    </span>
+  );
+}
+function Empty({ text }: { text: string }) {
+  return (
+    <div className="grid min-h-48 place-items-center text-center">
+      <div>
+        <FileSpreadsheet className="mx-auto text-muted" />
+        <p className="mt-3 font-bold">{text}</p>
+        <p className="mt-1 text-sm text-muted">
+          Use Add or import validated content when it becomes available.
+        </p>
+      </div>
+    </div>
+  );
+}
