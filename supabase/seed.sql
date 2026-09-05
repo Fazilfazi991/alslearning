@@ -1,0 +1,2 @@
+-- Legitimate ALS reference data is inserted by the academic foundation migration.
+-- Keep synthetic QA fixtures out of persistent seed data.
