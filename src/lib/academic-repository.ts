@@ -99,7 +99,7 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
       .order("display_order"),
     db
       .from("questions")
-      .select("*,question_options(*)")
+      .select("*,question_options(*),question_answer_keys(option_id)")
       .order("created_at", { ascending: false })
       .range(0, 24),
   ]);
@@ -142,6 +142,9 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
       const options = (q.question_options || []).sort(
         (a: Row, b: Row) => Number(a.display_order) - Number(b.display_order),
       );
+      const correctIds = new Set(
+        (q.question_answer_keys || []).map((key: Row) => key.option_id),
+      );
       return {
         id: q.id,
         question: q.prompt,
@@ -153,7 +156,7 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
         topic: byId.get(q.topic_id)?.name,
         options: options.map((o: Row) => String(o.content)),
         correctAnswers: options
-          .filter((o: Row) => o.is_correct)
+          .filter((o: Row) => correctIds.has(o.id))
           .map((o: Row) => String(o.content)),
         explanation: q.explanation || "",
         difficulty:
@@ -280,26 +283,24 @@ export async function saveQuestion(
   const db = createClient(),
     find = (kind: AcademicEntity["kind"], name?: string) =>
       entities.find((x) => x.kind === kind && x.name === name)?.id;
-  const { error } = await db
-    .from("questions")
-    .upsert({
-      id: q.id,
-      prompt: q.question,
-      type: questionTypeToDb[q.type],
-      exam_id: find("exam", q.exam),
-      program_id: find("program", q.program),
-      subject_id: find("subject", q.subject),
-      chapter_id: find("chapter", q.chapter),
-      topic_id: find("topic", q.topic),
-      explanation: q.explanation,
-      difficulty: q.difficulty.toLowerCase(),
-      marks: q.marks,
-      negative_marks: q.negativeMarks,
-      source_type: sourceToDb[q.sourceType],
-      source_reference: q.sourceReference || null,
-      exam_year: q.examYear || null,
-      status: dbStatus(q.status),
-    });
+  const { error } = await db.from("questions").upsert({
+    id: q.id,
+    prompt: q.question,
+    type: questionTypeToDb[q.type],
+    exam_id: find("exam", q.exam),
+    program_id: find("program", q.program),
+    subject_id: find("subject", q.subject),
+    chapter_id: find("chapter", q.chapter),
+    topic_id: find("topic", q.topic),
+    explanation: q.explanation,
+    difficulty: q.difficulty.toLowerCase(),
+    marks: q.marks,
+    negative_marks: q.negativeMarks,
+    source_type: sourceToDb[q.sourceType],
+    source_reference: q.sourceReference || null,
+    exam_year: q.examYear || null,
+    status: dbStatus(q.status),
+  });
   assert(error);
   const removed = await db
     .from("question_options")
@@ -307,13 +308,20 @@ export async function saveQuestion(
     .eq("question_id", q.id);
   assert(removed.error);
   const options = q.options.map((content, index) => ({
+    id: crypto.randomUUID(),
     question_id: q.id,
     content,
-    is_correct: q.correctAnswers.includes(content),
     display_order: index,
   }));
   const result = await db.from("question_options").insert(options);
   assert(result.error);
+  const keys = options
+    .filter((option) => q.correctAnswers.includes(option.content))
+    .map((option) => ({ question_id: q.id, option_id: option.id }));
+  if (keys.length) {
+    const saved = await db.from("question_answer_keys").insert(keys);
+    assert(saved.error);
+  }
 }
 export async function deleteQuestion(id: string) {
   const { error } = await createClient()
@@ -346,7 +354,9 @@ export async function loadQuestionPage(
     size = 25;
   let query = db
     .from("questions")
-    .select("*,question_options(*)", { count: "exact" })
+    .select("*,question_options(*),question_answer_keys(option_id)", {
+      count: "exact",
+    })
     .order("created_at", { ascending: false })
     .range(page * size, page * size + size - 1);
   if (search.trim()) query = query.ilike("prompt", `%${search.trim()}%`);
@@ -362,6 +372,9 @@ export async function loadQuestionPage(
     const options = (q.question_options || []).sort(
       (a: Row, b: Row) => Number(a.display_order) - Number(b.display_order),
     );
+    const correctIds = new Set(
+      (q.question_answer_keys || []).map((key: Row) => key.option_id),
+    );
     return {
       id: q.id,
       question: q.prompt,
@@ -373,7 +386,7 @@ export async function loadQuestionPage(
       topic: byId.get(q.topic_id)?.name,
       options: options.map((o: Row) => String(o.content)),
       correctAnswers: options
-        .filter((o: Row) => o.is_correct)
+        .filter((o: Row) => correctIds.has(o.id))
         .map((o: Row) => String(o.content)),
       explanation: q.explanation || "",
       difficulty:

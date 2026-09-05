@@ -43,8 +43,20 @@ try {
     if (error) throw error;
     users[labels[i]] = data.user.id;
   }
-  const { data: roleRows, error: roleError } = await root.from("profiles").select("id,role").in("id",Object.values(users));
-  assert("trusted_app_metadata_syncs_profile_roles",!roleError&&labels.every((label,index)=>roleRows.some(row=>row.id===users[label]&&row.role===roles[index])),roleError?.message);
+  const { data: roleRows, error: roleError } = await root
+    .from("profiles")
+    .select("id,role")
+    .in("id", Object.values(users));
+  assert(
+    "trusted_app_metadata_syncs_profile_roles",
+    !roleError &&
+      labels.every((label, index) =>
+        roleRows.some(
+          (row) => row.id === users[label] && row.role === roles[index],
+        ),
+      ),
+    roleError?.message,
+  );
   const [admin, teacher, student, outsider] = await Promise.all(
     labels.map(userClient),
   );
@@ -84,25 +96,21 @@ try {
     .single();
   assert("admin_can_create_batch", !response.error, response.error?.message);
   fixture.batch = response.data.id;
-  await root
-    .from("faculty_assignments")
-    .insert({
-      faculty_id: users.teacher,
-      program_id: fixture.program,
-      subject_id: assignedSubject,
-      can_manage_content: true,
-      can_manage_questions: true,
-      can_manage_tests: true,
-    });
-  await root
-    .from("enrollments")
-    .insert({
-      student_id: users.student,
-      program_id: fixture.program,
-      batch_id: fixture.batch,
-      status: "active",
-      access_starts_at: new Date(Date.now() - 60000).toISOString(),
-    });
+  await root.from("faculty_assignments").insert({
+    faculty_id: users.teacher,
+    program_id: fixture.program,
+    subject_id: assignedSubject,
+    can_manage_content: true,
+    can_manage_questions: true,
+    can_manage_tests: true,
+  });
+  await root.from("enrollments").insert({
+    student_id: users.student,
+    program_id: fixture.program,
+    batch_id: fixture.batch,
+    status: "active",
+    access_starts_at: new Date(Date.now() - 60000).toISOString(),
+  });
   response = await teacher
     .from("learning_content")
     .insert({
@@ -136,10 +144,12 @@ try {
       .select("id")
       .single();
     if (error) throw error;
+    const correctOption=crypto.randomUUID(),wrongOption=crypto.randomUUID();
     await root.from("question_options").insert([
-      { question_id: data.id, content: "A", is_correct: true },
-      { question_id: data.id, content: "B", is_correct: false },
+      { id:correctOption,question_id: data.id, content: "A" },
+      { id:wrongOption,question_id: data.id, content: "B" },
     ]);
+    await root.from("question_answer_keys").insert({question_id:data.id,option_id:correctOption});
     return data.id;
   };
   fixture.assignedQuestion = await addQuestion(
@@ -183,6 +193,7 @@ try {
     check.data?.length === 1 && check.data[0].id === fixture.assignedQuestion,
     check.error?.message,
   );
+  check=await student.from("question_answer_keys").select("option_id").eq("question_id",fixture.assignedQuestion);assert("student_cannot_read_answer_keys",check.data?.length===0,check.error?.message);
   check = await student
     .from("questions")
     .update({ prompt: "forbidden" })
@@ -193,21 +204,17 @@ try {
     Boolean(check.error) || check.data?.length === 0,
     check.error?.message || `${check.data?.length} rows changed`,
   );
-  check = await student
-    .from("video_progress")
-    .insert({
-      content_id: fixture.content,
-      student_id: users.student,
-      position_seconds: 12,
-    });
+  check = await student.from("video_progress").insert({
+    content_id: fixture.content,
+    student_id: users.student,
+    position_seconds: 12,
+  });
   assert("student_saves_own_progress", !check.error, check.error?.message);
-  check = await student
-    .from("video_progress")
-    .insert({
-      content_id: fixture.content,
-      student_id: users.outsider,
-      position_seconds: 12,
-    });
+  check = await student.from("video_progress").insert({
+    content_id: fixture.content,
+    student_id: users.outsider,
+    position_seconds: 12,
+  });
   assert(
     "student_cannot_write_other_progress",
     Boolean(check.error),
@@ -252,30 +259,149 @@ try {
   );
   await root.storage.from("learning-content").remove([path]);
 
-  response = await teacher.from("tests").insert({slug:`qa-test-${suffix}`,title:"QA Test",type:"mock",program_id:fixture.program,subject_id:assignedSubject,question_count:1,duration_minutes:10,status:"active"}).select("id").single();
-  assert("assigned_teacher_can_create_test",!response.error,response.error?.message);fixture.test=response.data.id;
-  await root.from("test_questions").insert({test_id:fixture.test,question_id:fixture.assignedQuestion});
-  response=await student.from("test_attempts").insert({test_id:fixture.test,student_id:users.student,question_order:[fixture.assignedQuestion]}).select("id").single();
-  assert("student_starts_eligible_attempt",!response.error,response.error?.message);fixture.attempt=response.data.id;
-  const{data:correctOption}=await root.from("question_options").select("id").eq("question_id",fixture.assignedQuestion).eq("is_correct",true).single();
-  check=await student.from("attempt_answers").insert({attempt_id:fixture.attempt,question_id:fixture.assignedQuestion,selected_option_ids:[correctOption.id]});assert("student_answer_persists",!check.error,check.error?.message);
-  const scored=await student.rpc("submit_test_attempt",{target_attempt:fixture.attempt});assert("server_scoring_persists_result",!scored.error&&Number(scored.data)===1,scored.error?.message||String(scored.data));
+  response = await teacher
+    .from("tests")
+    .insert({
+      slug: `qa-test-${suffix}`,
+      title: "QA Test",
+      type: "mock",
+      program_id: fixture.program,
+      subject_id: assignedSubject,
+      question_count: 1,
+      duration_minutes: 10,
+      status: "active",
+    })
+    .select("id")
+    .single();
+  assert(
+    "assigned_teacher_can_create_test",
+    !response.error,
+    response.error?.message,
+  );
+  fixture.test = response.data.id;
+  await root
+    .from("test_questions")
+    .insert({ test_id: fixture.test, question_id: fixture.assignedQuestion });
+  response = await student
+    .from("test_attempts")
+    .insert({
+      test_id: fixture.test,
+      student_id: users.student,
+      question_order: [fixture.assignedQuestion],
+    })
+    .select("id")
+    .single();
+  assert(
+    "student_starts_eligible_attempt",
+    !response.error,
+    response.error?.message,
+  );
+  fixture.attempt = response.data.id;
+  const { data: correctKey } = await root.from("question_answer_keys").select("option_id").eq("question_id", fixture.assignedQuestion).single();
+  check = await student
+    .from("attempt_answers")
+    .insert({
+      attempt_id: fixture.attempt,
+      question_id: fixture.assignedQuestion,
+      selected_option_ids: [correctKey.option_id],
+    });
+  assert("student_answer_persists", !check.error, check.error?.message);
+  const scored = await student.rpc("submit_test_attempt", {
+    target_attempt: fixture.attempt,
+  });
+  assert(
+    "server_scoring_persists_result",
+    !scored.error && Number(scored.data) === 1,
+    scored.error?.message || String(scored.data),
+  );
 
-  response=await root.from("video_checkpoints").insert({video_id:fixture.content,question_id:fixture.assignedQuestion,trigger_seconds:5,mandatory:true}).select("id").single();fixture.checkpoint=response.data.id;
-  const checkpoint=await student.rpc("submit_checkpoint_response",{target_checkpoint:fixture.checkpoint,option_ids:[correctOption.id]});assert("checkpoint_response_persists",!checkpoint.error&&checkpoint.data===true,checkpoint.error?.message);
+  response = await root
+    .from("video_checkpoints")
+    .insert({
+      video_id: fixture.content,
+      question_id: fixture.assignedQuestion,
+      trigger_seconds: 5,
+      mandatory: true,
+    })
+    .select("id")
+    .single();
+  fixture.checkpoint = response.data.id;
+  const checkpoint = await student.rpc("submit_checkpoint_response", {
+    target_checkpoint: fixture.checkpoint,
+    option_ids: [correctKey.option_id],
+  });
+  assert(
+    "checkpoint_response_persists",
+    !checkpoint.error && checkpoint.data === true,
+    checkpoint.error?.message,
+  );
 
-  response=await teacher.from("live_sessions").insert({title:"QA Live",program_id:fixture.program,batch_id:fixture.batch,subject_id:assignedSubject,faculty_id:users.teacher,status:"scheduled",provider:"cloudflare-realtime"}).select("id").single();assert("assigned_teacher_schedules_live_session",!response.error,response.error?.message);fixture.live=response.data.id;
-  check=await student.rpc("set_live_presence",{target_session:fixture.live,joined:true});assert("eligible_student_presence_join",!check.error,check.error?.message);
-  check=await student.from("live_messages").insert({session_id:fixture.live,sender_id:users.student,body:"QA message"});assert("eligible_student_chat_persists",!check.error,check.error?.message);
-  check=await teacher.from("live_participants").update({audio_publish_allowed:true}).match({session_id:fixture.live,user_id:users.student}).select("user_id");assert("teacher_grants_student_audio",!check.error&&check.data?.length===1,check.error?.message);
-  check=await student.from("live_participants").update({presenter:true}).match({session_id:fixture.live,user_id:users.student}).select("user_id");assert("student_cannot_self_promote",Boolean(check.error)||check.data?.length===0,check.error?.message||`${check.data?.length} rows changed`);
-  check=await student.rpc("set_live_presence",{target_session:fixture.live,joined:false});assert("attendance_leave_persists",!check.error,check.error?.message);
+  response = await teacher
+    .from("live_sessions")
+    .insert({
+      title: "QA Live",
+      program_id: fixture.program,
+      batch_id: fixture.batch,
+      subject_id: assignedSubject,
+      faculty_id: users.teacher,
+      status: "scheduled",
+      provider: "cloudflare-realtime",
+    })
+    .select("id")
+    .single();
+  assert(
+    "assigned_teacher_schedules_live_session",
+    !response.error,
+    response.error?.message,
+  );
+  fixture.live = response.data.id;
+  check = await student.rpc("set_live_presence", {
+    target_session: fixture.live,
+    joined: true,
+  });
+  assert("eligible_student_presence_join", !check.error, check.error?.message);
+  check = await student
+    .from("live_messages")
+    .insert({
+      session_id: fixture.live,
+      sender_id: users.student,
+      body: "QA message",
+    });
+  assert("eligible_student_chat_persists", !check.error, check.error?.message);
+  check = await teacher
+    .from("live_participants")
+    .update({ audio_publish_allowed: true })
+    .match({ session_id: fixture.live, user_id: users.student })
+    .select("user_id");
+  assert(
+    "teacher_grants_student_audio",
+    !check.error && check.data?.length === 1,
+    check.error?.message,
+  );
+  check = await student
+    .from("live_participants")
+    .update({ presenter: true })
+    .match({ session_id: fixture.live, user_id: users.student })
+    .select("user_id");
+  assert(
+    "student_cannot_self_promote",
+    Boolean(check.error) || check.data?.length === 0,
+    check.error?.message || `${check.data?.length} rows changed`,
+  );
+  check = await student.rpc("set_live_presence", {
+    target_session: fixture.live,
+    joined: false,
+  });
+  assert("attendance_leave_persists", !check.error, check.error?.message);
   process.stdout.write(JSON.stringify({ ok: true, results }, null, 2));
 } finally {
-  if(fixture.live)await root.from("live_sessions").delete().eq("id",fixture.live);
-  if(fixture.checkpoint)await root.from("video_checkpoints").delete().eq("id",fixture.checkpoint);
-  if(fixture.attempt)await root.from("test_attempts").delete().eq("id",fixture.attempt);
-  if(fixture.test)await root.from("tests").delete().eq("id",fixture.test);
+  if (fixture.live)
+    await root.from("live_sessions").delete().eq("id", fixture.live);
+  if (fixture.checkpoint)
+    await root.from("video_checkpoints").delete().eq("id", fixture.checkpoint);
+  if (fixture.attempt)
+    await root.from("test_attempts").delete().eq("id", fixture.attempt);
+  if (fixture.test) await root.from("tests").delete().eq("id", fixture.test);
   if (fixture.assignedQuestion || fixture.otherQuestion)
     await root
       .from("questions")
