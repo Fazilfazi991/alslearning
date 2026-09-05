@@ -188,9 +188,11 @@ export async function getTestForStudent(slug: string) {
     .eq("status", "active")
     .single();
   if (error) return null;
+  const finalized=await db.rpc("finalize_expired_test_attempts",{target_test:test.id});
+  if(finalized.error)throw new Error(finalized.error.message);
   const { data: attempts } = await db
     .from("test_attempts")
-    .select("id,status,started_at,expires_at,submitted_at,score,question_order,correct_count,incorrect_count,unanswered_count,negative_marks_total,attempt_answers(question_id,selected_option_ids)")
+    .select("id,status,started_at,expires_at,submitted_at,score,question_order,option_order,correct_count,incorrect_count,unanswered_count,negative_marks_total,attempt_answers(question_id,selected_option_ids)")
     .eq("test_id", test.id)
     .eq("student_id", user.id)
     .order("started_at", { ascending: false });

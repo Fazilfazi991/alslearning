@@ -291,6 +291,8 @@ try {
     response.error?.message,
   );
   fixture.attempt = response.data.id;
+  assert("server_persists_question_order", response.data.question_order?.[0] === fixture.assignedQuestion, JSON.stringify(response.data.question_order));
+  assert("server_persists_option_order", Array.isArray(response.data.option_order?.[fixture.assignedQuestion]), JSON.stringify(response.data.option_order));
   const secondStart = await student.rpc("start_test_attempt", { target_test: fixture.test });
   assert("multiple_tabs_share_active_attempt", !secondStart.error && secondStart.data.id === fixture.attempt, secondStart.error?.message);
   const earlyReview = await student.rpc("get_test_review", { target_attempt: fixture.attempt });
@@ -313,13 +315,13 @@ try {
   await root.from("test_attempts").update({ expires_at: new Date(Date.now()-1000).toISOString() }).eq("id", fixture.attempt);
   const lateAnswer = await student.rpc("save_attempt_answer", { target_attempt: fixture.attempt, target_question: fixture.assignedQuestion, option_ids: [correctKey.option_id] });
   assert("expired_attempt_rejects_answer_changes", Boolean(lateAnswer.error), lateAnswer.error?.message);
-  const scored = await student.rpc("submit_test_attempt", {
-    target_attempt: fixture.attempt,
-  });
+  const finalized = await student.rpc("finalize_expired_test_attempts", { target_test: fixture.test });
+  assert("expired_attempt_finalizes_lazily", !finalized.error && finalized.data === 1, finalized.error?.message);
+  const scored = await student.from("test_attempts").select("score,status,unanswered_count").eq("id",fixture.attempt).single();
   assert(
     "server_scoring_persists_result",
-    !scored.error && Number(scored.data) === 1,
-    scored.error?.message || String(scored.data),
+    !scored.error && Number(scored.data.score) === 1 && scored.data.status === "submitted",
+    scored.error?.message || JSON.stringify(scored.data),
   );
   const review = await student.rpc("get_test_review", { target_attempt: fixture.attempt });
   assert("submitted_owner_receives_configured_review", !review.error && review.data?.correct === 1 && review.data?.answers?.length === 1, review.error?.message);

@@ -26,3 +26,7 @@ ALS data can be added through authenticated Admin screens or validated imports w
 ## Inputs ALS still needs to supply
 
 Confirmed program/exam mapping, complete syllabus, final faculty and student lists, batch dates, production videos/materials, question bank, test rules, and certificate policy. Leave ambiguous relationships unset until ALS confirms them.
+
+## YouTube progress policy
+
+YouTube embeds are treated as limited-tracking content until the official IFrame Player API is integrated and verified. They must not contribute automatic watched-time or completion percentages. ALS may enable an explicit learner completion action later if its completion policy accepts self-attestation. Direct HTML5 video remains the authoritative progress path.
