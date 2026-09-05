@@ -99,7 +99,7 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
       .order("display_order"),
     db
       .from("questions")
-      .select("*,question_options(*),question_answer_keys(option_id)")
+      .select("*,question_options!question_options_question_id_fkey(*),question_answer_keys(option_id)")
       .order("created_at", { ascending: false })
       .range(0, 24),
   ]);
@@ -354,7 +354,7 @@ export async function loadQuestionPage(
     size = 25;
   let query = db
     .from("questions")
-    .select("*,question_options(*),question_answer_keys(option_id)", {
+    .select("*,question_options!question_options_question_id_fkey(*),question_answer_keys(option_id)", {
       count: "exact",
     })
     .order("created_at", { ascending: false })

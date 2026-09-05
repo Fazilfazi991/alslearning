@@ -78,7 +78,7 @@ export function CloudflareClassroomPoc({
       .on("postgres_changes",{event:"*",schema:"public",table:"live_questions",filter:`session_id=eq.${session.id}`},()=>void refreshPolls())
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"live_question_responses"},()=>void refreshPolls())
       .subscribe();
-    async function refreshPolls(){const{data}=await db.from("live_questions").select("id,question_id,launched_at,closed_at,show_results,questions(prompt,question_options(id,content,display_order)),live_question_responses(student_id,selected_option_ids)").eq("session_id",session.id).order("launched_at",{ascending:false});if(data)setPolls(data as unknown as Poll[])}
+    async function refreshPolls(){const{data}=await db.from("live_questions").select("id,question_id,launched_at,closed_at,show_results,questions(prompt,question_options!question_options_question_id_fkey(id,content,display_order)),live_question_responses(student_id,selected_option_ids)").eq("session_id",session.id).order("launched_at",{ascending:false});if(data)setPolls(data as unknown as Poll[])}
     const leave = () => {
       void db.rpc("set_live_presence", {
         target_session: session.id,

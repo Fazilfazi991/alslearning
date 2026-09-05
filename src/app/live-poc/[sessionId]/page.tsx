@@ -31,7 +31,7 @@ export default async function Page({
       )
       .eq("session_id", sessionId)
       .order("created_at"),
-    db.from("live_questions").select("id,question_id,launched_at,closed_at,show_results,questions(prompt,question_options(id,content,display_order)),live_question_responses(student_id,selected_option_ids)").eq("session_id",sessionId).order("launched_at",{ascending:false}),
+    db.from("live_questions").select("id,question_id,launched_at,closed_at,show_results,questions(prompt,question_options!question_options_question_id_fkey(id,content,display_order)),live_question_responses(student_id,selected_option_ids)").eq("session_id",sessionId).order("launched_at",{ascending:false}),
     db.from("questions").select("id,prompt").eq("status","active").limit(100),
   ]);
   if (session.error) notFound();
