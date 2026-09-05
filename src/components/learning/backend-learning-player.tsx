@@ -229,10 +229,10 @@ export function BackendLearningPlayer({ data }: { data: Data }) {
               Video checkpoint
             </p>
             <h2 className="mt-2 text-xl font-bold">
-              {active.questions[0]?.prompt}
+              {active.questions?.[0]?.prompt}
             </h2>
             <div className="mt-4 space-y-2">
-              {active.questions[0]?.question_options.map((option) => (
+              {active.questions?.[0]?.question_options.map((option) => (
                 <label
                   key={option.id}
                   className="flex gap-3 rounded border p-3"

@@ -152,7 +152,7 @@ export async function getLearningContent(slug: string) {
     db
       .from("video_checkpoints")
       .select(
-        "id,trigger_seconds,pause_video,mandatory,retry_policy,show_feedback,question_id,questions(prompt,explanation,question_options(id,content,display_order))",
+        "id,trigger_seconds,pause_video,mandatory,retry_policy,show_feedback,question_id,questions(prompt,explanation,question_options!question_options_question_id_fkey(id,content,display_order))",
       )
       .eq("video_id", data.id)
       .order("trigger_seconds"),
@@ -182,7 +182,7 @@ export async function getTestForStudent(slug: string) {
   const { data: test, error } = await db
     .from("tests")
     .select(
-      "*,test_questions(display_order,marks_override,negative_marks_override,questions(id,prompt,type,question_options(id,content,display_order)))",
+      "*,test_questions(display_order,marks_override,negative_marks_override,questions(id,prompt,type,question_options!question_options_question_id_fkey(id,content,display_order)))",
     )
     .eq("slug", slug)
     .eq("status", "active")
