@@ -24,12 +24,12 @@ class StructuralStop(unittest.TestCase):
             self.assertEqual(source["all_native_tables_including_wrappers"],
                              source["source_questions"] + source["nested_content_tables"])
 
-    def test_existing_parser_loses_general_microbiology_table(self):
+    def test_parser_retains_general_microbiology_table(self):
         parser = module("parser", "pathology-fidelity-preflight.py")
         path = ROOT / "MOQ/app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx"
         questions = parser.parse(path)
-        self.assertEqual(len(questions), 105)  # 98 wrappers plus 7 content tables misidentified.
-        self.assertNotIn("Quaternary ammonium compounds", questions[0]["explanation"])
+        self.assertEqual(len(questions), 98)
+        self.assertIn("Quaternary ammonium compounds", questions[0]["explanation"])
         scanner = module("scanner", "microbiology-structure-scan.py")
         first_table = scanner.scan()["files"][0]["native_table_evidence"][0]
         self.assertIn("Quaternary ammonium compounds", str(first_table["rows"]))

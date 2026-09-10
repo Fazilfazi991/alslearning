@@ -1,0 +1,43 @@
+{
+  "results": [
+    "All 24 real source tables render structurally at 1440",
+    "All source tables contain page overflow at 1440",
+    "Admin 1440 search finds table-cell text",
+    "Admin 1440 tables, merged cells, superscript/subscript render",
+    "Admin 1440 page has no horizontal overflow",
+    "Admin 1440 no-op save preserves full table structure",
+    "Student 1440 stem and option tables render",
+    "Student 1440 solution tables and keys absent from payload",
+    "Student 1440 content order includes table before and after image",
+    "Student 1440 answer survives refresh in same attempt",
+    "Student 1440 attempt overflow contained",
+    "Student 1440 server grade is 1/1",
+    "Student 1440 explanation and option tables render in review",
+    "Student 1440 review overflow contained",
+    "Admin 1440 cell edit persists",
+    "Student 1440 historical table remains original after source edit",
+    "All 24 real source tables render structurally at 390",
+    "All source tables contain page overflow at 390",
+    "Admin 390 search finds table-cell text",
+    "Admin 390 tables, merged cells, superscript/subscript render",
+    "Admin 390 page has no horizontal overflow",
+    "Admin 390 no-op save preserves full table structure",
+    "Student 390 stem and option tables render",
+    "Student 390 solution tables and keys absent from payload",
+    "Student 390 content order includes table before and after image",
+    "Student 390 answer survives refresh in same attempt",
+    "Student 390 attempt overflow contained",
+    "Student 390 server grade is 1/1",
+    "Student 390 explanation and option tables render in review",
+    "Student 390 review overflow contained",
+    "Admin 390 cell edit persists",
+    "Student 390 historical table remains original after source edit",
+    "No browser runtime or console errors"
+  ],
+  "errors": [],
+  "attempts": [
+    "19ea09c2-e119-4c75-94e3-7ef727834ae1",
+    "e85c80b8-a999-43e8-8d15-b5145ecc72e8"
+  ],
+  "synthetic_test_archived": true
+}

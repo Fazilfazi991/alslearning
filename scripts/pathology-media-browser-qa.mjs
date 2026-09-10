@@ -8,13 +8,14 @@ const qa = JSON.parse(readFileSync(".local-qa/pathology-acceptance.json", "utf8"
 const manifest = JSON.parse(readFileSync("docs/pathology-import-manifest.json", "utf8"));
 const browser = await chromium.launch({ headless: true, channel: "msedge" });
 const results = [];
+const origin = process.env.QA_ORIGIN || "http://localhost:3004";
 try {
   for (const width of [1440, 390]) {
     const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 1000 } });
     const page = await context.newPage();
     const link = ok(await root.auth.admin.generateLink({ type: "magiclink", email: qa.fixture.users.admin.email }));
-    await page.goto(`http://localhost:3004/auth/callback?token_hash=${link.properties.hashed_token}&type=magiclink`);
-    await page.goto("http://localhost:3004/admin/questions");
+    await page.goto(`${origin}/auth/callback?token_hash=${link.properties.hashed_token}&type=magiclink`);
+    await page.goto(`${origin}/admin/questions`);
     for (const record of manifest.records.filter(r => r.media_ids?.length || (r.subhead === 2 && r.source_sequence === 126) || (r.subhead === 4 && r.source_sequence === 68))) {
       await page.getByRole("combobox", { name: /^Filter by subject/ }).selectOption(manifest.taxonomy.subject.id);
       await page.getByRole("combobox", { name: /^Filter by chapter/ }).selectOption(manifest.taxonomy.chapters[record.subhead - 1].id);

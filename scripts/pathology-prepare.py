@@ -17,7 +17,8 @@ for subhead, source in enumerate(baseline["records"], 1):
     path = ROOT / "MOQ" / source["file"]
     if hashlib.sha256(path.read_bytes()).hexdigest() != source["sha256"]:
         raise ValueError(f"Source hash changed: {path.name}")
-    questions = parser.parse(path)
+    # This completed batch retains its approved v1 gallery payload on reruns.
+    questions = parser.parse(path, legacy_media=True)
     if len(questions) != source["source_questions"]:
         raise ValueError("Source count changed")
     with zipfile.ZipFile(path) as archive:

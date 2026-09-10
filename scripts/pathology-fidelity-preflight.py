@@ -26,14 +26,26 @@ def attr(element, name="val", default=None):
 
 
 def plain(doc):
-    return "\n".join("".join(r["text"] for r in b["runs"]) for b in doc["blocks"])
+    return "\n".join("".join(r["text"] for r in b["runs"]) if "runs" in b else
+                     "\n".join("\t".join(plain(c["content"]) for c in row["cells"]) for row in b["rows"])
+                     if b["type"] == "table" else "" for b in doc["blocks"])
+
+
+def rich_runs(doc):
+    for block in doc["blocks"]:
+        if "runs" in block:
+            yield from block["runs"]
+        elif block["type"] == "table":
+            for row in block["rows"]:
+                for cell in row["cells"]:
+                    yield from rich_runs(cell["content"])
 
 
 def raw(cell):
     return "".join(x.text or "" for x in cell.findall(".//w:t", NS))
 
 
-def parse(path):
+def parse(path, *, legacy_media=False):
     file_hash = hashlib.sha256(path.read_bytes()).hexdigest()
     with zipfile.ZipFile(path) as archive:
         root = ET.fromstring(archive.read("word/document.xml"))
@@ -44,15 +56,59 @@ def parse(path):
             abstract = {attr(a, "abstractNumId"): {attr(l, "ilvl"): l for l in a.findall("w:lvl", NS)} for a in nums.findall("w:abstractNum", NS)}
             numbering = {attr(n, "numId"): attr(n.find("w:abstractNumId", NS)) for n in nums.findall("w:num", NS)}
         questions = []
-        for sequence, table in enumerate(root.findall(".//w:tbl", NS), 1):
+        for sequence, table in enumerate(root.findall("w:body/w:tbl", NS), 1):
             q = {"source_document": path.name, "source_sha256": file_hash, "source_sequence": sequence,
                  "source_key": f"{file_hash}:{sequence}", "options": [], "media": [], "anomalies": [], "format_runs": []}
 
-            def content(cell, role):
-                blocks = []
-                for paragraph in cell.findall("w:p", NS):
+            def native_table(table, role):
+                if table.findall(".//w:tbl", NS):
+                    raise ValueError("Unsupported nested content table")
+                rows, ongoing = [], {}
+                columns = len(table.findall("w:tblGrid/w:gridCol", NS))
+                for ri, tr in enumerate(table.findall("w:tr", NS)):
+                    before = int(attr(tr.find("w:trPr/w:gridBefore", NS), default="0"))
+                    after = int(attr(tr.find("w:trPr/w:gridAfter", NS), default="0"))
+                    row, column = {"cells": []}, before
+                    if before: row["before"] = before
+                    if after: row["after"] = after
+                    header = tr.find("w:trPr/w:tblHeader", NS) is not None
+                    text_runs = [r for r in tr.findall(".//w:r", NS) if raw(r).strip()]
+                    if ri == 0 and len(tr.findall("w:tc", NS)) == columns and text_runs:
+                        header = header or all(r.find("w:rPr/w:b", NS) is not None and attr(r.find("w:rPr/w:b", NS), default="true") not in ("0", "false", "off") for r in text_runs)
+                    for tc in tr.findall("w:tc", NS):
+                        span = int(attr(tc.find("w:tcPr/w:gridSpan", NS), default="1"))
+                        merge = tc.find("w:tcPr/w:vMerge", NS)
+                        if tc.find("w:tcPr/w:hMerge", NS) is not None:
+                            raise ValueError("Unsupported legacy horizontal merge")
+                        if merge is not None and attr(merge, default="continue") == "continue":
+                            if column not in ongoing or ongoing[column]["colspan"] != span or raw(tc).strip():
+                                raise ValueError("Unsupported vertical merge continuation")
+                            ongoing[column]["rowspan"] += 1
+                        else:
+                            item = {"content": content(tc, role, force_order=True), "colspan": span, "rowspan": 1, "header": header}
+                            row["cells"].append(item)
+                            if merge is not None:
+                                ongoing[column] = item
+                            else:
+                                ongoing.pop(column, None)
+                        column += span
+                    if column + after != columns:
+                        raise ValueError(f"Table grid mismatch in row {ri}")
+                    rows.append(row)
+                return {"type": "table", "columns": columns, "rows": rows}
+
+            def content(cell, role, force_order=False):
+                blocks, legacy_blocks = [], []
+                for paragraph in cell:
+                    if paragraph.tag == "{" + W + "}tbl":
+                        blocks.append(native_table(paragraph, role))
+                        continue
+                    if paragraph.tag != "{" + W + "}p":
+                        continue
                     runs = []
                     num = paragraph.find("w:pPr/w:numPr", NS)
+                    if num is not None and attr(num.find("w:numId", NS)) == "0":
+                        num = None  # Word explicitly disables numbering with numId=0.
                     if num is not None:
                         num_id, level = attr(num.find("w:numId", NS)), attr(num.find("w:ilvl", NS), default="0")
                         definition = abstract.get(numbering.get(num_id), {}).get(level)
@@ -71,6 +127,7 @@ def parse(path):
                                 q["anomalies"].append(f"Unsupported list format: {fmt}")
                             runs.append({"text": label + "\t", "marks": []})
                             q.setdefault("lists", []).append({"role": role, "num_id": num_id, "level": level, "format": fmt, "marker": label})
+                    paragraph_runs = list(runs)
                     for run in paragraph.findall(".//w:r", NS):
                         marks = []
                         for prop, mark in [("b", "bold"), ("i", "italic"), ("u", "underline")]:
@@ -90,6 +147,7 @@ def parse(path):
                             elif tag == "softHyphen": text += "\u00ad"
                         if text:
                             runs.append({"text": text, "marks": marks})
+                            paragraph_runs.append({"text": text, "marks": marks})
                             if vertical in ("superscript", "subscript"):
                                 q["format_runs"].append({"role": role, "text": text, "format": vertical})
                         for blip in run.findall(".//a:blip", NS):
@@ -108,10 +166,29 @@ def parse(path):
                             q["media"].append({"kind": kind, "position": sum(m["kind"] == kind for m in q["media"]),
                                 "relationship": rid, "original_filename": media_path, "mime_type": mime,
                                 "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data), "frames": frames,
-                                "paragraph_index": len(blocks), "after_run": len(runs),
+                                "paragraph_index": len(legacy_blocks), "after_run": len(paragraph_runs),
                                 "source_document": path.name, "source_sequence": sequence})
-                    blocks.append({"runs": runs})
-                return {"version": 1, "blocks": blocks}
+                            if runs:
+                                blocks.append({"runs": runs})
+                                runs = []
+                            blocks.append({"type": "media", "position": q["media"][-1]["position"]})
+                    if runs or not paragraph.findall(".//a:blip", NS):
+                        blocks.append({"runs": runs})
+                    legacy_blocks.append({"runs": paragraph_runs})
+                # Preserve legacy trailing galleries, but use ordered blocks whenever
+                # tables or text after an image require true content interleaving.
+                complex_blocks = any(b.get("type") == "table" for b in blocks)
+                seen_image = False
+                for block in blocks:
+                    if block.get("type") == "media": seen_image = True
+                    elif seen_image and not legacy_media and any(r["text"].strip() for r in block.get("runs", [])): complex_blocks = True
+                if force_order and seen_image: complex_blocks = True
+                if not complex_blocks:
+                    # Keep original paragraph boundaries and v1 AST for established sources.
+                    if seen_image:
+                        return {"version": 1, "blocks": legacy_blocks}
+                    return {"version": 1, "blocks": blocks}
+                return {"version": 2, "blocks": blocks}
 
             for row in table.findall("w:tr", NS):
                 cells = row.findall("w:tc", NS)
@@ -151,7 +228,7 @@ def parse(path):
             answer = re.search(r"\b(?:Ans(?:wer)?)[\s:.-]+([A-D])\b", q["explanation"], re.I)
             q["answer_conflict"] = bool(answer and [ord(answer[1].upper()) - 65] != correct)
             q["content_review"] = "CONTENT REVIEW REQUIRED" if q["answer_conflict"] else None
-            q["rich_text"] = any(r["marks"] for d in [q.get("prompt_rich"), q.get("explanation_rich"), *[o["content_rich"] for o in q["options"]]] if d for b in d["blocks"] for r in b["runs"]) or bool(q.get("lists"))
+            q["rich_text"] = any(r["marks"] for d in [q.get("prompt_rich"), q.get("explanation_rich"), *[o["content_rich"] for o in q["options"]]] if d for r in rich_runs(d)) or bool(q.get("lists"))
             references = list(dict.fromkeys(re.findall(r"\b\d{3}/(?:19|20)\d{2}\b", q["prompt"] + "\n" + q["explanation"])))
             q["source_reference_candidates"] = references
             q["source_type"] = "standard"  # requires scope review before any previous-paper mapping

@@ -1,0 +1,772 @@
+{
+  "scope": "LOCAL PREFLIGHT ONLY — ZERO IMPORTS",
+  "files": [
+    {
+      "micro": 1,
+      "name": "MICRO 1 - General Microbiology",
+      "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+      "sha256": "d4f08f98c6e1b0206a59c9334261fcc1cb3a9a3e1fa9e25c3d7015719a27ce7b",
+      "source": 98,
+      "ready": 97,
+      "review": 0,
+      "quarantine": 1,
+      "technical_blockers": 0,
+      "images": 22,
+      "native_tables": 7,
+      "previous_paper_questions": 0
+    },
+    {
+      "micro": 2,
+      "name": "MICRO 2 - Bacteriology",
+      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "sha256": "29439b42a1c3584afd9f096ef45d6e38187a31e06d8f137ba019a04449ed575c",
+      "source": 102,
+      "ready": 99,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 3,
+      "images": 31,
+      "native_tables": 8,
+      "previous_paper_questions": 0
+    },
+    {
+      "micro": 3,
+      "name": "MICRO 3 - Mycology",
+      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "sha256": "eabc7021575dcc137487eb8ae25831302b11dd96fa8dd2e3dad044afe8c7c7de",
+      "source": 100,
+      "ready": 96,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 4,
+      "images": 16,
+      "native_tables": 2,
+      "previous_paper_questions": 0
+    },
+    {
+      "micro": 4,
+      "name": "MICRO 4 - Parasitology",
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "sha256": "ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc",
+      "source": 102,
+      "ready": 97,
+      "review": 0,
+      "quarantine": 1,
+      "technical_blockers": 4,
+      "images": 22,
+      "native_tables": 3,
+      "previous_paper_questions": 0
+    },
+    {
+      "micro": 5,
+      "name": "MICRO 5 - Virology",
+      "source_document": "app friendly format - JSO SIR 11 - VIROLOGY.docx",
+      "sha256": "345fcb3d2c530c3e81c623c748b143e31a8eba4e606eaff67ad119bb2f54e56c",
+      "source": 101,
+      "ready": 101,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 12,
+      "native_tables": 3,
+      "previous_paper_questions": 0
+    },
+    {
+      "micro": 6,
+      "name": "MICRO 6 - Applied Microbiology",
+      "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "sha256": "074e4c6cdec076c00c289b267d24758f975d173d911b314ad747b964d5abe4f7",
+      "source": 101,
+      "ready": 98,
+      "review": 2,
+      "quarantine": 1,
+      "technical_blockers": 0,
+      "images": 12,
+      "native_tables": 0,
+      "previous_paper_questions": 0
+    },
+    {
+      "micro": 7,
+      "name": "MICRO 7 - Immunology",
+      "source_document": "app friendly format - JSO SIR 13 - Immunology.docx",
+      "sha256": "c22511774d37465259774e4c8b1fff137b89e374deebb7b0b990e8dad268653c",
+      "source": 193,
+      "ready": 192,
+      "review": 0,
+      "quarantine": 1,
+      "technical_blockers": 0,
+      "images": 1,
+      "native_tables": 1,
+      "previous_paper_questions": 31
+    }
+  ],
+  "total": {
+    "source": 797,
+    "ready": 780,
+    "review": 2,
+    "quarantine": 4,
+    "technical_blockers": 11,
+    "images": 116,
+    "native_tables": 24,
+    "previous_paper_questions": 31
+  },
+  "marks_distribution": {
+    "1.0/0.0": 797
+  },
+  "format_inventory": {
+    "bold": 796,
+    "italic": 44,
+    "underline": 11,
+    "superscript": 0,
+    "subscript": 0,
+    "bullets": 149,
+    "numbered_lists": 0,
+    "unicode_scientific": 91,
+    "multi_statement_stem": 61,
+    "match_combination_mcq": 6
+  },
+  "media_mime_counts": {
+    "image/jpeg": 42,
+    "image/png": 61,
+    "null": 11,
+    "image/gif": 2
+  },
+  "stem_images": 13,
+  "solution_images": 103,
+  "multiple_image_questions": 23,
+  "longest_explanations": [
+    {
+      "micro": 2,
+      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "source_index": 23,
+      "characters": 1769
+    },
+    {
+      "micro": 5,
+      "source_document": "app friendly format - JSO SIR 11 - VIROLOGY.docx",
+      "source_index": 33,
+      "characters": 1530
+    },
+    {
+      "micro": 6,
+      "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "source_index": 29,
+      "characters": 1302
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 102,
+      "characters": 1294
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 26,
+      "characters": 1263
+    },
+    {
+      "micro": 5,
+      "source_document": "app friendly format - JSO SIR 11 - VIROLOGY.docx",
+      "source_index": 35,
+      "characters": 1008
+    },
+    {
+      "micro": 3,
+      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "source_index": 11,
+      "characters": 945
+    },
+    {
+      "micro": 2,
+      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "source_index": 68,
+      "characters": 943
+    },
+    {
+      "micro": 5,
+      "source_document": "app friendly format - JSO SIR 11 - VIROLOGY.docx",
+      "source_index": 29,
+      "characters": 935
+    },
+    {
+      "micro": 6,
+      "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "source_index": 10,
+      "characters": 896
+    }
+  ],
+  "exact_duplicates": [
+    {
+      "classification": "EXACT STEM/OPTIONS/ANSWER — POSSIBLE SOURCE COPY DUPLICATION",
+      "same_explanation": false,
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 19
+        },
+        {
+          "micro": 2,
+          "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+          "source_index": 1
+        }
+      ]
+    },
+    {
+      "classification": "EXACT STEM/OPTIONS/ANSWER — POSSIBLE SOURCE COPY DUPLICATION",
+      "same_explanation": false,
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 24
+        },
+        {
+          "micro": 6,
+          "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+          "source_index": 2
+        }
+      ]
+    },
+    {
+      "classification": "EXACT STEM/OPTIONS/ANSWER — POSSIBLE SOURCE COPY DUPLICATION",
+      "same_explanation": true,
+      "records": [
+        {
+          "micro": 2,
+          "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+          "source_index": 96
+        },
+        {
+          "micro": 2,
+          "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+          "source_index": 97
+        }
+      ]
+    }
+  ],
+  "same_stem_differences": [
+    {
+      "different_marked_answer": false,
+      "different_explanation": true,
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 19,
+          "marked_answers": [
+            "Meuller Hinton agar "
+          ],
+          "explanation": "Correct Answer:- Option C) Meuller Hinton agar "
+        },
+        {
+          "micro": 2,
+          "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+          "source_index": 1,
+          "marked_answers": [
+            "Meuller Hinton agar "
+          ],
+          "explanation": "Correct Answer:- Option- C) Meuller Hinton agar "
+        }
+      ]
+    },
+    {
+      "different_marked_answer": false,
+      "different_explanation": true,
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 24,
+          "marked_answers": [
+            "Flushing untreated labwaste down laboratory sink "
+          ],
+          "explanation": "Correct Answer:- Option-D) Flushing untreated labwaste down laboratory sink "
+        },
+        {
+          "micro": 6,
+          "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+          "source_index": 2,
+          "marked_answers": [
+            "Flushing untreated labwaste down laboratory sink "
+          ],
+          "explanation": "Correct Answer:- Option-D:-Flushing untreated labwaste down laboratory sink "
+        }
+      ]
+    },
+    {
+      "different_marked_answer": false,
+      "different_explanation": true,
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 43,
+          "marked_answers": [
+            "White"
+          ],
+          "explanation": "Correct Answer:- Option-D) White\n\n\n\n\n\n"
+        },
+        {
+          "micro": 6,
+          "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+          "source_index": 25,
+          "marked_answers": [
+            "White"
+          ],
+          "explanation": "Answer: D – White"
+        }
+      ]
+    }
+  ],
+  "near_duplicates": [
+    {
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 29
+        },
+        {
+          "micro": 6,
+          "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+          "source_index": 21
+        }
+      ],
+      "similarity": 0.9945,
+      "classification": "NEAR DUPLICATE / REPEATED CONCEPT CANDIDATE — NO CLINICAL ADJUDICATION"
+    },
+    {
+      "records": [
+        {
+          "micro": 1,
+          "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+          "source_index": 51
+        },
+        {
+          "micro": 6,
+          "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+          "source_index": 33
+        }
+      ],
+      "similarity": 0.9637,
+      "classification": "NEAR DUPLICATE / REPEATED CONCEPT CANDIDATE — NO CLINICAL ADJUDICATION"
+    }
+  ],
+  "duplicate_method": "Exact literal stem/options/answer; normalized equal stems; near token Jaccard >= .8 and character similarity >= .9. All occurrences retained, no medical equivalence inferred.",
+  "anomalies": [
+    {
+      "micro": 1,
+      "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+      "source_index": 34,
+      "classification": "QUARANTINE",
+      "marked_answers": [],
+      "written_answer_labels": [],
+      "explanation": "Correct Answer:- Qn Cancelled",
+      "review": [],
+      "quarantine": [
+        "SOURCE QUESTION CANCELLED",
+        "MISSING/INVALID CORRECT ANSWER"
+      ],
+      "technical": [],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 2,
+      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "source_index": 20,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "C",
+          "text": "Chlamydia trachomatis "
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "C",
+          "clause": "Correct Answer:- Option-C)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Correct Answer:- Option-C) Chlamydia trachomatis \n\n\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 2,
+      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "source_index": 40,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "A",
+          "text": "Genital chlamydiasis"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "A",
+          "clause": "Correct Answer:- Option-A",
+          "offset": 0
+        }
+      ],
+      "explanation": "Correct Answer:- Option-A:-Genital chlamydiasis\n•\tSerotypes D-K (Genital Chlamydiasis)\n•\tSerotypes A, B, Ba, and C: These cause Trachoma\n•\tSerotypes L1, L2, and L3: These cause Lymphogranuloma venereum (LGV)\n\n\n\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 2,
+      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "source_index": 46,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "C",
+          "text": "Only (iii) "
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "C",
+          "clause": "Correct Answer:- Option-C)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Correct Answer:- Option-C) Only (iii) \n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 3,
+      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "source_index": 55,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "D",
+          "text": "Candida glabrata"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "D",
+          "clause": "Ans : D",
+          "offset": 8
+        }
+      ],
+      "explanation": "Correct Ans : D. Candida glabrata\n•\tDalmau plate culture: Culture on cornmeal agar can provide clue for species identification. \n•\tC. albicans produces thick walled chlamydospores.\n\n•\tCandida albicans - blastoconidia , spherical chlamydospores.\n•\tC. dubliniensis - terminal chlamydospores that occur in pairs or clusters.\n•\tCandida parapsilosis - pseudohyphae and scattered blastoconidia.\n•\t Candida tropicalis: oval blastoconidia, long pesudohyphae.\n•\tCandida krusei: pseudohyphae with blastoconidia forming cross-matchstick appearance.\n•\tCandida kefyr (pseudotropicalis) - elongated blastoconidia that tend to line up along the pseudohyphae in a \"logs in stream\" arrangement.\n•\t Candida glabrata- no pseudohyphae.\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 3,
+      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "source_index": 57,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "A",
+          "text": "Irregular staining, barrel-shaped arthrospores"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "A",
+          "clause": "Ans : A",
+          "offset": 8
+        }
+      ],
+      "explanation": "Correct Ans : A. irregular staining, barrel-shaped arthrospores\n•\tCulture\n•\tCulture on SDA produces mycelial growth, described as fragmented hyphae consisting of barrel-shaped arthrospores with alternate cells distorted (empty cells) \n•\tCoccidioides differs from other dimorphic fungi as it grows as mold at both 25°C and 37°C in usual culture media .\n•\tIt forms spherules at 37°C in certain special culture media only. \n•\tCultures are highly infectious: may lead to accidental inhalation of spores in laboratories, require biosafety level-3 precautions\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 3,
+      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "source_index": 60,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "B",
+          "text": "Hortaea werneckii"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "B",
+          "clause": "Ans : B",
+          "offset": 8
+        }
+      ],
+      "explanation": "Correct Ans : B. Hortaea werneckii\n•\tPalm - tinea nigra palmaris\n•\tSole - tinea nigra plantaris\n\n•\tInitially colonies are brown , rapidly become olive to shiny , greenish black tar-like, producing metallic sheen (drop of oil).\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 3,
+      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "source_index": 63,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "A",
+          "text": "Trichophyton rubrum"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "A",
+          "clause": "Ans : A",
+          "offset": 8
+        }
+      ],
+      "explanation": "Correct Ans : A. Trichophyton rubrum\n\n\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 16,
+      "classification": "QUARANTINE",
+      "marked_answers": [],
+      "written_answer_labels": [],
+      "explanation": "Correct Answer:-Question Cancelled",
+      "review": [],
+      "quarantine": [
+        "SOURCE QUESTION CANCELLED",
+        "MISSING/INVALID CORRECT ANSWER"
+      ],
+      "technical": [],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 69,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "D",
+          "text": "Vivax"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "D",
+          "clause": "Ans : (D)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Ans : (D) Vivax\n\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 70,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "D",
+          "text": "Have slow, undefined motility"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "D",
+          "clause": "Ans (D)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Ans (D) Have slow, undefined motility\n\n\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 71,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "B",
+          "text": "Review the fecal concentration carefully for the presence of other microorganisms that may be pathogenic"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "B",
+          "clause": "Ans : (B)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Ans : (B) Review the fecal concentration carefully for the presence of other microorganisms that may be pathogenic\n•\tEntamoeba coli is a nonpathogenic protozoan. \n•\tIts presence indicates the ingestion of fecally contaminated food or water and should lead to a closer review of the specimen for pathogenic parasites or the collection of additional specimens.",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "IMAGE-ONLY STEM — canonical required-text validation rejects it; do not invent a prompt"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 4,
+      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "source_index": 77,
+      "classification": "TECHNICAL BLOCKER",
+      "marked_answers": [
+        {
+          "label": "D",
+          "text": "Scotch tape preparation"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "D",
+          "clause": "Ans : (D)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Ans : (D) scotch tape preparation\n",
+      "review": [],
+      "quarantine": [],
+      "technical": [
+        "Unsupported media"
+      ],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 6,
+      "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "source_index": 70,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        {
+          "label": "C",
+          "text": "Standard plate count"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "D",
+          "clause": "Answer: D)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Answer: D) H₂S strip test",
+      "review": [
+        "MARKED ANSWER / WRITTEN ANSWER CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": [],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 6,
+      "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "source_index": 72,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        {
+          "label": "C",
+          "text": "Plague"
+        }
+      ],
+      "written_answer_labels": [
+        {
+          "label": "B",
+          "clause": "Answer: B)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Answer: B) Anthrax",
+      "review": [
+        "MARKED ANSWER / WRITTEN ANSWER CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": [],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 6,
+      "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "source_index": 76,
+      "classification": "QUARANTINE",
+      "marked_answers": [],
+      "written_answer_labels": [
+        {
+          "label": "C",
+          "clause": "Answer: C)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Answer: C) Implement control measures",
+      "review": [],
+      "quarantine": [
+        "MISSING/INVALID CORRECT ANSWER"
+      ],
+      "technical": [],
+      "parser_artifacts": []
+    },
+    {
+      "micro": 7,
+      "source_document": "app friendly format - JSO SIR 13 - Immunology.docx",
+      "source_index": 36,
+      "classification": "QUARANTINE",
+      "marked_answers": [],
+      "written_answer_labels": [
+        {
+          "label": "B",
+          "clause": "Correct Answer: B)",
+          "offset": 0
+        }
+      ],
+      "explanation": "Correct Answer: B) IgE",
+      "review": [],
+      "quarantine": [
+        "MISSING/INVALID CORRECT ANSWER"
+      ],
+      "technical": [],
+      "parser_artifacts": []
+    }
+  ]
+}
