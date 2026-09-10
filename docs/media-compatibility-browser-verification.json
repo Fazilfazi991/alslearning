@@ -1,0 +1,34 @@
+{
+  "results": [
+    "Admin 1440 displays image-only fallback",
+    "Admin 1440 displays both derivatives and format metadata",
+    "Admin 1440 no page overflow",
+    "Admin 1440 save keeps original empty prompt",
+    "Student 1440 image-only payload and solution protection",
+    "Student 1440 image precedes answer options",
+    "Student 1440 full-size display link available",
+    "Student 1440 refresh retains image, answer and attempt",
+    "Student 1440 no page overflow",
+    "Student 1440 submission grades and displays solution derivative",
+    "Student 1440 history retains original stem and solution after source edit",
+    "Student 1440 history no page overflow",
+    "Admin 390 displays image-only fallback",
+    "Admin 390 displays both derivatives and format metadata",
+    "Admin 390 no page overflow",
+    "Admin 390 save keeps original empty prompt",
+    "Student 390 image-only payload and solution protection",
+    "Student 390 image precedes answer options",
+    "Student 390 full-size display link available",
+    "Student 390 refresh retains image, answer and attempt",
+    "Student 390 no page overflow",
+    "Student 390 submission grades and displays solution derivative",
+    "Student 390 history retains original stem and solution after source edit",
+    "Student 390 history no page overflow",
+    "No console or runtime errors"
+  ],
+  "errors": [],
+  "attempts": [
+    "dc00ac70-ac9f-4458-b2f5-6c95ffcde7c4",
+    "f289d3a6-73a9-4ede-a9a6-4dc78ef64629"
+  ]
+}

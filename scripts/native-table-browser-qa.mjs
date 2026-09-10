@@ -7,7 +7,7 @@ const { chromium } = await import(
 );
 const { root, admin } = await clients();
 const qa = JSON.parse(readFileSync(".local-qa/native-table-qa.json", "utf8"));
-const origin = "http://localhost:3005",
+const origin = process.env.QA_ORIGIN || "http://localhost:3005",
   results = [],
   errors = [],
   attempts = [];
@@ -80,7 +80,7 @@ try {
     ok(await admin.rpc("core_save_question", { value: qa.q }));
     ok(
       await admin.rpc("core_save_test", {
-        value: { ...qa.test, status: "active" },
+        value: { ...qa.test, status: "active", max_attempts: 100 },
         question_ids: [qa.q.id],
         batch_ids: [qa.fixture.batch.id],
       }),

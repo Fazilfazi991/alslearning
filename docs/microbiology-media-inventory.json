@@ -539,6 +539,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 14,
+    "alt_text": "A diagram of a cell structure\n\nDescription automatically generated",
     "dimensions": [
       996,
       601
@@ -595,13 +596,47 @@
     "position": 1,
     "relationship": "rId11",
     "original_filename": "word/media/image7.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb",
     "bytes": 295444,
     "frames": 1,
     "paragraph_index": 3,
     "after_run": 0,
     "source_sequence": 20,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb.emf",
+        "filename": "word/media/image7.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb",
+        "bytes": 295444
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\cf73cdfe65e8ac5cfa70ccf22ac23befe972309b9b91de216156c751f20fc5b3.png",
+        "mime_type": "image/png",
+        "sha256": "abd5a6b0f106c5e7232c5d1a6f684568bf85043edc8eb932393cbf3f41a92d39",
+        "width": 2817,
+        "height": 1730,
+        "bytes": 1831470
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4292221,
+            "cy": 2636392
+          }
+        },
+        "cache_key": "cf73cdfe65e8ac5cfa70ccf22ac23befe972309b9b91de216156c751f20fc5b3"
+      }
+    },
     "dimensions": [
       5169,
       3174
@@ -763,13 +798,47 @@
     "position": 1,
     "relationship": "rId19",
     "original_filename": "word/media/image15.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228",
     "bytes": 153320,
     "frames": 1,
     "paragraph_index": 5,
     "after_run": 0,
     "source_sequence": 40,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228.emf",
+        "filename": "word/media/image15.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228",
+        "bytes": 153320
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\e84cd7221dbe5f687f97d91f11035f9cd16d621e89690fc3fb97f0d630a3e26b.png",
+        "mime_type": "image/png",
+        "sha256": "331855a176c1f40c344f454cff9e5097068a677e4a246f18356a172288da86e4",
+        "width": 2853,
+        "height": 371,
+        "bytes": 498302
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4346575,
+            "cy": 564442
+          }
+        },
+        "cache_key": "e84cd7221dbe5f687f97d91f11035f9cd16d621e89690fc3fb97f0d630a3e26b"
+      }
+    },
     "dimensions": [
       6590,
       851
@@ -784,13 +853,47 @@
     "position": 2,
     "relationship": "rId20",
     "original_filename": "word/media/image16.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f",
     "bytes": 111492,
     "frames": 1,
     "paragraph_index": 6,
     "after_run": 0,
     "source_sequence": 40,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f.emf",
+        "filename": "word/media/image16.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f",
+        "bytes": 111492
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\1d455842cf60baf6c0bc9afdc2bb118239b4435bd8de6329c8448d1619ad6cd8.png",
+        "mime_type": "image/png",
+        "sha256": "7c8705289555a3aff36679ee9f2c52f3f4e22c398a28e47e210928747209cf00",
+        "width": 2853,
+        "height": 263,
+        "bytes": 360502
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4346575,
+            "cy": 399415
+          }
+        },
+        "cache_key": "1d455842cf60baf6c0bc9afdc2bb118239b4435bd8de6329c8448d1619ad6cd8"
+      }
+    },
     "dimensions": [
       6590,
       600
@@ -805,13 +908,47 @@
     "position": 0,
     "relationship": "rId21",
     "original_filename": "word/media/image17.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18",
     "bytes": 2035708,
     "frames": 1,
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 46,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18.emf",
+        "filename": "word/media/image17.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18",
+        "bytes": 2035708
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\d574a378103bb0860f32847fee891c9ebba147dc4f904f1c03539541d86cc3f8.png",
+        "mime_type": "image/png",
+        "sha256": "aa855051d34b04c0dfa6634661571c50e66eb6133d53e78e045eea2c668702d3",
+        "width": 2356,
+        "height": 1903,
+        "bytes": 2457695
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 53478,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 3589361,
+            "cy": 2900045
+          }
+        },
+        "cache_key": "d574a378103bb0860f32847fee891c9ebba147dc4f904f1c03539541d86cc3f8"
+      }
+    },
     "dimensions": [
       2120,
       2046
@@ -875,6 +1012,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 71,
+    "alt_text": "Neisseria Meningitidis - New",
     "dimensions": [
       277,
       182
@@ -938,6 +1076,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 78,
+    "alt_text": "A diagram of a cell structure\n\nDescription automatically generated",
     "dimensions": [
       996,
       601
@@ -1022,6 +1161,7 @@
     "paragraph_index": 3,
     "after_run": 0,
     "source_sequence": 88,
+    "alt_text": "The bulls-eye rash of Lyme disease: Investigating the cutaneous  host-pathogen dynamics of erythema migrans.",
     "dimensions": [
       300,
       446
@@ -1204,13 +1344,47 @@
     "position": 0,
     "relationship": "rId9",
     "original_filename": "word/media/image5.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1",
     "bytes": 4604604,
     "frames": 1,
     "paragraph_index": 3,
     "after_run": 0,
     "source_sequence": 55,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1.emf",
+        "filename": "word/media/image5.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1",
+        "bytes": 4604604
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\676d75341cb9575768deb5226eb3e2197d1a9f3ccb201abda11346f8b13501c0.png",
+        "mime_type": "image/png",
+        "sha256": "e8f92523fac1ecf0ccaafb8438b853d7fe937264c83a93d2e4edbb5ca6019012",
+        "width": 2727,
+        "height": 1037,
+        "bytes": 4320318
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4155744,
+            "cy": 1580068
+          }
+        },
+        "cache_key": "676d75341cb9575768deb5226eb3e2197d1a9f3ccb201abda11346f8b13501c0"
+      }
+    },
     "dimensions": [
       5953,
       2264
@@ -1232,6 +1406,7 @@
     "paragraph_index": 11,
     "after_run": 0,
     "source_sequence": 55,
+    "alt_text": "Cornmeal Agar with Tween-80 Inoculation for Candida species: 1 ...",
     "dimensions": [
       850,
       674
@@ -1246,13 +1421,47 @@
     "position": 0,
     "relationship": "rId11",
     "original_filename": "word/media/image7.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac",
     "bytes": 648720,
     "frames": 1,
     "paragraph_index": 6,
     "after_run": 0,
     "source_sequence": 57,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac.emf",
+        "filename": "word/media/image7.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac",
+        "bytes": 648720
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\8a4f22161066b2490253710e0d2fb0bffb7444a237c9da6817d710b44d4d9a47.png",
+        "mime_type": "image/png",
+        "sha256": "9c598faca89ad9507b38412c98f0a61f0f9b6dfcc46ed3ae9a2e2d018678c5a5",
+        "width": 2830,
+        "height": 867,
+        "bytes": 4114272
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4312693,
+            "cy": 1321169
+          }
+        },
+        "cache_key": "8a4f22161066b2490253710e0d2fb0bffb7444a237c9da6817d710b44d4d9a47"
+      }
+    },
     "dimensions": [
       7261,
       2225
@@ -1295,6 +1504,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 59,
+    "alt_text": "Lactophenol cotton blue wet mount showing club shaped macroconidia of ...",
     "dimensions": [
       374,
       346
@@ -1372,13 +1582,47 @@
     "position": 1,
     "relationship": "rId17",
     "original_filename": "word/media/image13.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd",
     "bytes": 5505608,
     "frames": 1,
     "paragraph_index": 5,
     "after_run": 0,
     "source_sequence": 60,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd.emf",
+        "filename": "word/media/image13.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd",
+        "bytes": 5505608
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\8c32548ad78973f012f2dd9e929b225077b90f49fbbb0de1addeacc08d8dd80a.png",
+        "mime_type": "image/png",
+        "sha256": "3a89019958a3d603fe838a735551bff5b1f0e35c342b4188039ce702dc891ca7",
+        "width": 2763,
+        "height": 1173,
+        "bytes": 6797139
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4210335,
+            "cy": 1786684
+          }
+        },
+        "cache_key": "8c32548ad78973f012f2dd9e929b225077b90f49fbbb0de1addeacc08d8dd80a"
+      }
+    },
     "dimensions": [
       7712,
       3276
@@ -1400,6 +1644,7 @@
     "paragraph_index": 2,
     "after_run": 0,
     "source_sequence": 62,
+    "alt_text": "Arthroconidium - Wikipedia",
     "dimensions": [
       563,
       383
@@ -1435,13 +1680,47 @@
     "position": 1,
     "relationship": "rId20",
     "original_filename": "word/media/image16.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c",
     "bytes": 20423184,
     "frames": 1,
     "paragraph_index": 3,
     "after_run": 0,
     "source_sequence": 63,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c.emf",
+        "filename": "word/media/image16.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c",
+        "bytes": 20423184
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\945ecf6cc87f8496d7b19cb650479f2a12783f17a4abdbd1bb647d25447b5d37.png",
+        "mime_type": "image/png",
+        "sha256": "e7fd0be18877b4dcffc20e2a4c1fb46ee3fd71bd28e7c2db50bdbcd7362ca79b",
+        "width": 2633,
+        "height": 929,
+        "bytes": 4723270
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4012442,
+            "cy": 1415659
+          }
+        },
+        "cache_key": "945ecf6cc87f8496d7b19cb650479f2a12783f17a4abdbd1bb647d25447b5d37"
+      }
+    },
     "dimensions": [
       6065,
       2145
@@ -1631,6 +1910,7 @@
     "paragraph_index": 4,
     "after_run": 0,
     "source_sequence": 68,
+    "alt_text": "Entamoeba Coli Vs Histolytica",
     "dimensions": [
       1024,
       778
@@ -1645,13 +1925,47 @@
     "position": 0,
     "relationship": "rId16",
     "original_filename": "word/media/image9.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d",
     "bytes": 395472,
     "frames": 1,
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 69,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d.emf",
+        "filename": "word/media/image9.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d",
+        "bytes": 395472
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\4501466a06852574f637dfd9cb48800de46b2770af09ddc271d938cfa254d135.png",
+        "mime_type": "image/png",
+        "sha256": "077460488f94475dffd95edcf23ac90e78af5ac8b639fe3767d68f776298058f",
+        "width": 2857,
+        "height": 989,
+        "bytes": 1069186
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4352925,
+            "cy": 1506503
+          }
+        },
+        "cache_key": "4501466a06852574f637dfd9cb48800de46b2770af09ddc271d938cfa254d135"
+      }
+    },
     "dimensions": [
       7107,
       2464
@@ -1694,6 +2008,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 70,
+    "alt_text": "Entamoeba coli, smear showing cysts * – Instruments Direct",
     "dimensions": [
       200,
       133
@@ -1729,13 +2044,47 @@
     "position": 1,
     "relationship": "rId20",
     "original_filename": "word/media/image13.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19",
     "bytes": 639564,
     "frames": 1,
     "paragraph_index": 2,
     "after_run": 0,
     "source_sequence": 70,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19.emf",
+        "filename": "word/media/image13.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19",
+        "bytes": 639564
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\3778ee97b1b6a2ea931ca5c0fc84f80180026e03ecdef0565a2c8b4cdc137693.png",
+        "mime_type": "image/png",
+        "sha256": "a58a72ea5a77c42c91ad64617fcfd5d6e6078af7b2d57d227a92d608faa15caa",
+        "width": 756,
+        "height": 1857,
+        "bytes": 2482524
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 1152031,
+            "cy": 2828925
+          }
+        },
+        "cache_key": "3778ee97b1b6a2ea931ca5c0fc84f80180026e03ecdef0565a2c8b4cdc137693"
+      }
+    },
     "dimensions": [
       1616,
       3980
@@ -1757,6 +2106,7 @@
     "paragraph_index": 3,
     "after_run": 0,
     "source_sequence": 70,
+    "alt_text": "Differences Between Entamoeba histolytica and Entamoeba coli",
     "dimensions": [
       949,
       569
@@ -1778,6 +2128,7 @@
     "paragraph_index": 0,
     "after_run": 0,
     "source_sequence": 71,
+    "alt_text": "Entamoeba coli, smear showing cysts * – Instruments Direct",
     "dimensions": [
       200,
       133
@@ -1799,6 +2150,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 72,
+    "alt_text": "Giardia trophozoite in a fecal smear (direct smear). Image taken at ...",
     "dimensions": [
       456,
       456
@@ -1841,6 +2193,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 74,
+    "alt_text": "SOLUTION: Parasites causing autoinfection - Studypool",
     "dimensions": [
       2000,
       1125
@@ -1862,6 +2215,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 76,
+    "alt_text": "Enterobius Vermicularis Egg",
     "dimensions": [
       225,
       225
@@ -1883,6 +2237,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 77,
+    "alt_text": "Enterobius Vermicularis Egg",
     "dimensions": [
       225,
       225
@@ -1897,13 +2252,47 @@
     "position": 0,
     "relationship": "rId26",
     "original_filename": "word/media/image19.emf",
-    "mime_type": null,
+    "mime_type": "image/x-emf",
     "sha256": "62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2",
     "bytes": 433932,
     "frames": 1,
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 77,
+    "derivative": {
+      "original": {
+        "local_path": ".local-qa\\media-derivatives\\62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2.emf",
+        "filename": "word/media/image19.emf",
+        "mime_type": "image/x-emf",
+        "sha256": "62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2",
+        "bytes": 433932
+      },
+      "display": {
+        "local_path": ".local-qa\\media-derivatives\\664ddc938951448addf3845a8a9e83191a1687b0c9a00453ccf79c8e0d70dc17.png",
+        "mime_type": "image/png",
+        "sha256": "132eef529c4ab0559cd57014f196a4e4f7839eaaccb33eae731e3ddbffd549ea",
+        "width": 2657,
+        "height": 1549,
+        "bytes": 1562007
+      },
+      "conversion": {
+        "kind": "windows-gdiplus-emf-docx-png-600dpi-white",
+        "version": "1",
+        "presentation": {
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "extent_emu": {
+            "cx": 4048125,
+            "cy": 2360286
+          }
+        },
+        "cache_key": "664ddc938951448addf3845a8a9e83191a1687b0c9a00453ccf79c8e0d70dc17"
+      }
+    },
     "dimensions": [
       6121,
       3578
@@ -2051,6 +2440,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 33,
+    "alt_text": "No photo description available.",
     "dimensions": [
       417,
       417
@@ -2072,6 +2462,7 @@
     "paragraph_index": 15,
     "after_run": 0,
     "source_sequence": 33,
+    "alt_text": "No photo description available.",
     "dimensions": [
       526,
       526
@@ -2135,6 +2526,7 @@
     "paragraph_index": 1,
     "after_run": 0,
     "source_sequence": 88,
+    "alt_text": "Hepatitis B Serology | Test Findings - MedSchool",
     "dimensions": [
       1200,
       870

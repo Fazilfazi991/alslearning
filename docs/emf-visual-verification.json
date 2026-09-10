@@ -1,0 +1,167 @@
+[
+  {
+    "original_sha256": "bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb",
+    "display_sha256": "abd5a6b0f106c5e7232c5d1a6f684568bf85043edc8eb932393cbf3f41a92d39",
+    "word_source_page": 10,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228",
+    "display_sha256": "331855a176c1f40c344f454cff9e5097068a677e4a246f18356a172288da86e4",
+    "word_source_page": 19,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f",
+    "display_sha256": "7c8705289555a3aff36679ee9f2c52f3f4e22c398a28e47e210928747209cf00",
+    "word_source_page": 19,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18",
+    "display_sha256": "aa855051d34b04c0dfa6634661571c50e66eb6133d53e78e045eea2c668702d3",
+    "word_source_page": 22,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "Source-author crop right 53.478% preserved"
+  },
+  {
+    "original_sha256": "0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1",
+    "display_sha256": "e8f92523fac1ecf0ccaafb8438b853d7fe937264c83a93d2e4edbb5ca6019012",
+    "word_source_page": 18,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac",
+    "display_sha256": "9c598faca89ad9507b38412c98f0a61f0f9b6dfcc46ed3ae9a2e2d018678c5a5",
+    "word_source_page": 20,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd",
+    "display_sha256": "3a89019958a3d603fe838a735551bff5b1f0e35c342b4188039ce702dc891ca7",
+    "word_source_page": 22,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c",
+    "display_sha256": "e7fd0be18877b4dcffc20e2a4c1fb46ee3fd71bd28e7c2db50bdbcd7362ca79b",
+    "word_source_page": 23,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d",
+    "display_sha256": "077460488f94475dffd95edcf23ac90e78af5ac8b639fe3767d68f776298058f",
+    "word_source_page": 25,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19",
+    "display_sha256": "a58a72ea5a77c42c91ad64617fcfd5d6e6078af7b2d57d227a92d608faa15caa",
+    "word_source_page": 26,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  },
+  {
+    "original_sha256": "62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2",
+    "display_sha256": "132eef529c4ab0559cd57014f196a4e4f7839eaaccb33eae731e3ddbffd549ea",
+    "word_source_page": 30,
+    "visual_fidelity": "PASS",
+    "checks": [
+      "complete source-visible content",
+      "labels and symbols retained",
+      "arrows and lines retained",
+      "source colors and white background retained",
+      "source DOCX aspect ratio and explicit crop retained",
+      "readable text"
+    ],
+    "note": "No inferred crop"
+  }
+]

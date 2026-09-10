@@ -231,14 +231,16 @@ export function CoreTestEngine({
               {String(remaining % 60).padStart(2, "0")}
             </strong>
           </div>
-          <div className="min-w-0 whitespace-pre-wrap text-lg font-bold">
-            <RichContent
-              value={q.prompt_rich}
-              fallback={q.prompt}
-              media={q.stem_media}
-              kind="stem"
-            />
-          </div>
+          {(q.prompt.trim() || mediaPositions(q.prompt_rich).length > 0) && (
+            <div className="min-w-0 whitespace-pre-wrap text-lg font-bold">
+              <RichContent
+                value={q.prompt_rich}
+                fallback={q.prompt}
+                media={q.stem_media}
+                kind="stem"
+              />
+            </div>
+          )}
           <QuestionGallery
             kind="stem"
             media={mediaPositions(q.prompt_rich).length ? [] : q.stem_media}
@@ -310,14 +312,17 @@ export function CoreTestEngine({
               </p>
               {review.answers?.map((a) => (
                 <article className="mt-5 border-t pt-4" key={a.question_id}>
-                  <div className="min-w-0 font-bold">
-                    <RichContent
-                      value={a.prompt_rich}
-                      fallback={a.prompt}
-                      media={a.stem_media}
-                      kind="stem"
-                    />
-                  </div>
+                  {(a.prompt.trim() ||
+                    mediaPositions(a.prompt_rich).length > 0) && (
+                    <div className="min-w-0 font-bold">
+                      <RichContent
+                        value={a.prompt_rich}
+                        fallback={a.prompt}
+                        media={a.stem_media}
+                        kind="stem"
+                      />
+                    </div>
+                  )}
                   <QuestionGallery
                     kind="stem"
                     media={

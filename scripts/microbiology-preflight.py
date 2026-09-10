@@ -10,6 +10,7 @@ import re
 import xml.etree.ElementTree as ET
 import zipfile
 from PIL import Image
+from media_derivatives import prepare_emf
 
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location("parser",ROOT/"scripts/pathology-fidelity-preflight.py")
@@ -22,10 +23,16 @@ location=lambda q:{"micro":q["micro"],"source_document":q["source_document"],"so
 def run():
     records,files,media_inventory=[],[],[]
     baseline=json.loads((ROOT/"docs/native-table-feature-inventory.json").read_text(encoding="utf-8"))
+    reviewed=json.loads((ROOT/'docs/emf-visual-verification.json').read_text(encoding='utf-8'))
+    def convert(data,filename,presentation):
+        result=prepare_emf(data,filename,presentation,ROOT/'.local-qa/media-derivatives')
+        if not any(r['original_sha256']==result['original']['sha256'] and r['display_sha256']==result['display']['sha256'] and r['visual_fidelity']=='PASS' for r in reviewed):
+            raise ValueError('Derivative has not passed source visual comparison')
+        return result
     for i,source in enumerate(baseline["files"],1):
         path=ROOT/"MOQ"/source["source_document"]
         assert hashlib.sha256(path.read_bytes()).hexdigest()==source["sha256"],"Source changed"
-        questions=parser.parse(path)
+        questions=parser.parse(path,media_converter=convert)
         with zipfile.ZipFile(path) as archive:
             xml=ET.fromstring(archive.read("word/document.xml"))
             wrappers=xml.findall("w:body/w:tbl",parser.NS)
@@ -42,9 +49,6 @@ def run():
                 elif marked and any(ord(a["label"])-65 not in marked for a in q["written_answer_labels"]):q["review_reasons"].append("MARKED ANSWER / WRITTEN ANSWER CONFLICT")
                 if len(marked)>1:q["review_reasons"].append("MULTIPLE CORRECT MARKERS — CONFIRM MULTIPLE-ANSWER INTENT")
                 for error in q["structural_errors"]:
-                    if error == "Empty stem" and any(m["kind"]=="stem" for m in q["media"]):
-                        q["technical_reasons"].append("IMAGE-ONLY STEM — canonical required-text validation rejects it; do not invent a prompt")
-                        continue
                     if error in ("Missing correct answer","Malformed options","Invalid marks","Empty stem"):
                         if error!="Missing correct answer":q["quarantine_reasons"].append(error.upper())
                     else:q["technical_reasons"].append(error)
@@ -72,6 +76,7 @@ def run():
         subset=[q for q in records if q["micro"]==i]
         count=Counter(q["classification"] for q in subset)
         files.append({"micro":i,"name":f"MICRO {i} - {NAMES[i-1]}","source_document":path.name,"sha256":source["sha256"],"source":len(subset),"ready":count["STRUCTURALLY READY"],"review":count["CONTENT REVIEW REQUIRED"],"quarantine":count["QUARANTINE"],"technical_blockers":count["TECHNICAL BLOCKER"],"images":sum(len(q["media"]) for q in subset),"native_tables":sum(q["native_tables"] for q in subset),"previous_paper_questions":sum(bool(q["source_reference_candidates"]) for q in subset)})
+        files[-1].update({"emfs":sum(m['mime_type']=='image/x-emf' for q in subset for m in q['media']),"image_only_stems":sum(not q['prompt'].strip() and any(m['kind']=='stem' for m in q['media']) for q in subset)})
     exact,stems=defaultdict(list),defaultdict(list)
     for q in records:
         signature=(q["prompt"],tuple((o["content"],o["correct"]) for o in q["options"]))
@@ -95,6 +100,7 @@ def run():
     assert len({q["source_key"] for q in records})==len(records)
     summary={"scope":"LOCAL PREFLIGHT ONLY — ZERO IMPORTS", "files":files,"total":{key:sum(f[key] for f in files) for key in ("source","ready","review","quarantine","technical_blockers","images","native_tables","previous_paper_questions")},"marks_distribution":dict(Counter(f'{q.get("marks")}/{q.get("negative_marks")}' for q in records)),"format_inventory":{k:sum(q["format_inventory"][k] for q in records) for k in records[0]["format_inventory"]},"media_mime_counts":dict(Counter(m["mime_type"] for m in media_inventory)),"stem_images":sum(m["kind"]=="stem" for m in media_inventory),"solution_images":sum(m["kind"]=="solution" for m in media_inventory),"multiple_image_questions":sum(len(q["media"])>1 for q in records),"longest_explanations":[{**location(q),"characters":q["explanation_characters"]} for q in sorted(records,key=lambda q:q["explanation_characters"],reverse=True)[:10]],"exact_duplicates":duplicate_groups,"same_stem_differences":same_stem,"near_duplicates":near,"duplicate_method":"Exact literal stem/options/answer; normalized equal stems; near token Jaccard >= .8 and character similarity >= .9. All occurrences retained, no medical equivalence inferred.","anomalies":[{**location(q),"classification":q["classification"],"marked_answers":[{"label":chr(65+i),"text":o["content"]} for i,o in enumerate(q["options"]) if o["correct"]],"written_answer_labels":q["written_answer_labels"],"explanation":q["explanation"],"review":q["review_reasons"],"quarantine":q["quarantine_reasons"],"technical":q["technical_reasons"],"parser_artifacts":q["parser_artifacts"]} for q in records if q["classification"]!="STRUCTURALLY READY"]}
     (ROOT/".local-qa/microbiology-preflight-records.json").write_text(json.dumps(records,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    summary['total'].update({key:sum(f[key] for f in files) for key in ('emfs','image_only_stems')})
     (ROOT/"docs/microbiology-preflight.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     (ROOT/"docs/microbiology-media-inventory.json").write_text(json.dumps(media_inventory,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"files":files,"total":summary["total"],"anomalies":len(summary["anomalies"]),"exact_groups":len(duplicate_groups),"near_pairs":len(near)},indent=2))

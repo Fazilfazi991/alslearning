@@ -1,5 +1,9 @@
 import { PrivateImage } from "./private-image";
-import { orderedMedia, type QuestionMedia } from "@/lib/question-media";
+import {
+  mediaAlt,
+  orderedMedia,
+  type QuestionMedia,
+} from "@/lib/question-media";
 export function QuestionGallery({
   media,
   kind,
@@ -17,12 +21,17 @@ export function QuestionGallery({
       />
     );
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div
+      className={`grid gap-3 ${orderedMedia(media, kind).length > 1 ? "sm:grid-cols-2" : ""}`}
+    >
       {orderedMedia(media, kind).map((m, i) => (
         <figure key={m.id}>
           <PrivateImage
             path={m.storage_path}
-            alt={`${kind === "stem" ? "Question" : "Solution"} image ${i + 1}`}
+            alt={mediaAlt(
+              m,
+              `${kind === "stem" ? "Question" : "Solution"} image ${i + 1}`,
+            )}
           />
           <figcaption className="text-xs text-muted">Image {i + 1}</figcaption>
         </figure>

@@ -38,14 +38,21 @@ export function PrivateImage({
   return state.error ? (
     <p role="alert">Image unavailable: {state.error}</p>
   ) : state.url ? (
-    <Image
-      unoptimized
-      src={state.url}
-      alt={alt}
-      width={900}
-      height={600}
-      className="my-3 h-auto max-h-96 w-full rounded-lg object-contain"
-    />
+    <a
+      href={state.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Open full-size ${alt}`}
+    >
+      <Image
+        unoptimized
+        src={state.url}
+        alt={alt}
+        width={900}
+        height={600}
+        className="my-3 h-auto max-h-96 w-full rounded-lg object-contain"
+      />
+    </a>
   ) : (
     <p>Loading image…</p>
   );

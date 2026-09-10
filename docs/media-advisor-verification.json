@@ -1,0 +1,9 @@
+{
+  "project": "xstssknlgdraulebdsfd",
+  "counts": {
+    "anon_security_definer_function_executable": 2,
+    "authenticated_security_definer_function_executable": 18,
+    "auth_leaked_password_protection": 1
+  },
+  "new_private_helpers_flagged": []
+}

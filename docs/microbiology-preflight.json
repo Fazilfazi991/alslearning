@@ -13,7 +13,9 @@
       "technical_blockers": 0,
       "images": 22,
       "native_tables": 7,
-      "previous_paper_questions": 0
+      "previous_paper_questions": 0,
+      "emfs": 0,
+      "image_only_stems": 0
     },
     {
       "micro": 2,
@@ -21,13 +23,15 @@
       "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
       "sha256": "29439b42a1c3584afd9f096ef45d6e38187a31e06d8f137ba019a04449ed575c",
       "source": 102,
-      "ready": 99,
+      "ready": 102,
       "review": 0,
       "quarantine": 0,
-      "technical_blockers": 3,
+      "technical_blockers": 0,
       "images": 31,
       "native_tables": 8,
-      "previous_paper_questions": 0
+      "previous_paper_questions": 0,
+      "emfs": 4,
+      "image_only_stems": 0
     },
     {
       "micro": 3,
@@ -35,13 +39,15 @@
       "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
       "sha256": "eabc7021575dcc137487eb8ae25831302b11dd96fa8dd2e3dad044afe8c7c7de",
       "source": 100,
-      "ready": 96,
+      "ready": 100,
       "review": 0,
       "quarantine": 0,
-      "technical_blockers": 4,
+      "technical_blockers": 0,
       "images": 16,
       "native_tables": 2,
-      "previous_paper_questions": 0
+      "previous_paper_questions": 0,
+      "emfs": 4,
+      "image_only_stems": 0
     },
     {
       "micro": 4,
@@ -49,13 +55,15 @@
       "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
       "sha256": "ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc",
       "source": 102,
-      "ready": 97,
+      "ready": 101,
       "review": 0,
       "quarantine": 1,
-      "technical_blockers": 4,
+      "technical_blockers": 0,
       "images": 22,
       "native_tables": 3,
-      "previous_paper_questions": 0
+      "previous_paper_questions": 0,
+      "emfs": 3,
+      "image_only_stems": 1
     },
     {
       "micro": 5,
@@ -69,7 +77,9 @@
       "technical_blockers": 0,
       "images": 12,
       "native_tables": 3,
-      "previous_paper_questions": 0
+      "previous_paper_questions": 0,
+      "emfs": 0,
+      "image_only_stems": 0
     },
     {
       "micro": 6,
@@ -83,7 +93,9 @@
       "technical_blockers": 0,
       "images": 12,
       "native_tables": 0,
-      "previous_paper_questions": 0
+      "previous_paper_questions": 0,
+      "emfs": 0,
+      "image_only_stems": 0
     },
     {
       "micro": 7,
@@ -97,18 +109,22 @@
       "technical_blockers": 0,
       "images": 1,
       "native_tables": 1,
-      "previous_paper_questions": 31
+      "previous_paper_questions": 31,
+      "emfs": 0,
+      "image_only_stems": 0
     }
   ],
   "total": {
     "source": 797,
-    "ready": 780,
+    "ready": 791,
     "review": 2,
     "quarantine": 4,
-    "technical_blockers": 11,
+    "technical_blockers": 0,
     "images": 116,
     "native_tables": 24,
-    "previous_paper_questions": 31
+    "previous_paper_questions": 31,
+    "emfs": 11,
+    "image_only_stems": 1
   },
   "marks_distribution": {
     "1.0/0.0": 797
@@ -128,7 +144,7 @@
   "media_mime_counts": {
     "image/jpeg": 42,
     "image/png": 61,
-    "null": 11,
+    "image/x-emf": 11,
     "image/gif": 2
   },
   "stem_images": 13,
@@ -373,188 +389,6 @@
       "parser_artifacts": []
     },
     {
-      "micro": 2,
-      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
-      "source_index": 20,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "C",
-          "text": "Chlamydia trachomatis "
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "C",
-          "clause": "Correct Answer:- Option-C)",
-          "offset": 0
-        }
-      ],
-      "explanation": "Correct Answer:- Option-C) Chlamydia trachomatis \n\n\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 2,
-      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
-      "source_index": 40,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "A",
-          "text": "Genital chlamydiasis"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "A",
-          "clause": "Correct Answer:- Option-A",
-          "offset": 0
-        }
-      ],
-      "explanation": "Correct Answer:- Option-A:-Genital chlamydiasis\n•\tSerotypes D-K (Genital Chlamydiasis)\n•\tSerotypes A, B, Ba, and C: These cause Trachoma\n•\tSerotypes L1, L2, and L3: These cause Lymphogranuloma venereum (LGV)\n\n\n\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 2,
-      "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
-      "source_index": 46,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "C",
-          "text": "Only (iii) "
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "C",
-          "clause": "Correct Answer:- Option-C)",
-          "offset": 0
-        }
-      ],
-      "explanation": "Correct Answer:- Option-C) Only (iii) \n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 3,
-      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
-      "source_index": 55,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "D",
-          "text": "Candida glabrata"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "D",
-          "clause": "Ans : D",
-          "offset": 8
-        }
-      ],
-      "explanation": "Correct Ans : D. Candida glabrata\n•\tDalmau plate culture: Culture on cornmeal agar can provide clue for species identification. \n•\tC. albicans produces thick walled chlamydospores.\n\n•\tCandida albicans - blastoconidia , spherical chlamydospores.\n•\tC. dubliniensis - terminal chlamydospores that occur in pairs or clusters.\n•\tCandida parapsilosis - pseudohyphae and scattered blastoconidia.\n•\t Candida tropicalis: oval blastoconidia, long pesudohyphae.\n•\tCandida krusei: pseudohyphae with blastoconidia forming cross-matchstick appearance.\n•\tCandida kefyr (pseudotropicalis) - elongated blastoconidia that tend to line up along the pseudohyphae in a \"logs in stream\" arrangement.\n•\t Candida glabrata- no pseudohyphae.\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 3,
-      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
-      "source_index": 57,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "A",
-          "text": "Irregular staining, barrel-shaped arthrospores"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "A",
-          "clause": "Ans : A",
-          "offset": 8
-        }
-      ],
-      "explanation": "Correct Ans : A. irregular staining, barrel-shaped arthrospores\n•\tCulture\n•\tCulture on SDA produces mycelial growth, described as fragmented hyphae consisting of barrel-shaped arthrospores with alternate cells distorted (empty cells) \n•\tCoccidioides differs from other dimorphic fungi as it grows as mold at both 25°C and 37°C in usual culture media .\n•\tIt forms spherules at 37°C in certain special culture media only. \n•\tCultures are highly infectious: may lead to accidental inhalation of spores in laboratories, require biosafety level-3 precautions\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 3,
-      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
-      "source_index": 60,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "B",
-          "text": "Hortaea werneckii"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "B",
-          "clause": "Ans : B",
-          "offset": 8
-        }
-      ],
-      "explanation": "Correct Ans : B. Hortaea werneckii\n•\tPalm - tinea nigra palmaris\n•\tSole - tinea nigra plantaris\n\n•\tInitially colonies are brown , rapidly become olive to shiny , greenish black tar-like, producing metallic sheen (drop of oil).\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 3,
-      "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
-      "source_index": 63,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "A",
-          "text": "Trichophyton rubrum"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "A",
-          "clause": "Ans : A",
-          "offset": 8
-        }
-      ],
-      "explanation": "Correct Ans : A. Trichophyton rubrum\n\n\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
       "micro": 4,
       "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
       "source_index": 16,
@@ -568,110 +402,6 @@
         "MISSING/INVALID CORRECT ANSWER"
       ],
       "technical": [],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 4,
-      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
-      "source_index": 69,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "D",
-          "text": "Vivax"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "D",
-          "clause": "Ans : (D)",
-          "offset": 0
-        }
-      ],
-      "explanation": "Ans : (D) Vivax\n\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 4,
-      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
-      "source_index": 70,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "D",
-          "text": "Have slow, undefined motility"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "D",
-          "clause": "Ans (D)",
-          "offset": 0
-        }
-      ],
-      "explanation": "Ans (D) Have slow, undefined motility\n\n\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 4,
-      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
-      "source_index": 71,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "B",
-          "text": "Review the fecal concentration carefully for the presence of other microorganisms that may be pathogenic"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "B",
-          "clause": "Ans : (B)",
-          "offset": 0
-        }
-      ],
-      "explanation": "Ans : (B) Review the fecal concentration carefully for the presence of other microorganisms that may be pathogenic\n•\tEntamoeba coli is a nonpathogenic protozoan. \n•\tIts presence indicates the ingestion of fecally contaminated food or water and should lead to a closer review of the specimen for pathogenic parasites or the collection of additional specimens.",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "IMAGE-ONLY STEM — canonical required-text validation rejects it; do not invent a prompt"
-      ],
-      "parser_artifacts": []
-    },
-    {
-      "micro": 4,
-      "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
-      "source_index": 77,
-      "classification": "TECHNICAL BLOCKER",
-      "marked_answers": [
-        {
-          "label": "D",
-          "text": "Scotch tape preparation"
-        }
-      ],
-      "written_answer_labels": [
-        {
-          "label": "D",
-          "clause": "Ans : (D)",
-          "offset": 0
-        }
-      ],
-      "explanation": "Ans : (D) scotch tape preparation\n",
-      "review": [],
-      "quarantine": [],
-      "technical": [
-        "Unsupported media"
-      ],
       "parser_artifacts": []
     },
     {

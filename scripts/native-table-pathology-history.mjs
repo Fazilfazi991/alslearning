@@ -6,6 +6,7 @@ const { chromium } = await import(
   pathToFileURL(process.env.PLAYWRIGHT_MODULE).href
 );
 const { root } = await clients();
+const origin = process.env.QA_ORIGIN || "http://localhost:3005";
 const qa = JSON.parse(
   readFileSync(".local-qa/pathology-acceptance.json", "utf8"),
 );
@@ -29,9 +30,9 @@ try {
       }),
     );
     await page.goto(
-      `http://localhost:3005/auth/callback?token_hash=${link.properties.hashed_token}&type=magiclink`,
+      `${origin}/auth/callback?token_hash=${link.properties.hashed_token}&type=magiclink`,
     );
-    await page.goto(`http://localhost:3005/student/exams/${qa.test_slug}`);
+    await page.goto(`${origin}/student/exams/${qa.test_slug}`);
     await page
       .getByRole("button", { name: "View result", exact: true })
       .first()

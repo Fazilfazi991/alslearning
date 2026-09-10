@@ -34,6 +34,7 @@ import {
   type QuestionMedia,
 } from "@/lib/question-media";
 import { PrivateImage } from "@/components/learning/private-image";
+import { mediaAlt, questionLabel, conversionLabel } from "@/lib/question-media";
 
 export function CoreManager({
   mode,
@@ -125,7 +126,7 @@ export function CoreManager({
     const isQuestion = "prompt" in x;
     const searchable = isQuestion
       ? [
-          x.prompt,
+          questionLabel(x),
           x.source_label,
           x.source_reference,
           x.exam_year,
@@ -270,7 +271,7 @@ export function CoreManager({
                   {x.status}
                 </span>
                 <h2 className="mt-1 break-words font-bold">
-                  {"prompt" in x ? x.prompt : x.title}
+                  {"prompt" in x ? questionLabel(x) : x.title}
                 </h2>
                 <p className="mt-1 text-sm text-muted">
                   {data.subjects.find((s) => s.id === x.subject_id)?.name}
@@ -513,7 +514,13 @@ function MediaField({
               <summary className="min-h-11 cursor-pointer break-all text-sm">
                 {i + 1}. {m.original_filename || "Image"} — preview
               </summary>
-              <PrivateImage path={m.storage_path} alt={`${label} ${i + 1}`} />
+              <PrivateImage
+                path={m.storage_path}
+                alt={mediaAlt(m, `${label} ${i + 1}`)}
+              />
+              {conversionLabel(m) && (
+                <p className="text-xs text-muted">{conversionLabel(m)}</p>
+              )}
             </details>
             <div className="flex flex-wrap gap-2">
               {[-1, 1].map((d) => (
@@ -893,7 +900,7 @@ function TestForm({
             <div className="max-h-64 overflow-y-auto rounded-lg border p-3">
               {eligible
                 .filter((q) =>
-                  q.prompt.toLowerCase().includes(search.toLowerCase()),
+                  questionLabel(q).toLowerCase().includes(search.toLowerCase()),
                 )
                 .map((q) => (
                   <label
@@ -913,7 +920,7 @@ function TestForm({
                       }
                     />
                     <span>
-                      {q.prompt} · {q.marks} marks
+                      {questionLabel(q)} · {q.marks} marks
                     </span>
                   </label>
                 ))}
