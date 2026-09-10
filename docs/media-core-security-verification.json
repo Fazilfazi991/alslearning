@@ -1,0 +1,16 @@
+{
+  "results": [
+    "Concurrent starts resume one attempt",
+    "Forged option denied",
+    "Duplicate options denied",
+    "Direct answer result write denied",
+    "Direct attempt insert denied",
+    "Concurrent submissions are idempotent",
+    "Negative marks persist",
+    "Unanswered question receives no penalty",
+    "Teacher program-wide reorder denied",
+    "Admin reorder leaves distinct positions",
+    "Private PDF returns PDF bytes",
+    "Cross-student review hidden"
+  ]
+}

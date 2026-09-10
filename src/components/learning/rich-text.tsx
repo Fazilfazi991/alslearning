@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { validRichText } from "@/lib/rich-text";
-import type { QuestionMedia } from "@/lib/question-media";
+import { mediaAlt, type QuestionMedia } from "@/lib/question-media";
 import { PrivateImage } from "./private-image";
 export function RichContent({
   value,
@@ -27,7 +27,10 @@ export function RichContent({
               <PrivateImage
                 key={i}
                 path={item?.storage_path || null}
-                alt={`${kind === "stem" ? "Question" : "Solution"} image ${b.position + 1}`}
+                alt={mediaAlt(
+                  item,
+                  `${kind === "stem" ? "Question" : "Solution"} image ${b.position + 1}`,
+                )}
               />
             );
           }

@@ -1,0 +1,742 @@
+[
+  {
+    "micro": 2,
+    "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+    "source_index": 20,
+    "kind": "solution",
+    "position": 1,
+    "relationship": "rId11",
+    "original_filename": "word/media/image7.emf",
+    "mime_type": null,
+    "sha256": "bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb",
+    "bytes": 295444,
+    "frames": 1,
+    "paragraph_index": 3,
+    "after_run": 0,
+    "source_sequence": 20,
+    "dimensions": [
+      5169,
+      3174
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb",
+    "local_original": ".local-qa\\emf\\micro-2-q20-image7.emf",
+    "inline_index": 7,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4292221,
+        "cy": 2636392
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      5169,
+      3174
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      21894,
+      13419
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 6,
+      "30": 3,
+      "33": 4,
+      "34": 4,
+      "70": 6,
+      "76": 1,
+      "81": 3,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 4,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 2,
+    "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+    "source_index": 40,
+    "kind": "solution",
+    "position": 1,
+    "relationship": "rId19",
+    "original_filename": "word/media/image15.emf",
+    "mime_type": null,
+    "sha256": "20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228",
+    "bytes": 153320,
+    "frames": 1,
+    "paragraph_index": 5,
+    "after_run": 0,
+    "source_sequence": 40,
+    "dimensions": [
+      6590,
+      851
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228",
+    "local_original": ".local-qa\\emf\\micro-2-q40-image15.emf",
+    "inline_index": 15,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4346575,
+        "cy": 564442
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      6590,
+      851
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      27912,
+      3599
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 5,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 2,
+    "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+    "source_index": 40,
+    "kind": "solution",
+    "position": 2,
+    "relationship": "rId20",
+    "original_filename": "word/media/image16.emf",
+    "mime_type": null,
+    "sha256": "c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f",
+    "bytes": 111492,
+    "frames": 1,
+    "paragraph_index": 6,
+    "after_run": 0,
+    "source_sequence": 40,
+    "dimensions": [
+      6590,
+      600
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f",
+    "local_original": ".local-qa\\emf\\micro-2-q40-image16.emf",
+    "inline_index": 16,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4346575,
+        "cy": 399415
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      6590,
+      600
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      27912,
+      2538
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 5,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 2,
+    "source_document": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+    "source_index": 46,
+    "kind": "solution",
+    "position": 0,
+    "relationship": "rId21",
+    "original_filename": "word/media/image17.emf",
+    "mime_type": null,
+    "sha256": "10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18",
+    "bytes": 2035708,
+    "frames": 1,
+    "paragraph_index": 1,
+    "after_run": 0,
+    "source_sequence": 46,
+    "dimensions": [
+      2120,
+      2046
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18",
+    "local_original": ".local-qa\\emf\\micro-2-q46-image17.emf",
+    "inline_index": 17,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 53478,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 3589361,
+        "cy": 2900045
+      }
+    },
+    "bounds": [
+      -17,
+      -17,
+      2103,
+      2029
+    ],
+    "frame_01mm": [
+      0,
+      0,
+      18662,
+      8520
+    ],
+    "record_types": {
+      "1": 1,
+      "9": 1,
+      "10": 1,
+      "14": 1,
+      "18": 1,
+      "21": 2,
+      "22": 1,
+      "24": 3,
+      "30": 1,
+      "33": 4,
+      "34": 4,
+      "36": 2,
+      "37": 14,
+      "40": 1,
+      "58": 2,
+      "70": 16,
+      "76": 1,
+      "81": 1,
+      "82": 1,
+      "84": 1,
+      "86": 1,
+      "95": 1,
+      "98": 3
+    },
+    "vector_text_records": 1,
+    "raster_records": 2,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 3,
+    "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+    "source_index": 55,
+    "kind": "solution",
+    "position": 0,
+    "relationship": "rId9",
+    "original_filename": "word/media/image5.emf",
+    "mime_type": null,
+    "sha256": "0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1",
+    "bytes": 4604604,
+    "frames": 1,
+    "paragraph_index": 3,
+    "after_run": 0,
+    "source_sequence": 55,
+    "dimensions": [
+      5953,
+      2264
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1",
+    "local_original": ".local-qa\\emf\\micro-3-q55-image5.emf",
+    "inline_index": 5,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4155744,
+        "cy": 1580068
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      5953,
+      2264
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      25214,
+      9572
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 10,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 3,
+    "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+    "source_index": 57,
+    "kind": "solution",
+    "position": 0,
+    "relationship": "rId11",
+    "original_filename": "word/media/image7.emf",
+    "mime_type": null,
+    "sha256": "f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac",
+    "bytes": 648720,
+    "frames": 1,
+    "paragraph_index": 6,
+    "after_run": 0,
+    "source_sequence": 57,
+    "dimensions": [
+      7261,
+      2225
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac",
+    "local_original": ".local-qa\\emf\\micro-3-q57-image7.emf",
+    "inline_index": 7,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4312693,
+        "cy": 1321169
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      7261,
+      2225
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      30754,
+      9407
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 10,
+      "76": 1,
+      "81": 3,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 4,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 3,
+    "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+    "source_index": 60,
+    "kind": "solution",
+    "position": 1,
+    "relationship": "rId17",
+    "original_filename": "word/media/image13.emf",
+    "mime_type": null,
+    "sha256": "4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd",
+    "bytes": 5505608,
+    "frames": 1,
+    "paragraph_index": 5,
+    "after_run": 0,
+    "source_sequence": 60,
+    "dimensions": [
+      7712,
+      3276
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd",
+    "local_original": ".local-qa\\emf\\micro-3-q60-image13.emf",
+    "inline_index": 13,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4210335,
+        "cy": 1786684
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      7712,
+      3276
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      32664,
+      13850
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 49,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 3,
+    "source_document": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+    "source_index": 63,
+    "kind": "solution",
+    "position": 1,
+    "relationship": "rId20",
+    "original_filename": "word/media/image16.emf",
+    "mime_type": null,
+    "sha256": "dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c",
+    "bytes": 20423184,
+    "frames": 1,
+    "paragraph_index": 3,
+    "after_run": 0,
+    "source_sequence": 63,
+    "dimensions": [
+      6065,
+      2145
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c",
+    "local_original": ".local-qa\\emf\\micro-3-q63-image16.emf",
+    "inline_index": 16,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4012442,
+        "cy": 1415659
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      6065,
+      2145
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      25689,
+      9069
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 29,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 4,
+    "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+    "source_index": 69,
+    "kind": "solution",
+    "position": 0,
+    "relationship": "rId16",
+    "original_filename": "word/media/image9.emf",
+    "mime_type": null,
+    "sha256": "1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d",
+    "bytes": 395472,
+    "frames": 1,
+    "paragraph_index": 1,
+    "after_run": 0,
+    "source_sequence": 69,
+    "dimensions": [
+      7107,
+      2464
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d",
+    "local_original": ".local-qa\\emf\\micro-4-q69-image9.emf",
+    "inline_index": 10,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4352925,
+        "cy": 1506503
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      7107,
+      2464
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      30102,
+      10418
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 5,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 4,
+    "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+    "source_index": 70,
+    "kind": "solution",
+    "position": 1,
+    "relationship": "rId20",
+    "original_filename": "word/media/image13.emf",
+    "mime_type": null,
+    "sha256": "3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19",
+    "bytes": 639564,
+    "frames": 1,
+    "paragraph_index": 2,
+    "after_run": 0,
+    "source_sequence": 70,
+    "dimensions": [
+      1616,
+      3980
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19",
+    "local_original": ".local-qa\\emf\\micro-4-q70-image13.emf",
+    "inline_index": 14,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 1152031,
+        "cy": 2828925
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      1616,
+      3980
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      6846,
+      16826
+    ],
+    "record_types": {
+      "1": 1,
+      "14": 1,
+      "21": 4,
+      "30": 2,
+      "33": 3,
+      "34": 3,
+      "70": 5,
+      "76": 1,
+      "81": 2,
+      "98": 1
+    },
+    "vector_text_records": 0,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  },
+  {
+    "micro": 4,
+    "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+    "source_index": 77,
+    "kind": "solution",
+    "position": 0,
+    "relationship": "rId26",
+    "original_filename": "word/media/image19.emf",
+    "mime_type": null,
+    "sha256": "62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2",
+    "bytes": 433932,
+    "frames": 1,
+    "paragraph_index": 1,
+    "after_run": 0,
+    "source_sequence": 77,
+    "dimensions": [
+      6121,
+      3578
+    ],
+    "declared_content_type": "image/x-emf",
+    "original_sha256": "62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2",
+    "local_original": ".local-qa\\emf\\micro-4-q77-image19.emf",
+    "inline_index": 22,
+    "presentation": {
+      "crop": {
+        "l": 0,
+        "t": 0,
+        "r": 0,
+        "b": 0
+      },
+      "extent_emu": {
+        "cx": 4048125,
+        "cy": 2360286
+      }
+    },
+    "bounds": [
+      0,
+      0,
+      6121,
+      3578
+    ],
+    "frame_01mm": [
+      -3,
+      -3,
+      25926,
+      15127
+    ],
+    "record_types": {
+      "1": 1,
+      "10": 1,
+      "12": 1,
+      "14": 1,
+      "18": 1,
+      "21": 4,
+      "22": 1,
+      "24": 1,
+      "28": 1,
+      "30": 2,
+      "33": 5,
+      "34": 5,
+      "36": 1,
+      "37": 2,
+      "40": 1,
+      "70": 8,
+      "75": 1,
+      "76": 1,
+      "81": 2,
+      "82": 1,
+      "84": 1,
+      "98": 2
+    },
+    "vector_text_records": 1,
+    "raster_records": 3,
+    "alpha_blend_records": 0,
+    "transparent_blit_records": 0,
+    "duplicate_locations": []
+  }
+]

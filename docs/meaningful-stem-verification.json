@@ -1,0 +1,8 @@
+{
+  "results": [
+    "blank without media rejected",
+    "whitespace without media rejected",
+    "empty rich paragraphs without media rejected",
+    "Image-only media remains valid and original question unchanged"
+  ]
+}

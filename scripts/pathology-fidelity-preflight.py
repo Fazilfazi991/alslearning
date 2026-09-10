@@ -45,7 +45,7 @@ def raw(cell):
     return "".join(x.text or "" for x in cell.findall(".//w:t", NS))
 
 
-def parse(path, *, legacy_media=False):
+def parse(path, *, legacy_media=False, media_converter=None):
     file_hash = hashlib.sha256(path.read_bytes()).hexdigest()
     with zipfile.ZipFile(path) as archive:
         root = ET.fromstring(archive.read("word/document.xml"))
@@ -161,6 +161,8 @@ def parse(path, *, legacy_media=False):
                             with Image.open(io.BytesIO(data)) as image:
                                 mime = Image.MIME.get(image.format)
                                 frames = getattr(image, "n_frames", 1)
+                            is_emf = len(data) >= 88 and data[:4] == b'\x01\0\0\0' and data[40:44] == b' EMF'
+                            if is_emf: mime = 'image/x-emf'
                             kind = "stem" if role == "question" else "solution" if role == "solution" else "option"
                             if kind == "option": q["anomalies"].append("Option image requires separate support")
                             q["media"].append({"kind": kind, "position": sum(m["kind"] == kind for m in q["media"]),
@@ -168,6 +170,20 @@ def parse(path, *, legacy_media=False):
                                 "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data), "frames": frames,
                                 "paragraph_index": len(legacy_blocks), "after_run": len(paragraph_runs),
                                 "source_document": path.name, "source_sequence": sequence})
+                            wp = '{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}'
+                            properties = run.find('.//' + wp + 'docPr')
+                            if properties is not None and not legacy_media:
+                                for key, target_key in [('descr','alt_text'),('title','title')]:
+                                    if properties.get(key): q['media'][-1][target_key] = properties.get(key)
+                            if is_emf and media_converter:
+                                crop = run.find('.//a:srcRect', NS)
+                                extent = run.find('.//' + wp + 'extent')
+                                presentation = {'crop':{k:int(crop.get(k,'0')) if crop is not None else 0 for k in ('l','t','r','b')},'extent_emu':{k:int(extent.get(k)) for k in ('cx','cy')}}
+                                try:
+                                    converted = media_converter(data,media_path,presentation)
+                                    q['media'][-1]['derivative'] = converted
+                                except (ValueError,RuntimeError) as error:
+                                    q['anomalies'].append('Media conversion failed: '+str(error))
                             if runs:
                                 blocks.append({"runs": runs})
                                 runs = []
@@ -217,12 +233,12 @@ def parse(path, *, legacy_media=False):
             correct = [i for i, o in enumerate(q["options"]) if o["correct"]]
             q["type"] = "multiple_mcq" if len(correct) > 1 else "single_mcq"
             errors = []
-            if not q["prompt"].strip(): errors.append("Empty stem")
+            if not q["prompt"].strip() and not any(m['kind']=='stem' for m in q['media']): errors.append("Empty stem")
             if q.get("source_question_type") != "multiple_choice": errors.append("Unsupported source type")
             if len(q["options"]) < 2 or any(not o["content"].strip() for o in q["options"]): errors.append("Malformed options")
             if not correct: errors.append("Missing correct answer")
             if q.get("marks", 0) <= 0 or q.get("negative_marks", -1) < 0: errors.append("Invalid marks")
-            if any(m["mime_type"] not in ("image/png", "image/jpeg", "image/gif", "image/webp") for m in q["media"]): errors.append("Unsupported media")
+            if any(m["mime_type"] not in ("image/png", "image/jpeg", "image/gif", "image/webp") and not m.get('derivative') for m in q["media"]): errors.append("Unsupported media")
             errors += q["anomalies"]
             q["structural_errors"] = sorted(set(errors))
             answer = re.search(r"\b(?:Ans(?:wer)?)[\s:.-]+([A-D])\b", q["explanation"], re.I)
