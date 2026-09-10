@@ -1,5 +1,7 @@
 "use client";
+import {localDateTime} from "@/lib/core-time";
 
+import {Editor} from "./core-fields";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Archive,
@@ -55,8 +57,7 @@ const kinds: { kind: AcademicEntityKind; label: string }[] = [
   { kind: "chapter", label: "Chapters" },
   { kind: "topic", label: "Topics" },
   { kind: "batch", label: "Batches" },
-  { kind: "video", label: "Videos" },
-  { kind: "material", label: "Materials" },
+
 ];
 const slugify = (value: string) =>
   value
@@ -121,7 +122,7 @@ export function AcademicWorkspaceManager({
           </p>
         </div>
         <span className="rounded-full bg-green-50 px-3 py-2 text-xs font-bold text-green-800">
-          Supabase connected
+          Academic records
         </span>
       </header>
       {loading && (
@@ -158,7 +159,8 @@ function Structure({
 }) {
   const [kind, setKind] = useState<AcademicEntityKind>("program"),
     [search, setSearch] = useState(""),
-    [editing, setEditing] = useState<AcademicEntity | null>(null);
+    [editing, setEditing] = useState<AcademicEntity | null>(null),[actionError,setActionError]=useState("");
+  const runAction=async(action:()=>Promise<void>)=>{setActionError("");try{await action()}catch(e){setActionError(e instanceof Error?e.message:"Could not save the change")}};
   const list = useMemo(
     () =>
       workspace.entities
@@ -263,7 +265,7 @@ function Structure({
             Add {kind}
           </button>
         </div>
-        <div className="mt-5 overflow-x-auto">
+        {actionError&&<p role="alert" className="mt-4 rounded bg-red-50 p-3 text-sm text-red-800">{actionError}</p>}<div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
               <tr>
@@ -284,14 +286,14 @@ function Structure({
                     <div className="flex">
                       <button
                         aria-label="Move up"
-                        onClick={() => move(item.id, -1)}
+                        onClick={() => void runAction(()=>move(item.id, -1))}
                         className="p-2"
                       >
                         <ArrowUp size={15} />
                       </button>
                       <button
                         aria-label="Move down"
-                        onClick={() => move(item.id, 1)}
+                        onClick={() => void runAction(()=>move(item.id, 1))}
                         className="p-2"
                       >
                         <ArrowDown size={15} />
@@ -318,7 +320,7 @@ function Structure({
                     <div className="flex justify-end">
                       <button
                         title="Archive"
-                        onClick={() => archive(item.id)}
+                        onClick={() => void runAction(()=>archive(item.id))}
                         className="p-2"
                       >
                         <Archive size={17} />
@@ -326,7 +328,7 @@ function Structure({
                       <button
                         title="Delete draft"
                         disabled={item.status !== "Draft"}
-                        onClick={() => remove(item.id)}
+                        onClick={() => void runAction(()=>remove(item.id))}
                         className="p-2 text-red-700 disabled:opacity-25"
                       >
                         <Trash2 size={17} />
@@ -373,7 +375,7 @@ function EntityDialog({
   onClose: () => void;
   onSave: (x: AcademicEntity) => Promise<void>;
 }) {
-  const [draft, setDraft] = useState(entity);
+  const [draft, setDraft] = useState(entity), [saving,setSaving]=useState(false),[error,setError]=useState("");
   const parentKinds: Partial<Record<AcademicEntityKind, AcademicEntityKind[]>> =
     {
       program: ["exam"],
@@ -387,15 +389,15 @@ function EntityDialog({
     (parentKinds[draft.kind] || []).includes(x.kind),
   );
   return (
-    <div className="fixed inset-0 z-60 grid place-items-center overflow-y-auto bg-black/45 p-4">
+    <Editor title={`${entity.name?"Edit":"Add"} ${entity.kind}`} close={()=>{if(!saving)onClose()}}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onSave({ ...draft, slug: draft.slug || slugify(draft.name) });
+          setSaving(true);setError("");void onSave({ ...draft, slug: draft.slug || slugify(draft.name) }).catch(e=>setError(e.message)).finally(()=>setSaving(false));
         }}
         className={`${panel} w-full max-w-xl p-6`}
       >
-        <div className="flex items-center justify-between">
+        {error&&<p role="alert" className="mb-3 text-red-800">{error}</p>}<div className="hidden">
           <h2 className="text-xl font-bold">
             {entity.name ? "Edit" : "Add"} {entity.kind}
           </h2>
@@ -460,6 +462,11 @@ function EntityDialog({
               <option>Archived</option>
             </select>
           </Field>
+          {draft.kind==='program'&&<>
+            {(['duration_days','access_validity_days'] as const).map(key=><Field key={key} label={key==='duration_days'?'Duration (days)':'Default access validity (days)'}><input type="number" min="1" className={input} value={Number(draft.metadata?.[key])||''} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,[key]:Number(e.target.value)}})}/></Field>)}
+            <fieldset className="sm:col-span-2"><legend className="font-bold">Program subjects</legend>{choices.filter(x=>x.kind==='subject').map(x=><label key={x.id} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={((draft.metadata?.subjectIds||[]) as string[]).includes(x.id)} onChange={e=>{const ids=(draft.metadata?.subjectIds||[]) as string[];setDraft({...draft,metadata:{...draft.metadata,subjectIds:e.target.checked?[...ids,x.id]:ids.filter(id=>id!==x.id)}})}}/>{x.name}</label>)}</fieldset>
+          </>}
+          {draft.kind==='batch'&&<>{(['starts_on','ends_on','access_starts_at','access_expires_at','class_timing'] as const).map(key=><Field key={key} label={({starts_on:'Start date',ends_on:'End date',access_starts_at:'Access starts',access_expires_at:'Access expires',class_timing:'Class timing'})[key]}><input className={input} type={key==='class_timing'?'text':key.endsWith('_on')?'date':'datetime-local'} value={key.includes('_at')?localDateTime(String(draft.metadata?.[key]||'')):String(draft.metadata?.[key]||'')} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,[key]:key.includes('_at')&&e.target.value?new Date(e.target.value).toISOString():e.target.value}})}/></Field>)}</>}
           <div className="sm:col-span-2">
             <Field label="Description">
               <textarea
@@ -476,10 +483,10 @@ function EntityDialog({
           <button type="button" className={secondary} onClick={onClose}>
             Cancel
           </button>
-          <button className={primary}>Save draft</button>
+          <button disabled={saving} className={primary}>{saving?"Saving…":"Save record"}</button>
         </div>
       </form>
-    </div>
+    </Editor>
   );
 }
 

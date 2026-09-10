@@ -21,8 +21,8 @@ export async function loadAdminData() {
       .from("profiles")
       .select("id,full_name,email,role,is_active")
       .order("full_name"),
-    db.from("programs").select("id,name,exam_id,status").order("name"),
-    db.from("batches").select("id,name,program_id,status").order("name"),
+    db.from("programs").select("id,name,exam_id,status,access_validity_days").order("name"),
+    db.from("batches").select("id,name,program_id,status,access_starts_at,access_expires_at").order("name"),
     db.from("subjects").select("id,name").order("name"),
     db.from("chapters").select("id,name,subject_id").order("name"),
     db.from("topics").select("id,name,subject_id,chapter_id").order("name"),

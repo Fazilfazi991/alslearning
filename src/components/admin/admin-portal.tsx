@@ -40,6 +40,7 @@ import {
   teacherCourses,
 } from "@/lib/mock-data/teacher-portal";
 import { AcademicWorkspaceManager } from "./academic-workspace";
+import { CoreManager } from "./core-manager";
 import { AdminBackendManager } from "./admin-backend-manager";
 const panel = "rounded-lg border border-[#e6cbd5] bg-white";
 const input =
@@ -2160,7 +2161,7 @@ export function AdminPortal() {
   else if (path === "/admin/teachers/new") page = <CreateForm kind="Teacher" />;
   else if (path.startsWith("/admin/teachers/"))
     page = <EntityDetail type="Teacher" />;
-  else if (path === "/admin/courses") page = <AdminBackendManager mode="content" />;
+  else if (path === "/admin/courses") page = <CoreManager mode="content" />;
   else if (path === "/admin/courses/new") page = <CreateForm kind="Course" />;
   else if (path.startsWith("/admin/courses/"))
     page = <EntityDetail type="Course" />;
@@ -2173,8 +2174,8 @@ export function AdminPortal() {
   else if (path.startsWith("/admin/assessments/")) page = <AssessmentDetail />;
   else if (path === "/admin/question-bank") page = <QuestionBank />;
   else if (path === "/admin/academic") page = <AcademicWorkspaceManager />;
-  else if (path === "/admin/questions") page = <AcademicWorkspaceManager section="questions" />;
-  else if (path === "/admin/tests") page = <AdminBackendManager mode="tests" />;
+  else if (path === "/admin/questions") page = <CoreManager mode="questions" />;
+  else if (path === "/admin/tests") page = <CoreManager mode="tests" />;
   else if (path === "/admin/live-learning") page = <AdminBackendManager mode="checkpoints" />;
   else if (path === "/admin/payments") page = <Payments />;
   else if (path === "/admin/payments/new") page = <PaymentForm />;

@@ -1,1 +1,2 @@
-import{AnswerReview}from"@/components/student/answer-review";export default function Page(){return <AnswerReview/>}
+import {redirect} from "next/navigation";
+export default function Page(){redirect("/student/exams")}

@@ -1,1 +1,2 @@
-import{ExamTake}from"@/components/student/exam-take";export default function Page(){return <ExamTake/>}
+import {redirect} from "next/navigation";
+export default function Page(){redirect("/student/exams")}
