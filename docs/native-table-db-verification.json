@@ -1,0 +1,20 @@
+{
+  "results": [
+    "Server derives searchable table-cell text",
+    "Admin no-op transaction preserves table AST",
+    "Malformed or malicious AST 1 rejected",
+    "Malformed or malicious AST 2 rejected",
+    "Malformed or malicious AST 3 rejected",
+    "Malformed or malicious AST 4 rejected",
+    "Malformed or malicious AST 5 rejected",
+    "Malformed or malicious AST 6 rejected",
+    "Rejected edits roll back completely",
+    "Student cannot author structured question",
+    "In-progress payload excludes explanation table and solution media",
+    "Hidden review settings omit solution table",
+    "Historical settings remain hidden after test edit"
+  ],
+  "question_id": "bc231107-7439-464b-8261-b65ddba0ee67",
+  "test_id": "cc04cfde-4cfe-4558-8ecb-0e69c0f9b3c8",
+  "hidden_attempt": "9c152a9e-506d-4967-a082-0d7fcb940731"
+}

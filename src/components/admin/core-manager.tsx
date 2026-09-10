@@ -612,6 +612,8 @@ function QuestionForm({
             label="Question / case text"
             text={q.prompt}
             value={q.prompt_rich}
+            media={q.media}
+            kind="stem"
             onChange={(prompt, prompt_rich) =>
               setQ({ ...q, prompt, prompt_rich })
             }
@@ -678,6 +680,8 @@ function QuestionForm({
             label="Explanation"
             text={q.explanation || ""}
             value={q.explanation_rich}
+            media={q.media}
+            kind="solution"
             onChange={(explanation, explanation_rich) =>
               setQ({ ...q, explanation, explanation_rich })
             }

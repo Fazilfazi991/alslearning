@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { QuestionGallery } from "@/components/learning/question-gallery";
 import { RichContent } from "@/components/learning/rich-text";
+import { mediaPositions } from "@/lib/rich-text";
 import type { RichText } from "@/lib/rich-text";
 import type { QuestionMedia } from "@/lib/question-media";
 type Option = { id: string; content: string; content_rich?: RichText };
@@ -230,12 +231,17 @@ export function CoreTestEngine({
               {String(remaining % 60).padStart(2, "0")}
             </strong>
           </div>
-          <h2 className="whitespace-pre-wrap text-lg font-bold">
-            <RichContent value={q.prompt_rich} fallback={q.prompt} />
-          </h2>
+          <div className="min-w-0 whitespace-pre-wrap text-lg font-bold">
+            <RichContent
+              value={q.prompt_rich}
+              fallback={q.prompt}
+              media={q.stem_media}
+              kind="stem"
+            />
+          </div>
           <QuestionGallery
             kind="stem"
-            media={q.stem_media}
+            media={mediaPositions(q.prompt_rich).length ? [] : q.stem_media}
             legacy={q.stem_image_path}
           />
           <fieldset className="my-5 space-y-3">
@@ -304,53 +310,66 @@ export function CoreTestEngine({
               </p>
               {review.answers?.map((a) => (
                 <article className="mt-5 border-t pt-4" key={a.question_id}>
-                  <h3 className="font-bold">
-                    <RichContent value={a.prompt_rich} fallback={a.prompt} />
-                  </h3>
+                  <div className="min-w-0 font-bold">
+                    <RichContent
+                      value={a.prompt_rich}
+                      fallback={a.prompt}
+                      media={a.stem_media}
+                      kind="stem"
+                    />
+                  </div>
                   <QuestionGallery
                     kind="stem"
-                    media={a.stem_media}
+                    media={
+                      mediaPositions(a.prompt_rich).length ? [] : a.stem_media
+                    }
                     legacy={a.stem_image_path}
                   />
-                  <p className="mt-2 text-sm">
+                  <div className="mt-2 text-sm">
                     Your answer:{" "}
                     {a.options
                       .filter((o) => a.selected_option_ids.includes(o.id))
                       .map((o) => (
-                        <span key={o.id} className="mr-2">
+                        <div key={o.id} className="mr-2">
                           <RichContent
                             value={o.content_rich}
                             fallback={o.content}
                           />
-                        </span>
+                        </div>
                       ))}
                     {a.selected_option_ids.length === 0 && "Unanswered"}
-                  </p>
-                  <p className="text-sm">
+                  </div>
+                  <div className="text-sm">
                     Correct answer:{" "}
                     {a.options
                       .filter((o) => a.correct_option_ids.includes(o.id))
                       .map((o) => (
-                        <span key={o.id} className="mr-2">
+                        <div key={o.id} className="mr-2">
                           <RichContent
                             value={o.content_rich}
                             fallback={o.content}
                           />
-                        </span>
+                        </div>
                       ))}
-                  </p>
+                  </div>
                   <p className="text-sm">Marks earned: {a.marks_awarded}</p>
-                  {a.explanation && (
-                    <p className="mt-2 whitespace-pre-wrap">
+                  {(a.explanation || a.explanation_rich) && (
+                    <div className="mt-2 whitespace-pre-wrap">
                       <RichContent
                         value={a.explanation_rich}
                         fallback={a.explanation}
+                        media={a.solution_media}
+                        kind="solution"
                       />
-                    </p>
+                    </div>
                   )}
                   <QuestionGallery
                     kind="solution"
-                    media={a.solution_media}
+                    media={
+                      mediaPositions(a.explanation_rich).length
+                        ? []
+                        : a.solution_media
+                    }
                     legacy={a.explanation_image_path}
                   />
                 </article>

@@ -1,0 +1,10 @@
+{
+  "project": "redacted-preview-project",
+  "writes": 0,
+  "result": [
+    {
+      "tables_validated": 24,
+      "all_match": true
+    }
+  ]
+}
