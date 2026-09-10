@@ -1,0 +1,86 @@
+{
+  "results": [
+    "966 imported questions with distinct deterministic identities",
+    "Every imported field, option, key, rich AST, metadata and media matches source payload",
+    "961 active and five review drafts",
+    "3864 ordered options and 966 keys",
+    "All answer keys reference their own question options",
+    "Two recoverable quarantine records with no database question",
+    "Six canonical chapters and no invented Topics",
+    "79 imported previous-paper records retain exact reference and year",
+    "99 imported blank solutions remain blank",
+    "Eight media relations and no orphaned question media",
+    "Original media bytes: 190/0/image/png",
+    "Original media bytes: 190/1/image/jpeg",
+    "Original media bytes: 190/2/image/png",
+    "Original media bytes: 190/3/image/gif",
+    "Original media bytes: 16/0/image/png",
+    "Original media bytes: 24/0/image/png",
+    "Original media bytes: 78/0/image/png",
+    "Original media bytes: 79/0/image/png",
+    "Q190 stays draft with four ordered images including GIF",
+    "Student cannot directly read imported questions or keys",
+    "Draft Q190 image 0 cannot be signed by Student",
+    "Draft Q190 image 1 cannot be signed by Student",
+    "Draft Q190 image 2 cannot be signed by Student",
+    "Draft Q190 image 3 cannot be signed by Student"
+  ],
+  "table": [
+    {
+      "subhead": "PATHO 1",
+      "source": 310,
+      "active": 306,
+      "draft": 4,
+      "quarantined": 0,
+      "images": 4
+    },
+    {
+      "subhead": "PATHO 2",
+      "source": 137,
+      "active": 136,
+      "draft": 0,
+      "quarantined": 1,
+      "images": 0
+    },
+    {
+      "subhead": "PATHO 3",
+      "source": 168,
+      "active": 167,
+      "draft": 1,
+      "quarantined": 0,
+      "images": 4
+    },
+    {
+      "subhead": "PATHO 4",
+      "source": 100,
+      "active": 99,
+      "draft": 0,
+      "quarantined": 1,
+      "images": 0
+    },
+    {
+      "subhead": "PATHO 5",
+      "source": 148,
+      "active": 148,
+      "draft": 0,
+      "quarantined": 0,
+      "images": 0
+    },
+    {
+      "subhead": "PATHO 6",
+      "source": 105,
+      "active": 105,
+      "draft": 0,
+      "quarantined": 0,
+      "images": 0
+    }
+  ],
+  "imported": 966,
+  "active": 961,
+  "drafts": 5,
+  "quarantine": 2,
+  "options": 3864,
+  "keys": 966,
+  "media": 8,
+  "previous_paper": 79
+}
