@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:core-db": "node --env-file=.env.local scripts/core-pipeline-qa.mjs",
-    "test:core-security": "node --env-file=.env.local scripts/core-security-qa.mjs"
+    "test:core-security": "node --env-file=.env.local scripts/core-security-qa.mjs",
+    "test:fidelity-db": "node --env-file=.env.local scripts/fidelity-qa.mjs",
+    "test:fidelity-browser": "node --env-file=.env.local scripts/fidelity-browser-qa.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",

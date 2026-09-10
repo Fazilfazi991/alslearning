@@ -1,11 +1,16 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { PrivateImage } from "@/components/learning/private-image";
-type Option = { id: string; content: string };
+import { QuestionGallery } from "@/components/learning/question-gallery";
+import { RichContent } from "@/components/learning/rich-text";
+import type { RichText } from "@/lib/rich-text";
+import type { QuestionMedia } from "@/lib/question-media";
+type Option = { id: string; content: string; content_rich?: RichText };
 type Question = {
   id: string;
   prompt: string;
+  prompt_rich?: RichText;
+  stem_media?: QuestionMedia[];
   type: string;
   stem_image_path: string | null;
   options: Option[];
@@ -33,11 +38,15 @@ type Review = {
   answers: {
     question_id: string;
     prompt: string;
+    prompt_rich?: RichText;
+    stem_media?: QuestionMedia[];
     options: Option[];
     selected_option_ids: string[];
     correct_option_ids: string[];
     marks_awarded: number;
     explanation: string | null;
+    explanation_rich?: RichText;
+    solution_media?: QuestionMedia[];
     stem_image_path: string | null;
     explanation_image_path: string | null;
   }[];
@@ -221,8 +230,14 @@ export function CoreTestEngine({
               {String(remaining % 60).padStart(2, "0")}
             </strong>
           </div>
-          <h2 className="whitespace-pre-wrap text-lg font-bold">{q.prompt}</h2>
-          <PrivateImage path={q.stem_image_path} alt="Question image" />
+          <h2 className="whitespace-pre-wrap text-lg font-bold">
+            <RichContent value={q.prompt_rich} fallback={q.prompt} />
+          </h2>
+          <QuestionGallery
+            kind="stem"
+            media={q.stem_media}
+            legacy={q.stem_image_path}
+          />
           <fieldset className="my-5 space-y-3">
             <legend className="mb-2 text-sm">
               {q.type === "multiple_mcq"
@@ -247,7 +262,7 @@ export function CoreTestEngine({
                     checked={(attempt.answers[q.id] || []).includes(o.id)}
                     onChange={() => void answer(q, o.id)}
                   />
-                  <span>{o.content}</span>
+                  <RichContent value={o.content_rich} fallback={o.content} />
                 </label>
               ))}
           </fieldset>
@@ -289,29 +304,54 @@ export function CoreTestEngine({
               </p>
               {review.answers?.map((a) => (
                 <article className="mt-5 border-t pt-4" key={a.question_id}>
-                  <h3 className="font-bold">{a.prompt}</h3>
-                  <PrivateImage path={a.stem_image_path} alt="Question image" />
+                  <h3 className="font-bold">
+                    <RichContent value={a.prompt_rich} fallback={a.prompt} />
+                  </h3>
+                  <QuestionGallery
+                    kind="stem"
+                    media={a.stem_media}
+                    legacy={a.stem_image_path}
+                  />
                   <p className="mt-2 text-sm">
                     Your answer:{" "}
                     {a.options
                       .filter((o) => a.selected_option_ids.includes(o.id))
-                      .map((o) => o.content)
-                      .join(", ") || "Unanswered"}
+                      .map((o) => (
+                        <span key={o.id} className="mr-2">
+                          <RichContent
+                            value={o.content_rich}
+                            fallback={o.content}
+                          />
+                        </span>
+                      ))}
+                    {a.selected_option_ids.length === 0 && "Unanswered"}
                   </p>
                   <p className="text-sm">
                     Correct answer:{" "}
                     {a.options
                       .filter((o) => a.correct_option_ids.includes(o.id))
-                      .map((o) => o.content)
-                      .join(", ")}
+                      .map((o) => (
+                        <span key={o.id} className="mr-2">
+                          <RichContent
+                            value={o.content_rich}
+                            fallback={o.content}
+                          />
+                        </span>
+                      ))}
                   </p>
                   <p className="text-sm">Marks earned: {a.marks_awarded}</p>
                   {a.explanation && (
-                    <p className="mt-2 whitespace-pre-wrap">{a.explanation}</p>
+                    <p className="mt-2 whitespace-pre-wrap">
+                      <RichContent
+                        value={a.explanation_rich}
+                        fallback={a.explanation}
+                      />
+                    </p>
                   )}
-                  <PrivateImage
-                    path={a.explanation_image_path}
-                    alt="Solution image"
+                  <QuestionGallery
+                    kind="solution"
+                    media={a.solution_media}
+                    legacy={a.explanation_image_path}
                   />
                 </article>
               ))}

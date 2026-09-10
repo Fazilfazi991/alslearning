@@ -1,0 +1,214 @@
+{
+  "imported": 0,
+  "pending": 968,
+  "documents": [
+    {
+      "subhead": "PATHO 1",
+      "questions": 310,
+      "rich_text": 310,
+      "superscript_questions": 0,
+      "subscript_questions": 0,
+      "questions_with_images": 1,
+      "multiple_image_questions": 1,
+      "images": 4,
+      "gifs": 1,
+      "unsupported_media": 0,
+      "conflicts": [
+        42,
+        180,
+        190,
+        205
+      ],
+      "structurally_ready": 310,
+      "malformed": [],
+      "format_runs": []
+    },
+    {
+      "subhead": "PATHO 2",
+      "questions": 137,
+      "rich_text": 137,
+      "superscript_questions": 1,
+      "subscript_questions": 0,
+      "questions_with_images": 0,
+      "multiple_image_questions": 0,
+      "images": 0,
+      "gifs": 0,
+      "unsupported_media": 0,
+      "conflicts": [],
+      "structurally_ready": 136,
+      "malformed": [
+        {
+          "sequence": 6,
+          "errors": [
+            "Missing correct answer"
+          ]
+        }
+      ],
+      "format_runs": [
+        {
+          "sequence": 126,
+          "runs": [
+            {
+              "role": "option",
+              "text": "st",
+              "format": "superscript"
+            },
+            {
+              "role": "option",
+              "text": "nd",
+              "format": "superscript"
+            },
+            {
+              "role": "option",
+              "text": "rd",
+              "format": "superscript"
+            },
+            {
+              "role": "option",
+              "text": "th",
+              "format": "superscript"
+            },
+            {
+              "role": "solution",
+              "text": "nd",
+              "format": "superscript"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "subhead": "PATHO 3",
+      "questions": 168,
+      "rich_text": 168,
+      "superscript_questions": 0,
+      "subscript_questions": 0,
+      "questions_with_images": 4,
+      "multiple_image_questions": 0,
+      "images": 4,
+      "gifs": 0,
+      "unsupported_media": 0,
+      "conflicts": [
+        97
+      ],
+      "structurally_ready": 168,
+      "malformed": [],
+      "format_runs": []
+    },
+    {
+      "subhead": "PATHO 4",
+      "questions": 100,
+      "rich_text": 100,
+      "superscript_questions": 1,
+      "subscript_questions": 0,
+      "questions_with_images": 0,
+      "multiple_image_questions": 0,
+      "images": 0,
+      "gifs": 0,
+      "unsupported_media": 0,
+      "conflicts": [],
+      "structurally_ready": 99,
+      "malformed": [
+        {
+          "sequence": 43,
+          "errors": [
+            "Missing correct answer"
+          ]
+        }
+      ],
+      "format_runs": [
+        {
+          "sequence": 68,
+          "runs": [
+            {
+              "role": "option",
+              "text": "nd",
+              "format": "superscript"
+            },
+            {
+              "role": "option",
+              "text": "th",
+              "format": "superscript"
+            },
+            {
+              "role": "option",
+              "text": "th",
+              "format": "superscript"
+            },
+            {
+              "role": "option",
+              "text": "th",
+              "format": "superscript"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "subhead": "PATHO 5",
+      "questions": 148,
+      "rich_text": 148,
+      "superscript_questions": 0,
+      "subscript_questions": 0,
+      "questions_with_images": 0,
+      "multiple_image_questions": 0,
+      "images": 0,
+      "gifs": 0,
+      "unsupported_media": 0,
+      "conflicts": [],
+      "structurally_ready": 148,
+      "malformed": [],
+      "format_runs": []
+    },
+    {
+      "subhead": "PATHO 6",
+      "questions": 105,
+      "rich_text": 105,
+      "superscript_questions": 0,
+      "subscript_questions": 0,
+      "questions_with_images": 0,
+      "multiple_image_questions": 0,
+      "images": 0,
+      "gifs": 0,
+      "unsupported_media": 0,
+      "conflicts": [],
+      "structurally_ready": 105,
+      "malformed": [],
+      "format_runs": []
+    }
+  ],
+  "exact_duplicate_groups": [
+    [
+      {
+        "file": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+        "sequence": 209
+      },
+      {
+        "file": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+        "sequence": 294
+      }
+    ],
+    [
+      {
+        "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+        "sequence": 63
+      },
+      {
+        "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+        "sequence": 80
+      }
+    ],
+    [
+      {
+        "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+        "sequence": 70
+      },
+      {
+        "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+        "sequence": 72
+      }
+    ]
+  ],
+  "duplicate_definition": "Identical text AST, options/markings, solution AST, and marks; source locations retained; no deduplication",
+  "conflict_detection": "Explicit Ans/Answer A-D mismatches; not a clinical review"
+}

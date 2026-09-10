@@ -50,3 +50,6 @@ next-env.d.ts
 # Disposable core acceptance artifacts
 /.local-qa/
 /core-qa-results.json
+
+# Local Python preflight cache
+/scripts/__pycache__/
