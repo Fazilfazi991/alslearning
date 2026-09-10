@@ -1,4 +1,5 @@
 "use client";
+import {localDateTime} from "@/lib/core-time";
 import { useEffect, useMemo, useState } from "react";
 import {
   loadAdminData,
@@ -6,7 +7,6 @@ import {
   removeBatchFaculty,
   removeFacultyAssignment,
   saveBatchFaculty,
-  saveCheckpoint,
   saveContent,
   saveEnrollment,
   saveFacultyAssignment,
@@ -53,7 +53,7 @@ function Select({
         <option value="">{blank}</option>
         {items.map((x) => (
           <option key={String(x.id)} value={String(x.id)}>
-            {String(x.name ?? x.full_name ?? x.email)}
+            {String(x.name ?? x.title ?? x.prompt ?? x.full_name ?? x.email)}
           </option>
         ))}
       </select>
@@ -187,6 +187,7 @@ function Enrollments({ data, busy, run }: Props) {
           onChange={(v) => {
             setProgram(v);
             setBatch("");
+            if(!editing){const days=data.programs.find(p=>p.id===v)?.access_validity_days;setStart(localDateTime(new Date().toISOString()));setNoExpiry(!days);setExpiry(days?localDateTime(new Date(Date.now()+days*86400000).toISOString()):"")}
           }}
           items={data.programs}
         />
@@ -241,7 +242,7 @@ function Enrollments({ data, busy, run }: Props) {
           primary: names.get(x.student_id) || "Student",
           secondary: programs.get(x.program_id) || "Program",
           meta: `${x.status} · ${x.access_expires_at ? new Date(x.access_expires_at).toLocaleDateString() : "No expiry"}`,
-          action: <div className="flex flex-wrap gap-2"><button className="min-h-10 rounded border px-3 text-sm font-bold" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?new Date(x.access_starts_at).toISOString().slice(0,16):"");setExpiry(x.access_expires_at?new Date(x.access_expires_at).toISOString().slice(0,16):"");setNoExpiry(!x.access_expires_at)}}>Edit</button><button className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
+          action: <div className="flex flex-wrap gap-2"><button className="min-h-10 rounded border px-3 text-sm font-bold" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?localDateTime(x.access_starts_at):"");setExpiry(x.access_expires_at?localDateTime(x.access_expires_at):"");setNoExpiry(!x.access_expires_at)}}>Edit</button><button className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
         }))}
       />
     </div>
@@ -253,7 +254,7 @@ function Faculty({ data, busy, run }: Props) {
     [teacher, setTeacher] = useState(""),
     [program, setProgram] = useState(""),
     [subject, setSubject] = useState(""),
-    [batch, setBatch] = useState("");
+    [batch, setBatch] = useState(""), [permissions,setPermissions]=useState({content:false,questions:false,tests:false});
   return (
     <div className="grid gap-5 xl:grid-cols-[420px_1fr]">
       <form
@@ -266,9 +267,9 @@ function Faculty({ data, busy, run }: Props) {
                 faculty_id: teacher,
                 program_id: program || null,
                 subject_id: subject || null,
-                can_manage_content: true,
-                can_manage_questions: true,
-                can_manage_tests: true,
+                can_manage_content: permissions.content,
+                can_manage_questions: permissions.questions,
+                can_manage_tests: permissions.tests,
               });
             if (batch) await saveBatchFaculty(batch, teacher);
           });
@@ -301,6 +302,7 @@ function Faculty({ data, busy, run }: Props) {
           items={data.batches}
           blank="Optional"
         />
+        <fieldset><legend className="text-sm font-bold">Assignment permissions</legend>{(["content","questions","tests"] as const).map(key=><label key={key} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={permissions[key]} onChange={e=>setPermissions({...permissions,[key]:e.target.checked})}/>Manage {key}</label>)}</fieldset>
         <button
           disabled={busy || !teacher || (!program && !subject && !batch)}
           className={button}
@@ -743,7 +745,7 @@ function Tests({ data, busy, run }: Props) {
     </div>
   );
 }
-function Checkpoints({ data, busy, run }: Props) {
+function Checkpoints({ data }: Props) {
   const [video, setVideo] = useState(""),
     [question, setQuestion] = useState(""),
     [seconds, setSeconds] = useState(0),
@@ -754,23 +756,9 @@ function Checkpoints({ data, busy, run }: Props) {
     <div className="grid gap-5 xl:grid-cols-[420px_1fr]">
       <form
         className={`${box} grid gap-4`}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void run(() =>
-            saveCheckpoint({
-              video_id: video,
-              question_id: question,
-              trigger_seconds: seconds,
-              pause_video: pause,
-              mandatory,
-              show_feedback: true,
-              retry_policy: retry,
-              store_response: true,
-            }),
-          );
-        }}
+        onSubmit={e=>e.preventDefault()}
       >
-        <Select
+        <fieldset disabled className="contents"><Select
           label="Video"
           value={video}
           onChange={setVideo}
@@ -820,9 +808,11 @@ function Checkpoints({ data, busy, run }: Props) {
             <option value="until_correct">Until correct</option>
           </select>
         </label>
-        <button className={button} disabled={busy || !video || !question}>
+        <p className="text-sm text-muted">Checkpoint playback is disabled pending a dedicated validation batch. Existing checkpoint records are preserved.</p>
+        <button className={button} disabled>
           Add checkpoint
         </button>
+        </fieldset>
       </form>
       <Rows
         empty="No checkpoint questions yet."

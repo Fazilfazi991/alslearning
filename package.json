@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:core-db": "node --env-file=.env.local scripts/core-pipeline-qa.mjs",
+    "test:core-security": "node --env-file=.env.local scripts/core-security-qa.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",

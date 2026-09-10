@@ -58,6 +58,7 @@ function entity(
     name: String(row.name ?? row.title),
     slug: String(row.slug),
     parentId,
+    metadata: {duration_days:Number(row.duration_days||0),access_validity_days:Number(row.access_validity_days||0),subjectIds:((row.program_subjects||[]) as {subject_id:string}[]).map(x=>x.subject_id),starts_on:String(row.starts_on||''),ends_on:String(row.ends_on||''),access_starts_at:String(row.access_starts_at||''),access_expires_at:String(row.access_expires_at||''),class_timing:Array.isArray(row.schedule)?String((row.schedule[0] as {label?:string})?.label||''):''},
     status: uiStatus(row.status),
     order: Number(row.display_order || 0),
     description: row.description ? String(row.description) : undefined,
@@ -80,7 +81,7 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
     questions,
   ] = await Promise.all([
     db.from("entrance_exams").select("*").order("display_order"),
-    db.from("programs").select("*").order("display_order"),
+    db.from("programs").select("*,program_subjects(subject_id)").order("display_order"),
     db.from("subjects").select("*").order("display_order"),
     db.from("chapters").select("*").order("display_order"),
     db.from("topics").select("*").order("display_order"),
@@ -191,8 +192,7 @@ export async function saveAcademicEntity(
     status: dbStatus(item.status),
     display_order: item.order,
   };
-  if (item.kind === "program")
-    payload.exam_id = parent?.kind === "exam" ? parent.id : null;
+  if (item.kind === "program") {payload.exam_id = parent?.kind === "exam" ? parent.id : null; payload.duration_days=Number(item.metadata?.duration_days)||null;payload.access_validity_days=Number(item.metadata?.access_validity_days)||null;}
   if (item.kind === "chapter") {
     if (parent?.kind !== "subject")
       throw new Error("A chapter must belong to a subject.");
@@ -221,6 +221,9 @@ export async function saveAcademicEntity(
       slug: item.slug,
       name: item.name,
       program_id: item.parentId,
+      starts_on:item.metadata?.starts_on||null,ends_on:item.metadata?.ends_on||null,
+      access_starts_at:item.metadata?.access_starts_at||null,access_expires_at:item.metadata?.access_expires_at||null,
+      schedule:item.metadata?.class_timing?[{label:item.metadata.class_timing}]:[],
       status:
         item.status === "Archived"
           ? "archived"
@@ -247,6 +250,7 @@ export async function saveAcademicEntity(
   }
   const { error } = await db.from(tableFor(item.kind)).upsert(payload);
   assert(error);
+  if(item.kind==='program'){const r=await db.rpc('core_program_subjects',{target_program:item.id,subject_ids:item.metadata?.subjectIds||[]});assert(r.error)}
 }
 export async function archiveAcademicEntity(item: AcademicEntity) {
   const { error } = await createClient()

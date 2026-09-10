@@ -46,3 +46,7 @@ next-env.d.ts
 /Teachers ui.zip
 /admin ui/
 /admin ui.zip
+
+# Disposable core acceptance artifacts
+/.local-qa/
+/core-qa-results.json

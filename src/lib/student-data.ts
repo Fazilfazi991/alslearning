@@ -39,11 +39,7 @@ export async function getStudentPortalData() {
         .from("video_progress")
         .select("content_id,position_seconds,completed,updated_at")
         .eq("student_id", user.id),
-      db
-        .from("test_attempts")
-        .select("id,test_id,started_at,submitted_at,score,status")
-        .eq("student_id", user.id)
-        .order("started_at", { ascending: false }),
+      db.rpc("core_attempt_history"),
     ]);
   const error = [
     enrollments,
@@ -56,12 +52,12 @@ export async function getStudentPortalData() {
   if (error) throw new Error(error.message);
   return {
     user,
-    enrollments: enrollments.data || [],
+    enrollments: (enrollments.data || []).filter(e=>e.programs && e.status==="active" && (!e.batch_id || e.batches) && (!e.access_starts_at || new Date(e.access_starts_at)<=new Date()) && (!e.access_expires_at || new Date(e.access_expires_at)>new Date())),
     content: content.data || [],
     sessions: sessions.data || [],
     tests: tests.data || [],
     progress: progress.data || [],
-    attempts: attempts.data || [],
+    attempts: (attempts.data || []) as {id:string;test_id:string;started_at:string;submitted_at:string|null;score:number|null;status:string}[],
   };
 }
 
@@ -77,13 +73,14 @@ export async function getCourseDetail(slug: string) {
     .eq("slug", slug)
     .single();
   if (error) return null;
-  const { data: enrollment } = await db
+  const { data: courseEnrollments, error: enrollmentError } = await db
     .from("enrollments")
-    .select("id,status,batch_id,access_starts_at,access_expires_at")
+    .select("id,status,batch_id,access_starts_at,access_expires_at,batches(id)")
     .eq("student_id", user.id)
     .eq("program_id", program.id)
-    .eq("status", "active")
-    .maybeSingle();
+    .eq("status", "active");
+  if(enrollmentError)throw new Error(enrollmentError.message);
+  const enrollment=courseEnrollments?.find(e=>(!e.batch_id||e.batches)&&(!e.access_starts_at||new Date(e.access_starts_at)<=new Date())&&(!e.access_expires_at||new Date(e.access_expires_at)>new Date()));
   if (!enrollment) return null;
   const [chapters, topics, content, faculty] = await Promise.all([
     db
@@ -149,13 +146,7 @@ export async function getLearningContent(slug: string) {
       .eq("content_id", data.id)
       .eq("student_id", user.id)
       .maybeSingle(),
-    db
-      .from("video_checkpoints")
-      .select(
-        "id,trigger_seconds,pause_video,mandatory,retry_policy,show_feedback,question_id,questions(prompt,explanation,question_options!question_options_question_id_fkey(id,content,display_order))",
-      )
-      .eq("video_id", data.id)
-      .order("trigger_seconds"),
+    Promise.resolve({data:[],error:null}),
     db
       .from("learning_content")
       .select("id,slug,title,display_order")
@@ -175,26 +166,11 @@ export async function getLearningContent(slug: string) {
   };
 }
 
-export async function getTestForStudent(slug: string) {
-  const user = await currentUser();
-  if (!user) return null;
-  const db = await createClient();
-  const { data: test, error } = await db
-    .from("tests")
-    .select(
-      "*,test_questions(display_order,marks_override,negative_marks_override,questions(id,prompt,type,question_options!question_options_question_id_fkey(id,content,display_order)))",
-    )
-    .eq("slug", slug)
-    .eq("status", "active")
-    .single();
-  if (error) return null;
-  const finalized=await db.rpc("finalize_expired_test_attempts",{target_test:test.id});
-  if(finalized.error)throw new Error(finalized.error.message);
-  const { data: attempts } = await db
-    .from("test_attempts")
-    .select("id,status,started_at,expires_at,submitted_at,score,question_order,option_order,correct_count,incorrect_count,unanswered_count,negative_marks_total,attempt_answers(question_id,selected_option_ids)")
-    .eq("test_id", test.id)
-    .eq("student_id", user.id)
-    .order("started_at", { ascending: false });
-  return { user, test, attempts: attempts || [] };
+export async function getTestForStudent(slug:string) {
+ const user=await currentUser();if(!user)return null;const db=await createClient();
+ const {data:test,error}=await db.rpc("core_test_summary",{test_slug:slug});
+ if(error||!test)return null;
+ const {data:attempts,error:attemptError}=await db.rpc("core_attempt_history",{target_test:test.id});
+ if(attemptError)throw new Error(attemptError.message);
+ return {user,test,attempts:attempts||[]};
 }
