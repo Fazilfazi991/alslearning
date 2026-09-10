@@ -6,6 +6,8 @@ import { RichContent } from "@/components/learning/rich-text";
 import { mediaPositions } from "@/lib/rich-text";
 import type { RichText } from "@/lib/rich-text";
 import type { QuestionMedia } from "@/lib/question-media";
+import { SubmittedReview } from "./submitted-review";
+import type { Review } from "./review-types";
 type Option = { id: string; content: string; content_rich?: RichText };
 type Question = {
   id: string;
@@ -30,27 +32,6 @@ type Attempt = {
   option_order: Record<string, string[]>;
   questions: Question[];
   answers: Record<string, string[]>;
-};
-type Review = {
-  status: string;
-  results_visible: boolean;
-  score: number | null;
-  total_marks: number;
-  answers: {
-    question_id: string;
-    prompt: string;
-    prompt_rich?: RichText;
-    stem_media?: QuestionMedia[];
-    options: Option[];
-    selected_option_ids: string[];
-    correct_option_ids: string[];
-    marks_awarded: number;
-    explanation: string | null;
-    explanation_rich?: RichText;
-    solution_media?: QuestionMedia[];
-    stem_image_path: string | null;
-    explanation_image_path: string | null;
-  }[];
 };
 const button =
   "min-h-11 rounded-lg bg-brand px-4 py-2 font-semibold text-white disabled:opacity-50";
@@ -78,6 +59,13 @@ export function CoreTestEngine({
     [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const expiredSubmission = useRef<string | null>(null);
+  useEffect(() => {
+    if (!review) return;
+    const frame = requestAnimationFrame(() =>
+      window.scrollTo({ top: 0, behavior: "instant" }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [review]);
   const refresh = useCallback(async () => {
     const r = await createClient().rpc("core_attempt_history", {
       target_test: data.test.id,
@@ -213,7 +201,9 @@ export function CoreTestEngine({
   }
   const q = attempt?.questions[index];
   return (
-    <div className="mx-auto max-w-3xl p-4 sm:p-6">
+    <div
+      className={`mx-auto ${review ? "max-w-5xl py-4 sm:py-6" : "max-w-3xl p-4 sm:p-6"}`}
+    >
       <h1 className="mb-4 text-2xl font-bold">{data.test.title}</h1>
       {error && (
         <p role="alert" className="my-3 rounded bg-red-50 p-3 text-red-800">
@@ -302,85 +292,7 @@ export function CoreTestEngine({
         </section>
       ) : (
         <>
-          {review && (
-            <section className="card mb-5 p-4 sm:p-6">
-              <h2 className="text-xl font-bold">Submitted result</h2>
-              <p className="mt-2 font-semibold">
-                {review.results_visible
-                  ? `Score: ${review.score} / ${review.total_marks}`
-                  : "Your submission is saved. Results are hidden by the test settings."}
-              </p>
-              {review.answers?.map((a) => (
-                <article className="mt-5 border-t pt-4" key={a.question_id}>
-                  {(a.prompt.trim() ||
-                    mediaPositions(a.prompt_rich).length > 0) && (
-                    <div className="min-w-0 font-bold">
-                      <RichContent
-                        value={a.prompt_rich}
-                        fallback={a.prompt}
-                        media={a.stem_media}
-                        kind="stem"
-                      />
-                    </div>
-                  )}
-                  <QuestionGallery
-                    kind="stem"
-                    media={
-                      mediaPositions(a.prompt_rich).length ? [] : a.stem_media
-                    }
-                    legacy={a.stem_image_path}
-                  />
-                  <div className="mt-2 text-sm">
-                    Your answer:{" "}
-                    {a.options
-                      .filter((o) => a.selected_option_ids.includes(o.id))
-                      .map((o) => (
-                        <div key={o.id} className="mr-2">
-                          <RichContent
-                            value={o.content_rich}
-                            fallback={o.content}
-                          />
-                        </div>
-                      ))}
-                    {a.selected_option_ids.length === 0 && "Unanswered"}
-                  </div>
-                  <div className="text-sm">
-                    Correct answer:{" "}
-                    {a.options
-                      .filter((o) => a.correct_option_ids.includes(o.id))
-                      .map((o) => (
-                        <div key={o.id} className="mr-2">
-                          <RichContent
-                            value={o.content_rich}
-                            fallback={o.content}
-                          />
-                        </div>
-                      ))}
-                  </div>
-                  <p className="text-sm">Marks earned: {a.marks_awarded}</p>
-                  {(a.explanation || a.explanation_rich) && (
-                    <div className="mt-2 whitespace-pre-wrap">
-                      <RichContent
-                        value={a.explanation_rich}
-                        fallback={a.explanation}
-                        media={a.solution_media}
-                        kind="solution"
-                      />
-                    </div>
-                  )}
-                  <QuestionGallery
-                    kind="solution"
-                    media={
-                      mediaPositions(a.explanation_rich).length
-                        ? []
-                        : a.solution_media
-                    }
-                    legacy={a.explanation_image_path}
-                  />
-                </article>
-              ))}
-            </section>
-          )}
+          {review && <SubmittedReview review={review} />}
           <section className="card p-4">
             <p>
               {data.test.question_count} questions ·{" "}

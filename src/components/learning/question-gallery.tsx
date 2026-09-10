@@ -8,10 +8,12 @@ export function QuestionGallery({
   media,
   kind,
   legacy,
+  showLabels = true,
 }: {
   media?: QuestionMedia[];
   kind: "stem" | "solution";
   legacy?: string | null;
+  showLabels?: boolean;
 }) {
   if (!media)
     return (
@@ -33,7 +35,11 @@ export function QuestionGallery({
               `${kind === "stem" ? "Question" : "Solution"} image ${i + 1}`,
             )}
           />
-          <figcaption className="text-xs text-muted">Image {i + 1}</figcaption>
+          {showLabels && (
+            <figcaption className="text-xs text-muted">
+              Image {i + 1}
+            </figcaption>
+          )}
         </figure>
       ))}
     </div>

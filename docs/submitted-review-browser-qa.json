@@ -1,0 +1,404 @@
+{
+  "results": [
+    {
+      "name": "pathology-1440",
+      "questions": 10,
+      "images": [
+        {
+          "width": 794,
+          "height": 364,
+          "naturalWidth": 794,
+          "naturalHeight": 364
+        },
+        {
+          "width": 395,
+          "height": 179,
+          "naturalWidth": 395,
+          "naturalHeight": 179
+        },
+        {
+          "width": 375,
+          "height": 334,
+          "naturalWidth": 375,
+          "naturalHeight": 334
+        },
+        {
+          "width": 273,
+          "height": 184,
+          "naturalWidth": 273,
+          "naturalHeight": 184
+        }
+      ],
+      "tables": [],
+      "no_page_overflow": true
+    },
+    {
+      "name": "microbiology-1440",
+      "questions": 11,
+      "images": [
+        {
+          "width": 958,
+          "height": 723,
+          "naturalWidth": 1030,
+          "naturalHeight": 777
+        },
+        {
+          "width": 363,
+          "height": 219,
+          "naturalWidth": 363,
+          "naturalHeight": 219
+        },
+        {
+          "width": 892,
+          "height": 500,
+          "naturalWidth": 892,
+          "naturalHeight": 500
+        },
+        {
+          "width": 728,
+          "height": 546,
+          "naturalWidth": 728,
+          "naturalHeight": 546
+        },
+        {
+          "width": 473,
+          "height": 73,
+          "naturalWidth": 932,
+          "naturalHeight": 144
+        },
+        {
+          "width": 473,
+          "height": 62,
+          "naturalWidth": 2853,
+          "naturalHeight": 371
+        },
+        {
+          "width": 473,
+          "height": 44,
+          "naturalWidth": 2853,
+          "naturalHeight": 263
+        },
+        {
+          "width": 958,
+          "height": 364,
+          "naturalWidth": 2727,
+          "naturalHeight": 1037
+        },
+        {
+          "width": 850,
+          "height": 674,
+          "naturalWidth": 850,
+          "naturalHeight": 674
+        },
+        {
+          "width": 200,
+          "height": 133,
+          "naturalWidth": 200,
+          "naturalHeight": 133
+        },
+        {
+          "width": 225,
+          "height": 225,
+          "naturalWidth": 225,
+          "naturalHeight": 225
+        },
+        {
+          "width": 958,
+          "height": 559,
+          "naturalWidth": 2657,
+          "naturalHeight": 1549
+        },
+        {
+          "width": 473,
+          "height": 106,
+          "naturalWidth": 747,
+          "naturalHeight": 168
+        },
+        {
+          "width": 473,
+          "height": 181,
+          "naturalWidth": 746,
+          "naturalHeight": 285
+        }
+      ],
+      "tables": [
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        },
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        },
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        },
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        },
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        }
+      ],
+      "no_page_overflow": true
+    },
+    {
+      "name": "local-states-q190-1440",
+      "questions": 4,
+      "images": [
+        {
+          "width": 473,
+          "height": 326,
+          "naturalWidth": 858,
+          "naturalHeight": 592
+        },
+        {
+          "width": 253,
+          "height": 199,
+          "naturalWidth": 253,
+          "naturalHeight": 199
+        },
+        {
+          "width": 473,
+          "height": 354,
+          "naturalWidth": 508,
+          "naturalHeight": 380
+        },
+        {
+          "width": 291,
+          "height": 355,
+          "naturalWidth": 291,
+          "naturalHeight": 355
+        }
+      ],
+      "tables": [
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        },
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        },
+        {
+          "scroll": 956,
+          "viewport": 956,
+          "font": "16px"
+        }
+      ],
+      "no_page_overflow": true
+    },
+    {
+      "name": "pathology-390",
+      "questions": 10,
+      "images": [
+        {
+          "width": 324,
+          "height": 149,
+          "naturalWidth": 794,
+          "naturalHeight": 364
+        },
+        {
+          "width": 324,
+          "height": 147,
+          "naturalWidth": 395,
+          "naturalHeight": 179
+        },
+        {
+          "width": 324,
+          "height": 289,
+          "naturalWidth": 375,
+          "naturalHeight": 334
+        },
+        {
+          "width": 273,
+          "height": 184,
+          "naturalWidth": 273,
+          "naturalHeight": 184
+        }
+      ],
+      "tables": [],
+      "no_page_overflow": true
+    },
+    {
+      "name": "microbiology-390",
+      "questions": 11,
+      "images": [
+        {
+          "width": 324,
+          "height": 244,
+          "naturalWidth": 1030,
+          "naturalHeight": 777
+        },
+        {
+          "width": 324,
+          "height": 195,
+          "naturalWidth": 363,
+          "naturalHeight": 219
+        },
+        {
+          "width": 324,
+          "height": 182,
+          "naturalWidth": 892,
+          "naturalHeight": 500
+        },
+        {
+          "width": 324,
+          "height": 243,
+          "naturalWidth": 728,
+          "naturalHeight": 546
+        },
+        {
+          "width": 324,
+          "height": 50,
+          "naturalWidth": 932,
+          "naturalHeight": 144
+        },
+        {
+          "width": 324,
+          "height": 42,
+          "naturalWidth": 2853,
+          "naturalHeight": 371
+        },
+        {
+          "width": 324,
+          "height": 30,
+          "naturalWidth": 2853,
+          "naturalHeight": 263
+        },
+        {
+          "width": 324,
+          "height": 123,
+          "naturalWidth": 2727,
+          "naturalHeight": 1037
+        },
+        {
+          "width": 324,
+          "height": 257,
+          "naturalWidth": 850,
+          "naturalHeight": 674
+        },
+        {
+          "width": 200,
+          "height": 133,
+          "naturalWidth": 200,
+          "naturalHeight": 133
+        },
+        {
+          "width": 225,
+          "height": 225,
+          "naturalWidth": 225,
+          "naturalHeight": 225
+        },
+        {
+          "width": 324,
+          "height": 189,
+          "naturalWidth": 2657,
+          "naturalHeight": 1549
+        },
+        {
+          "width": 324,
+          "height": 73,
+          "naturalWidth": 747,
+          "naturalHeight": 168
+        },
+        {
+          "width": 324,
+          "height": 124,
+          "naturalWidth": 746,
+          "naturalHeight": 285
+        }
+      ],
+      "tables": [
+        {
+          "scroll": 464,
+          "viewport": 322,
+          "font": "16px"
+        },
+        {
+          "scroll": 322,
+          "viewport": 322,
+          "font": "16px"
+        },
+        {
+          "scroll": 322,
+          "viewport": 322,
+          "font": "16px"
+        },
+        {
+          "scroll": 409,
+          "viewport": 322,
+          "font": "16px"
+        },
+        {
+          "scroll": 641,
+          "viewport": 322,
+          "font": "16px"
+        }
+      ],
+      "no_page_overflow": true
+    },
+    {
+      "name": "local-states-q190-390",
+      "questions": 4,
+      "images": [
+        {
+          "width": 324,
+          "height": 224,
+          "naturalWidth": 858,
+          "naturalHeight": 592
+        },
+        {
+          "width": 253,
+          "height": 199,
+          "naturalWidth": 253,
+          "naturalHeight": 199
+        },
+        {
+          "width": 324,
+          "height": 242,
+          "naturalWidth": 508,
+          "naturalHeight": 380
+        },
+        {
+          "width": 291,
+          "height": 355,
+          "naturalWidth": 291,
+          "naturalHeight": 355
+        }
+      ],
+      "tables": [
+        {
+          "scroll": 409,
+          "viewport": 322,
+          "font": "16px"
+        },
+        {
+          "scroll": 409,
+          "viewport": 322,
+          "font": "16px"
+        },
+        {
+          "scroll": 409,
+          "viewport": 322,
+          "font": "16px"
+        }
+      ],
+      "no_page_overflow": true
+    }
+  ],
+  "errors": [],
+  "database_writes": false,
+  "production_touched": false,
+  "local_fixture_note": "Correct/wrong/unanswered and draft Q190 gallery exercised by browser-local RPC/storage interception; historical subject reviews use real permitted snapshots."
+}
