@@ -1,5 +1,6 @@
 """Read-only acceptance against the six locally supplied client files."""
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -7,13 +8,15 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("parser", ROOT / "scripts/pathology-fidelity-preflight.py")
 parser = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(parser)
+SOURCES = [ROOT / "MOQ" / source["file"] for source in
+           json.loads((ROOT / "docs/pathology-preflight.json").read_text(encoding="utf-8-sig"))["records"]]
 
 
-@unittest.skipUnless(len(list((ROOT / "MOQ").glob("*.docx"))) == 6, "Client source files are local, not committed")
+@unittest.skipUnless(all(path.is_file() for path in SOURCES), "Client source files are local, not committed")
 class SourceFidelity(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.docs = [parser.parse(p) for p in sorted((ROOT / "MOQ").glob("*.docx"))]
+        cls.docs = [parser.parse(p) for p in SOURCES]
 
     def test_reconciliation(self):
         self.assertEqual([len(d) for d in self.docs], [310, 137, 168, 100, 148, 105])
