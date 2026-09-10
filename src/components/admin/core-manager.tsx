@@ -47,6 +47,10 @@ export function CoreManager({
     [editing, setEditing] = useState<Question | Test | Content | null>(null),
     [search, setSearch] = useState(""),
     [status, setStatus] = useState(""),
+    [subject, setSubject] = useState(""),
+    [chapter, setChapter] = useState(""),
+    [sourceType, setSourceType] = useState(""),
+    [reviewOnly, setReviewOnly] = useState(false),
     [page, setPage] = useState(0);
   const refresh = useCallback(async () => {
     setData(await loadCoreData());
@@ -117,14 +121,30 @@ export function CoreManager({
       : mode === "tests"
         ? data.tests
         : data.content
-  ).filter(
-    (x) =>
+  ).filter((x) => {
+    const isQuestion = "prompt" in x;
+    const searchable = isQuestion
+      ? [
+          x.prompt,
+          x.source_label,
+          x.source_reference,
+          x.exam_year,
+          data.subjects.find((s) => s.id === x.subject_id)?.name,
+          data.chapters.find((c) => c.id === x.chapter_id)?.name,
+        ].join(" ")
+      : x.title;
+    return (
       canManage(data, mode, x) &&
       (!status || x.status === status) &&
-      ("prompt" in x ? x.prompt : x.title)
-        .toLowerCase()
-        .includes(search.toLowerCase()),
-  );
+      (!isQuestion ||
+        ((!subject || x.subject_id === subject) &&
+          (!chapter || x.chapter_id === chapter) &&
+          (!sourceType || x.source_type === sourceType) &&
+          (!reviewOnly ||
+            x.source_label?.includes("CONTENT REVIEW REQUIRED")))) &&
+      searchable.toLowerCase().includes(search.toLowerCase())
+    );
+  });
   return (
     <div className="min-w-0">
       <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -192,6 +212,55 @@ export function CoreManager({
           }))}
         />
       </div>
+      {mode === "questions" && (
+        <div className="mb-5 grid gap-3 sm:grid-cols-2">
+          <Select
+            label="Filter by subject"
+            value={subject}
+            items={data.subjects}
+            onChange={(v) => {
+              setSubject(v);
+              setChapter("");
+              setPage(0);
+            }}
+          />
+          <Select
+            label="Filter by chapter"
+            value={chapter}
+            items={data.chapters.filter(
+              (c) => !subject || c.subject_id === subject,
+            )}
+            onChange={(v) => {
+              setChapter(v);
+              setPage(0);
+            }}
+          />
+          <Select
+            label="Filter by source"
+            value={sourceType}
+            items={[
+              { id: "standard", name: "Regular" },
+              { id: "previous_exam", name: "Previous paper" },
+              { id: "recalled", name: "Recalled" },
+            ]}
+            onChange={(v) => {
+              setSourceType(v);
+              setPage(0);
+            }}
+          />
+          <label className="flex min-h-11 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={reviewOnly}
+              onChange={(e) => {
+                setReviewOnly(e.target.checked);
+                setPage(0);
+              }}
+            />
+            Content review required only
+          </label>
+        </div>
+      )}
       <div className="space-y-3">
         {rows.slice(page * 20, page * 20 + 20).map((x) => (
           <article className="card min-w-0 p-4" key={x.id}>
@@ -209,6 +278,23 @@ export function CoreManager({
                     ? ` · ${x.type.replaceAll("_", " ")}`
                     : ` · ${x.kind}`}
                 </p>
+                {"prompt" in x && (
+                  <>
+                    <p className="mt-1 break-words text-sm text-muted">
+                      {data.chapters.find((c) => c.id === x.chapter_id)?.name}
+                    </p>
+                    {x.source_label?.includes("CONTENT REVIEW REQUIRED") && (
+                      <p className="mt-1 font-semibold text-amber-800">
+                        Content review required
+                      </p>
+                    )}
+                    {x.source_reference && (
+                      <p className="text-sm text-muted">
+                        Previous paper: {x.source_reference}
+                      </p>
+                    )}
+                  </>
+                )}
                 {"total_marks" in x && (
                   <p className="text-sm text-muted">
                     {x.question_count} questions · {x.total_marks} marks ·{" "}

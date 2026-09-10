@@ -1,0 +1,30 @@
+{
+  "test": {
+    "id": "fa0e3cc8-c0f6-5648-bd85-7c5ec01d6d1a",
+    "status": "archived",
+    "total_marks": 10
+  },
+  "attempts": [
+    {
+      "id": "6587aa6a-756e-4b98-bd24-29841da2db13",
+      "status": "submitted",
+      "score": 10
+    },
+    {
+      "id": "ea304703-07da-401b-85f0-6614245ba96e",
+      "status": "submitted",
+      "score": 10
+    },
+    {
+      "id": "f78aa0f3-d27e-4fdb-b603-b1318966a9c4",
+      "status": "submitted",
+      "score": 10
+    },
+    {
+      "id": "e3462e11-db3e-41c2-9e71-47f251d08a1f",
+      "status": "submitted",
+      "score": 10
+    }
+  ],
+  "client_questions_retained": true
+}

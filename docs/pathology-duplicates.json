@@ -1,0 +1,313 @@
+{
+  "policy": "All source occurrences retained; similarities are lexical candidates, not clinical equivalence judgments",
+  "exact_groups": [
+    [
+      {
+        "subhead": 1,
+        "sequence": 209,
+        "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx"
+      },
+      {
+        "subhead": 1,
+        "sequence": 294,
+        "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx"
+      }
+    ],
+    [
+      {
+        "subhead": 5,
+        "sequence": 63,
+        "source_document": "app friendly format - JSO SIR 5 - Histopathology.docx"
+      },
+      {
+        "subhead": 5,
+        "sequence": 80,
+        "source_document": "app friendly format - JSO SIR 5 - Histopathology.docx"
+      }
+    ],
+    [
+      {
+        "subhead": 5,
+        "sequence": 70,
+        "source_document": "app friendly format - JSO SIR 5 - Histopathology.docx"
+      },
+      {
+        "subhead": 5,
+        "sequence": 72,
+        "source_document": "app friendly format - JSO SIR 5 - Histopathology.docx"
+      }
+    ]
+  ],
+  "same_stem_differing_answer_or_solution": [
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 61,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "Hemolytic anemia"
+          ],
+          "solution": "Ans: B"
+        },
+        {
+          "subhead": 3,
+          "sequence": 18,
+          "source_document": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+          "marked_answers": [
+            "Hemolytic anemia"
+          ],
+          "solution": "Answer: C. Hemolytic anemia"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 200,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "20% blasts"
+          ],
+          "solution": "Correct Answer: B) 20% blasts"
+        },
+        {
+          "subhead": 3,
+          "sequence": 103,
+          "source_document": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+          "marked_answers": [
+            "20% blasts"
+          ],
+          "solution": "Correct Answer: B. 20% blasts"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 201,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "Flow cytometry"
+          ],
+          "solution": "Correct Answer: C). Flow cytometry"
+        },
+        {
+          "subhead": 3,
+          "sequence": 167,
+          "source_document": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+          "marked_answers": [
+            "Flow cytometry"
+          ],
+          "solution": "Answer: C. Flow cytometry"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 202,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "Döhle body"
+          ],
+          "solution": "Correct Answer: C) Döhle body"
+        },
+        {
+          "subhead": 3,
+          "sequence": 102,
+          "source_document": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+          "marked_answers": [
+            "Döhle body"
+          ],
+          "solution": "Correct Answer: C. Döhle body\n•\tA. Cabot ring: Seen in red blood cells as remnants of mitotic spindle, not in neutrophils.\n•\tB. Heinz body: Present in red blood cells due to denatured hemoglobin.\n•\tC. Döhle body: Pale blue cytoplasmic inclusions seen in neutrophils, especially in infections.\n•\tD. Pappenheimer body: Iron-containing granules seen in red blood cells.\n"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 203,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "Myeloid"
+          ],
+          "solution": "Correct Answer: C) Myeloid"
+        },
+        {
+          "subhead": 3,
+          "sequence": 101,
+          "source_document": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+          "marked_answers": [
+            "Myeloid"
+          ],
+          "solution": "Correct Answer: C. Myeloid"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 224,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "PT"
+          ],
+          "solution": "Answer: b) PT\n•\tVitamin K dependent clotting factors II, VII, IX, and X. \n•\tSince Factor VII (extrinsic pathway) has the shortest half-life, PT is prolonged first in vitamin K deficiency. "
+        },
+        {
+          "subhead": 1,
+          "sequence": 239,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "Prothrombin time (PT)"
+          ],
+          "solution": "Answer: b) Prothrombin time (PT)"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 235,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "aPTT"
+          ],
+          "solution": "Answer: b) Aptt\nIntrinsic pathway: XII → XI → IX + VIII → X (common pathway)\n•\tThis pathway is assessed by aPTT (activated partial thromboplastin time)\nExtrinsic pathway: Tissue Factor (III) + Factor VII → Activation of Factor X\n•\tThis pathway is assessed by PT (Prothrombin Time)"
+        },
+        {
+          "subhead": 1,
+          "sequence": 265,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "aPTT"
+          ],
+          "solution": "Answer: b) aPTT"
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 248,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "aPTT"
+          ],
+          "solution": "Answer: b) aPTT"
+        },
+        {
+          "subhead": 1,
+          "sequence": 262,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "aPTT"
+          ],
+          "solution": "Answer: c) Aptt\n•\tHeparin primarily affects the intrinsic pathway and thus prolongs the activated partial thromboplastin time (aPTT). \n•\taPTT is used to monitor the anticoagulant effect of heparin therapy to ensure therapeutic levels without excessive bleeding risk.\n•\tPT and INR monitor Warfarin therapy (extrinsic pathway).\n•\tBleeding time assesses platelet function, not coagulation factor activity."
+        }
+      ]
+    },
+    {
+      "classification": "POTENTIAL CONTRADICTORY DUPLICATE — faculty review required",
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 304,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+          "marked_answers": [
+            "Hematocrit"
+          ],
+          "solution": "Correct Answer: D) Hematocrit"
+        },
+        {
+          "subhead": 3,
+          "sequence": 104,
+          "source_document": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+          "marked_answers": [
+            "Hematocrit"
+          ],
+          "solution": "Correct Answer: D.Hematocrit"
+        }
+      ]
+    }
+  ],
+  "near_pairs": [
+    {
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 209,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx"
+        },
+        {
+          "subhead": 1,
+          "sequence": 286,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx"
+        }
+      ],
+      "similarity": 0.9434
+    },
+    {
+      "records": [
+        {
+          "subhead": 1,
+          "sequence": 286,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx"
+        },
+        {
+          "subhead": 1,
+          "sequence": 294,
+          "source_document": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx"
+        }
+      ],
+      "similarity": 0.9434
+    },
+    {
+      "records": [
+        {
+          "subhead": 4,
+          "sequence": 48,
+          "source_document": "app friendly format - JSO SIR 4 - Cytology and Cytogenetics.docx"
+        },
+        {
+          "subhead": 4,
+          "sequence": 49,
+          "source_document": "app friendly format - JSO SIR 4 - Cytology and Cytogenetics.docx"
+        }
+      ],
+      "similarity": 0.9167
+    },
+    {
+      "records": [
+        {
+          "subhead": 5,
+          "sequence": 69,
+          "source_document": "app friendly format - JSO SIR 5 - Histopathology.docx"
+        },
+        {
+          "subhead": 5,
+          "sequence": 71,
+          "source_document": "app friendly format - JSO SIR 5 - Histopathology.docx"
+        }
+      ],
+      "similarity": 0.9767
+    }
+  ],
+  "near_threshold": "Token Jaccard >= 0.8 and character similarity >= 0.9, excluding identical stems"
+}
