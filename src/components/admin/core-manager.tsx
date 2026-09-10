@@ -27,6 +27,12 @@ import {
   fieldClass as input,
   actionClass as button,
 } from "./core-fields";
+import { RichEditor } from "./rich-editor";
+import {
+  imageTypes,
+  orderedMedia,
+  type QuestionMedia,
+} from "@/lib/question-media";
 import { PrivateImage } from "@/components/learning/private-image";
 
 export function CoreManager({
@@ -350,58 +356,107 @@ function NumberField({
     </Field>
   );
 }
-function ImageField({
+function MediaField({
   label,
-  path,
+  kind,
   id,
+  media,
   onChange,
   onBusy,
 }: {
   label: string;
-  path: string;
+  kind: "stem" | "solution";
   id: string;
-  onChange: (v: string) => void;
+  media: QuestionMedia[];
+  onChange: (items: QuestionMedia[]) => void;
   onBusy: (v: boolean) => void;
 }) {
-  const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  const items = orderedMedia(media, kind);
+  const change = (next: QuestionMedia[]) =>
+    onChange([
+      ...media.filter((m) => m.kind !== kind),
+      ...next.map((m, position) => ({ ...m, position })),
+    ]);
   return (
-    <div>
+    <div className="space-y-2">
       <Field label={label}>
         <input
           type="file"
-          accept="image/png,image/jpeg,image/webp"
+          multiple
+          accept={imageTypes.join(",")}
           disabled={busy}
           className={`${input} max-w-full`}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              setBusy(true);
-              onBusy(true);
-              setError("");
-              void uploadCoreFile(file, "question-media", id)
-                .then(onChange)
-                .catch((e) => setError(e.message))
-                .finally(() => {
-                  setBusy(false);
-                  onBusy(false);
+          onChange={async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            setBusy(true);
+            onBusy(true);
+            setError("");
+            const additions: QuestionMedia[] = [];
+            try {
+              for (const file of files) {
+                if (!imageTypes.includes(file.type))
+                  throw Error("Use PNG, JPEG, WebP, or GIF images.");
+                const path = await uploadCoreFile(file, "question-media", id);
+                additions.push({
+                  id: crypto.randomUUID(),
+                  kind,
+                  storage_path: path,
+                  mime_type: file.type,
+                  original_filename: file.name,
+                  position: items.length + additions.length,
                 });
+              }
+            } catch (e) {
+              setError(e instanceof Error ? e.message : "Upload failed");
+            } finally {
+              change([...items, ...additions]);
+              setBusy(false);
+              onBusy(false);
             }
           }}
         />
       </Field>
-      {busy && <p role="status">Uploading image…</p>}
       {error && <p role="alert">{error}</p>}
-      <PrivateImage path={path} alt={label} />
-      {path && (
-        <button
-          type="button"
-          className="min-h-11 text-sm text-brand"
-          onClick={() => onChange("")}
-        >
-          Remove image from question
-        </button>
-      )}
+      <div className="grid gap-2 sm:grid-cols-2">
+        {items.map((m, i) => (
+          <div key={m.id} className="min-w-0 rounded border p-2">
+            <details>
+              <summary className="min-h-11 cursor-pointer break-all text-sm">
+                {i + 1}. {m.original_filename || "Image"} — preview
+              </summary>
+              <PrivateImage path={m.storage_path} alt={`${label} ${i + 1}`} />
+            </details>
+            <div className="flex flex-wrap gap-2">
+              {[-1, 1].map((d) => (
+                <button
+                  type="button"
+                  className="min-h-11 rounded border px-2"
+                  key={d}
+                  disabled={busy || i + d < 0 || i + d >= items.length}
+                  onClick={() => {
+                    const next = [...items];
+                    [next[i], next[i + d]] = [next[i + d], next[i]];
+                    change(next);
+                  }}
+                >
+                  {d < 0 ? "Move up" : "Move down"}
+                </button>
+              ))}
+              <button
+                type="button"
+                disabled={busy}
+                className="min-h-11 px-2"
+                onClick={() => change(items.filter((x) => x.id !== m.id))}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -467,21 +522,22 @@ function QuestionForm({
           option.
         </p>
         <Field label="Question / case text">
-          <textarea
-            required
-            className={`${input} min-h-28`}
-            value={q.prompt}
-            onChange={(e) => setQ({ ...q, prompt: e.target.value })}
+          <RichEditor
+            label="Question / case text"
+            text={q.prompt}
+            value={q.prompt_rich}
+            onChange={(prompt, prompt_rich) =>
+              setQ({ ...q, prompt, prompt_rich })
+            }
           />
         </Field>
-        <ImageField
-          onBusy={onBusy}
-          label="Question image"
+        <MediaField
+          label="Question images"
+          kind="stem"
           id={q.id}
-          path={q.stem_image_path}
-          onChange={(v) =>
-            setQ((current) => ({ ...current, stem_image_path: v }))
-          }
+          media={q.media || []}
+          onBusy={onBusy}
+          onChange={(media) => setQ((current) => ({ ...current, media }))}
         />
         <fieldset className="space-y-3">
           <legend className="mb-2 font-semibold">
@@ -511,16 +567,16 @@ function QuestionForm({
                 }
               />
               <Field label={`Option ${i + 1}`}>
-                <input
-                  required
+                <RichEditor
+                  label={`Option ${i + 1}`}
+                  text={o.content}
+                  value={o.content_rich}
                   disabled={q.type === "true_false"}
-                  className={input}
-                  value={o.content}
-                  onChange={(e) =>
+                  onChange={(content, content_rich) =>
                     setQ({
                       ...q,
                       options: q.options.map((x, n) =>
-                        n === i ? { ...x, content: e.target.value } : x,
+                        n === i ? { ...x, content, content_rich } : x,
                       ),
                     })
                   }
@@ -532,20 +588,22 @@ function QuestionForm({
       </Section>
       <Section title="Explanation and marking" open>
         <Field label="Explanation">
-          <textarea
-            className={`${input} min-h-24`}
-            value={q.explanation || ""}
-            onChange={(e) => setQ({ ...q, explanation: e.target.value })}
+          <RichEditor
+            label="Explanation"
+            text={q.explanation || ""}
+            value={q.explanation_rich}
+            onChange={(explanation, explanation_rich) =>
+              setQ({ ...q, explanation, explanation_rich })
+            }
           />
         </Field>
-        <ImageField
-          onBusy={onBusy}
-          label="Solution / explanation image"
+        <MediaField
+          label="Solution images"
+          kind="solution"
           id={q.id}
-          path={q.explanation_image_path}
-          onChange={(v) =>
-            setQ((current) => ({ ...current, explanation_image_path: v }))
-          }
+          media={q.media || []}
+          onBusy={onBusy}
+          onChange={(media) => setQ((current) => ({ ...current, media }))}
         />
         <div className="grid gap-4 sm:grid-cols-3">
           <Select

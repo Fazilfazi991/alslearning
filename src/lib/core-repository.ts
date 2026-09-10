@@ -1,3 +1,5 @@
+import type { RichText } from "./rich-text";
+import type { QuestionMedia } from "./question-media";
 import { createClient } from "./supabase/client";
 
 export type Lookup = {
@@ -31,7 +33,14 @@ export type Question = Taxonomy & {
   status: string;
   stem_image_path: string;
   explanation_image_path: string;
-  options: { content: string; correct: boolean }[];
+  prompt_rich?: RichText | null;
+  explanation_rich?: RichText | null;
+  media?: QuestionMedia[];
+  options: {
+    content: string;
+    correct: boolean;
+    content_rich?: RichText | null;
+  }[];
 };
 export type Test = Taxonomy & {
   id: string;
@@ -241,7 +250,7 @@ export async function loadCoreData(): Promise<CoreData> {
       db
         .from("questions")
         .select(
-          "*,question_options!question_options_question_id_fkey(id,content,display_order),question_answer_keys(option_id)",
+          "*,question_options!question_options_question_id_fkey(id,content,content_rich,display_order),question_answer_keys(option_id),question_media(*)",
         )
         .order("created_at", { ascending: false })
         .range(from, to),
@@ -295,17 +304,21 @@ export async function loadCoreData(): Promise<CoreData> {
       ...(questions.data || []).map((q) => ({
         ...q,
         exam_year: q.exam_year?.toString() || "",
+        media: q.question_media || [],
         options: q.question_options
           .sort(
             (a: { display_order: number }, b: { display_order: number }) =>
               a.display_order - b.display_order,
           )
-          .map((o: { id: string; content: string }) => ({
-            content: o.content,
-            correct: q.question_answer_keys.some(
-              (k: { option_id: string }) => k.option_id === o.id,
-            ),
-          })),
+          .map(
+            (o: { id: string; content: string; content_rich?: RichText }) => ({
+              content: o.content,
+              content_rich: o.content_rich,
+              correct: q.question_answer_keys.some(
+                (k: { option_id: string }) => k.option_id === o.id,
+              ),
+            }),
+          ),
       })),
     ].filter(
       (q, i, items) => items.findLastIndex((x) => x.id === q.id) === i,
