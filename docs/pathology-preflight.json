@@ -1,0 +1,110 @@
+{
+  "status": "blocked_before_import",
+  "records": [
+    {
+      "subhead": "PATHO 1",
+      "file": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+      "sha256": "5a1b81dab4ffc092f44d501eecf377524acc8a559f61675e8349d7c4ed9a4f82",
+      "source_questions": 310,
+      "imported": 0,
+      "quarantined": 0,
+      "pending": 310,
+      "image_occurrences": 4,
+      "previous_reference_candidates": 0,
+      "blank_solutions": 0,
+      "image_locations": [
+        {
+          "sequence": 190,
+          "role": "solution",
+          "images": 4
+        }
+      ]
+    },
+    {
+      "subhead": "PATHO 2",
+      "file": "app friendly format - JSO SIR 2 - Clinical pathology.docx",
+      "sha256": "503c8c980ba4a18e5fa676a3535391dfd49f606af542714b23a47e27a3d7f362",
+      "source_questions": 137,
+      "imported": 0,
+      "quarantined": 0,
+      "pending": 137,
+      "image_occurrences": 0,
+      "previous_reference_candidates": 0,
+      "blank_solutions": 0,
+      "image_locations": []
+    },
+    {
+      "subhead": "PATHO 3",
+      "file": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+      "sha256": "26e8c2395c0fea51196c68fa71fdd3aa313b0ffc35444dad05bffe2918999bb6",
+      "source_questions": 168,
+      "imported": 0,
+      "quarantined": 0,
+      "pending": 168,
+      "image_occurrences": 4,
+      "previous_reference_candidates": 0,
+      "blank_solutions": 0,
+      "image_locations": [
+        {
+          "sequence": 16,
+          "role": "solution",
+          "images": 1
+        },
+        {
+          "sequence": 24,
+          "role": "solution",
+          "images": 1
+        },
+        {
+          "sequence": 78,
+          "role": "solution",
+          "images": 1
+        },
+        {
+          "sequence": 79,
+          "role": "solution",
+          "images": 1
+        }
+      ]
+    },
+    {
+      "subhead": "PATHO 4",
+      "file": "app friendly format - JSO SIR 4 - Cytology and Cytogenetics.docx",
+      "sha256": "229d529c0219cebfb4b4eaa2d7fe4bbcab014711fb05643cd2d56bb5e4fbfddd",
+      "source_questions": 100,
+      "imported": 0,
+      "quarantined": 0,
+      "pending": 100,
+      "image_occurrences": 0,
+      "previous_reference_candidates": 30,
+      "blank_solutions": 100,
+      "image_locations": []
+    },
+    {
+      "subhead": "PATHO 5",
+      "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+      "sha256": "ff12d756f56b5f07055775b2c3e8371abb61a5087d75b8f884aedeb817716195",
+      "source_questions": 148,
+      "imported": 0,
+      "quarantined": 0,
+      "pending": 148,
+      "image_occurrences": 0,
+      "previous_reference_candidates": 9,
+      "blank_solutions": 0,
+      "image_locations": []
+    },
+    {
+      "subhead": "PATHO 6",
+      "file": "app friendly format - JSO SIR 6 - Blood Banking.docx",
+      "sha256": "4ba3e48fd961a59eaedc14932f8e1998fae126e21ce5ddcd215834382c49264a",
+      "source_questions": 105,
+      "imported": 0,
+      "quarantined": 0,
+      "pending": 105,
+      "image_occurrences": 0,
+      "previous_reference_candidates": 41,
+      "blank_solutions": 0,
+      "image_locations": []
+    }
+  ]
+}
