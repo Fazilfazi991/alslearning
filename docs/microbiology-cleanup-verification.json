@@ -1,0 +1,29 @@
+{
+  "test": {
+    "id": "1ac5a167-2333-5b63-a111-afdc41813025",
+    "status": "archived",
+    "total_marks": 11
+  },
+  "attempts": [
+    {
+      "id": "eadf6bca-a14c-400f-9600-440481d5f5df",
+      "status": "submitted",
+      "score": 0
+    },
+    {
+      "id": "3751559a-a936-49a3-8442-ce84285d68fa",
+      "status": "submitted",
+      "score": 11
+    },
+    {
+      "id": "498ea629-561b-44ab-ade2-9b6e427f2c12",
+      "status": "submitted",
+      "score": 11
+    }
+  ],
+  "client_questions_retained": true,
+  "active": 791,
+  "drafts": 2,
+  "quarantined": 4,
+  "disposable_test_archived": true
+}

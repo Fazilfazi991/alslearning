@@ -1,0 +1,222 @@
+import assert from "node:assert/strict";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { clients, ok } from "./pathology-client.mjs";
+import { batch, identity } from "./microbiology-import-model.mjs";
+const { admin, fixture, login } = await clients();
+const manifest = JSON.parse(
+  readFileSync("docs/microbiology-import-manifest.json", "utf8"),
+);
+assert.equal(
+  manifest.records.length,
+  797,
+  "Completed import manifest required",
+);
+assert.equal(manifest.images.length, 116);
+const input = JSON.parse(
+  readFileSync(".local-qa/microbiology-preflight-records.json", "utf8"),
+);
+const prior = existsSync(".local-qa/microbiology-acceptance.json")
+  ? JSON.parse(readFileSync(".local-qa/microbiology-acceptance.json", "utf8"))
+  : null;
+const studentId = prior?.student_id || fixture.users.second.id;
+async function row(table, id, value) {
+  const old = ok(
+    await admin.from(table).select("*").eq("id", id).maybeSingle(),
+  );
+  return (
+    old ||
+    ok(
+      await admin
+        .from(table)
+        .insert({ id, ...value })
+        .select()
+        .single(),
+    )
+  );
+}
+const program = await row("programs", identity(`${batch}:qa-program`), {
+  exam_id: manifest.taxonomy.exam.id,
+  name: "QA ONLY — Microbiology Import Acceptance",
+  slug: "qa-microbiology-import-acceptance",
+  status: "active",
+  has_tests: true,
+});
+ok(
+  await admin.rpc("core_program_subjects", {
+    target_program: program.id,
+    subject_ids: [manifest.taxonomy.subject.id],
+  }),
+);
+const qaBatch = await row("batches", identity(`${batch}:qa-batch`), {
+  program_id: program.id,
+  name: "QA ONLY — Microbiology acceptance fixture",
+  slug: "qa-microbiology-acceptance",
+  status: "active",
+});
+await row("enrollments", identity(`${batch}:qa-enrollment`), {
+  student_id: studentId,
+  program_id: program.id,
+  batch_id: qaBatch.id,
+  status: "active",
+});
+const pick = (subhead, source_sequence) =>
+  input.find(
+    (q) => q.micro === subhead && q.source_sequence === source_sequence,
+  );
+const selections = [
+  pick(1, 1),
+  pick(1, 12),
+  pick(2, 23),
+  pick(2, 58),
+  pick(2, 40),
+  pick(3, 55),
+  pick(4, 71),
+  pick(4, 77),
+  pick(5, 59),
+  pick(6, 1),
+  input.find(
+    (q) =>
+      q.micro === 7 &&
+      q.source_reference_candidates.length &&
+      q.classification === "STRUCTURALLY READY",
+  ),
+];
+for (const mark of ["superscript", "subscript"]) {
+  const q = input.find(
+    (q) =>
+      q.classification === "STRUCTURALLY READY" && q.format_inventory[mark],
+  );
+  if (q && !selections.includes(q)) selections.push(q);
+}
+assert.ok(
+  selections.every((q) => q && q.classification === "STRUCTURALLY READY"),
+);
+const questionIds = selections.map((q) => identity(q.source_key));
+const test = {
+  id: identity(`${batch}:qa-test`),
+  title: "QA ONLY — Microbiology import acceptance",
+  type: "mock",
+  exam_id: manifest.taxonomy.exam.id,
+  program_id: program.id,
+  subject_id: manifest.taxonomy.subject.id,
+  chapter_id: null,
+  topic_id: null,
+  duration_minutes: 90,
+  question_count: questionIds.length,
+  default_negative_marks: 0,
+  max_attempts: 10,
+  available_from: null,
+  available_until: null,
+  randomize_questions: false,
+  randomize_options: false,
+  show_results: true,
+  show_answers: true,
+  show_explanations: true,
+  selection_mode: "manual",
+  selection_rules: {},
+  status: "active",
+};
+const save = (value, ids = questionIds) =>
+  admin.rpc("core_save_test", {
+    value,
+    question_ids: ids,
+    batch_ids: [qaBatch.id],
+  });
+ok(await save(test));
+const assertions = [];
+const check = (name, condition) => {
+  if (!condition) throw Error(name);
+  assertions.push(name);
+  console.log("PASS", name);
+};
+const draftIds = manifest.records
+  .filter((r) => r.status === "draft")
+  .map((r) => r.question_id);
+for (const id of draftIds)
+  check(
+    "Draft excluded from explicit test selection: " + id,
+    !!(
+      await save({ ...test, question_count: questionIds.length + 1 }, [
+        ...questionIds,
+        id,
+      ])
+    ).error,
+  );
+ok(await save({ ...test, selection_mode: "generated", question_count: 791 }));
+const generated = ok(
+  await admin
+    .from("test_questions")
+    .select("question_id")
+    .eq("test_id", test.id),
+);
+check(
+  "Generated selection contains 791 active questions and no review drafts",
+  generated.length === 791 &&
+    !generated.some((r) => draftIds.includes(r.question_id)),
+);
+ok(await save(test));
+const student = await login("second");
+check(
+  "Student cannot create tests",
+  !!(
+    await student.rpc("core_save_test", {
+      value: test,
+      question_ids: questionIds,
+      batch_ids: [qaBatch.id],
+    })
+  ).error,
+);
+const inaccessible = await login("wrong-batch");
+check(
+  "Unenrolled fixture cannot see the QA test",
+  ok(await inaccessible.from("tests").select("id").eq("id", test.id)).length ===
+    0,
+);
+check(
+  "Unenrolled fixture cannot start the QA test",
+  !!(await inaccessible.rpc("start_test_attempt", { target_test: test.id }))
+    .error,
+);
+check(
+  "One deterministic QA test; no quarantine/draft in its manual bank",
+  new Set(questionIds).size === questionIds.length &&
+    questionIds.every((id) =>
+      manifest.records.some(
+        (r) => r.question_id === id && r.status === "active",
+      ),
+    ),
+);
+const result = {
+  test,
+  test_slug: `test-${test.id}`,
+  program,
+  qa_batch: qaBatch,
+  student_id: studentId,
+  fixture: prior?.fixture || fixture,
+  question_ids: questionIds,
+  selections: selections.map((q) => ({
+    subhead: q.micro,
+    source_sequence: q.source_sequence,
+    question_id: identity(q.source_key),
+    has_images: !!q.media.length,
+    explanation_length: q.explanation.length,
+  })),
+  assertions,
+};
+writeFileSync(
+  ".local-qa/microbiology-acceptance.json",
+  JSON.stringify(result, null, 2),
+);
+writeFileSync(
+  "docs/microbiology-test-acceptance.json",
+  JSON.stringify(
+    {
+      test_id: test.id,
+      test_slug: result.test_slug,
+      selections: result.selections,
+      assertions,
+    },
+    null,
+    2,
+  ),
+);

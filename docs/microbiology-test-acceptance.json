@@ -1,0 +1,92 @@
+{
+  "test_id": "1ac5a167-2333-5b63-a111-afdc41813025",
+  "test_slug": "test-1ac5a167-2333-5b63-a111-afdc41813025",
+  "selections": [
+    {
+      "subhead": 1,
+      "source_sequence": 1,
+      "question_id": "91afe9da-463b-5317-b9e6-cf8dbb8152b0",
+      "has_images": true,
+      "explanation_length": 858
+    },
+    {
+      "subhead": 1,
+      "source_sequence": 12,
+      "question_id": "0dbc2d62-6fc1-5437-924a-8941e2afa2e9",
+      "has_images": true,
+      "explanation_length": 48
+    },
+    {
+      "subhead": 2,
+      "source_sequence": 23,
+      "question_id": "b910813c-ada1-598c-8f36-8f3215485aee",
+      "has_images": true,
+      "explanation_length": 1769
+    },
+    {
+      "subhead": 2,
+      "source_sequence": 58,
+      "question_id": "56d5a55e-e5d9-5bad-ac33-22b12a32dc6b",
+      "has_images": false,
+      "explanation_length": 599
+    },
+    {
+      "subhead": 2,
+      "source_sequence": 40,
+      "question_id": "a8a565a7-af98-58c5-a779-b7233cd73aaa",
+      "has_images": true,
+      "explanation_length": 211
+    },
+    {
+      "subhead": 3,
+      "source_sequence": 55,
+      "question_id": "54cde87b-b26e-5f09-ad59-0022c9ffcde4",
+      "has_images": true,
+      "explanation_length": 716
+    },
+    {
+      "subhead": 4,
+      "source_sequence": 71,
+      "question_id": "7cccf803-55fb-56fa-990f-1a4c46ea3675",
+      "has_images": true,
+      "explanation_length": 358
+    },
+    {
+      "subhead": 4,
+      "source_sequence": 77,
+      "question_id": "a3db1d60-b916-51ab-8f77-25e758eb319e",
+      "has_images": true,
+      "explanation_length": 34
+    },
+    {
+      "subhead": 5,
+      "source_sequence": 59,
+      "question_id": "179ccaad-ea0d-5e5a-a014-a01698d21f43",
+      "has_images": false,
+      "explanation_length": 707
+    },
+    {
+      "subhead": 6,
+      "source_sequence": 1,
+      "question_id": "7d0acb1f-83df-53fc-9057-022120a62ff3",
+      "has_images": true,
+      "explanation_length": 555
+    },
+    {
+      "subhead": 7,
+      "source_sequence": 143,
+      "question_id": "cbe47eaf-0271-58c0-ba8a-88c565eeb956",
+      "has_images": false,
+      "explanation_length": 31
+    }
+  ],
+  "assertions": [
+    "Draft excluded from explicit test selection: f6b4ad66-c6d2-5a6b-9c17-d02af1390e38",
+    "Draft excluded from explicit test selection: e0c8f7c4-61a3-5359-b9b3-1bdd578bed47",
+    "Generated selection contains 791 active questions and no review drafts",
+    "Student cannot create tests",
+    "Unenrolled fixture cannot see the QA test",
+    "Unenrolled fixture cannot start the QA test",
+    "One deterministic QA test; no quarantine/draft in its manual bank"
+  ]
+}

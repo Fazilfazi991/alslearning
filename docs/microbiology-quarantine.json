@@ -1,0 +1,714 @@
+[
+  {
+    "source_document": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+    "source_sha256": "d4f08f98c6e1b0206a59c9334261fcc1cb3a9a3e1fa9e25c3d7015719a27ce7b",
+    "source_sequence": 34,
+    "source_key": "d4f08f98c6e1b0206a59c9334261fcc1cb3a9a3e1fa9e25c3d7015719a27ce7b:34",
+    "options": [
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Biohazard sign",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Biohazard sign "
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "HEPA filter",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "HEPA filter "
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Class 1 microbiological safety cabinet",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Class 1 microbiological safety cabinet "
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Class 3 microbiological safety cabinet ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Class 3 microbiological safety cabinet "
+      }
+    ],
+    "media": [],
+    "anomalies": [],
+    "format_runs": [],
+    "prompt_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Essential requirement for laboratory containment level-2 include",
+              "marks": [
+                "bold"
+              ]
+            },
+            {
+              "text": " ",
+              "marks": [
+                "bold"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "source_question_type": "multiple_choice",
+    "explanation_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Correct ",
+              "marks": []
+            },
+            {
+              "text": "Answer:-",
+              "marks": []
+            },
+            {
+              "text": " Qn Cancelled",
+              "marks": []
+            }
+          ]
+        }
+      ]
+    },
+    "marks": 1.0,
+    "negative_marks": 0.0,
+    "prompt": "Essential requirement for laboratory containment level-2 include ",
+    "explanation": "Correct Answer:- Qn Cancelled",
+    "type": "single_mcq",
+    "structural_errors": [
+      "Missing correct answer"
+    ],
+    "answer_conflict": false,
+    "content_review": null,
+    "rich_text": true,
+    "source_reference_candidates": [],
+    "source_type": "standard",
+    "micro": 1,
+    "written_answer_labels": [],
+    "review_reasons": [],
+    "quarantine_reasons": [
+      "SOURCE QUESTION CANCELLED",
+      "MISSING/INVALID CORRECT ANSWER"
+    ],
+    "technical_reasons": [],
+    "word_structure_counts": {},
+    "parser_artifacts": [],
+    "classification": "QUARANTINE",
+    "native_tables": 0,
+    "format_inventory": {
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "superscript": false,
+      "subscript": false,
+      "bullets": false,
+      "numbered_lists": false,
+      "unicode_scientific": false,
+      "multi_statement_stem": false,
+      "match_combination_mcq": false
+    },
+    "source_metadata": {
+      "references": [],
+      "years": [],
+      "previous_label_present": false,
+      "recalled_label_present": false
+    },
+    "explanation_characters": 29,
+    "disposition": "Recoverable source manifest; not inserted into question bank"
+  },
+  {
+    "source_document": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+    "source_sha256": "ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc",
+    "source_sequence": 16,
+    "source_key": "ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc:16",
+    "options": [
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Transfusion recipients",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Transfusion recipients "
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Patients without a spleen",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Patients without a spleen "
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "AIDS patients",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "AIDS patients "
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Transplant recipients",
+                  "marks": []
+                },
+                {
+                  "text": " ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Transplant recipients "
+      }
+    ],
+    "media": [],
+    "anomalies": [],
+    "format_runs": [],
+    "prompt_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Babesiosis, is a tick-borne disease resulting in a febrile illness. Infection with Babesia is most commonly observed in",
+              "marks": [
+                "bold"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "source_question_type": "multiple_choice",
+    "explanation_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Correct ",
+              "marks": []
+            },
+            {
+              "text": "Answer:-",
+              "marks": []
+            },
+            {
+              "text": "Question Cancelled",
+              "marks": []
+            }
+          ]
+        }
+      ]
+    },
+    "marks": 1.0,
+    "negative_marks": 0.0,
+    "prompt": "Babesiosis, is a tick-borne disease resulting in a febrile illness. Infection with Babesia is most commonly observed in",
+    "explanation": "Correct Answer:-Question Cancelled",
+    "type": "single_mcq",
+    "structural_errors": [
+      "Missing correct answer"
+    ],
+    "answer_conflict": false,
+    "content_review": null,
+    "rich_text": true,
+    "source_reference_candidates": [],
+    "source_type": "standard",
+    "micro": 4,
+    "written_answer_labels": [],
+    "review_reasons": [],
+    "quarantine_reasons": [
+      "SOURCE QUESTION CANCELLED",
+      "MISSING/INVALID CORRECT ANSWER"
+    ],
+    "technical_reasons": [],
+    "word_structure_counts": {},
+    "parser_artifacts": [],
+    "classification": "QUARANTINE",
+    "native_tables": 0,
+    "format_inventory": {
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "superscript": false,
+      "subscript": false,
+      "bullets": false,
+      "numbered_lists": false,
+      "unicode_scientific": false,
+      "multi_statement_stem": false,
+      "match_combination_mcq": false
+    },
+    "source_metadata": {
+      "references": [],
+      "years": [],
+      "previous_label_present": false,
+      "recalled_label_present": false
+    },
+    "explanation_characters": 34,
+    "disposition": "Recoverable source manifest; not inserted into question bank"
+  },
+  {
+    "source_document": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+    "source_sha256": "074e4c6cdec076c00c289b267d24758f975d173d911b314ad747b964d5abe4f7",
+    "source_sequence": 76,
+    "source_key": "074e4c6cdec076c00c289b267d24758f975d173d911b314ad747b964d5abe4f7:76",
+    "options": [
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Publish report",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Publish report"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Hypothesis testing",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Hypothesis testing"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Implement control measures",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Implement control measures"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Close investigation",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Close investigation"
+      }
+    ],
+    "media": [],
+    "anomalies": [],
+    "format_runs": [],
+    "prompt_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Same pathogen isolated from patients & water → next step?",
+              "marks": [
+                "bold"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "source_question_type": "multiple_choice",
+    "explanation_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Answer: C) Implement control measures",
+              "marks": []
+            }
+          ]
+        }
+      ]
+    },
+    "marks": 1.0,
+    "negative_marks": 0.0,
+    "prompt": "Same pathogen isolated from patients & water → next step?",
+    "explanation": "Answer: C) Implement control measures",
+    "type": "single_mcq",
+    "structural_errors": [
+      "Missing correct answer"
+    ],
+    "answer_conflict": true,
+    "content_review": "CONTENT REVIEW REQUIRED",
+    "rich_text": true,
+    "source_reference_candidates": [],
+    "source_type": "standard",
+    "micro": 6,
+    "written_answer_labels": [
+      {
+        "label": "C",
+        "clause": "Answer: C)",
+        "offset": 0
+      }
+    ],
+    "review_reasons": [],
+    "quarantine_reasons": [
+      "MISSING/INVALID CORRECT ANSWER"
+    ],
+    "technical_reasons": [],
+    "word_structure_counts": {},
+    "parser_artifacts": [],
+    "classification": "QUARANTINE",
+    "native_tables": 0,
+    "format_inventory": {
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "superscript": false,
+      "subscript": false,
+      "bullets": false,
+      "numbered_lists": false,
+      "unicode_scientific": true,
+      "multi_statement_stem": false,
+      "match_combination_mcq": false
+    },
+    "source_metadata": {
+      "references": [],
+      "years": [],
+      "previous_label_present": false,
+      "recalled_label_present": false
+    },
+    "explanation_characters": 37,
+    "disposition": "Recoverable source manifest; not inserted into question bank"
+  },
+  {
+    "source_document": "app friendly format - JSO SIR 13 - Immunology.docx",
+    "source_sha256": "c22511774d37465259774e4c8b1fff137b89e374deebb7b0b990e8dad268653c",
+    "source_sequence": 36,
+    "source_key": "c22511774d37465259774e4c8b1fff137b89e374deebb7b0b990e8dad268653c:36",
+    "options": [
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "IgA",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "IgA"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "IgE",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "IgE"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "IgM",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "IgM"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "IgG",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "IgG"
+      }
+    ],
+    "media": [],
+    "anomalies": [],
+    "format_runs": [],
+    "prompt_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "36.",
+              "marks": [
+                "bold"
+              ]
+            },
+            {
+              "text": " ",
+              "marks": [
+                "bold"
+              ]
+            },
+            {
+              "text": "Which antibody binds to mast cells?",
+              "marks": [
+                "bold"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "source_question_type": "multiple_choice",
+    "explanation_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Correct Answer: B",
+              "marks": []
+            },
+            {
+              "text": ")",
+              "marks": []
+            },
+            {
+              "text": " ",
+              "marks": []
+            },
+            {
+              "text": "IgE",
+              "marks": []
+            }
+          ]
+        }
+      ]
+    },
+    "marks": 1.0,
+    "negative_marks": 0.0,
+    "prompt": "36. Which antibody binds to mast cells?",
+    "explanation": "Correct Answer: B) IgE",
+    "type": "single_mcq",
+    "structural_errors": [
+      "Missing correct answer"
+    ],
+    "answer_conflict": true,
+    "content_review": "CONTENT REVIEW REQUIRED",
+    "rich_text": true,
+    "source_reference_candidates": [],
+    "source_type": "standard",
+    "micro": 7,
+    "written_answer_labels": [
+      {
+        "label": "B",
+        "clause": "Correct Answer: B)",
+        "offset": 0
+      }
+    ],
+    "review_reasons": [],
+    "quarantine_reasons": [
+      "MISSING/INVALID CORRECT ANSWER"
+    ],
+    "technical_reasons": [],
+    "word_structure_counts": {},
+    "parser_artifacts": [],
+    "classification": "QUARANTINE",
+    "native_tables": 0,
+    "format_inventory": {
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "superscript": false,
+      "subscript": false,
+      "bullets": false,
+      "numbered_lists": false,
+      "unicode_scientific": false,
+      "multi_statement_stem": false,
+      "match_combination_mcq": false
+    },
+    "source_metadata": {
+      "references": [],
+      "years": [],
+      "previous_label_present": false,
+      "recalled_label_present": false
+    },
+    "explanation_characters": 22,
+    "disposition": "Recoverable source manifest; not inserted into question bank"
+  }
+]

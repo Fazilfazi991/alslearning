@@ -1,0 +1,102 @@
+{
+  "results": [
+    "793 persisted questions; 791 Active and two Draft",
+    "All 793 complete payloads match source: wording, rich AST, options, keys, marks, metadata, ordered media",
+    "Four complete quarantines; no bank rows",
+    "Quarantine complete content is recoverable without inferred answers",
+    "One subject and exactly seven chapters",
+    "No invented topics or program-specific client questions",
+    "116 ordered media relations; 11 preserved EMFs and 11 PNG derivatives",
+    "No duplicate source identities, media identities, or storage paths",
+    "All 127 stored original/display objects match SHA256",
+    "All 24 native tables across 21 source questions retain complete AST and ordering",
+    "3172 ordered options and 793 valid answer keys",
+    "MICRO 4 Q71 Active: empty text, one original stem JPEG, four options",
+    "31 previous-paper references and source years retained",
+    "Student cannot directly read any imported bank row or answer key",
+    "No additional accidental batch questions"
+  ],
+  "table": [
+    {
+      "subhead": "MICRO 1",
+      "source": 98,
+      "active": 97,
+      "draft": 0,
+      "quarantine": 1,
+      "images": 22,
+      "tables": 7
+    },
+    {
+      "subhead": "MICRO 2",
+      "source": 102,
+      "active": 102,
+      "draft": 0,
+      "quarantine": 0,
+      "images": 31,
+      "tables": 8
+    },
+    {
+      "subhead": "MICRO 3",
+      "source": 100,
+      "active": 100,
+      "draft": 0,
+      "quarantine": 0,
+      "images": 16,
+      "tables": 2
+    },
+    {
+      "subhead": "MICRO 4",
+      "source": 102,
+      "active": 101,
+      "draft": 0,
+      "quarantine": 1,
+      "images": 22,
+      "tables": 3
+    },
+    {
+      "subhead": "MICRO 5",
+      "source": 101,
+      "active": 101,
+      "draft": 0,
+      "quarantine": 0,
+      "images": 12,
+      "tables": 3
+    },
+    {
+      "subhead": "MICRO 6",
+      "source": 101,
+      "active": 98,
+      "draft": 2,
+      "quarantine": 1,
+      "images": 12,
+      "tables": 0
+    },
+    {
+      "subhead": "MICRO 7",
+      "source": 193,
+      "active": 192,
+      "draft": 0,
+      "quarantine": 1,
+      "images": 1,
+      "tables": 1
+    }
+  ],
+  "subject": 1,
+  "chapters": 7,
+  "active": 791,
+  "draft": 2,
+  "quarantine": 4,
+  "questions": 793,
+  "options": 3172,
+  "keys": 793,
+  "media": 116,
+  "web_native": 105,
+  "emfs": 11,
+  "derivatives": 11,
+  "storage_objects": 127,
+  "tables": 24,
+  "table_questions": 21,
+  "merged_cells": 10,
+  "previous_paper": 31,
+  "image_only": 1
+}
