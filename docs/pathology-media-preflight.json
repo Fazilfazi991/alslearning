@@ -1,0 +1,195 @@
+{
+  "status": "blocked_before_media_extension",
+  "full_structural_validation": "not_completed",
+  "records": [
+    {
+      "file": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+      "sha256": "5a1b81dab4ffc092f44d501eecf377524acc8a559f61675e8349d7c4ed9a4f82",
+      "source_questions": 310,
+      "questions_with_stem_images": 0,
+      "questions_with_solution_images": 1,
+      "questions_with_multiple_images": 1,
+      "image_occurrences": 4,
+      "media": [
+        {
+          "sequence": 190,
+          "role": "solution",
+          "relationship": "rId5"
+        },
+        {
+          "sequence": 190,
+          "role": "solution",
+          "relationship": "rId6"
+        },
+        {
+          "sequence": 190,
+          "role": "solution",
+          "relationship": "rId7"
+        },
+        {
+          "sequence": 190,
+          "role": "solution",
+          "relationship": "rId8"
+        }
+      ],
+      "gifs": [
+        {
+          "file": "word/media/image4.gif",
+          "frames": 1,
+          "size": [
+            291,
+            355
+          ],
+          "sha256": "be60ef22ce9a2c4070e54196b978be87a44f32dc89cd5c498caa9a138f89bee3"
+        }
+      ],
+      "vertical_format_runs": []
+    },
+    {
+      "file": "app friendly format - JSO SIR 2 - Clinical pathology.docx",
+      "sha256": "503c8c980ba4a18e5fa676a3535391dfd49f606af542714b23a47e27a3d7f362",
+      "source_questions": 137,
+      "questions_with_stem_images": 0,
+      "questions_with_solution_images": 0,
+      "questions_with_multiple_images": 0,
+      "image_occurrences": 0,
+      "media": [],
+      "gifs": [],
+      "vertical_format_runs": [
+        {
+          "sequence": 126,
+          "row": "option",
+          "cell": 1,
+          "text": "st",
+          "format": "superscript"
+        },
+        {
+          "sequence": 126,
+          "row": "option",
+          "cell": 1,
+          "text": "nd",
+          "format": "superscript"
+        },
+        {
+          "sequence": 126,
+          "row": "option",
+          "cell": 1,
+          "text": "rd",
+          "format": "superscript"
+        },
+        {
+          "sequence": 126,
+          "row": "option",
+          "cell": 1,
+          "text": "th",
+          "format": "superscript"
+        },
+        {
+          "sequence": 126,
+          "row": "solution",
+          "cell": 1,
+          "text": "nd",
+          "format": "superscript"
+        }
+      ]
+    },
+    {
+      "file": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+      "sha256": "26e8c2395c0fea51196c68fa71fdd3aa313b0ffc35444dad05bffe2918999bb6",
+      "source_questions": 168,
+      "questions_with_stem_images": 0,
+      "questions_with_solution_images": 4,
+      "questions_with_multiple_images": 0,
+      "image_occurrences": 4,
+      "media": [
+        {
+          "sequence": 16,
+          "role": "solution",
+          "relationship": "rId5"
+        },
+        {
+          "sequence": 24,
+          "role": "solution",
+          "relationship": "rId6"
+        },
+        {
+          "sequence": 78,
+          "role": "solution",
+          "relationship": "rId7"
+        },
+        {
+          "sequence": 79,
+          "role": "solution",
+          "relationship": "rId8"
+        }
+      ],
+      "gifs": [],
+      "vertical_format_runs": []
+    },
+    {
+      "file": "app friendly format - JSO SIR 4 - Cytology and Cytogenetics.docx",
+      "sha256": "229d529c0219cebfb4b4eaa2d7fe4bbcab014711fb05643cd2d56bb5e4fbfddd",
+      "source_questions": 100,
+      "questions_with_stem_images": 0,
+      "questions_with_solution_images": 0,
+      "questions_with_multiple_images": 0,
+      "image_occurrences": 0,
+      "media": [],
+      "gifs": [],
+      "vertical_format_runs": [
+        {
+          "sequence": 68,
+          "row": "option",
+          "cell": 1,
+          "text": "nd",
+          "format": "superscript"
+        },
+        {
+          "sequence": 68,
+          "row": "option",
+          "cell": 1,
+          "text": "th",
+          "format": "superscript"
+        },
+        {
+          "sequence": 68,
+          "row": "option",
+          "cell": 1,
+          "text": "th",
+          "format": "superscript"
+        },
+        {
+          "sequence": 68,
+          "row": "option",
+          "cell": 1,
+          "text": "th",
+          "format": "superscript"
+        }
+      ]
+    },
+    {
+      "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+      "sha256": "ff12d756f56b5f07055775b2c3e8371abb61a5087d75b8f884aedeb817716195",
+      "source_questions": 148,
+      "questions_with_stem_images": 0,
+      "questions_with_solution_images": 0,
+      "questions_with_multiple_images": 0,
+      "image_occurrences": 0,
+      "media": [],
+      "gifs": [],
+      "vertical_format_runs": []
+    },
+    {
+      "file": "app friendly format - JSO SIR 6 - Blood Banking.docx",
+      "sha256": "4ba3e48fd961a59eaedc14932f8e1998fae126e21ce5ddcd215834382c49264a",
+      "source_questions": 105,
+      "questions_with_stem_images": 0,
+      "questions_with_solution_images": 0,
+      "questions_with_multiple_images": 0,
+      "image_occurrences": 0,
+      "media": [],
+      "gifs": [],
+      "vertical_format_runs": []
+    }
+  ]
+}
