@@ -1,4 +1,4 @@
-# Student Courses and Dashboard mobile UX — live acceptance pending
+# STUDENT COURSES + DASHBOARD UX — PASS
 
 ## Root cause and change
 
@@ -41,14 +41,14 @@ QA Preview browser wall-clock measurements including automation overhead:
 | Courses useful content | 3508 ms |
 | Subject switch to Pathology | 5068 ms |
 
-The subject-switch figure includes the browser locator wait and is not an isolated database or rendering measurement. Production timings remain pending the real Student login. No browser network/hydration trace is claimed. Courses Question Bank calls are **0 by loader inspection and instrumented regression tests**; no questions/test-question/attempt-history query exists in its loader.
+The subject-switch figure includes the browser locator wait and is not an isolated database or rendering measurement. Production browser measurements after normal Student login: Dashboard 3134 ms; Courses 3270 ms; subject switch to Microbiology 3380 ms. These include automation overhead. No browser network/hydration trace is claimed. Courses Question Bank calls are **0 by loader inspection and instrumented regression tests**; no questions/test-question/attempt-history query exists in its loader.
 
 ## Regression and gates
 
 - Dashboard, Courses: QA visual/data PASS.
 - Classes: existing Live Classes screen renders its legitimate empty scheduled-session state.
 - Canonical recording player: Courses link opens Donor selection; YouTube playback advanced to 15 seconds.
-- Exams and Progress/history: existing QA fixture has no tests/attempts; both pages render correct empty states. Existing submitted-review automated tests pass. Live Production results/history still need the real Student session.
+- Exams and Progress/history: existing QA fixture has no tests/attempts; both pages render correct empty states. Existing submitted-review automated tests pass. Production existing Attempt 3 opened successfully: score 4/15, 4 correct, 11 incorrect, all 15 answer reviews with explanations. No attempt was created or changed.
 - Auth: existing QA Student password authentication, authenticated navigation and logout work; no new accounts or password changes. Direct Draft access denied.
 - `pnpm typecheck`: PASS.
 - `pnpm lint`: PASS. Generated `.local-qa` artifacts now excluded from lint; application source remains checked.
@@ -68,4 +68,7 @@ QA Preview: https://alslearning-j4q867w3f-faziils-projects.vercel.app — `dpl_3
 
 Production build: `dpl_D1oNFLaUWXwKCZBhNZ1kpD3b4mnQ`, **READY**, alias https://alslearning.vercel.app, Production target `dvmahmkapgtjfqmoottt`, triggered by fast-forwarding main only after QA passed. Built with Production environment; QA Preview was not aliased to Production.
 
-Final live acceptance is pending normal sign-in as the existing Production Student. The Chrome login tab is open with the email prefilled; no password was requested in chat or invented.
+Final live acceptance PASS using the existing Production Student normal session. DHS Long Term shows all three mapped subjects and the four correct recordings (Pathology 1, Microbiology 2, Biochemistry 1). Hemostasis direct application URL returns Recording unavailable. Dashboard shows 1 active program, 0 upcoming classes, 1 available test and 4 recordings. Production 390 × 844 dashboard and Courses screenshots and 1440 px Courses screenshot inspected: compact, readable, no page overflow or bottom navigation overlap. Courses DOM has zero player iframes. Donor selection playback advanced to 19 seconds. Live Classes retains its correct empty upcoming-session state; Exams and historical submitted review work. QA login/logout passed, Production normal login/session passed. Viewport override reset and Courses left open for the user. No database writes or application changes during this final acceptance pass.
+
+YES — STUDENT COURSES AND DASHBOARD MOBILE UX FIXED
+
