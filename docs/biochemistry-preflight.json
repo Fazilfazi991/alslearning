@@ -1,0 +1,2191 @@
+{
+  "scope": "LOCAL PREFLIGHT ONLY; zero writes/uploads/imports/deployments",
+  "files": [
+    {
+      "bio": 1,
+      "name": "Biochemistry of Major Biomolecules",
+      "source_document": "app friendly format - JSO SIR 15 - Biochemistry of Major Biomolecules.docx",
+      "sha256": "11b1423f0f4bb6ca9f63656ec3d63e00226b4b6c96383ffae7d3d6e1b17685d8",
+      "bytes": 38401,
+      "cached_page_count": 8,
+      "source": 32,
+      "ready": 32,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 0,
+      "all_native_tables_including_wrappers": 32,
+      "question_wrappers": 32,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 32,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/styles.xml",
+        "word/webSettings.xml",
+        "word/fontTable.xml",
+        "docProps/core.xml",
+        "docProps/app.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 237,
+        "bCs": 237,
+        "body": 1,
+        "bookmarkEnd": 1,
+        "bookmarkStart": 1,
+        "bottom": 32,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 64,
+        "gridCol": 96,
+        "hideMark": 704,
+        "highlight": 1,
+        "ind": 5,
+        "jc": 11,
+        "lang": 1602,
+        "lastRenderedPageBreak": 7,
+        "left": 32,
+        "p": 749,
+        "pPr": 749,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 32,
+        "proofErr": 188,
+        "r": 884,
+        "rFonts": 1633,
+        "rPr": 1633,
+        "rect": 32,
+        "right": 32,
+        "sectPr": 1,
+        "spacing": 749,
+        "sz": 1633,
+        "szCs": 1633,
+        "t": 852,
+        "tbl": 32,
+        "tblCellMar": 32,
+        "tblCellSpacing": 288,
+        "tblGrid": 32,
+        "tblLook": 32,
+        "tblPr": 32,
+        "tblW": 32,
+        "tc": 704,
+        "tcPr": 704,
+        "tcW": 704,
+        "top": 32,
+        "tr": 256,
+        "trPr": 256,
+        "vAlign": 545,
+        "wAfter": 32
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [],
+      "display_number_gaps": [],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 32
+      },
+      "types": {
+        "single_mcq": 32,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 2,
+        "matching_combination": 0,
+        "multi_statement_combination": 2,
+        "image_only": 0,
+        "table_containing": 0
+      },
+      "formatting": {
+        "bold": 32,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 0,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 0,
+        "unicode_subscript": 0,
+        "greek": 2,
+        "arrows": 0,
+        "math_symbols": 1,
+        "mu": 0,
+        "angstrom": 0,
+        "formula_candidate": 0,
+        "isotope_candidate": 0
+      }
+    },
+    {
+      "bio": 2,
+      "name": "Vitamins and Minerals, Hemoglobin",
+      "source_document": "app friendly format - JSO SIR 16 - Vitamins and Minerals, Hemoglobin.docx",
+      "sha256": "a07ea0df2229536fca082e76c5de88a243eeb96b89758cf9be126a36c489a79b",
+      "bytes": 47734,
+      "cached_page_count": 12,
+      "source": 46,
+      "ready": 46,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 0,
+      "all_native_tables_including_wrappers": 46,
+      "question_wrappers": 46,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 46,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/fontTable.xml",
+        "word/webSettings.xml",
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "word/styles.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 422,
+        "bCs": 534,
+        "body": 1,
+        "bookmarkEnd": 1,
+        "bookmarkStart": 1,
+        "bottom": 46,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 92,
+        "gridCol": 138,
+        "hideMark": 1012,
+        "iCs": 2,
+        "ind": 4,
+        "jc": 14,
+        "lang": 2043,
+        "lastRenderedPageBreak": 11,
+        "left": 46,
+        "p": 1067,
+        "pPr": 1067,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 46,
+        "proofErr": 258,
+        "r": 1252,
+        "rFonts": 2319,
+        "rPr": 2319,
+        "rStyle": 5,
+        "rect": 46,
+        "right": 46,
+        "sectPr": 1,
+        "spacing": 1067,
+        "sz": 2319,
+        "szCs": 2319,
+        "t": 1206,
+        "tbl": 46,
+        "tblCellMar": 46,
+        "tblCellSpacing": 414,
+        "tblGrid": 46,
+        "tblLook": 46,
+        "tblPr": 46,
+        "tblW": 46,
+        "tc": 1012,
+        "tcPr": 1012,
+        "tcW": 1012,
+        "top": 46,
+        "tr": 368,
+        "trPr": 368,
+        "vAlign": 782,
+        "wAfter": 36
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [],
+      "display_number_gaps": [],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 46
+      },
+      "types": {
+        "single_mcq": 46,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 5,
+        "matching_combination": 1,
+        "multi_statement_combination": 0,
+        "image_only": 0,
+        "table_containing": 0
+      },
+      "formatting": {
+        "bold": 46,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 0,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 0,
+        "unicode_subscript": 0,
+        "greek": 1,
+        "arrows": 0,
+        "math_symbols": 0,
+        "mu": 0,
+        "angstrom": 0,
+        "formula_candidate": 0,
+        "isotope_candidate": 0
+      }
+    },
+    {
+      "bio": 3,
+      "name": "Enzymology, Techniques and Instrumentation, Biostatistics",
+      "source_document": "app friendly format - JSO SIR 17 - Enzymology, Techniques and Instrumentation, Biostatistics.docx",
+      "sha256": "8c3c3fcd2a886d900a1cea2a617f3e254fd28936916e285c8f53aa7b499233b5",
+      "bytes": 45105,
+      "cached_page_count": 11,
+      "source": 44,
+      "ready": 44,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 1,
+      "all_native_tables_including_wrappers": 45,
+      "question_wrappers": 44,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 44,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/fontTable.xml",
+        "word/webSettings.xml",
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "word/styles.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 378,
+        "bCs": 474,
+        "body": 1,
+        "bookmarkEnd": 1,
+        "bookmarkStart": 1,
+        "bottom": 45,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 88,
+        "gridCol": 135,
+        "hideMark": 968,
+        "ind": 2,
+        "insideH": 1,
+        "insideV": 1,
+        "jc": 13,
+        "lang": 1905,
+        "lastRenderedPageBreak": 10,
+        "left": 45,
+        "p": 1028,
+        "pPr": 1028,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 44,
+        "proofErr": 144,
+        "r": 1124,
+        "rFonts": 2152,
+        "rPr": 2152,
+        "rect": 44,
+        "right": 45,
+        "sectPr": 1,
+        "spacing": 1016,
+        "sz": 2152,
+        "szCs": 2152,
+        "t": 1080,
+        "tbl": 45,
+        "tblBorders": 1,
+        "tblCellMar": 44,
+        "tblCellSpacing": 396,
+        "tblGrid": 45,
+        "tblInd": 1,
+        "tblLook": 45,
+        "tblPr": 45,
+        "tblStyle": 1,
+        "tblW": 45,
+        "tc": 980,
+        "tcPr": 980,
+        "tcW": 980,
+        "top": 45,
+        "tr": 356,
+        "trPr": 352,
+        "vAlign": 748,
+        "wAfter": 50
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [
+        39
+      ],
+      "display_number_gaps": [
+        39
+      ],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 44
+      },
+      "types": {
+        "single_mcq": 44,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 0,
+        "matching_combination": 1,
+        "multi_statement_combination": 1,
+        "image_only": 0,
+        "table_containing": 1
+      },
+      "formatting": {
+        "bold": 44,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 0,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 0,
+        "unicode_subscript": 0,
+        "greek": 2,
+        "arrows": 0,
+        "math_symbols": 1,
+        "mu": 0,
+        "angstrom": 0,
+        "formula_candidate": 1,
+        "isotope_candidate": 0
+      }
+    },
+    {
+      "bio": 4,
+      "name": "Molecular Biology",
+      "source_document": "app friendly format - JSO SIR 14 -Molecular Biology.docx",
+      "sha256": "b9ae909c2faf3b63b38b2a9059359dc4fa5fea7084376d1e89afb9a41383f12a",
+      "bytes": 164802,
+      "cached_page_count": 1,
+      "source": 200,
+      "ready": 200,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 0,
+      "all_native_tables_including_wrappers": 200,
+      "question_wrappers": 200,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 200,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/fontTable.xml",
+        "word/webSettings.xml",
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "word/styles.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 1776,
+        "bCs": 1576,
+        "body": 1,
+        "bookmarkEnd": 1,
+        "bookmarkStart": 1,
+        "bottom": 200,
+        "color": 1,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 400,
+        "gridCol": 600,
+        "hideMark": 4400,
+        "highlight": 4,
+        "jc": 60,
+        "lang": 10114,
+        "lastRenderedPageBreak": 53,
+        "left": 200,
+        "p": 5001,
+        "pPr": 5001,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 200,
+        "proofErr": 6,
+        "r": 5113,
+        "rFonts": 10114,
+        "rPr": 10114,
+        "rect": 200,
+        "right": 200,
+        "sectPr": 1,
+        "spacing": 5001,
+        "sz": 10114,
+        "szCs": 10114,
+        "t": 4913,
+        "tbl": 200,
+        "tblCellMar": 200,
+        "tblCellSpacing": 1800,
+        "tblGrid": 200,
+        "tblLook": 200,
+        "tblPr": 200,
+        "tblW": 200,
+        "tc": 4400,
+        "tcPr": 4400,
+        "tcW": 4400,
+        "top": 200,
+        "tr": 1600,
+        "trPr": 1600,
+        "vAlign": 3597,
+        "wAfter": 234
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [],
+      "display_number_gaps": [],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 200
+      },
+      "types": {
+        "single_mcq": 200,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 0,
+        "matching_combination": 0,
+        "multi_statement_combination": 0,
+        "image_only": 0,
+        "table_containing": 0
+      },
+      "formatting": {
+        "bold": 200,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 0,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 1,
+        "unicode_subscript": 0,
+        "greek": 0,
+        "arrows": 4,
+        "math_symbols": 0,
+        "mu": 0,
+        "angstrom": 1,
+        "formula_candidate": 0,
+        "isotope_candidate": 0
+      }
+    },
+    {
+      "bio": 5,
+      "name": "Physical Chemistry, General Biochemistry",
+      "source_document": "app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx",
+      "sha256": "9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08",
+      "bytes": 46671,
+      "cached_page_count": 11,
+      "source": 42,
+      "ready": 41,
+      "review": 0,
+      "quarantine": 1,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 3,
+      "all_native_tables_including_wrappers": 45,
+      "question_wrappers": 42,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 42,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/fontTable.xml",
+        "word/webSettings.xml",
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "word/styles.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 404,
+        "bCs": 545,
+        "body": 1,
+        "bookmarkEnd": 2,
+        "bookmarkStart": 2,
+        "bottom": 45,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 84,
+        "gridCol": 132,
+        "hideMark": 954,
+        "ind": 32,
+        "jc": 13,
+        "lang": 1862,
+        "lastRenderedPageBreak": 10,
+        "left": 45,
+        "p": 1010,
+        "pPr": 1010,
+        "pStyle": 30,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 42,
+        "proofErr": 198,
+        "r": 1204,
+        "rFonts": 2214,
+        "rPr": 2214,
+        "rect": 42,
+        "right": 45,
+        "sectPr": 1,
+        "spacing": 990,
+        "sz": 2214,
+        "szCs": 2214,
+        "t": 1162,
+        "tab": 10,
+        "tabs": 5,
+        "tbl": 45,
+        "tblCellMar": 45,
+        "tblCellSpacing": 396,
+        "tblGrid": 45,
+        "tblHeader": 3,
+        "tblInd": 1,
+        "tblLook": 45,
+        "tblPr": 45,
+        "tblW": 45,
+        "tc": 954,
+        "tcPr": 954,
+        "tcW": 954,
+        "top": 45,
+        "tr": 351,
+        "trHeight": 5,
+        "trPr": 351,
+        "vAlign": 745,
+        "vertAlign": 8,
+        "wAfter": 22
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [],
+      "display_number_gaps": [],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 42
+      },
+      "types": {
+        "single_mcq": 42,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 2,
+        "matching_combination": 4,
+        "multi_statement_combination": 1,
+        "image_only": 0,
+        "table_containing": 3
+      },
+      "formatting": {
+        "bold": 42,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 2,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 0,
+        "unicode_subscript": 0,
+        "greek": 1,
+        "arrows": 0,
+        "math_symbols": 3,
+        "mu": 1,
+        "angstrom": 0,
+        "formula_candidate": 2,
+        "isotope_candidate": 2
+      }
+    },
+    {
+      "bio": 6,
+      "name": "Clinical Biochemistry",
+      "source_document": "app friendly format - JSO SIR 19 - Clinical biochemistry.docx",
+      "sha256": "585cf396c088a50c9c391711fb6ab1ed63ba80bebb0cb6f6194532de594f9101",
+      "bytes": 160894,
+      "cached_page_count": 47,
+      "source": 202,
+      "ready": 197,
+      "review": 5,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 1,
+      "all_native_tables_including_wrappers": 203,
+      "question_wrappers": 202,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+          "Target": "numbering.xml"
+        },
+        {
+          "Id": "rId6",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 202,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/webSettings.xml",
+        "word/styles.xml",
+        "docProps/core.xml",
+        "word/numbering.xml",
+        "word/fontTable.xml",
+        "docProps/app.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 1994,
+        "bCs": 2384,
+        "body": 1,
+        "bookmarkEnd": 44,
+        "bookmarkStart": 44,
+        "bottom": 202,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 404,
+        "gridCol": 609,
+        "hideMark": 4444,
+        "ilvl": 7,
+        "ind": 11,
+        "jc": 61,
+        "lang": 8984,
+        "lastRenderedPageBreak": 46,
+        "left": 202,
+        "numId": 7,
+        "numPr": 7,
+        "p": 4684,
+        "pPr": 4684,
+        "pStyle": 7,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 202,
+        "proofErr": 624,
+        "r": 5852,
+        "rFonts": 10536,
+        "rPr": 10536,
+        "rect": 202,
+        "right": 202,
+        "sectPr": 1,
+        "spacing": 4669,
+        "sz": 10536,
+        "szCs": 10536,
+        "t": 5650,
+        "tbl": 203,
+        "tblCellMar": 202,
+        "tblCellSpacing": 1818,
+        "tblGrid": 203,
+        "tblInd": 1,
+        "tblLook": 203,
+        "tblPr": 203,
+        "tblStyle": 1,
+        "tblW": 203,
+        "tc": 4456,
+        "tcPr": 4456,
+        "tcW": 4456,
+        "top": 202,
+        "tr": 1620,
+        "trPr": 1616,
+        "vAlign": 3434,
+        "vertAlign": 5,
+        "wAfter": 258
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [],
+      "display_number_gaps": [],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 202
+      },
+      "types": {
+        "single_mcq": 202,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 5,
+        "matching_combination": 1,
+        "multi_statement_combination": 1,
+        "image_only": 0,
+        "table_containing": 1
+      },
+      "formatting": {
+        "bold": 202,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 1,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 0,
+        "unicode_subscript": 0,
+        "greek": 0,
+        "arrows": 1,
+        "math_symbols": 2,
+        "mu": 7,
+        "angstrom": 0,
+        "formula_candidate": 2,
+        "isotope_candidate": 0
+      }
+    },
+    {
+      "bio": 7,
+      "name": "Diagnostic Biochemistry",
+      "source_document": "app friendly format - JSO SIR 19 - Diagnostic Biochemistry.docx",
+      "sha256": "e2eb10f49392bd1b915a5d834b220eb51ccc6a81f638ca69afd62924366e76d9",
+      "bytes": 75919,
+      "cached_page_count": 20,
+      "source": 85,
+      "ready": 85,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 1,
+      "all_native_tables_including_wrappers": 86,
+      "question_wrappers": 85,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+          "Target": "numbering.xml"
+        },
+        {
+          "Id": "rId6",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 85,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/webSettings.xml",
+        "word/styles.xml",
+        "docProps/core.xml",
+        "word/numbering.xml",
+        "word/fontTable.xml",
+        "docProps/app.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 733,
+        "bCs": 841,
+        "body": 1,
+        "bookmarkEnd": 2,
+        "bookmarkStart": 2,
+        "bottom": 95,
+        "color": 5,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 170,
+        "gridCol": 257,
+        "hideMark": 1880,
+        "ilvl": 3,
+        "ind": 3,
+        "jc": 26,
+        "lang": 3922,
+        "lastRenderedPageBreak": 21,
+        "left": 95,
+        "numId": 3,
+        "numPr": 3,
+        "p": 1974,
+        "pPr": 1974,
+        "pStyle": 3,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 85,
+        "proofErr": 292,
+        "r": 2241,
+        "rFonts": 4215,
+        "rPr": 4215,
+        "rect": 85,
+        "right": 95,
+        "sectPr": 1,
+        "spacing": 1974,
+        "sz": 4215,
+        "szCs": 4215,
+        "t": 2156,
+        "tbl": 86,
+        "tblCellMar": 85,
+        "tblCellSpacing": 771,
+        "tblGrid": 86,
+        "tblHeader": 1,
+        "tblLook": 86,
+        "tblPr": 86,
+        "tblW": 86,
+        "tc": 1880,
+        "tcMar": 10,
+        "tcPr": 1880,
+        "tcW": 1880,
+        "top": 95,
+        "tr": 685,
+        "trHeight": 5,
+        "trPr": 685,
+        "vAlign": 1489,
+        "wAfter": 98
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [
+        48
+      ],
+      "display_number_gaps": [
+        48
+      ],
+      "previous_paper_questions": 0,
+      "marks_distribution": {
+        "1.0 / 0.0": 85
+      },
+      "types": {
+        "single_mcq": 85,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 4,
+        "matching_combination": 1,
+        "multi_statement_combination": 0,
+        "image_only": 0,
+        "table_containing": 1
+      },
+      "formatting": {
+        "bold": 85,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 0,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 2,
+        "unicode_subscript": 2,
+        "greek": 0,
+        "arrows": 0,
+        "math_symbols": 1,
+        "mu": 0,
+        "angstrom": 0,
+        "formula_candidate": 1,
+        "isotope_candidate": 0
+      }
+    },
+    {
+      "bio": 8,
+      "name": "Hormones, QC, Toxicology",
+      "source_document": "app friendly format - JSO SIR 20 - HORMONES,QC,TOXICOLOGY.docx",
+      "sha256": "82e126f998ecd542fb5814f2b1611a1ecc21ef8bbfeeef67ce56f46b37407c26",
+      "bytes": 63938,
+      "cached_page_count": 17,
+      "source": 63,
+      "ready": 63,
+      "review": 0,
+      "quarantine": 0,
+      "technical_blockers": 0,
+      "images": 0,
+      "native_tables": 2,
+      "all_native_tables_including_wrappers": 65,
+      "question_wrappers": 63,
+      "relationships": [
+        {
+          "Id": "rId3",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings",
+          "Target": "webSettings.xml"
+        },
+        {
+          "Id": "rId7",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+          "Target": "theme/theme1.xml"
+        },
+        {
+          "Id": "rId2",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+          "Target": "settings.xml"
+        },
+        {
+          "Id": "rId1",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+          "Target": "styles.xml"
+        },
+        {
+          "Id": "rId6",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable",
+          "Target": "fontTable.xml"
+        },
+        {
+          "Id": "rId5",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/endnotes",
+          "Target": "endnotes.xml"
+        },
+        {
+          "Id": "rId4",
+          "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes",
+          "Target": "footnotes.xml"
+        }
+      ],
+      "package_media_count": 0,
+      "package_media_formats": {},
+      "embedded_objects": 0,
+      "word_structure_counts": {
+        "drawing": 0,
+        "blip": 0,
+        "pict": 63,
+        "oMath": 0,
+        "oMathPara": 0,
+        "object": 0,
+        "OLEObject": 0,
+        "txbxContent": 0,
+        "sym": 0,
+        "chart": 0,
+        "AlternateContent": 0
+      },
+      "xml_parts": [
+        "[Content_Types].xml",
+        "word/document.xml",
+        "word/footnotes.xml",
+        "word/endnotes.xml",
+        "word/theme/theme1.xml",
+        "word/settings.xml",
+        "word/webSettings.xml",
+        "docProps/core.xml",
+        "word/styles.xml",
+        "word/fontTable.xml",
+        "docProps/app.xml"
+      ],
+      "xml_tag_inventory": {
+        "b": 454,
+        "bCs": 454,
+        "body": 1,
+        "bookmarkEnd": 1,
+        "bookmarkStart": 1,
+        "bottom": 243,
+        "cols": 1,
+        "docGrid": 1,
+        "document": 1,
+        "gridAfter": 126,
+        "gridCol": 201,
+        "hideMark": 1476,
+        "jc": 19,
+        "lang": 3116,
+        "lastRenderedPageBreak": 23,
+        "left": 245,
+        "p": 1556,
+        "pPr": 1556,
+        "pgMar": 1,
+        "pgSz": 1,
+        "pict": 63,
+        "proofErr": 188,
+        "r": 1560,
+        "rFonts": 3116,
+        "rPr": 3116,
+        "rect": 63,
+        "right": 245,
+        "sectPr": 1,
+        "shd": 90,
+        "spacing": 1556,
+        "sz": 3116,
+        "szCs": 3116,
+        "t": 1497,
+        "tbl": 65,
+        "tblCellMar": 65,
+        "tblCellSpacing": 567,
+        "tblGrid": 65,
+        "tblInd": 1,
+        "tblLayout": 4,
+        "tblLook": 65,
+        "tblPr": 65,
+        "tblW": 65,
+        "tc": 1476,
+        "tcBorders": 90,
+        "tcMar": 90,
+        "tcPr": 1476,
+        "tcW": 1476,
+        "top": 243,
+        "tr": 519,
+        "trHeight": 15,
+        "trPr": 519,
+        "vAlign": 1071,
+        "wAfter": 68
+      },
+      "display_number_duplicates": {},
+      "missing_visible_numbers": [
+        57
+      ],
+      "display_number_gaps": [
+        57
+      ],
+      "previous_paper_questions": 3,
+      "marks_distribution": {
+        "1.0 / 0.0": 63
+      },
+      "types": {
+        "single_mcq": 63,
+        "genuine_multiple_select": 0,
+        "assertion_reason": 0,
+        "matching_combination": 0,
+        "multi_statement_combination": 3,
+        "image_only": 0,
+        "table_containing": 2
+      },
+      "formatting": {
+        "bold": 63,
+        "italic": 0,
+        "underline": 0,
+        "superscript": 0,
+        "subscript": 0
+      },
+      "scientific": {
+        "unicode_superscript": 1,
+        "unicode_subscript": 0,
+        "greek": 1,
+        "arrows": 1,
+        "math_symbols": 3,
+        "mu": 0,
+        "angstrom": 0,
+        "formula_candidate": 1,
+        "isotope_candidate": 0
+      }
+    }
+  ],
+  "totals": {
+    "source": 714,
+    "ready": 708,
+    "review": 5,
+    "quarantine": 1,
+    "technical_blockers": 0,
+    "images": 0,
+    "native_tables": 8,
+    "previous_paper_questions": 3
+  },
+  "anomalies": [
+    {
+      "location": "BIO 5 Q31",
+      "displayed_number": 31,
+      "classification": "QUARANTINE",
+      "marked_answers": [],
+      "answer_claims": [
+        {
+          "raw": "Correct Answer: C) Cytoplasm",
+          "label": "C",
+          "named_answer": "Cytoplasm",
+          "exact_named_option_matches": [
+            "C"
+          ]
+        }
+      ],
+      "review": [],
+      "quarantine": [
+        "MISSING CORRECT OPTION MARKER — DO NOT INFER FROM SOLUTION"
+      ],
+      "technical": []
+    },
+    {
+      "location": "BIO 6 Q73",
+      "displayed_number": 73,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        "B"
+      ],
+      "answer_claims": [
+        {
+          "raw": "Answer: B) Peritoneal fluid",
+          "label": "B",
+          "named_answer": "Peritoneal fluid",
+          "exact_named_option_matches": [
+            "A"
+          ]
+        }
+      ],
+      "review": [
+        "WRITTEN LETTER / NAMED OPTION CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": []
+    },
+    {
+      "location": "BIO 6 Q77",
+      "displayed_number": 77,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        "C"
+      ],
+      "answer_claims": [
+        {
+          "raw": "Answer: C) Increased number of leukocytes (D is also correct)",
+          "label": "C",
+          "named_answer": "Increased number of leukocytes (D is also correct)",
+          "exact_named_option_matches": []
+        },
+        {
+          "raw": "Answer: C) Increased number of leukocytes (D is also correct)",
+          "label": "D",
+          "named_answer": "",
+          "kind": "explicit additional answer claim",
+          "exact_named_option_matches": []
+        }
+      ],
+      "review": [
+        "CONFLICTING WRITTEN ANSWER CLAIMS",
+        "MARKED / WRITTEN ANSWER CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": []
+    },
+    {
+      "location": "BIO 6 Q135",
+      "displayed_number": 135,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        "A"
+      ],
+      "answer_claims": [
+        {
+          "raw": "Answer: A) < 9",
+          "label": "A",
+          "named_answer": "< 9",
+          "exact_named_option_matches": [
+            "D"
+          ]
+        }
+      ],
+      "review": [
+        "WRITTEN LETTER / NAMED OPTION CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": []
+    },
+    {
+      "location": "BIO 6 Q172",
+      "displayed_number": 172,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        "A"
+      ],
+      "answer_claims": [
+        {
+          "raw": "Answer: A) Formation of thread over 2 cm long",
+          "label": "A",
+          "named_answer": "Formation of thread over 2 cm long",
+          "exact_named_option_matches": [
+            "B"
+          ]
+        }
+      ],
+      "review": [
+        "WRITTEN LETTER / NAMED OPTION CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": []
+    },
+    {
+      "location": "BIO 6 Q188",
+      "displayed_number": 188,
+      "classification": "CONTENT REVIEW REQUIRED",
+      "marked_answers": [
+        "A"
+      ],
+      "answer_claims": [
+        {
+          "raw": "Answer: A) Sodium citrate",
+          "label": "A",
+          "named_answer": "Sodium citrate",
+          "exact_named_option_matches": [
+            "D"
+          ]
+        }
+      ],
+      "review": [
+        "WRITTEN LETTER / NAMED OPTION CONFLICT"
+      ],
+      "quarantine": [],
+      "technical": []
+    }
+  ],
+  "numbering": [
+    {
+      "location": "BIO 3 Q39",
+      "displayed_number": null,
+      "stem_start": "The term \"biological reference interval\" that  deemed normal for a healthy person approved by _________",
+      "reason": "missing/malformed visible number"
+    },
+    {
+      "location": "BIO 7 Q48",
+      "displayed_number": null,
+      "stem_start": "Assertion (A): Anion gap is useful in differentiating types of metabolic acidosis.\nReason (R): A normal anion gap suggests acidosis is due to accumulation of no",
+      "reason": "missing/malformed visible number"
+    },
+    {
+      "location": "BIO 8 Q57",
+      "displayed_number": null,
+      "stem_start": "The primary biochemical mechanism of lead toxicity is inhibition of:",
+      "reason": "missing/malformed visible number"
+    }
+  ],
+  "exact_stem_options_key_groups": [],
+  "same_stem_groups": [
+    {
+      "records": [
+        "BIO 2 Q32",
+        "BIO 2 Q40"
+      ],
+      "options_or_key_differ": true
+    },
+    {
+      "records": [
+        "BIO 4 Q55",
+        "BIO 4 Q77"
+      ],
+      "options_or_key_differ": true
+    }
+  ],
+  "near_duplicates": [
+    {
+      "records": [
+        "BIO 1 Q31",
+        "BIO 2 Q13"
+      ],
+      "similarity": 0.9091
+    },
+    {
+      "records": [
+        "BIO 1 Q31",
+        "BIO 2 Q32"
+      ],
+      "similarity": 0.9259
+    },
+    {
+      "records": [
+        "BIO 1 Q31",
+        "BIO 2 Q40"
+      ],
+      "similarity": 0.9259
+    },
+    {
+      "records": [
+        "BIO 2 Q13",
+        "BIO 2 Q32"
+      ],
+      "similarity": 0.9831
+    },
+    {
+      "records": [
+        "BIO 2 Q13",
+        "BIO 2 Q40"
+      ],
+      "similarity": 0.9831
+    },
+    {
+      "records": [
+        "BIO 4 Q53",
+        "BIO 4 Q76"
+      ],
+      "similarity": 0.8667
+    },
+    {
+      "records": [
+        "BIO 4 Q114",
+        "BIO 4 Q117"
+      ],
+      "similarity": 0.8706
+    },
+    {
+      "records": [
+        "BIO 4 Q114",
+        "BIO 4 Q118"
+      ],
+      "similarity": 0.8736
+    },
+    {
+      "records": [
+        "BIO 4 Q114",
+        "BIO 4 Q154"
+      ],
+      "similarity": 0.875
+    },
+    {
+      "records": [
+        "BIO 4 Q114",
+        "BIO 4 Q157"
+      ],
+      "similarity": 0.8608
+    },
+    {
+      "records": [
+        "BIO 4 Q114",
+        "BIO 4 Q191"
+      ],
+      "similarity": 0.8608
+    },
+    {
+      "records": [
+        "BIO 4 Q117",
+        "BIO 4 Q154"
+      ],
+      "similarity": 0.8889
+    },
+    {
+      "records": [
+        "BIO 4 Q117",
+        "BIO 4 Q157"
+      ],
+      "similarity": 0.9
+    },
+    {
+      "records": [
+        "BIO 4 Q117",
+        "BIO 4 Q191"
+      ],
+      "similarity": 0.85
+    },
+    {
+      "records": [
+        "BIO 4 Q118",
+        "BIO 4 Q157"
+      ],
+      "similarity": 0.8537
+    },
+    {
+      "records": [
+        "BIO 4 Q118",
+        "BIO 4 Q191"
+      ],
+      "similarity": 0.8537
+    },
+    {
+      "records": [
+        "BIO 4 Q154",
+        "BIO 4 Q157"
+      ],
+      "similarity": 0.9333
+    },
+    {
+      "records": [
+        "BIO 4 Q154",
+        "BIO 4 Q191"
+      ],
+      "similarity": 0.9067
+    },
+    {
+      "records": [
+        "BIO 4 Q155",
+        "BIO 4 Q156"
+      ],
+      "similarity": 0.9608
+    },
+    {
+      "records": [
+        "BIO 4 Q157",
+        "BIO 4 Q158"
+      ],
+      "similarity": 0.9136
+    },
+    {
+      "records": [
+        "BIO 4 Q157",
+        "BIO 4 Q191"
+      ],
+      "similarity": 0.9459
+    },
+    {
+      "records": [
+        "BIO 4 Q174",
+        "BIO 4 Q195"
+      ],
+      "similarity": 0.8654
+    },
+    {
+      "records": [
+        "BIO 4 Q192",
+        "BIO 4 Q194"
+      ],
+      "similarity": 0.9307
+    },
+    {
+      "records": [
+        "BIO 4 Q192",
+        "BIO 4 Q197"
+      ],
+      "similarity": 0.8519
+    },
+    {
+      "records": [
+        "BIO 5 Q21",
+        "BIO 6 Q44"
+      ],
+      "similarity": 0.8966
+    },
+    {
+      "records": [
+        "BIO 6 Q44",
+        "BIO 7 Q35"
+      ],
+      "similarity": 0.8916
+    },
+    {
+      "records": [
+        "BIO 6 Q114",
+        "BIO 7 Q35"
+      ],
+      "similarity": 0.8649
+    }
+  ],
+  "duplicate_method": "Leading visible number removed; whitespace/case normalized. Near: token Jaccard >=0.70 and SequenceMatcher >=0.85. Candidates only; no records removed.",
+  "identity": {
+    "existing_key": "SHA256(exact DOCX bytes):source sequence",
+    "additional_preflight_identity": "SHA256([subject,BIO subhead,exact filename,DOCX SHA256,sequence])",
+    "unique_existing_keys": 714,
+    "unique_scoped_keys": 714,
+    "bio6_bio7_overlap": 0
+  },
+  "native_table_inventory": [
+    {
+      "location": "BIO 3 Q5",
+      "source_document": "app friendly format - JSO SIR 17 - Enzymology, Techniques and Instrumentation, Biostatistics.docx",
+      "role": "question",
+      "option": null,
+      "table_index": 1,
+      "rows": 4,
+      "columns": 3,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "I.",
+          "Oxidoreductase ",
+          "a. fumarase"
+        ],
+        [
+          "II.",
+          "Hydrolase",
+          "b. amino acyl tRNA synthase"
+        ],
+        [
+          "III.",
+          "Lyase",
+          "c. urease"
+        ],
+        [
+          "IV.",
+          "Ligase",
+          "d. catalase"
+        ]
+      ],
+      "rich_properties": {
+        "b": 24,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "6dc55f2e52515a60af6f14ecbf1c404a50b2f4d1d56d960da15bc5481c6813f7"
+    },
+    {
+      "location": "BIO 5 Q13",
+      "source_document": "app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx",
+      "role": "question",
+      "option": null,
+      "table_index": 1,
+      "rows": 5,
+      "columns": 2,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "List I",
+          "List II"
+        ],
+        [
+          "A. DNA polymerase",
+          "1. Lysosome"
+        ],
+        [
+          "B. succinate dehydrogenase",
+          "2. golgi complex"
+        ],
+        [
+          "C. galactosyl transferase",
+          "3. nucleus"
+        ],
+        [
+          "D. Cathepsin",
+          "4. mitochondria"
+        ]
+      ],
+      "rich_properties": {
+        "b": 0,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "14431ed07a14fc2d118eba4a6673910539a6bfff480b16f46cd1e4a69e6ea466"
+    },
+    {
+      "location": "BIO 5 Q34",
+      "source_document": "app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx",
+      "role": "question",
+      "option": null,
+      "table_index": 1,
+      "rows": 5,
+      "columns": 2,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "Column A (Radioisotope)",
+          "Column B (Application)"
+        ],
+        [
+          "A. Iodine-131",
+          "1. heart valve scan"
+        ],
+        [
+          "B. Technetium-99",
+          "2. Thyroid disorders"
+        ],
+        [
+          "C. Cobalt-60",
+          "3. Radiotherapy"
+        ],
+        [
+          "D. Phosphorus-32",
+          "4. DNA analysis"
+        ]
+      ],
+      "rich_properties": {
+        "b": 0,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "196b171f476ffa94489a7b0243a9e549f84a13aaa6dac5d5b02fb0c244c2f492"
+    },
+    {
+      "location": "BIO 5 Q42",
+      "source_document": "app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx",
+      "role": "question",
+      "option": null,
+      "table_index": 1,
+      "rows": 5,
+      "columns": 2,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "List I (Biomedical Waste)",
+          "List II (Colour Code)"
+        ],
+        [
+          "A. Catheter tube",
+          "1. Blue"
+        ],
+        [
+          "B. Used syringes & needles",
+          "2. Yellow"
+        ],
+        [
+          "C. Broken glassware",
+          "3. White (Translucent)"
+        ],
+        [
+          "D. Expired medicines",
+          "4. Red"
+        ]
+      ],
+      "rich_properties": {
+        "b": 0,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "d999b89a13c69d542df2d4ceebcc9004f127cc09fb257d0c55bd1a99867474d7"
+    },
+    {
+      "location": "BIO 6 Q13",
+      "source_document": "app friendly format - JSO SIR 19 - Clinical biochemistry.docx",
+      "role": "question",
+      "option": null,
+      "table_index": 1,
+      "rows": 4,
+      "columns": 3,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "a)",
+          "EDTA & gel",
+          "i) orange"
+        ],
+        [
+          "b)",
+          "Thrombin",
+          "ii) yellow"
+        ],
+        [
+          "c)",
+          "1;4 ESR",
+          "iii) white"
+        ],
+        [
+          "d)",
+          "Brain heart infusion broth",
+          "iv) black "
+        ]
+      ],
+      "rich_properties": {
+        "b": 0,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "2d13f9e3d55677f34130992fc57791d55ac3fa0818c0fdf7294a284108dfeb6e"
+    },
+    {
+      "location": "BIO 7 Q47",
+      "source_document": "app friendly format - JSO SIR 19 - Diagnostic Biochemistry.docx",
+      "role": "question",
+      "option": null,
+      "table_index": 1,
+      "rows": 5,
+      "columns": 2,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "Column A (Disorder)",
+          "Column B (Cause)"
+        ],
+        [
+          "A. Metabolic acidosis",
+          "1. Vomiting"
+        ],
+        [
+          "B. Metabolic alkalosis",
+          "2. Diabetic ketoacidosis"
+        ],
+        [
+          "C. Respiratory acidosis",
+          "3. COPD (Chronic Obstructive Pulmonary Disease)"
+        ],
+        [
+          "D. Respiratory alkalosis",
+          "4. Hyperventilation due to anxiety"
+        ]
+      ],
+      "rich_properties": {
+        "b": 0,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "0050ad7f613792d6762906412b5aaf3dbd8929ec7f1d98c74dbfe3e952be4bf9"
+    },
+    {
+      "location": "BIO 8 Q8",
+      "source_document": "app friendly format - JSO SIR 20 - HORMONES,QC,TOXICOLOGY.docx",
+      "role": "solution",
+      "option": null,
+      "table_index": 1,
+      "rows": 5,
+      "columns": 6,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "MEN Type",
+          "Gene Affected",
+          "Chromosomal Location",
+          "Type of Mutation",
+          "Inheritance / Representation",
+          "Major Tumors (Examples)"
+        ],
+        [
+          "MEN 1 (Wermer syndrome)",
+          "MEN1 (menin)",
+          "11q13",
+          "Tumor suppressor gene – loss of function",
+          "Autosomal dominant (two-hit hypothesis)",
+          "Parathyroid adenoma, Pancreatic NETs (gastrinoma, insulinoma), Pituitary adenoma"
+        ],
+        [
+          "MEN 2A",
+          "RET proto-oncogene",
+          "10q11.2",
+          "Gain of function (activating mutation)",
+          "Autosomal dominant",
+          "Medullary thyroid carcinoma, Pheochromocytoma, Parathyroid hyperplasia"
+        ],
+        [
+          "MEN 2B",
+          "RET proto-oncogene",
+          "10q11.2",
+          "Gain of function",
+          "Autosomal dominant",
+          "Medullary thyroid carcinoma, Pheochromocytoma, Mucosal neuromas, Marfanoid habitus"
+        ],
+        [
+          "FMTC",
+          "RET proto-oncogene",
+          "10q11.2",
+          "Gain of function",
+          "Autosomal dominant",
+          "Medullary thyroid carcinoma only"
+        ]
+      ],
+      "rich_properties": {
+        "b": 8,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "9b9f68905031e249005ab7d2932710fa74b7dbab7b36edb0a4c4cf96f2999660"
+    },
+    {
+      "location": "BIO 8 Q10",
+      "source_document": "app friendly format - JSO SIR 20 - HORMONES,QC,TOXICOLOGY.docx",
+      "role": "solution",
+      "option": null,
+      "table_index": 1,
+      "rows": 10,
+      "columns": 6,
+      "merged_cells": 0,
+      "nested_tables": 0,
+      "images_in_cells": 0,
+      "row_text": [
+        [
+          "Disorder",
+          "Common Name of Gene",
+          "Official Gene Symbol",
+          "Chromosomal Location",
+          "Inheritance / Mechanism",
+          "Key Exam Point"
+        ],
+        [
+          "Acromegaly / Gigantism",
+          "G-protein alpha subunit",
+          "GNAS",
+          "20q13",
+          "Somatic activating mutation",
+          "↑ cAMP → excess GH secretion"
+        ],
+        [
+          "Pituitary adenoma (familial acromegaly)",
+          "Menin",
+          "MEN1",
+          "11q13",
+          "Autosomal dominant",
+          "Tumor suppressor gene"
+        ],
+        [
+          "Pituitary dwarfism (Isolated GH deficiency)",
+          "Growth hormone gene",
+          "GH1",
+          "17q23",
+          "AR / AD",
+          "↓ GH synthesis"
+        ],
+        [
+          "Laron dwarfism",
+          "GH receptor",
+          "GHR",
+          "5p13",
+          "Autosomal recessive",
+          "GH resistance (↑ GH, ↓ IGF-1)"
+        ],
+        [
+          "Central diabetes insipidus (familial)",
+          "Vasopressin gene",
+          "AVP (ADH)",
+          "20p13",
+          "Autosomal dominant",
+          "↓ ADH synthesis"
+        ],
+        [
+          "Nephrogenic diabetes insipidus (AR)",
+          "Aquaporin-2",
+          "AQP2",
+          "12q13",
+          "Autosomal recessive",
+          "Defective water channels"
+        ],
+        [
+          "SIAD (familial)",
+          "Vasopressin receptor",
+          "AVPR2 (activating)",
+          "Xq28",
+          "Gain-of-function mutation",
+          "ADH action despite low ADH"
+        ],
+        [
+          "Congenital adrenal hyperplasia (most common)",
+          "21-hydroxylase",
+          "CYP21A2",
+          "6p21",
+          "Autosomal recessive",
+          "↓ Cortisol ± ↓ Aldosterone"
+        ],
+        [
+          "Phaeochromocytoma (MEN 2)",
+          "RET proto-oncogene",
+          "RET",
+          "10q11.2",
+          "Autosomal dominant",
+          "Medullary thyroid carcinoma"
+        ]
+      ],
+      "rich_properties": {
+        "b": 33,
+        "i": 0,
+        "u": 0,
+        "vertAlign": 0
+      },
+      "source_cell_order": [
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "canonical_order_matches": true,
+      "xml_sha256": "7c0cb023f533c0d304ef43e8bef87d28b015a98d9c3e5b67a7dd75e95a69017c"
+    }
+  ],
+  "decorative_separators": 714,
+  "additional_inventory": {
+    "native_content_tables": 8,
+    "merged_content_tables": 0,
+    "nested_content_tables": 0,
+    "images": 0,
+    "gif": 0,
+    "emf": 0,
+    "image_only_stems": 0,
+    "table_only_stems": 0,
+    "officemath_nodes": 0,
+    "superscript_runs": 13,
+    "subscript_runs": 0,
+    "superscript_or_subscript_questions_including_unicode": 7,
+    "previous_paper_questions": 3,
+    "exact_normalized_stem_groups": 2,
+    "exact_normalized_stem_options_key_groups": 0,
+    "near_duplicate_pairs": 27,
+    "answer_conflict_questions": 5,
+    "missing_correct_markers": 1,
+    "missing_written_answers": 0,
+    "cancelled_questions": 0,
+    "multiple_correct_markers": 0,
+    "missing_display_numbers": 3,
+    "unexpected_parser_records": 0
+  }
+}
