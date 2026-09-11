@@ -6,7 +6,7 @@ type Hierarchy = Pick<CoreData,"exams"|"programs"|"subjects"|"chapters"|"topics"
 // active question availability are fetched afresh; RLS still applies to writes.
 let hierarchy: {user:string; expires:number; promise:Promise<Hierarchy>} | undefined;
 export function clearTestHierarchy() { hierarchy = undefined; }
-async function metadata(user:string):Promise<Hierarchy> {
+export async function loadAcademicMetadata(user:string):Promise<Hierarchy> {
   if(hierarchy?.user===user && hierarchy.expires>Date.now())return hierarchy.promise;
   const db=createClient();
   const promise=Promise.all([
@@ -34,7 +34,7 @@ export async function loadTestWorkspace(actor?:{id:string;role:string}):Promise<
     identity = {id:auth.data.user.id,role:profile.role};
   }
   const [academic,tests,assignments]=await Promise.all([
-    metadata(identity.id),
+    loadAcademicMetadata(identity.id),
     db.from("tests").select("*,test_questions(question_id,display_order),test_batches(batch_id)").order("created_at",{ascending:false}),
     db.from("faculty_assignments").select("*"),
   ]);

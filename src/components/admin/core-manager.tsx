@@ -567,7 +567,7 @@ function MediaField({
     </div>
   );
 }
-function QuestionForm({
+export function QuestionForm({
   value,
   data,
   busy,
