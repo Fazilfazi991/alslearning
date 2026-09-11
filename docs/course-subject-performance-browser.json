@@ -1,0 +1,126 @@
+{
+  "initial": {
+    "usefulMs": 1341,
+    "htmlBytes": 34236
+  },
+  "viewports": [
+    {
+      "width": 390,
+      "samples": [
+        {
+          "subject": "Microbiology",
+          "commitMs": 3.3999999994412065
+        },
+        {
+          "subject": "Pathology",
+          "commitMs": 2.7999999998137355
+        },
+        {
+          "subject": "Biochemistry",
+          "commitMs": 2.2999999998137355
+        },
+        {
+          "subject": "Microbiology",
+          "commitMs": 6.599999999627471
+        },
+        {
+          "subject": "Biochemistry",
+          "commitMs": 1.7000000001862645
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://i.ytimg.com/vi/sgbJTyco26g/mqdefault.jpg",
+          "type": "image"
+        },
+        {
+          "url": "https://i.ytimg.com/vi/-oF7W3AvhmU/mqdefault.jpg",
+          "type": "image"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "https://i.ytimg.com/vi/pprnhTi86pA/mqdefault.jpg",
+          "type": "image"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "samples": [
+        {
+          "subject": "Microbiology",
+          "commitMs": 5.2999999998137355
+        },
+        {
+          "subject": "Pathology",
+          "commitMs": 2.2999999998137355
+        },
+        {
+          "subject": "Biochemistry",
+          "commitMs": 2.8999999994412065
+        },
+        {
+          "subject": "Microbiology",
+          "commitMs": 3.099999999627471
+        },
+        {
+          "subject": "Biochemistry",
+          "commitMs": 2.5
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://i.ytimg.com/vi/sgbJTyco26g/mqdefault.jpg",
+          "type": "image"
+        },
+        {
+          "url": "https://i.ytimg.com/vi/-oF7W3AvhmU/mqdefault.jpg",
+          "type": "image"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "https://i.ytimg.com/vi/pprnhTi86pA/mqdefault.jpg",
+          "type": "image"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        },
+        {
+          "url": "http://localhost:3018/favicon.ico?favicon.2vob68tjqpejf.ico",
+          "type": "other"
+        }
+      ]
+    }
+  ]
+}
