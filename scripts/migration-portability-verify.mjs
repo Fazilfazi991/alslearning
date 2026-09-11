@@ -1,0 +1,20 @@
+// Read-only comparison of a migrated ALS project with the clean local replay.
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { query, management, QA, PRODUCTION, catalogSql, checkPrivileges } from "./helper-grants-lib.mjs";
+import { schemaSql, compareStructure } from "./migration-portability-schema.mjs";
+const target = process.argv[2];
+assert.ok([QA, PRODUCTION].includes(target));
+const local = JSON.parse(readFileSync(".local-qa/helper-grants/local-fresh-replay.json"));
+assert.equal(local.error, null);
+assert.equal(local.conditional, false);
+const inventory = (await query(target, catalogSql))[0].inventory;
+const structure = (await query(target, schemaSql))[0].structure;
+const checks = [...checkPrivileges(inventory), ...compareStructure(structure, local.structure)];
+assert.deepEqual(inventory.policies, local.inventory.policies);
+checks.push("All application and storage policies match clean replay");
+const history = await management(target, "database/migrations");
+assert.deepEqual(history.map((m) => m.version), readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).sort().map((f) => f.split("_")[0]));
+checks.push("Exact repository migration versions reconciled");
+writeFileSync(`.local-qa/helper-grants/${target}-portability-schema.json`, JSON.stringify({target, checks, history, inventory, structure}, null, 2));
+console.log(`PASS ${target}: ${checks.length} schema/privilege/history assertions`);

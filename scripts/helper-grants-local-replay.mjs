@@ -1,10 +1,11 @@
 // Isolated local PostgreSQL only. The provider shim implements the SQL surface
-// used by the migrations, not the Supabase HTTP services. A conditional replay
-// is explicitly distinguished from the failing fresh-production prerequisite.
+// used by the migrations, not the Supabase HTTP services. The clean replay has
+// no optional legacy helper; conditional mode also checks an existing QA helper.
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { catalogSql, checkPrivileges } from "./helper-grants-lib.mjs";
+import { schemaSql } from "./migration-portability-schema.mjs";
 const exe = process.env.ALS_TEST_PSQL,
   port = process.env.ALS_TEST_PGPORT;
 assert.ok(
@@ -73,6 +74,15 @@ try {
   }
   report.failed_migration = null;
   report.assertions = checkPrivileges(JSON.parse(sql(catalogSql)));
+  report.inventory = JSON.parse(sql(catalogSql));
+  report.structure = JSON.parse(sql(schemaSql));
+  assert.equal(report.inventory.tables.length, 34, "All 34 application tables");
+  report.assertions.push("All 34 application tables");
+  const auth = spawnSync(process.execPath, ["scripts/migration-portability-authorization.mjs", "local"], {
+    env: {...process.env, ALS_TEST_PGDATABASE: database}, encoding: "utf8",
+  });
+  assert.equal(auth.status, 0, auth.stderr);
+  report.authorization = JSON.parse(readFileSync(".local-qa/helper-grants/local-portability-authorization.json", "utf8"));
   console.log(
     `PASS ${conditional ? "conditional" : "fresh"} local replay: ${report.applied.length} migrations, ${report.assertions.length} assertions`,
   );
