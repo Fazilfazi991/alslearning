@@ -1,0 +1,16 @@
+{
+  "project": "dvmahmkapgtjfqmoottt",
+  "email": "fazil4fazi@gmail.com",
+  "invitationSent": true,
+  "userId": "REDACTED_ADMIN_ID",
+  "profile": [
+    {
+      "id": "REDACTED_ADMIN_ID",
+      "email": "fazil4fazi@gmail.com",
+      "role": "admin",
+      "is_active": true
+    }
+  ],
+  "emailConfirmed": true,
+  "requiresUserAcceptance": false
+}

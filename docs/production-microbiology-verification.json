@@ -1,0 +1,77 @@
+{
+  "project": "dvmahmkapgtjfqmoottt",
+  "subject": "microbiology",
+  "groups": {
+    "MICRO 1": {
+      "source": 98,
+      "active": 97,
+      "draft": 0,
+      "quarantine": 1
+    },
+    "MICRO 2": {
+      "source": 102,
+      "active": 102,
+      "draft": 0,
+      "quarantine": 0
+    },
+    "MICRO 3": {
+      "source": 100,
+      "active": 100,
+      "draft": 0,
+      "quarantine": 0
+    },
+    "MICRO 4": {
+      "source": 102,
+      "active": 101,
+      "draft": 0,
+      "quarantine": 1
+    },
+    "MICRO 5": {
+      "source": 101,
+      "active": 101,
+      "draft": 0,
+      "quarantine": 0
+    },
+    "MICRO 6": {
+      "source": 101,
+      "active": 98,
+      "draft": 2,
+      "quarantine": 1
+    },
+    "MICRO 7": {
+      "source": 193,
+      "active": 192,
+      "draft": 0,
+      "quarantine": 1
+    }
+  },
+  "completePayloadsVerified": 793,
+  "options": 3172,
+  "answerKeys": 793,
+  "media": 116,
+  "assetsHashed": 127,
+  "tables": 24,
+  "emfs": 11,
+  "derivatives": 11,
+  "runs": [
+    {
+      "created": 793,
+      "unchanged": 0,
+      "failed": 0,
+      "uploaded": 127,
+      "reused_assets": 0,
+      "new_subjects": 0,
+      "new_chapters": 7
+    },
+    {
+      "created": 0,
+      "unchanged": 793,
+      "failed": 0,
+      "uploaded": 0,
+      "reused_assets": 127,
+      "new_subjects": 0,
+      "new_chapters": 0
+    }
+  ],
+  "qaUnchanged": true
+}

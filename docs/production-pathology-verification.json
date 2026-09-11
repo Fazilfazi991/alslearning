@@ -1,0 +1,67 @@
+{
+  "project": "dvmahmkapgtjfqmoottt",
+  "subject": "pathology",
+  "groups": {
+    "PATHO 1": {
+      "source": 310,
+      "active": 306,
+      "draft": 4,
+      "quarantine": 0
+    },
+    "PATHO 2": {
+      "source": 137,
+      "active": 136,
+      "draft": 0,
+      "quarantine": 1
+    },
+    "PATHO 3": {
+      "source": 168,
+      "active": 167,
+      "draft": 1,
+      "quarantine": 0
+    },
+    "PATHO 4": {
+      "source": 100,
+      "active": 99,
+      "draft": 0,
+      "quarantine": 1
+    },
+    "PATHO 5": {
+      "source": 148,
+      "active": 148,
+      "draft": 0,
+      "quarantine": 0
+    },
+    "PATHO 6": {
+      "source": 105,
+      "active": 105,
+      "draft": 0,
+      "quarantine": 0
+    }
+  },
+  "completePayloadsVerified": 966,
+  "options": 3864,
+  "answerKeys": 966,
+  "media": 8,
+  "assetsHashed": 8,
+  "tables": 0,
+  "emfs": 0,
+  "derivatives": 0,
+  "runs": [
+    {
+      "created": 966,
+      "unchanged": 0,
+      "failed": 0,
+      "uploaded": 8,
+      "reused_images": 0
+    },
+    {
+      "created": 0,
+      "unchanged": 966,
+      "failed": 0,
+      "uploaded": 0,
+      "reused_images": 8
+    }
+  ],
+  "qaUnchanged": true
+}
