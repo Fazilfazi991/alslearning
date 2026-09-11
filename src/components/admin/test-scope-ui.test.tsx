@@ -19,3 +19,10 @@ it("paginates compact rows and exposes an explicit preview without preloading me
  const html=renderToStaticMarkup(<TestQuestionPicker questions={questions} selected={["1"]} onChange={()=>{}} />);
  expect(html).toContain("Image-only question");expect(html).toContain("line-clamp-2");expect(html).toContain("Page 1 of 3");expect(html).not.toContain("Question 10");expect(html).toContain("Preview Image-only question");expect(html).not.toContain("Loading image");
 });
+it("shows per-subject quotas and a derived total without an editable combined random count",()=>{
+ const d={...data,subjects:[...data.subjects,{id:"patho",name:"Pathology"}],mappings:[...data.mappings,{program_id:"program",subject_id:"patho"}]};
+ const t={...newTest(),exam_id:"exam",program_id:"program",selection_mode:"generated",selection_rules:{scopes:[{subject_id:"micro",chapter_ids:[],count:2},{subject_id:"patho",chapter_ids:[],count:3}]}};
+ const html=renderToStaticMarkup(<TestForm value={t} data={d} busy={false} save={async()=>{}}/>);
+ expect(html).toContain("Total requested: 5");expect(html).not.toContain("Number of questions");expect(html).not.toContain("undefined");
+ expect(html).toContain("No active questions are available for this scope.");
+});

@@ -433,12 +433,14 @@ function NumberField({
   onChange,
   min = 0,
   step = 1,
+  disabled = false,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   min?: number;
   step?: number;
+  disabled?: boolean;
 }) {
   return (
     <Field label={label}>
@@ -447,6 +449,7 @@ function NumberField({
         required
         min={min}
         step={step}
+        disabled={disabled}
         className={input}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
@@ -893,12 +896,13 @@ export function TestForm({
                 setT({ ...t, selection_rules: { ...t.selection_rules, difficulty: v } })
               }
             />
-            <NumberField
+            {t.selection_rules.scopes ? <p className="text-sm font-semibold">Total requested: {t.selection_rules.scopes.reduce((n, scope) => n + (scope.count || 0), 0)}</p> : <NumberField
               label="Number of questions"
               min={1}
+              disabled={!eligible.length}
               value={t.question_count}
               onChange={(v) => setT({ ...t, question_count: v })}
-            />
+            />}
             <p className="text-sm text-muted">
               A fresh eligible sample is selected by the server for each
               attempt. Marks are summed from that sample.
