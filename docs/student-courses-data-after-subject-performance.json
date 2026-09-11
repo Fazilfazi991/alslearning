@@ -1,0 +1,176 @@
+{
+  "xstssknlgdraulebdsfd": {
+    "fingerprints": [
+      {
+        "name": "questions",
+        "count": 2533,
+        "hash": "915ba43fef8cadeaaf98015a4724c75d"
+      },
+      {
+        "name": "question_options",
+        "count": 10084,
+        "hash": "fa0f66f1b1ccf1b64814e55ef89cf27a"
+      },
+      {
+        "name": "question_answer_keys",
+        "count": 2540,
+        "hash": "6d93639093e92eb51b1ec6919171da00"
+      },
+      {
+        "name": "question_media",
+        "count": 244,
+        "hash": "261b41e3792e47bb1095ba940f014f5e"
+      },
+      {
+        "name": "recorded_classes",
+        "count": 5,
+        "hash": "6a97286c0f2acedc2939fbc1231ae954"
+      },
+      {
+        "name": "enrollments",
+        "count": 72,
+        "hash": "970742a0118d8ea6ce34618c85cbd336"
+      },
+      {
+        "name": "program_subjects",
+        "count": 17,
+        "hash": "b7bad12f3714de5534d69fd0353cfb88"
+      },
+      {
+        "name": "learning_content",
+        "count": 26,
+        "hash": "45cc2cb0542233a5374d6221ca45f9e9"
+      }
+    ],
+    "recordings": [
+      {
+        "id": "573ecbcc-05d7-4212-8b50-fbdb7463af37",
+        "title": "Carbohydrates II",
+        "status": "published",
+        "topic_label": "Biochemistry of Major Biomolecules",
+        "subtopic": "CARBOHYDRATES",
+        "subject": "Biochemistry"
+      },
+      {
+        "id": "506ba3ef-3272-4712-8e9b-9375701d101f",
+        "title": "Influenza Parainfluenza Mumps RSV",
+        "status": "published",
+        "topic_label": "Virology",
+        "subtopic": null,
+        "subject": "Microbiology"
+      },
+      {
+        "id": "b97076c6-f4b7-47ab-b264-eadf234c7487",
+        "title": "Trematodes I",
+        "status": "published",
+        "topic_label": "Parasitology",
+        "subtopic": null,
+        "subject": "Microbiology"
+      },
+      {
+        "id": "50781c7f-9138-4815-93a9-bc449e046b60",
+        "title": "Donor selection",
+        "status": "published",
+        "topic_label": "Blood Banking and Transfusion Medicine",
+        "subtopic": null,
+        "subject": "Pathology"
+      },
+      {
+        "id": "0b44c5e0-916c-49f0-b55a-67c5c7b0e56e",
+        "title": "Hemostasis",
+        "status": "draft",
+        "topic_label": "Clinical Haematology",
+        "subtopic": null,
+        "subject": "Pathology"
+      }
+    ],
+    "securityHash": "59bdfcbfb9c4af3a5f7463e094634ee1c026c4e42054c4b272ec6054dc787fe4"
+  },
+  "dvmahmkapgtjfqmoottt": {
+    "fingerprints": [
+      {
+        "name": "questions",
+        "count": 2472,
+        "hash": "c39f23957fda67393211baf9645ae4b2"
+      },
+      {
+        "name": "question_options",
+        "count": 9888,
+        "hash": "a6c522b9bb465e593f1f6a099e47c8e6"
+      },
+      {
+        "name": "question_answer_keys",
+        "count": 2472,
+        "hash": "a6bfdbce0e235e6cd9486c52b0b175af"
+      },
+      {
+        "name": "question_media",
+        "count": 124,
+        "hash": "551af465b3c1d11fdd78dfc9f3f782ce"
+      },
+      {
+        "name": "recorded_classes",
+        "count": 5,
+        "hash": "c61b9601cd94aa422358fbf064c435e0"
+      },
+      {
+        "name": "enrollments",
+        "count": 1,
+        "hash": "66063bf0f1c28b39828aa473492a6688"
+      },
+      {
+        "name": "program_subjects",
+        "count": 3,
+        "hash": "b6fbaf6dacf71b4789b8c825b65f314c"
+      },
+      {
+        "name": "learning_content",
+        "count": 0,
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    ],
+    "recordings": [
+      {
+        "id": "99e6a06b-a64e-43cd-be4c-686f070246ef",
+        "title": "Carbohydrates II",
+        "status": "published",
+        "topic_label": "Biochemistry of Major Biomolecules",
+        "subtopic": "CARBOHYDRATES",
+        "subject": "Biochemistry"
+      },
+      {
+        "id": "c10ae88e-a900-4729-8277-c5b6a1750586",
+        "title": "Influenza Parainfluenza Mumps RSV",
+        "status": "published",
+        "topic_label": "Virology",
+        "subtopic": null,
+        "subject": "Microbiology"
+      },
+      {
+        "id": "d892454e-a4a7-4d99-a686-8f0b8d8861e6",
+        "title": "Trematodes I",
+        "status": "published",
+        "topic_label": "Parasitology",
+        "subtopic": null,
+        "subject": "Microbiology"
+      },
+      {
+        "id": "8984dbd2-c1c3-4c4a-8693-e9eb3edb5d21",
+        "title": "Donor selection",
+        "status": "published",
+        "topic_label": "Blood Banking and Transfusion Medicine",
+        "subtopic": null,
+        "subject": "Pathology"
+      },
+      {
+        "id": "4b8f1ddf-039b-4387-a544-0512325232f6",
+        "title": "Hemostasis",
+        "status": "draft",
+        "topic_label": "Clinical Haematology",
+        "subtopic": null,
+        "subject": "Pathology"
+      }
+    ],
+    "securityHash": "8c35720d3de703659e9c2d40c1f48365615955b7b7eb91cce481452fefbff995"
+  }
+}
