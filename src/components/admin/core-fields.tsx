@@ -25,12 +25,16 @@ export function Select({
   onChange,
   items,
   required = false,
+  emptyLabel,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   items: { id: string; name: string }[];
   required?: boolean;
+  emptyLabel?: string;
+  disabled?: boolean;
 }) {
   return (
     <Field label={label}>
@@ -39,8 +43,11 @@ export function Select({
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         required={required}
+        disabled={disabled}
       >
-        <option value="">{required ? "Select…" : "Any / optional"}</option>
+        <option value="">
+          {emptyLabel ?? (required ? "Select…" : "Any / optional")}
+        </option>
         {items.map((x) => (
           <option key={x.id} value={x.id}>
             {x.name}
@@ -56,12 +63,14 @@ export function TaxonomyFields({
   data,
   programRequired = false,
   subjectRequired = true,
+  sectionMode = false,
 }: {
   value: Taxonomy;
   onChange: (v: Taxonomy) => void;
   data: CoreData;
   programRequired?: boolean;
   subjectRequired?: boolean;
+  sectionMode?: boolean;
 }) {
   const allowed = (v: Partial<Taxonomy>) =>
     data.role === "admin" ||
@@ -134,7 +143,13 @@ export function TaxonomyFields({
         }
       />
       <Select
-        label="Chapter"
+        label={sectionMode ? "Section / sub-head" : "Chapter"}
+        disabled={sectionMode && !value.subject_id}
+        emptyLabel={sectionMode
+          ? (value.subject_id
+            ? `All ${data.subjects.find((s) => s.id === value.subject_id)?.name ?? "subject"} sections`
+            : "Choose a subject first")
+          : undefined}
         value={value.chapter_id}
         items={data.chapters.filter((x) => x.subject_id === value.subject_id)}
         onChange={(v) => onChange({ ...value, chapter_id: v, topic_id: "" })}

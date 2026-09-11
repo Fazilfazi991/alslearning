@@ -1,4 +1,10 @@
 "use client";
+import {
+  eligibleTestQuestions,
+  hasTestScope,
+  testSelectionError,
+} from "@/lib/test-question-scope";
+import { TestQuestionPicker } from "./test-question-picker";
 import { localDateTime } from "@/lib/core-time";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -767,7 +773,7 @@ function QuestionForm({
     </form>
   );
 }
-function TestForm({
+export function TestForm({
   value,
   data,
   busy,
@@ -780,16 +786,11 @@ function TestForm({
 }) {
   const [t, setT] = useState(value),
     [search, setSearch] = useState("");
-  const eligible = data.questions.filter(
-    (q) =>
-      q.status === "active" &&
-      q.type !== "match_following" &&
-      q.exam_id === t.exam_id &&
-      (!q.program_id || q.program_id === t.program_id) &&
-      (!t.subject_id || q.subject_id === t.subject_id) &&
-      (!t.chapter_id || q.chapter_id === t.chapter_id) &&
-      (!t.topic_id || q.topic_id === t.topic_id),
-  );
+  const scoped = hasTestScope(data, t);
+  const eligible = eligibleTestQuestions(data, t);
+  const selectionError = testSelectionError(data, t);
+  const subject = data.subjects.find((s) => s.id === t.subject_id);
+  const section = data.chapters.find((s) => s.id === t.chapter_id);
   const total = eligible
     .filter((q) => t.question_ids.includes(q.id))
     .reduce((s, q) => s + Number(q.marks), 0);
@@ -798,7 +799,7 @@ function TestForm({
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        void save(t);
+        if (!selectionError) void save(t);
       }}
     >
       <Section title="Test details" open>
@@ -810,15 +811,6 @@ function TestForm({
             onChange={(e) => setT({ ...t, title: e.target.value })}
           />
         </Field>
-        <TaxonomyFields
-          value={t}
-          data={data}
-          subjectRequired={false}
-          programRequired
-          onChange={(v) =>
-            setT({ ...t, ...v, question_ids: [], batch_ids: [] })
-          }
-        />
         <Select
           label="Test type"
           value={t.type}
@@ -856,7 +848,34 @@ function TestForm({
           />
         </div>
       </Section>
+      <Section title="Academic scope" open>
+        <TaxonomyFields
+          value={t}
+          data={data}
+          programRequired
+          sectionMode
+          onChange={(v) => {
+            setSearch("");
+            setT({
+              ...t,
+              ...v,
+              question_ids: [],
+              question_count: 1,
+              batch_ids: t.program_id === v.program_id ? t.batch_ids : [],
+            });
+          }}
+        />
+      </Section>
       <Section title="Question selection" open>
+        {!scoped ? (
+          <p>Choose a subject above before selecting questions.</p>
+        ) : <>
+        <div className="grid gap-1 text-sm sm:grid-cols-2" aria-live="polite">
+          <p>Subject: {subject?.name}</p>
+          <p>Section: {section?.name ?? `All ${subject?.name} sections`}</p>
+          <p>Available Active Questions: {eligible.length}</p>
+          <p>{t.selection_mode === "manual" ? `Selected: ${t.question_ids.length}` : `Requested: ${t.question_count}`}</p>
+        </div>
         <Select
           label="Selection mode"
           value={t.selection_mode}
@@ -897,37 +916,12 @@ function TestForm({
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Field>
-            <div className="max-h-64 overflow-y-auto rounded-lg border p-3">
-              {eligible
-                .filter((q) =>
-                  questionLabel(q).toLowerCase().includes(search.toLowerCase()),
-                )
-                .map((q) => (
-                  <label
-                    key={q.id}
-                    className="flex min-h-11 items-start gap-3 py-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={t.question_ids.includes(q.id)}
-                      onChange={(e) =>
-                        setT({
-                          ...t,
-                          question_ids: e.target.checked
-                            ? [...t.question_ids, q.id]
-                            : t.question_ids.filter((id) => id !== q.id),
-                        })
-                      }
-                    />
-                    <span>
-                      {questionLabel(q)} · {q.marks} marks
-                    </span>
-                  </label>
-                ))}
-              {!eligible.length && (
-                <p>No active questions match this taxonomy.</p>
-              )}
-            </div>
+            <TestQuestionPicker
+              key={[t.subject_id, t.chapter_id, t.topic_id, search].join(":")}
+              questions={eligible.filter((q) => [questionLabel(q), q.source_label, q.source_reference].join(" ").toLowerCase().includes(search.toLowerCase()))}
+              selected={t.question_ids}
+              onChange={(question_ids) => setT({ ...t, question_ids })}
+            />
             {t.question_ids.some(
               (id) => !eligible.some((q) => q.id === id),
             ) && (
@@ -952,6 +946,7 @@ function TestForm({
             </p>
           </>
         )}
+        </>}
       </Section>
       <Section title="Eligibility and review" open>
         <BatchesField
@@ -1011,7 +1006,10 @@ function TestForm({
         value={t.status}
         onChange={(v) => setT({ ...t, status: v })}
       />
-      <button disabled={busy} className={`${button} w-full`}>
+      {scoped && selectionError && (
+        <p role="status" className="text-sm text-muted">{selectionError}</p>
+      )}
+      <button disabled={busy || !!selectionError} className={`${button} w-full`}>
         {busy ? "Saving…" : "Save test"}
       </button>
     </form>
