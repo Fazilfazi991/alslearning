@@ -11,7 +11,7 @@ const navigation=[
   {label:"Live Classes",href:"/student/live-classes",icon:CalendarDays}, {label:"Exams & Quizzes",href:"/student/exams",icon:FileCheck2},
   {label:"Progress",href:"/student/progress",icon:TrendingUp}, {label:"Certificates",href:"/student/certificates",icon:GraduationCap},
 ];
-const pageTitle=(path:string)=>navigation.find(x=>x.href!=="/student"&&path.startsWith(x.href))?.label??(path==="/student"?"Dashboard":"Student Portal");
+const pageTitle=(path:string)=>path.startsWith("/student/recorded-classes")?"Recorded Classes":navigation.find(x=>x.href!=="/student"&&path.startsWith(x.href))?.label??(path==="/student"?"Dashboard":"Student Portal");
 
 export function StudentShell({children,user}:{children:React.ReactNode;user:{name:string;email:string}}){
   const path=usePathname(); const[more,setMore]=useState(false);

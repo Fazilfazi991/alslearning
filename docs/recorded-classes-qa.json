@@ -1,0 +1,253 @@
+{
+  "date": "2026-09-11",
+  "qa_project": "xstssknlgdraulebdsfd",
+  "production_modified_by_this_task": false,
+  "starting_sha": "7fb77790d31d5d8585b7256b27de9c6805191bf1",
+  "database": {
+    "checks": [
+      "Draft without link allowed",
+      "Published without link rejected",
+      "Cross-subject Topic rejected",
+      "Malformed ID rejected by database",
+      "Teacher authoring denied",
+      "Student authoring denied",
+      "Unenrolled Student denied",
+      "Admin edit and publish",
+      "Active enrolled Student can read published recording",
+      "Student API contains no source URL",
+      "Student source RPC denied",
+      "Admin source traceability",
+      "Student direct update denied",
+      "Teacher direct update denied",
+      "Cross-subject published read denied",
+      "Expired enrollment denied",
+      "Future enrollment denied",
+      "Archived recording denied",
+      "Draft with link denied",
+      "Exactly five imported records",
+      "Hemostasis hidden"
+    ],
+    "passed": 21
+  },
+  "browser": {
+    "checks": [
+      "Admin desktop 1440px has no overflow",
+      "No Admin Question Bank eager loading",
+      "Actual embedded playback xNBduyugQSc",
+      "Admin publishes verified video Carbohydrates II",
+      "Actual embedded playback pprnhTi86pA",
+      "Admin publishes verified video Donor selection",
+      "Actual embedded playback sgbJTyco26g",
+      "Admin publishes verified video Influenza Parainfluenza Mumps RSV",
+      "Actual embedded playback -oF7W3AvhmU",
+      "Admin publishes verified video Trematodes I",
+      "Admin mobile 390x844 has no overflow",
+      "Changing Subject resets and scopes Topics",
+      "Admin form and URL field fit mobile",
+      "Admin creates link-pending Draft in browser",
+      "Malformed URL rejected in browser",
+      "Admin edits and archives in browser",
+      "Status filter works",
+      "Subject and Topic filters work",
+      "Search and empty results work",
+      "Student sees four published recordings, no Hemostasis or Studio data",
+      "Optional sub-topic grouping shown",
+      "Student library mobile has no overflow",
+      "Student library desktop has no overflow",
+      "Student player mobile has no overflow",
+      "Student Previous/Next stays within Subject and works",
+      "Student player desktop has no overflow",
+      "Direct Draft URL denied",
+      "Deleted recording handled",
+      "Courses entry reaches Recorded Classes"
+    ],
+    "performance": [
+      {
+        "page": "admin",
+        "resources": [
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/subjects?select=id%2Cname&order=name.asc",
+            "duration_ms": 636
+          },
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/chapters?select=id%2Cname%2Csubject_id%2Cdisplay_order&order=display_order.asc",
+            "duration_ms": 638
+          },
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/profiles?select=id%2Cfull_name&role=eq.teacher&is_active=eq.true&order=full_name.asc",
+            "duration_ms": 684
+          },
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/subjects?select=id%2Cname&order=name.asc",
+            "duration_ms": 428
+          },
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/chapters?select=id%2Cname%2Csubject_id%2Cdisplay_order&order=display_order.asc",
+            "duration_ms": 435
+          },
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/profiles?select=id%2Cfull_name&role=eq.teacher&is_active=eq.true&order=full_name.asc",
+            "duration_ms": 444
+          },
+          {
+            "url": "https://xstssknlgdraulebdsfd.supabase.co/rest/v1/recorded_classes?select=*&order=updated_at.desc%2Cid.asc&offset=0&limit=30",
+            "duration_ms": 290
+          }
+        ]
+      },
+      {
+        "page": "student-mobile",
+        "navigation_to_content_ms": 1441
+      }
+    ]
+  },
+  "supplementary_browser": {
+    "checks": [
+      "Deleted recording handled",
+      "Course entry opens recorded library",
+      "Student Subject filtering works",
+      "Student thumbnails and layout 390",
+      "Student player ready 390",
+      "Student thumbnails and layout 1440",
+      "Student player ready 1440",
+      "Player network failure shows useful error and Retry",
+      "Final Admin layout 390",
+      "Final Admin layout 1440",
+      "Admin network error and Retry visible",
+      "Admin Retry recovers",
+      "YouTube unavailable-video event produces useful error",
+      "Unauthenticated Admin requires login",
+      "Unauthenticated Student requires login"
+    ],
+    "performance": [
+      {
+        "page": "admin",
+        "width": 390,
+        "content_ms": 2072
+      },
+      {
+        "page": "admin",
+        "width": 1440,
+        "content_ms": 1757
+      }
+    ]
+  },
+  "youtube": [
+    {
+      "id": "xNBduyugQSc",
+      "state": 1,
+      "time": 2.011639984741211,
+      "duration": 6725.721,
+      "src": "https://www.youtube-nocookie.com/embed/xNBduyugQSc?enablejsapi=1&playsinline=1&rel=0&origin=http%3A%2F%2Flocalhost%3A3012",
+      "verified_at": "2026-09-11T10:18:51.348Z"
+    },
+    {
+      "id": "pprnhTi86pA",
+      "state": 1,
+      "time": 2.01163513923645,
+      "duration": 5549.441,
+      "src": "https://www.youtube-nocookie.com/embed/pprnhTi86pA?enablejsapi=1&playsinline=1&rel=0&origin=http%3A%2F%2Flocalhost%3A3012",
+      "verified_at": "2026-09-11T10:18:57.142Z"
+    },
+    {
+      "id": "sgbJTyco26g",
+      "state": 1,
+      "time": 2.0243149866485597,
+      "duration": 4867.021,
+      "src": "https://www.youtube-nocookie.com/embed/sgbJTyco26g?enablejsapi=1&playsinline=1&rel=0&origin=http%3A%2F%2Flocalhost%3A3012",
+      "verified_at": "2026-09-11T10:19:02.562Z"
+    },
+    {
+      "id": "-oF7W3AvhmU",
+      "state": 1,
+      "time": 2.0136860457763675,
+      "duration": 7152.321,
+      "src": "https://www.youtube-nocookie.com/embed/-oF7W3AvhmU?enablejsapi=1&playsinline=1&rel=0&origin=http%3A%2F%2Flocalhost%3A3012",
+      "verified_at": "2026-09-11T10:19:08.419Z"
+    }
+  ],
+  "content": [
+    {
+      "id": "573ecbcc-05d7-4212-8b50-fbdb7463af37",
+      "title": "Carbohydrates II",
+      "status": "published",
+      "provider_video_id": "xNBduyugQSc",
+      "subtopic": "CARBOHYDRATES",
+      "duration_seconds": 6726
+    },
+    {
+      "id": "0b44c5e0-916c-49f0-b55a-67c5c7b0e56e",
+      "title": "Hemostasis",
+      "status": "draft",
+      "provider_video_id": null,
+      "subtopic": null,
+      "duration_seconds": null
+    },
+    {
+      "id": "50781c7f-9138-4815-93a9-bc449e046b60",
+      "title": "Donor selection",
+      "status": "published",
+      "provider_video_id": "pprnhTi86pA",
+      "subtopic": null,
+      "duration_seconds": 5549
+    },
+    {
+      "id": "506ba3ef-3272-4712-8e9b-9375701d101f",
+      "title": "Influenza Parainfluenza Mumps RSV",
+      "status": "published",
+      "provider_video_id": "sgbJTyco26g",
+      "subtopic": null,
+      "duration_seconds": 4867
+    },
+    {
+      "id": "b97076c6-f4b7-47ab-b264-eadf234c7487",
+      "title": "Trematodes I",
+      "status": "published",
+      "provider_video_id": "-oF7W3AvhmU",
+      "subtopic": null,
+      "duration_seconds": 7152
+    }
+  ],
+  "migration_replay": {
+    "applied": [
+      "20260905044506_academic_platform_foundation.sql",
+      "20260905052130_harden_academic_rls.sql",
+      "20260905052748_auth_profiles_and_recording_state.sql",
+      "20260905053528_teacher_writes_and_storage_access.sql",
+      "20260905054242_checkpoint_questions_and_live_teacher.sql",
+      "20260905060734_classroom_state_and_permissions.sql",
+      "20260905062434_fix_attempt_scoring.sql",
+      "20260905062543_fix_live_presence_functions.sql",
+      "20260905063243_sync_profile_role_from_app_metadata.sql",
+      "20260905063800_protect_question_answer_keys.sql",
+      "20260905064804_launch_readiness.sql",
+      "20260905072244_deterministic_attempts.sql",
+      "20260910024559_core_content_pipeline.sql",
+      "20260910030225_core_pipeline_guards.sql",
+      "20260910030835_core_pipeline_acceptance.sql",
+      "20260910032537_core_order_permissions.sql",
+      "20260910042640_core_content_fidelity.sql",
+      "20260910060858_core_native_tables.sql",
+      "20260910061431_core_table_grid_offsets.sql",
+      "20260910071239_core_media_compatibility.sql",
+      "20260910073352_core_original_media_capacity.sql",
+      "20260910073804_core_meaningful_stem_guard.sql",
+      "20260911020155_explicit_core_helper_function_grants.sql",
+      "20260911064746_test_subject_scopes.sql",
+      "20260911065842_test_scope_validation.sql",
+      "20260911095204_recorded_classes.sql"
+    ],
+    "error": null
+  },
+  "advisors": {
+    "related": [],
+    "total": 21
+  },
+  "tests": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "vitest": 137,
+    "node": 4,
+    "build": "PASS"
+  }
+}
