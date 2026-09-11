@@ -882,7 +882,7 @@ export function TestForm({
           required
           items={[
             { id: "manual", name: "Manual selection" },
-            { id: "generated", name: "Random active bank selection" },
+            { id: "generated", name: "Random Active Bank" },
           ]}
           onChange={(v) => setT({ ...t, selection_mode: v })}
         />

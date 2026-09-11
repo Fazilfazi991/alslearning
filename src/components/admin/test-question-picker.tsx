@@ -6,6 +6,12 @@ import { mediaPositions } from "@/lib/rich-text";
 import { RichContent } from "@/components/learning/rich-text";
 import { QuestionGallery } from "@/components/learning/question-gallery";
 
+function sourceIdentity(q: Question) {
+  const parts = q.source_label.split("|").map((part) => part.trim());
+  return [parts.find((part) => /^Q\d+$/.test(part)), parts[0] || q.source_reference]
+    .filter(Boolean).join(" · ");
+}
+
 function QuestionPreview({ question: q }: { question: Question }) {
   return (
     <div className="min-w-0 space-y-3 border-t border-line p-3 text-sm">
@@ -48,7 +54,7 @@ export function TestQuestionPicker({ questions, selected, onChange }: {
                   onChange={(e) => onChange(e.target.checked ? [...selected, q.id] : selected.filter((id) => id !== q.id))} />
                 <span className="min-w-0">
                   <span className="line-clamp-2 break-words">{questionLabel(q)}</span>
-                  <span className="block truncate text-xs text-muted">{q.source_label || q.source_reference} · {q.marks} marks</span>
+                  <span className="block truncate text-xs text-muted">{sourceIdentity(q)} · {q.marks} marks</span>
                 </span>
               </label>
               <button type="button" className="min-h-11 shrink-0 px-2 text-sm font-semibold text-brand"
