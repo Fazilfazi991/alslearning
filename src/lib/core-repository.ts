@@ -211,8 +211,8 @@ export function canManage(
       ))
   );
 }
-export async function loadCoreData(mode?: "questions" | "tests" | "content"): Promise<CoreData> {
-  if (mode === "tests") return (await import("./test-repository")).loadTestWorkspace();
+export async function loadCoreData(mode?: "questions" | "tests" | "content", actor?: {id:string;role:string}): Promise<CoreData> {
+  if (mode === "tests") return (await import("./test-repository")).loadTestWorkspace(actor);
   const db = createClient();
   const [
     exams,

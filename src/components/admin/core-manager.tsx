@@ -4,6 +4,7 @@ import {
   hasTestScope,
   testSelectionError,
 } from "@/lib/test-question-scope";
+import { useAuthorIdentity } from "./author-identity";
 import { LoadedTestForm } from "./loaded-test-form";
 import { TestScopeFields } from "./test-scope-fields";
 import { inferTestScope, retainAllowedSelections } from "@/lib/test-question-scope";
@@ -50,6 +51,7 @@ export function CoreManager({
 }: {
   mode: "questions" | "tests" | "content";
 }) {
+  const actor = useAuthorIdentity();
   const [data, setData] = useState<CoreData | null>(null),
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
@@ -63,11 +65,11 @@ export function CoreManager({
     [reviewOnly, setReviewOnly] = useState(false),
     [page, setPage] = useState(0);
   const refresh = useCallback(async () => {
-    setData(await loadCoreData(mode));
-  }, [mode]);
+    setData(await loadCoreData(mode, actor));
+  }, [mode, actor]);
   useEffect(() => {
     let live = true;
-    void loadCoreData(mode)
+    void loadCoreData(mode, actor)
       .then((v) => {
         if (live) setData(v);
       })
@@ -77,7 +79,7 @@ export function CoreManager({
     return () => {
       live = false;
     };
-  }, [mode]);
+  }, [mode, actor]);
   async function run(fn: () => Promise<void>, close = false) {
     setBusy(true);
     setError("");
@@ -864,7 +866,7 @@ export function TestForm({
         ) : <>
         <div className="grid gap-1 text-sm sm:grid-cols-2" aria-live="polite">
           <p>Subject: {t.selection_rules.scopes ? "Multiple subjects" : subject?.name}</p>
-          <p>Section: {section?.name ?? `All ${subject?.name} sections`}</p>
+          <p>Section: {t.selection_rules.scopes ? "Configured per subject" : section?.name ?? `All ${subject?.name} sections`}</p>
           <p>Available Active Questions: {eligible.length}</p>
           <p>{t.selection_mode === "manual" ? `Selected: ${t.question_ids.length}` : `Requested: ${t.question_count}`}</p>
         </div>
@@ -876,7 +878,10 @@ export function TestForm({
             { id: "manual", name: "Manual selection" },
             { id: "generated", name: "Random Active Bank" },
           ]}
-          onChange={(v) => setT({ ...t, selection_mode: v })}
+          onChange={(v) => {
+            const scopes = t.selection_rules.scopes?.map(scope => ({...scope, count: scope.count ?? 1}));
+            setT({...t, selection_mode: v, selection_rules: {...t.selection_rules, ...(scopes ? {scopes} : {})}, question_count: scopes ? scopes.reduce((n, scope) => n + scope.count, 0) : t.question_count});
+          }}
         />
         {t.selection_mode === "generated" ? (
           <>
