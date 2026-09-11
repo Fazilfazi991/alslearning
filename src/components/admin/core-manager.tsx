@@ -4,6 +4,9 @@ import {
   hasTestScope,
   testSelectionError,
 } from "@/lib/test-question-scope";
+import { LoadedTestForm } from "./loaded-test-form";
+import { TestScopeFields } from "./test-scope-fields";
+import { inferTestScope, retainAllowedSelections } from "@/lib/test-question-scope";
 import { TestQuestionPicker } from "./test-question-picker";
 import { localDateTime } from "@/lib/core-time";
 import { useCallback, useEffect, useState } from "react";
@@ -60,11 +63,11 @@ export function CoreManager({
     [reviewOnly, setReviewOnly] = useState(false),
     [page, setPage] = useState(0);
   const refresh = useCallback(async () => {
-    setData(await loadCoreData());
-  }, []);
+    setData(await loadCoreData(mode));
+  }, [mode]);
   useEffect(() => {
     let live = true;
-    void loadCoreData()
+    void loadCoreData(mode)
       .then((v) => {
         if (live) setData(v);
       })
@@ -74,7 +77,7 @@ export function CoreManager({
     return () => {
       live = false;
     };
-  }, []);
+  }, [mode]);
   async function run(fn: () => Promise<void>, close = false) {
     setBusy(true);
     setError("");
@@ -387,7 +390,7 @@ export function CoreManager({
               save={(v) => run(() => saveCoreQuestion(v), true)}
             />
           ) : mode === "tests" ? (
-            <TestForm
+            <LoadedTestForm
               value={editing as Test}
               data={formData}
               busy={busy}
@@ -784,8 +787,9 @@ export function TestForm({
   busy: boolean;
   save: (q: Test) => Promise<void>;
 }) {
-  const [t, setT] = useState(value),
+  const [t, setT] = useState(() => inferTestScope(data, value)),
     [search, setSearch] = useState("");
+  const [visibleSubject, setVisibleSubject] = useState(""), [visibleSection, setVisibleSection] = useState("");
   const scoped = hasTestScope(data, t);
   const eligible = eligibleTestQuestions(data, t);
   const selectionError = testSelectionError(data, t);
@@ -849,29 +853,17 @@ export function TestForm({
         </div>
       </Section>
       <Section title="Academic scope" open>
-        <TaxonomyFields
-          value={t}
-          data={data}
-          programRequired
-          sectionMode
-          onChange={(v) => {
-            setSearch("");
-            setT({
-              ...t,
-              ...v,
-              question_ids: [],
-              question_count: 1,
-              batch_ids: t.program_id === v.program_id ? t.batch_ids : [],
-            });
-          }}
-        />
+        <TestScopeFields value={t} data={data} onChange={next => {
+          setVisibleSubject(""); setVisibleSection("");
+          setT(retainAllowedSelections(data, next));
+        }}/>
       </Section>
       <Section title="Question selection" open>
         {!scoped ? (
           <p>Choose a subject above before selecting questions.</p>
         ) : <>
         <div className="grid gap-1 text-sm sm:grid-cols-2" aria-live="polite">
-          <p>Subject: {subject?.name}</p>
+          <p>Subject: {t.selection_rules.scopes ? "Multiple subjects" : subject?.name}</p>
           <p>Section: {section?.name ?? `All ${subject?.name} sections`}</p>
           <p>Available Active Questions: {eligible.length}</p>
           <p>{t.selection_mode === "manual" ? `Selected: ${t.question_ids.length}` : `Requested: ${t.question_count}`}</p>
@@ -893,7 +885,7 @@ export function TestForm({
               value={t.selection_rules?.difficulty || ""}
               items={["easy", "medium", "hard"].map((id) => ({ id, name: id }))}
               onChange={(v) =>
-                setT({ ...t, selection_rules: { difficulty: v } })
+                setT({ ...t, selection_rules: { ...t.selection_rules, difficulty: v } })
               }
             />
             <NumberField
@@ -909,6 +901,10 @@ export function TestForm({
           </>
         ) : (
           <>
+            {t.selection_rules.scopes && <div className="grid gap-3 sm:grid-cols-2">
+              <Select label="Visible subject" value={visibleSubject} items={data.subjects.filter(s => t.selection_rules.scopes?.some(scope => scope.subject_id === s.id))} onChange={v => {setVisibleSubject(v);setVisibleSection("");}}/>
+              <Select label="Visible section" value={visibleSection} items={data.chapters.filter(c => (!visibleSubject || c.subject_id === visibleSubject) && eligible.some(q => q.chapter_id === c.id))} onChange={setVisibleSection}/>
+            </div>}
             <Field label="Search active questions">
               <input
                 className={input}
@@ -917,8 +913,8 @@ export function TestForm({
               />
             </Field>
             <TestQuestionPicker
-              key={[t.subject_id, t.chapter_id, t.topic_id, search].join(":")}
-              questions={eligible.filter((q) => [questionLabel(q), q.source_label, q.source_reference].join(" ").toLowerCase().includes(search.toLowerCase()))}
+              key={[t.subject_id, t.chapter_id, t.topic_id, visibleSubject, visibleSection, search].join(":")}
+              questions={eligible.filter((q) => (!visibleSubject || q.subject_id === visibleSubject) && (!visibleSection || q.chapter_id === visibleSection) && [questionLabel(q), q.source_label, q.source_reference].join(" ").toLowerCase().includes(search.toLowerCase()))}
               selected={t.question_ids}
               onChange={(question_ids) => setT({ ...t, question_ids })}
             />
@@ -1006,7 +1002,7 @@ export function TestForm({
         value={t.status}
         onChange={(v) => setT({ ...t, status: v })}
       />
-      {scoped && selectionError && (
+      {selectionError && (
         <p role="status" className="text-sm text-muted">{selectionError}</p>
       )}
       <button disabled={busy || !!selectionError} className={`${button} w-full`}>

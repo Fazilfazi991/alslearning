@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { loadQuestionPreview } from "@/lib/test-repository";
+import { useEffect, useState } from "react";
 import type { Question } from "@/lib/core-repository";
 import { questionLabel } from "@/lib/question-media";
 import { mediaPositions } from "@/lib/rich-text";
@@ -12,7 +13,11 @@ function sourceIdentity(q: Question) {
     .filter(Boolean).join(" · ");
 }
 
-function QuestionPreview({ question: q }: { question: Question }) {
+function QuestionPreview({ question }: { question: Question }) {
+ const [q,setQ]=useState(question.options.length ? question : null);
+ const [error,setError]=useState("");
+ useEffect(()=>{if(question.options.length)return;let live=true;loadQuestionPreview(question.id).then(value=>{if(live)setQ(value);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[question]);
+ if(!q)return <p role="status" className="p-3 text-sm">{error || "Loading question preview…"}</p>;
   return (
     <div className="min-w-0 space-y-3 border-t border-line p-3 text-sm">
       <RichContent value={q.prompt_rich} fallback={q.prompt} media={q.media} />
