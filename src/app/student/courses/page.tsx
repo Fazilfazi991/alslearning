@@ -1,2 +1,12 @@
-import Link from"next/link";import{BookOpen}from"lucide-react";import{PageHeader}from"@/components/student/page-header";import{getStudentPortalData}from"@/lib/student-data";
-export default async function Page(){const data=await getStudentPortalData();const active=(data?.enrollments||[]).filter(e=>e.status==="active"&&(!e.access_expires_at||new Date(e.access_expires_at)>new Date())&&new Date(e.access_starts_at)<=new Date());return <div className="mx-auto max-w-[1220px]"><PageHeader title="My Programs" description="Your active entrance-exam coaching enrollments."/><Link href="/student/recorded-classes" className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-bold text-brand">Recorded Classes →</Link>{active.length?<div className="grid gap-5 md:grid-cols-2">{active.map(e=><Link key={e.id} href={`/student/courses/${e.programs.slug}`} className="card p-6"><BookOpen className="text-brand"/><h2 className="mt-4 text-xl font-bold">{e.programs.name}</h2><p className="mt-2 text-sm text-muted">{e.programs.description||"Syllabus and learning content will appear here as it is published."}</p><p className="mt-4 text-xs font-bold text-brand">{e.batches?.name||"Program access"}</p></Link>)}</div>:<section className="card grid min-h-64 place-items-center p-8 text-center"><div><BookOpen className="mx-auto text-muted"/><h2 className="mt-4 text-lg font-bold">No active programs</h2><p className="mt-2 text-sm text-muted">Your enrolled programs will appear here once access is active.</p></div></section>}</div>}
+import Link from "next/link";
+import { CourseLearningHub } from "@/components/student/course-learning-hub";
+import { courseAccess, getStudentCourse } from "@/lib/student-courses-server";
+export default async function Page({ searchParams }: { searchParams: Promise<{ subject?: string }> }) {
+  const [{ enrollments }, params] = await Promise.all([courseAccess(), searchParams]);
+  const programs = [...new Map(enrollments.filter(e => e.programs).map(e => [e.programs!.id, e.programs!])).values()];
+  if (programs.length === 1) {
+    const data = await getStudentCourse(programs[0].slug, params.subject);
+    if (data) return <CourseLearningHub data={data} basePath="/student/courses"/>;
+  }
+  return <div className="mx-auto max-w-5xl"><h2 className="text-xl font-bold">My Courses</h2><p className="mt-2 text-sm text-muted">Choose an enrolled program to explore its subjects.</p><div className="mt-4 grid gap-3 md:grid-cols-2">{programs.map(p => <Link key={p.id} href={`/student/courses/${p.slug}`} className="rounded-xl border border-line bg-white p-4 font-semibold">{p.name}</Link>)}</div>{!programs.length && <p className="mt-5 rounded-xl border border-line bg-white p-5 text-sm text-muted">No active programs. Your courses will appear when enrollment access is active.</p>}</div>;
+}
