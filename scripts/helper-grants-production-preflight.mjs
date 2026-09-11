@@ -27,6 +27,7 @@ assert.ok(source.includes("revoke all on function public.rls_auto_enable()"));
 const blocks = [];
 if (
   !actual.required_platform_function &&
+  !source.includes("if to_regprocedure('public.rls_auto_enable()') is not null then") &&
   !history.some((m) => m.version === dependent.split("_")[0])
 ) {
   blocks.push(

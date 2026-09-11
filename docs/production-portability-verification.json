@@ -1,0 +1,2270 @@
+{
+  "project": "dvmahmkapgtjfqmoottt",
+  "history": [
+    {
+      "version": "20260905044506",
+      "name": "academic_platform_foundation"
+    },
+    {
+      "version": "20260905052130",
+      "name": "harden_academic_rls"
+    },
+    {
+      "version": "20260905052748",
+      "name": "auth_profiles_and_recording_state"
+    },
+    {
+      "version": "20260905053528",
+      "name": "teacher_writes_and_storage_access"
+    },
+    {
+      "version": "20260905054242",
+      "name": "checkpoint_questions_and_live_teacher"
+    },
+    {
+      "version": "20260905060734",
+      "name": "classroom_state_and_permissions"
+    },
+    {
+      "version": "20260905062434",
+      "name": "fix_attempt_scoring"
+    },
+    {
+      "version": "20260905062543",
+      "name": "fix_live_presence_functions"
+    },
+    {
+      "version": "20260905063243",
+      "name": "sync_profile_role_from_app_metadata"
+    },
+    {
+      "version": "20260905063800",
+      "name": "protect_question_answer_keys"
+    },
+    {
+      "version": "20260905064804",
+      "name": "launch_readiness"
+    },
+    {
+      "version": "20260905072244",
+      "name": "deterministic_attempts"
+    },
+    {
+      "version": "20260910024559",
+      "name": "core_content_pipeline"
+    },
+    {
+      "version": "20260910030225",
+      "name": "core_pipeline_guards"
+    },
+    {
+      "version": "20260910030835",
+      "name": "core_pipeline_acceptance"
+    },
+    {
+      "version": "20260910032537",
+      "name": "core_order_permissions"
+    },
+    {
+      "version": "20260910042640",
+      "name": "core_content_fidelity"
+    },
+    {
+      "version": "20260910060858",
+      "name": "core_native_tables"
+    },
+    {
+      "version": "20260910061431",
+      "name": "core_table_grid_offsets"
+    },
+    {
+      "version": "20260910071239",
+      "name": "core_media_compatibility"
+    },
+    {
+      "version": "20260910073352",
+      "name": "core_original_media_capacity"
+    },
+    {
+      "version": "20260910073804",
+      "name": "core_meaningful_stem_guard"
+    },
+    {
+      "version": "20260911020155",
+      "name": "explicit_core_helper_function_grants"
+    }
+  ],
+  "checks": [
+    "public.is_admin(): anon=false",
+    "public.is_admin(): authenticated=true",
+    "public.is_admin(): postgres=true",
+    "public.is_admin(): service_role=false",
+    "public.is_admin(): postgres owner and empty search_path",
+    "public.is_admin(): security mode preserved",
+    "public.is_admin(): STABLE",
+    "public.is_teacher(): anon=false",
+    "public.is_teacher(): authenticated=true",
+    "public.is_teacher(): postgres=true",
+    "public.is_teacher(): service_role=false",
+    "public.is_teacher(): postgres owner and empty search_path",
+    "public.is_teacher(): security mode preserved",
+    "public.is_teacher(): STABLE",
+    "public.has_program_access(uuid): anon=false",
+    "public.has_program_access(uuid): authenticated=true",
+    "public.has_program_access(uuid): postgres=true",
+    "public.has_program_access(uuid): service_role=false",
+    "public.has_program_access(uuid): postgres owner and empty search_path",
+    "public.has_program_access(uuid): security mode preserved",
+    "public.has_program_access(uuid): STABLE",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): anon=false",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): authenticated=true",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): postgres=true",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): service_role=false",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): postgres owner and empty search_path",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): security mode preserved",
+    "public.teacher_has_assignment(uuid, uuid, uuid, text): STABLE",
+    "public.can_join_live(uuid): anon=false",
+    "public.can_join_live(uuid): authenticated=true",
+    "public.can_join_live(uuid): postgres=true",
+    "public.can_join_live(uuid): service_role=false",
+    "public.can_join_live(uuid): postgres owner and empty search_path",
+    "public.can_join_live(uuid): security mode preserved",
+    "public.can_join_live(uuid): STABLE",
+    "private.active_role(): anon=false",
+    "private.active_role(): authenticated=true",
+    "private.active_role(): postgres=true",
+    "private.active_role(): service_role=false",
+    "private.active_role(): postgres owner and empty search_path",
+    "private.active_role(): security mode preserved",
+    "private.active_role(): STABLE",
+    "private.enrolled(uuid, uuid): anon=false",
+    "private.enrolled(uuid, uuid): authenticated=true",
+    "private.enrolled(uuid, uuid): postgres=true",
+    "private.enrolled(uuid, uuid): service_role=false",
+    "private.enrolled(uuid, uuid): postgres owner and empty search_path",
+    "private.enrolled(uuid, uuid): security mode preserved",
+    "private.enrolled(uuid, uuid): STABLE",
+    "private.content_access(uuid, boolean): anon=false",
+    "private.content_access(uuid, boolean): authenticated=true",
+    "private.content_access(uuid, boolean): postgres=true",
+    "private.content_access(uuid, boolean): service_role=false",
+    "private.content_access(uuid, boolean): postgres owner and empty search_path",
+    "private.content_access(uuid, boolean): security mode preserved",
+    "private.content_access(uuid, boolean): STABLE",
+    "private.test_access(uuid, boolean): anon=false",
+    "private.test_access(uuid, boolean): authenticated=true",
+    "private.test_access(uuid, boolean): postgres=true",
+    "private.test_access(uuid, boolean): service_role=false",
+    "private.test_access(uuid, boolean): postgres owner and empty search_path",
+    "private.test_access(uuid, boolean): security mode preserved",
+    "private.test_access(uuid, boolean): STABLE",
+    "private.teacher_batches(uuid[]): anon=false",
+    "private.teacher_batches(uuid[]): authenticated=true",
+    "private.teacher_batches(uuid[]): postgres=true",
+    "private.teacher_batches(uuid[]): service_role=false",
+    "private.teacher_batches(uuid[]): postgres owner and empty search_path",
+    "private.teacher_batches(uuid[]): security mode preserved",
+    "private.teacher_batches(uuid[]): STABLE",
+    "private.image_access(text): anon=false",
+    "private.image_access(text): authenticated=true",
+    "private.image_access(text): postgres=true",
+    "private.image_access(text): service_role=false",
+    "private.image_access(text): postgres owner and empty search_path",
+    "private.image_access(text): security mode preserved",
+    "private.image_access(text): STABLE",
+    "private.attempt_access(uuid): anon=false",
+    "private.attempt_access(uuid): authenticated=false",
+    "private.attempt_access(uuid): postgres=true",
+    "private.attempt_access(uuid): service_role=false",
+    "private.attempt_access(uuid): postgres owner and empty search_path",
+    "private.attempt_access(uuid): security mode preserved",
+    "private.handle_new_user(): anon=false",
+    "private.handle_new_user(): authenticated=false",
+    "private.handle_new_user(): postgres=true",
+    "private.handle_new_user(): service_role=false",
+    "private.handle_new_user(): postgres owner and empty search_path",
+    "private.handle_new_user(): security mode preserved",
+    "private.rich_document_plain(jsonb, integer): anon=false",
+    "private.rich_document_plain(jsonb, integer): authenticated=false",
+    "private.rich_document_plain(jsonb, integer): postgres=true",
+    "private.rich_document_plain(jsonb, integer): service_role=false",
+    "private.rich_document_plain(jsonb, integer): postgres owner and empty search_path",
+    "private.rich_document_plain(jsonb, integer): security mode preserved",
+    "private.rich_media_positions(jsonb): anon=false",
+    "private.rich_media_positions(jsonb): authenticated=false",
+    "private.rich_media_positions(jsonb): postgres=true",
+    "private.rich_media_positions(jsonb): service_role=false",
+    "private.rich_media_positions(jsonb): postgres owner and empty search_path",
+    "private.rich_media_positions(jsonb): security mode preserved",
+    "private.rich_plain(jsonb): anon=false",
+    "private.rich_plain(jsonb): authenticated=false",
+    "private.rich_plain(jsonb): postgres=true",
+    "private.rich_plain(jsonb): service_role=false",
+    "private.rich_plain(jsonb): postgres owner and empty search_path",
+    "private.rich_plain(jsonb): security mode preserved",
+    "private.snapshot_questions(uuid[], numeric): anon=false",
+    "private.snapshot_questions(uuid[], numeric): authenticated=false",
+    "private.snapshot_questions(uuid[], numeric): postgres=true",
+    "private.snapshot_questions(uuid[], numeric): service_role=false",
+    "private.snapshot_questions(uuid[], numeric): postgres owner and empty search_path",
+    "private.snapshot_questions(uuid[], numeric): security mode preserved",
+    "private.sync_profile_role(): anon=false",
+    "private.sync_profile_role(): authenticated=false",
+    "private.sync_profile_role(): postgres=true",
+    "private.sync_profile_role(): service_role=false",
+    "private.sync_profile_role(): postgres owner and empty search_path",
+    "private.sync_profile_role(): security mode preserved",
+    "private.validate_meaningful_stem(): anon=false",
+    "private.validate_meaningful_stem(): authenticated=false",
+    "private.validate_meaningful_stem(): postgres=true",
+    "private.validate_meaningful_stem(): service_role=false",
+    "private.validate_meaningful_stem(): postgres owner and empty search_path",
+    "private.validate_meaningful_stem(): security mode preserved",
+    "private.validate_media_derivative(): anon=false",
+    "private.validate_media_derivative(): authenticated=false",
+    "private.validate_media_derivative(): postgres=true",
+    "private.validate_media_derivative(): service_role=false",
+    "private.validate_media_derivative(): postgres owner and empty search_path",
+    "private.validate_media_derivative(): security mode preserved",
+    "private.validate_rich_media(): anon=false",
+    "private.validate_rich_media(): authenticated=false",
+    "private.validate_rich_media(): postgres=true",
+    "private.validate_rich_media(): service_role=false",
+    "private.validate_rich_media(): postgres owner and empty search_path",
+    "private.validate_rich_media(): security mode preserved",
+    "private.validate_taxonomy(uuid, uuid, uuid, uuid, uuid): anon=false",
+    "private.validate_taxonomy(uuid, uuid, uuid, uuid, uuid): authenticated=false",
+    "private.validate_taxonomy(uuid, uuid, uuid, uuid, uuid): postgres=true",
+    "private.validate_taxonomy(uuid, uuid, uuid, uuid, uuid): service_role=false",
+    "private.validate_taxonomy(uuid, uuid, uuid, uuid, uuid): postgres owner and empty search_path",
+    "private.validate_taxonomy(uuid, uuid, uuid, uuid, uuid): security mode preserved",
+    "public.core_attempt_history(uuid): anon=false",
+    "public.core_attempt_history(uuid): authenticated=true",
+    "public.core_attempt_history(uuid): postgres=true",
+    "public.core_attempt_history(uuid): postgres owner and empty search_path",
+    "public.core_attempt_history(uuid): security mode preserved",
+    "public.core_attempt_payload(uuid): anon=false",
+    "public.core_attempt_payload(uuid): authenticated=true",
+    "public.core_attempt_payload(uuid): postgres=true",
+    "public.core_attempt_payload(uuid): postgres owner and empty search_path",
+    "public.core_attempt_payload(uuid): security mode preserved",
+    "public.core_move_content(uuid, integer): anon=false",
+    "public.core_move_content(uuid, integer): authenticated=true",
+    "public.core_move_content(uuid, integer): postgres=true",
+    "public.core_move_content(uuid, integer): postgres owner and empty search_path",
+    "public.core_move_content(uuid, integer): security mode preserved",
+    "public.core_program_subjects(uuid, uuid[]): anon=false",
+    "public.core_program_subjects(uuid, uuid[]): authenticated=true",
+    "public.core_program_subjects(uuid, uuid[]): postgres=true",
+    "public.core_program_subjects(uuid, uuid[]): postgres owner and empty search_path",
+    "public.core_program_subjects(uuid, uuid[]): security mode preserved",
+    "public.core_save_content(jsonb, uuid[]): anon=false",
+    "public.core_save_content(jsonb, uuid[]): authenticated=true",
+    "public.core_save_content(jsonb, uuid[]): postgres=true",
+    "public.core_save_content(jsonb, uuid[]): postgres owner and empty search_path",
+    "public.core_save_content(jsonb, uuid[]): security mode preserved",
+    "public.core_save_question(jsonb): anon=false",
+    "public.core_save_question(jsonb): authenticated=true",
+    "public.core_save_question(jsonb): postgres=true",
+    "public.core_save_question(jsonb): postgres owner and empty search_path",
+    "public.core_save_question(jsonb): security mode preserved",
+    "public.core_save_test(jsonb, uuid[], uuid[]): anon=false",
+    "public.core_save_test(jsonb, uuid[], uuid[]): authenticated=true",
+    "public.core_save_test(jsonb, uuid[], uuid[]): postgres=true",
+    "public.core_save_test(jsonb, uuid[], uuid[]): postgres owner and empty search_path",
+    "public.core_save_test(jsonb, uuid[], uuid[]): security mode preserved",
+    "public.core_test_bank(): anon=false",
+    "public.core_test_bank(): authenticated=true",
+    "public.core_test_bank(): postgres=true",
+    "public.core_test_bank(): postgres owner and empty search_path",
+    "public.core_test_bank(): security mode preserved",
+    "public.core_test_summary(text): anon=false",
+    "public.core_test_summary(text): authenticated=true",
+    "public.core_test_summary(text): postgres=true",
+    "public.core_test_summary(text): postgres owner and empty search_path",
+    "public.core_test_summary(text): security mode preserved",
+    "public.finalize_expired_test_attempts(uuid): anon=false",
+    "public.finalize_expired_test_attempts(uuid): authenticated=true",
+    "public.finalize_expired_test_attempts(uuid): postgres=true",
+    "public.finalize_expired_test_attempts(uuid): postgres owner and empty search_path",
+    "public.finalize_expired_test_attempts(uuid): security mode preserved",
+    "public.get_test_review(uuid): anon=false",
+    "public.get_test_review(uuid): authenticated=true",
+    "public.get_test_review(uuid): postgres=true",
+    "public.get_test_review(uuid): postgres owner and empty search_path",
+    "public.get_test_review(uuid): security mode preserved",
+    "public.save_attempt_answer(uuid, uuid, uuid[]): anon=false",
+    "public.save_attempt_answer(uuid, uuid, uuid[]): authenticated=true",
+    "public.save_attempt_answer(uuid, uuid, uuid[]): postgres=true",
+    "public.save_attempt_answer(uuid, uuid, uuid[]): postgres owner and empty search_path",
+    "public.save_attempt_answer(uuid, uuid, uuid[]): security mode preserved",
+    "public.set_live_presence(uuid, boolean): anon=false",
+    "public.set_live_presence(uuid, boolean): authenticated=true",
+    "public.set_live_presence(uuid, boolean): postgres=true",
+    "public.set_live_presence(uuid, boolean): postgres owner and empty search_path",
+    "public.set_live_presence(uuid, boolean): security mode preserved",
+    "public.set_raised_hand(uuid, boolean): anon=false",
+    "public.set_raised_hand(uuid, boolean): authenticated=true",
+    "public.set_raised_hand(uuid, boolean): postgres=true",
+    "public.set_raised_hand(uuid, boolean): postgres owner and empty search_path",
+    "public.set_raised_hand(uuid, boolean): security mode preserved",
+    "public.start_test_attempt(uuid): anon=false",
+    "public.start_test_attempt(uuid): authenticated=true",
+    "public.start_test_attempt(uuid): postgres=true",
+    "public.start_test_attempt(uuid): postgres owner and empty search_path",
+    "public.start_test_attempt(uuid): security mode preserved",
+    "public.submit_test_attempt(uuid): anon=false",
+    "public.submit_test_attempt(uuid): authenticated=true",
+    "public.submit_test_attempt(uuid): postgres=true",
+    "public.submit_test_attempt(uuid): postgres owner and empty search_path",
+    "public.submit_test_attempt(uuid): security mode preserved",
+    "public.submit_checkpoint_response(uuid, uuid[]): anon=false",
+    "public.submit_checkpoint_response(uuid, uuid[]): authenticated=false",
+    "public.submit_checkpoint_response(uuid, uuid[]): postgres=true",
+    "public.submit_checkpoint_response(uuid, uuid[]): postgres owner and empty search_path",
+    "public.submit_checkpoint_response(uuid, uuid[]): security mode preserved",
+    "RLS enabled on all canonical application tables",
+    "328 columns match clean replay",
+    "53 indexes match clean replay",
+    "155 constraints match clean replay",
+    "All application and storage policies match clean replay",
+    "Exact repository migration versions reconciled"
+  ],
+  "tables": [
+    {
+      "rls": true,
+      "name": "profiles",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "entrance_exams",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "enrollments",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "programs",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "subjects",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "program_subjects",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "chapters",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "topics",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "faculty_assignments",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "batches",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "batch_faculty",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "questions",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "video_progress",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "question_options",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "test_attempts",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "attempt_answers",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "tests",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "test_questions",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "test_batches",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "learning_content",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "content_batch_access",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "video_checkpoints",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "live_sessions",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "live_questions",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "live_question_responses",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "class_recordings",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "live_participants",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "live_messages",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "live_attachments",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "notifications",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "attempt_snapshots",
+      "schema": "private"
+    },
+    {
+      "rls": true,
+      "name": "question_answer_keys",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "checkpoint_responses",
+      "schema": "public"
+    },
+    {
+      "rls": true,
+      "name": "question_media",
+      "schema": "public"
+    }
+  ],
+  "functions": [
+    {
+      "anon": false,
+      "name": "active_role",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "text",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "attempt_access",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "content_access",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid, boolean",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "enrolled",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid, uuid",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "handle_new_user",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "trigger",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "image_access",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "text",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "rich_document_plain",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": false,
+      "returns": "text",
+      "postgres": true,
+      "arguments": "jsonb, integer",
+      "volatility": "i",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "rich_media_positions",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": false,
+      "returns": "integer[]",
+      "postgres": true,
+      "arguments": "jsonb",
+      "volatility": "i",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "rich_plain",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": false,
+      "returns": "text",
+      "postgres": true,
+      "arguments": "jsonb",
+      "volatility": "i",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "snapshot_questions",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "jsonb",
+      "postgres": true,
+      "arguments": "uuid[], numeric",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "sync_profile_role",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "trigger",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "teacher_batches",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid[]",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "test_access",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid, boolean",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "validate_meaningful_stem",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "trigger",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "validate_media_derivative",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "trigger",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "validate_rich_media",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "trigger",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "validate_taxonomy",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "private",
+      "definer": true,
+      "returns": "void",
+      "postgres": true,
+      "arguments": "uuid, uuid, uuid, uuid, uuid",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "can_join_live",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": false,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_attempt_history",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "jsonb",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_attempt_payload",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "jsonb",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_move_content",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "void",
+      "postgres": true,
+      "arguments": "uuid, integer",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_program_subjects",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "void",
+      "postgres": true,
+      "arguments": "uuid, uuid[]",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_save_content",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "uuid",
+      "postgres": true,
+      "arguments": "jsonb, uuid[]",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_save_question",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "uuid",
+      "postgres": true,
+      "arguments": "jsonb",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_save_test",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "uuid",
+      "postgres": true,
+      "arguments": "jsonb, uuid[], uuid[]",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_test_bank",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "jsonb",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "core_test_summary",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "jsonb",
+      "postgres": true,
+      "arguments": "text",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "finalize_expired_test_attempts",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "integer",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "get_test_review",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "jsonb",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "has_program_access",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "is_admin",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": false,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "is_teacher",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": false,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "save_attempt_answer",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "void",
+      "postgres": true,
+      "arguments": "uuid, uuid, uuid[]",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "set_live_presence",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "live_participants",
+      "postgres": true,
+      "arguments": "uuid, boolean",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "set_raised_hand",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "void",
+      "postgres": true,
+      "arguments": "uuid, boolean",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "start_test_attempt",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "test_attempts",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "submit_checkpoint_response",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid, uuid[]",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": false
+    },
+    {
+      "anon": false,
+      "name": "submit_test_attempt",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "numeric",
+      "postgres": true,
+      "arguments": "uuid",
+      "volatility": "v",
+      "service_role": false,
+      "authenticated": true
+    },
+    {
+      "anon": false,
+      "name": "teacher_has_assignment",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "definer": true,
+      "returns": "boolean",
+      "postgres": true,
+      "arguments": "uuid, uuid, uuid, text",
+      "volatility": "s",
+      "service_role": false,
+      "authenticated": true
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "attempt_answers",
+      "permissive": "PERMISSIVE",
+      "policyname": "answers_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "batch_faculty",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((private.active_role() = 'teacher'::text) AND (faculty_id = ( SELECT auth.uid() AS uid)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "batch_faculty",
+      "permissive": "PERMISSIVE",
+      "policyname": "batch_faculty_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "batches",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(private.enrolled(program_id, id) OR ((private.active_role() = 'teacher'::text) AND (EXISTS ( SELECT 1\n   FROM batch_faculty f\n  WHERE ((f.batch_id = batches.id) AND (f.faculty_id = ( SELECT auth.uid() AS uid)))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "batches",
+      "permissive": "PERMISSIVE",
+      "policyname": "batch_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chapters",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR ((EXISTS ( SELECT 1\n   FROM subjects s\n  WHERE (s.id = chapters.subject_id))) AND ((program_id IS NULL) OR has_program_access(program_id))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chapters",
+      "permissive": "PERMISSIVE",
+      "policyname": "chapter_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "class_recordings",
+      "permissive": "PERMISSIVE",
+      "policyname": "class_recordings_admin_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "class_recordings",
+      "permissive": "PERMISSIVE",
+      "policyname": "class_recordings_admin_insert",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "class_recordings",
+      "permissive": "PERMISSIVE",
+      "policyname": "class_recordings_admin_update",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = class_recordings.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))) OR ((status = 'ready'::recording_status) AND (EXISTS ( SELECT 1\n   FROM (live_sessions s\n     JOIN enrollments e ON ((e.batch_id = s.batch_id)))\n  WHERE ((s.id = class_recordings.session_id) AND (e.student_id = ( SELECT auth.uid() AS uid)) AND (e.status = 'active'::enrollment_status))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "class_recordings",
+      "permissive": "PERMISSIVE",
+      "policyname": "recordings_ready_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "private.content_access(content_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "content_batch_access",
+      "permissive": "PERMISSIVE",
+      "policyname": "content_batches_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "enrollments",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((private.active_role() = 'student'::text) AND (student_id = ( SELECT auth.uid() AS uid)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "enrollments",
+      "permissive": "PERMISSIVE",
+      "policyname": "enrollment_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "entrance_exams",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM programs p\n  WHERE (p.exam_id = entrance_exams.id))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "entrance_exams",
+      "permissive": "PERMISSIVE",
+      "policyname": "exam_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "faculty_assignments",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((private.active_role() = 'teacher'::text) AND (faculty_id = ( SELECT auth.uid() AS uid)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "faculty_assignments",
+      "permissive": "PERMISSIVE",
+      "policyname": "faculty_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "private.content_access(id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "learning_content",
+      "permissive": "PERMISSIVE",
+      "policyname": "content_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_attachments_member_insert",
+      "schemaname": "public",
+      "with_check": "((uploader_id = ( SELECT auth.uid() AS uid)) AND can_join_live(session_id))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "can_join_live(session_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_attachments_member_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "((uploader_id = ( SELECT auth.uid() AS uid)) OR is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_attachments.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_attachments_owner_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_messages",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_messages_member_insert",
+      "schemaname": "public",
+      "with_check": "((sender_id = ( SELECT auth.uid() AS uid)) AND can_join_live(session_id))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "can_join_live(session_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_messages",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_messages_member_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "((sender_id = ( SELECT auth.uid() AS uid)) OR is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_messages.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_messages",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_messages_owner_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_participants",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_participants_admin_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_participants",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_participants_admin_insert",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((user_id = ( SELECT auth.uid() AS uid)) OR is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_participants.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_participants",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_participants_scoped_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_participants.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_participants",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_participants_teacher_update",
+      "schemaname": "public",
+      "with_check": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_participants.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))"
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_question_responses",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_responses_own_insert",
+      "schemaname": "public",
+      "with_check": "(student_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((student_id = ( SELECT auth.uid() AS uid)) OR is_admin() OR (EXISTS ( SELECT 1\n   FROM (live_questions lq\n     JOIN live_sessions s ON ((s.id = lq.session_id)))\n  WHERE ((lq.id = live_question_responses.live_question_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_question_responses",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_responses_own_select",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(student_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_question_responses",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_responses_own_update",
+      "schemaname": "public",
+      "with_check": "(student_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_questions.session_id) AND ((s.faculty_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1\n           FROM enrollments e\n          WHERE ((e.batch_id = s.batch_id) AND (e.student_id = ( SELECT auth.uid() AS uid)) AND (e.status = 'active'::enrollment_status)))))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_questions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_questions_scoped_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_questions.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_questions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_questions_teacher_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_questions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_questions_teacher_insert",
+      "schemaname": "public",
+      "with_check": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_questions.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_questions.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_questions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_questions_teacher_update",
+      "schemaname": "public",
+      "with_check": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM live_sessions s\n  WHERE ((s.id = live_questions.session_id) AND (s.faculty_id = ( SELECT auth.uid() AS uid))))))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_sessions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_sessions_authorized_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_sessions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_sessions_authorized_insert",
+      "schemaname": "public",
+      "with_check": "(is_admin() OR ((faculty_id = ( SELECT auth.uid() AS uid)) AND teacher_has_assignment(NULL::uuid, program_id, subject_id, NULL::text)))"
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_sessions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_sessions_authorized_update",
+      "schemaname": "public",
+      "with_check": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1\n   FROM enrollments e\n  WHERE ((e.batch_id = live_sessions.batch_id) AND (e.student_id = ( SELECT auth.uid() AS uid)) AND (e.status = 'active'::enrollment_status)))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "live_sessions",
+      "permissive": "PERMISSIVE",
+      "policyname": "live_sessions_scoped_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "notifications",
+      "permissive": "PERMISSIVE",
+      "policyname": "notifications_admin_delete",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((recipient_id = ( SELECT auth.uid() AS uid)) OR is_admin())",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "notifications",
+      "permissive": "PERMISSIVE",
+      "policyname": "notifications_own_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(recipient_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "notifications",
+      "permissive": "PERMISSIVE",
+      "policyname": "notifications_own_update",
+      "schemaname": "public",
+      "with_check": "(recipient_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "profiles",
+      "permissive": "PERMISSIVE",
+      "policyname": "profiles_admin",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR ((private.active_role() IS NOT NULL) AND (id = ( SELECT auth.uid() AS uid))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "profiles",
+      "permissive": "PERMISSIVE",
+      "policyname": "profiles_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "program_subjects",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "has_program_access(program_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "program_subjects",
+      "permissive": "PERMISSIVE",
+      "policyname": "program_subject_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "programs",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "has_program_access(id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "programs",
+      "permissive": "PERMISSIVE",
+      "policyname": "program_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM questions q\n  WHERE (q.id = question_answer_keys.question_id)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "question_answer_keys",
+      "permissive": "PERMISSIVE",
+      "policyname": "keys_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM questions q\n  WHERE (q.id = question_media.question_id)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "question_media",
+      "permissive": "PERMISSIVE",
+      "policyname": "question_media_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM questions q\n  WHERE (q.id = question_options.question_id)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "question_options",
+      "permissive": "PERMISSIVE",
+      "policyname": "options_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "teacher_has_assignment(exam_id, program_id, subject_id, 'questions'::text)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "questions",
+      "permissive": "PERMISSIVE",
+      "policyname": "question_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "subjects",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR ((COALESCE(private.active_role(), ''::text) = 'student'::text) AND (EXISTS ( SELECT 1\n   FROM program_subjects ps\n  WHERE (ps.subject_id = subjects.id)))) OR ((COALESCE(private.active_role(), ''::text) = 'teacher'::text) AND (EXISTS ( SELECT 1\n   FROM faculty_assignments f\n  WHERE ((f.faculty_id = auth.uid()) AND ((f.subject_id IS NULL) OR (f.subject_id = subjects.id)))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "subjects",
+      "permissive": "PERMISSIVE",
+      "policyname": "subject_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "test_attempts",
+      "permissive": "PERMISSIVE",
+      "policyname": "attempts_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "private.test_access(test_id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "test_batches",
+      "permissive": "PERMISSIVE",
+      "policyname": "test_batches_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "private.test_access(test_id, true)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "test_questions",
+      "permissive": "PERMISSIVE",
+      "policyname": "test_questions_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "private.test_access(id)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "tests",
+      "permissive": "PERMISSIVE",
+      "policyname": "test_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "topics",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_manage",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR ((EXISTS ( SELECT 1\n   FROM subjects s\n  WHERE (s.id = topics.subject_id))) AND ((program_id IS NULL) OR has_program_access(program_id))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "topics",
+      "permissive": "PERMISSIVE",
+      "policyname": "topic_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "qual": "is_admin()",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "video_checkpoints",
+      "permissive": "PERMISSIVE",
+      "policyname": "checkpoint_admin",
+      "schemaname": "public",
+      "with_check": "is_admin()"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "private.content_access(video_id, true)",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "video_checkpoints",
+      "permissive": "PERMISSIVE",
+      "policyname": "checkpoint_staff_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(is_admin() OR ((private.active_role() = 'student'::text) AND (student_id = ( SELECT auth.uid() AS uid)) AND private.content_access(content_id)))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "video_progress",
+      "permissive": "PERMISSIVE",
+      "policyname": "progress_read",
+      "schemaname": "public",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "((private.active_role() = 'student'::text) AND (student_id = ( SELECT auth.uid() AS uid)) AND private.content_access(content_id))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "video_progress",
+      "permissive": "PERMISSIVE",
+      "policyname": "progress_update",
+      "schemaname": "public",
+      "with_check": "((private.active_role() = 'student'::text) AND (student_id = ( SELECT auth.uid() AS uid)) AND private.content_access(content_id))"
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "video_progress",
+      "permissive": "PERMISSIVE",
+      "policyname": "progress_write",
+      "schemaname": "public",
+      "with_check": "((private.active_role() = 'student'::text) AND (student_id = ( SELECT auth.uid() AS uid)) AND private.content_access(content_id))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "((bucket_id = ANY (ARRAY['learning-content'::text, 'class-recordings'::text])) AND is_admin())",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "objects",
+      "permissive": "PERMISSIVE",
+      "policyname": "learning_storage_admin_delete",
+      "schemaname": "storage",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "((bucket_id = ANY (ARRAY['learning-content'::text, 'class-recordings'::text])) AND is_admin())",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "objects",
+      "permissive": "PERMISSIVE",
+      "policyname": "learning_storage_admin_update",
+      "schemaname": "storage",
+      "with_check": "((bucket_id = ANY (ARRAY['learning-content'::text, 'class-recordings'::text])) AND is_admin())"
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "objects",
+      "permissive": "PERMISSIVE",
+      "policyname": "learning_storage_authorized_insert",
+      "schemaname": "storage",
+      "with_check": "((bucket_id = 'learning-content'::text) AND is_teacher() AND (split_part(name, '/'::text, 1) = (auth.uid())::text))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((bucket_id = ANY (ARRAY['learning-content'::text, 'class-recordings'::text])) AND (is_admin() OR (EXISTS ( SELECT 1\n   FROM learning_content c\n  WHERE ((c.storage_bucket = objects.bucket_id) AND (c.storage_path = objects.name) AND private.content_access(c.id))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "objects",
+      "permissive": "PERMISSIVE",
+      "policyname": "learning_storage_permitted_read",
+      "schemaname": "storage",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'question-media'::text) AND private.image_access(name))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "objects",
+      "permissive": "PERMISSIVE",
+      "policyname": "question_image_read",
+      "schemaname": "storage",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "objects",
+      "permissive": "PERMISSIVE",
+      "policyname": "question_image_upload",
+      "schemaname": "storage",
+      "with_check": "((bucket_id = 'question-media'::text) AND is_teacher() AND (split_part(name, '/'::text, 1) = (auth.uid())::text))"
+    }
+  ],
+  "schemaCounts": {
+    "columns": 328,
+    "indexes": 53,
+    "constraints": 155
+  },
+  "authorization": {
+    "target": "dvmahmkapgtjfqmoottt",
+    "checks": [
+      "Admin helper executes",
+      "Admin content policy",
+      "Teacher helper executes",
+      "Teacher assigned content policy",
+      "Teacher assigned test policy",
+      "Teacher wrong program denied",
+      "Teacher question permission denied",
+      "Teacher unassigned batch denied",
+      "Teacher unauthorized question RPC",
+      "Teacher unscoped test RPC",
+      "Student not admin",
+      "Student eligible content",
+      "Student eligible test",
+      "Student wrong program",
+      "Student wrong batch",
+      "Student question authoring denied",
+      "Student test authoring denied",
+      "Direct attempt inserts denied",
+      "Direct score mutation denied",
+      "Direct status mutation denied",
+      "Direct submitted_at mutation denied",
+      "Owner-only grading snapshot helper denied",
+      "future content denied",
+      "future test denied",
+      "expired content denied",
+      "expired test denied",
+      "suspended content denied",
+      "suspended test denied",
+      "Inactive student content denied",
+      "Inactive student test denied",
+      "Anon helper denied",
+      "Anon questions: no visible data (RLS or privilege denial)",
+      "Anon question_answer_keys: no visible data (RLS or privilege denial)",
+      "Anon test_attempts: no visible data (RLS or privilege denial)",
+      "Anon learning_content: no visible data (RLS or privilege denial)"
+    ],
+    "rolledBack": true,
+    "residualAccounts": 0
+  },
+  "counts": [
+    {
+      "counts": {
+        "media": 0,
+        "tests": 0,
+        "users": 0,
+        "buckets": [
+          {
+            "id": "learning-content",
+            "public": false
+          },
+          {
+            "id": "class-recordings",
+            "public": false
+          },
+          {
+            "id": "question-media",
+            "public": false
+          }
+        ],
+        "attempts": 0,
+        "programs": 4,
+        "subjects": 3,
+        "questions": 0,
+        "entrance_exams": 4,
+        "learning_content": 0,
+        "uploaded_objects": 0
+      }
+    }
+  ],
+  "advisors": [
+    {
+      "name": "rls_enabled_no_policy",
+      "level": "INFO",
+      "object": "attempt_snapshots"
+    },
+    {
+      "name": "rls_enabled_no_policy",
+      "level": "INFO",
+      "object": "checkpoint_responses"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_attempt_history"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_attempt_payload"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_move_content"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_program_subjects"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_save_content"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_save_question"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_save_test"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_test_bank"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "core_test_summary"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "finalize_expired_test_attempts"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "get_test_review"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "has_program_access"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "save_attempt_answer"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "set_live_presence"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "set_raised_hand"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "start_test_attempt"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "submit_test_attempt"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "object": "teacher_has_assignment"
+    }
+  ],
+  "repositoryOrderAndHashes": [
+    {
+      "file": "20260905044506_academic_platform_foundation.sql",
+      "sha256": "6e061bf8770951989c9a1aad71c783178a80af251519145000f352356b31db04"
+    },
+    {
+      "file": "20260905052130_harden_academic_rls.sql",
+      "sha256": "e743e390bc855bac3c0161cc5ee97cd41e9ddb1fdd15e2c7f15c77fd0b490dad"
+    },
+    {
+      "file": "20260905052748_auth_profiles_and_recording_state.sql",
+      "sha256": "93cbdfd22903b82d703178cc9c781d125870b1ad49c4bd75b4c3b2a5ec9d6f9b"
+    },
+    {
+      "file": "20260905053528_teacher_writes_and_storage_access.sql",
+      "sha256": "905e296ad94a1fae22ccfdffcb4df0b82235288d7951172700fc1bed5f6edb92"
+    },
+    {
+      "file": "20260905054242_checkpoint_questions_and_live_teacher.sql",
+      "sha256": "31a876f86c0dc2c09c73c7d1f18452fdf5370302efd5ba82b12b8276c5f8a6c0"
+    },
+    {
+      "file": "20260905060734_classroom_state_and_permissions.sql",
+      "sha256": "10515787f46b55cf27651423204a0372f05955d2963951b1e705f7171b4c662e"
+    },
+    {
+      "file": "20260905062434_fix_attempt_scoring.sql",
+      "sha256": "52db0070e2bbb6a62d721ed2a6790ea1c832b64ab851a24a68af2c72b4804648"
+    },
+    {
+      "file": "20260905062543_fix_live_presence_functions.sql",
+      "sha256": "57cab973d467852f2ccba84f723ca07b9b03e5e1994646a9aeead4b1524354c3"
+    },
+    {
+      "file": "20260905063243_sync_profile_role_from_app_metadata.sql",
+      "sha256": "348983b96b66af4d70aafd2d453e2138218246e19bb1b3926229178b41a68e40"
+    },
+    {
+      "file": "20260905063800_protect_question_answer_keys.sql",
+      "sha256": "26d594cb055f362a206af404c74df27b73e2411b71005e8622683820368cff7e"
+    },
+    {
+      "file": "20260905064804_launch_readiness.sql",
+      "sha256": "3ce17fcbf48f01a699f45e3199203a51b43e364dbb90e10e500e06497a06908d"
+    },
+    {
+      "file": "20260905072244_deterministic_attempts.sql",
+      "sha256": "1dc65b1257076693300aa12770bda304e4d40850f3704b2704e799e094883fc9"
+    },
+    {
+      "file": "20260910024559_core_content_pipeline.sql",
+      "sha256": "8e7bf869f0719d08f62fe96ec549251abe6ff3e9753ebcacf1b9d47d68ea8b18"
+    },
+    {
+      "file": "20260910030225_core_pipeline_guards.sql",
+      "sha256": "94d0ab3089f188f0ac919019aa47d4d7c9714740a933a6b3ca0d5e7d4f472f35"
+    },
+    {
+      "file": "20260910030835_core_pipeline_acceptance.sql",
+      "sha256": "51107dc59993d0fcf183ca924e608a0f4b8a879836805659d0f08235cfb8f994"
+    },
+    {
+      "file": "20260910032537_core_order_permissions.sql",
+      "sha256": "99b817d735115b088cf41fa73bedde6268657e207b81af791043e31fd7b612c5"
+    },
+    {
+      "file": "20260910042640_core_content_fidelity.sql",
+      "sha256": "144bc3cd85dacc6ec609587ea1ae45497bf7352aa634e401ecf602379aae189a"
+    },
+    {
+      "file": "20260910060858_core_native_tables.sql",
+      "sha256": "af06cb168cdd5169c25a67348aca63fd40105bc0f949200321d008a8a7c4a7ef"
+    },
+    {
+      "file": "20260910061431_core_table_grid_offsets.sql",
+      "sha256": "077b314c08a125c69b771e78756b4e2cac3285f8c78dddf4e75ae96d4e7eb987"
+    },
+    {
+      "file": "20260910071239_core_media_compatibility.sql",
+      "sha256": "3247c7c7657200ca866f1c61de9ddf9d613426ac764a90c5d63fb38898c5f16f"
+    },
+    {
+      "file": "20260910073352_core_original_media_capacity.sql",
+      "sha256": "49fcaaa8b141834bd5dc5aa45c2f4ad9444e109e56acf92f2cb6a939689d0a8a"
+    },
+    {
+      "file": "20260910073804_core_meaningful_stem_guard.sql",
+      "sha256": "0edac6cdbe5f78a996e48bcc74a151a15f425a8809c4fb36991779aff0e6c41e"
+    },
+    {
+      "file": "20260911020155_explicit_core_helper_function_grants.sql",
+      "sha256": "f1db55805135b3be3a8f01c004cf18ee51fe64dbf5e5917d57407a1ce819b237"
+    }
+  ]
+}
