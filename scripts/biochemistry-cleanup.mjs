@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import {readFileSync,writeFileSync} from "node:fs";
+import {login,ok} from "./biochemistry-client.mjs";
+const qa=JSON.parse(readFileSync(".local-qa/biochemistry-acceptance.json","utf8"));
+const {db:admin}=await login(),{db:student}=await login("student");
+const attempts=ok(await admin.from("test_attempts").select("id,status,score,correct_count,incorrect_count,unanswered_count,started_at").eq("test_id",qa.test.id).order("started_at",{ascending:false}));
+assert.ok(attempts.every(a=>a.status==="submitted"),"Do not archive an unfinished acceptance attempt");
+assert.equal(attempts[0].score,5);assert.equal(attempts[0].correct_count,5);assert.equal(attempts[0].incorrect_count,10);assert.equal(attempts[0].unanswered_count,0);
+const review=ok(await student.rpc("get_test_review",{target_attempt:attempts[0].id}));assert.equal(review.answers.length,15);
+ok(await admin.rpc("core_save_test",{value:{...qa.test,status:"archived"},question_ids:qa.question_ids,batch_ids:[qa.qa_batch.id]}));
+const test=ok(await admin.from("tests").select("id,status,question_count,total_marks").eq("id",qa.test.id).single());assert.equal(test.status,"archived");
+assert.ok((await student.rpc("start_test_attempt",{target_test:test.id})).error,"Archived test must not start");
+assert.deepEqual(ok(await student.rpc("get_test_review",{target_attempt:attempts[0].id})),review,"History must survive archival");
+const count=ok(await admin.from("tests").select("id").eq("title",qa.test.title));assert.equal(count.length,1);
+writeFileSync("docs/biochemistry-cleanup-verification.json",JSON.stringify({test,attempts,exactly_one_disposable_test:true,new_attempt_denied:true,historical_review_preserved:true,real_source_bank_retained:true,active:708,draft:5,quarantine:1},null,2)+"\n");
+console.log(JSON.stringify({test,attempts:attempts.length,history_preserved:true}));

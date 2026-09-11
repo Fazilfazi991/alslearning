@@ -1,0 +1,112 @@
+{
+  "qa_project": "xstssknlgdraulebdsfd",
+  "checks": [
+    "713 persisted source questions",
+    "Every canonical payload equals approved source: text, order, keys, marks, rich AST, source metadata",
+    "708 Active and five Draft",
+    "Complete BIO 5 Q31 quarantine source recoverable",
+    "Quarantine excluded from database",
+    "One canonical Biochemistry subject",
+    "Exactly eight canonical BIO chapters",
+    "No invented topics or program-specific source scope",
+    "All source media remains empty",
+    "No duplicate source identities",
+    "Global orphan options and keys zero",
+    "Pathology/Microbiology complete persisted content hashes unchanged",
+    "All eight native tables persisted",
+    "Complete second run created zero objects"
+  ],
+  "reconciliation": [
+    {
+      "bio": 1,
+      "source": 32,
+      "active": 32,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 0
+    },
+    {
+      "bio": 2,
+      "source": 46,
+      "active": 46,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 0
+    },
+    {
+      "bio": 3,
+      "source": 44,
+      "active": 44,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 1
+    },
+    {
+      "bio": 4,
+      "source": 200,
+      "active": 200,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 0
+    },
+    {
+      "bio": 5,
+      "source": 42,
+      "active": 41,
+      "draft": 0,
+      "quarantine": 1,
+      "tables": 3
+    },
+    {
+      "bio": 6,
+      "source": 202,
+      "active": 197,
+      "draft": 5,
+      "quarantine": 0,
+      "tables": 1
+    },
+    {
+      "bio": 7,
+      "source": 85,
+      "active": 85,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 1
+    },
+    {
+      "bio": 8,
+      "source": 63,
+      "active": 63,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 2
+    }
+  ],
+  "totals": {
+    "questions": 2533,
+    "options": 10084,
+    "keys": 2540,
+    "media": 244,
+    "orphan_options": 0,
+    "orphan_keys": 0
+  },
+  "second_run": {
+    "new_subjects": 0,
+    "new_chapters": 0,
+    "new_questions": 0,
+    "new_options": 0,
+    "new_answer_keys": 0,
+    "new_tables": 0,
+    "new_import_identities": 0,
+    "unchanged_questions": 713,
+    "uploads": 0
+  },
+  "protected_hashes": [
+    {
+      "questions": "fb84fdc216a44e8274b45c9a6374602f",
+      "options": "17202686ca885048ea3b6bb5b04df7bf",
+      "keys": "de26a452c49debd54179109c0d111357",
+      "media": "cec63007486e29fc4dc28cd54972d5cc"
+    }
+  ]
+}
