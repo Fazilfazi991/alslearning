@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run && node --test scripts/microbiology-import.test.mjs",
     "test:core-db": "node --env-file=.env.local scripts/core-pipeline-qa.mjs",
     "test:core-security": "node --env-file=.env.local scripts/core-security-qa.mjs",
     "test:fidelity-db": "node --env-file=.env.local scripts/fidelity-qa.mjs",

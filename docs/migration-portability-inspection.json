@@ -1,0 +1,334 @@
+{
+  "xstssknlgdraulebdsfd": {
+    "catalog": [
+      {
+        "result": {
+          "tables": [
+            {
+              "rls": true,
+              "name": "profiles",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "entrance_exams",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "programs",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "subjects",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "program_subjects",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "enrollments",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "faculty_assignments",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "learning_content",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "content_batch_access",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "batch_faculty",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "chapters",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "topics",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "batches",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "video_progress",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "checkpoint_responses",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "questions",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "question_options",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "live_participants",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "video_checkpoints",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "live_sessions",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "test_attempts",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "attempt_answers",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "tests",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "test_questions",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "live_questions",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "live_question_responses",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "class_recordings",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "live_messages",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "live_attachments",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "attempt_snapshots",
+              "schema": "private"
+            },
+            {
+              "rls": true,
+              "name": "question_answer_keys",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "notifications",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "test_batches",
+              "schema": "public"
+            },
+            {
+              "rls": true,
+              "name": "question_media",
+              "schema": "public"
+            }
+          ],
+          "function": {
+            "acl": [
+              "postgres=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "owner": "postgres",
+            "config": [
+              "search_path=pg_catalog"
+            ],
+            "definer": true,
+            "language": "plpgsql",
+            "signature": "rls_auto_enable()",
+            "definition": "CREATE OR REPLACE FUNCTION public.rls_auto_enable()\n RETURNS event_trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'pg_catalog'\nAS $function$\nDECLARE\n  cmd record;\nBEGIN\n  FOR cmd IN\n    SELECT *\n    FROM pg_event_trigger_ddl_commands()\n    WHERE command_tag IN ('CREATE TABLE', 'CREATE TABLE AS', 'SELECT INTO')\n      AND object_type IN ('table','partitioned table')\n  LOOP\n     IF cmd.schema_name IS NOT NULL AND cmd.schema_name IN ('public') AND cmd.schema_name NOT IN ('pg_catalog','information_schema') AND cmd.schema_name NOT LIKE 'pg_toast%' AND cmd.schema_name NOT LIKE 'pg_temp%' THEN\n      BEGIN\n        EXECUTE format('alter table if exists %s enable row level security', cmd.object_identity);\n        RAISE LOG 'rls_auto_enable: enabled RLS on %', cmd.object_identity;\n      EXCEPTION\n        WHEN OTHERS THEN\n          RAISE LOG 'rls_auto_enable: failed to enable RLS on %', cmd.object_identity;\n      END;\n     ELSE\n        RAISE LOG 'rls_auto_enable: skip % (either system schema or not in enforced list: %.)', cmd.object_identity, cmd.schema_name;\n     END IF;\n  END LOOP;\nEND;\n$function$\n",
+            "volatility": "v"
+          },
+          "triggers": [
+            {
+              "name": "ensure_rls",
+              "tags": [
+                "CREATE TABLE",
+                "CREATE TABLE AS",
+                "SELECT INTO"
+              ],
+              "event": "ddl_command_end",
+              "enabled": "O",
+              "function": "rls_auto_enable()"
+            }
+          ],
+          "dependencies": [
+            {
+              "type": "n",
+              "dependent": "function rls_auto_enable()",
+              "referenced": "language plpgsql"
+            },
+            {
+              "type": "n",
+              "dependent": "function rls_auto_enable()",
+              "referenced": "schema public"
+            },
+            {
+              "type": "n",
+              "dependent": "event trigger ensure_rls",
+              "referenced": "function rls_auto_enable()"
+            }
+          ]
+        }
+      }
+    ],
+    "history": [
+      {
+        "version": "20260905044506",
+        "name": "academic_platform_foundation"
+      },
+      {
+        "version": "20260905052130",
+        "name": "harden_academic_rls"
+      },
+      {
+        "version": "20260905052748",
+        "name": "auth_profiles_and_recording_state"
+      },
+      {
+        "version": "20260905053528",
+        "name": "teacher_writes_and_storage_access"
+      },
+      {
+        "version": "20260905054242",
+        "name": "checkpoint_questions_and_live_teacher"
+      },
+      {
+        "version": "20260905060734",
+        "name": "classroom_state_and_permissions"
+      },
+      {
+        "version": "20260905062434",
+        "name": "fix_attempt_scoring"
+      },
+      {
+        "version": "20260905062543",
+        "name": "fix_live_presence_functions"
+      },
+      {
+        "version": "20260905063243",
+        "name": "sync_profile_role_from_app_metadata"
+      },
+      {
+        "version": "20260905063800",
+        "name": "protect_question_answer_keys"
+      },
+      {
+        "version": "20260905064804",
+        "name": "launch_readiness"
+      },
+      {
+        "version": "20260905072244",
+        "name": "deterministic_attempts"
+      },
+      {
+        "version": "20260910024559",
+        "name": "core_content_pipeline"
+      },
+      {
+        "version": "20260910030225",
+        "name": "core_pipeline_guards"
+      },
+      {
+        "version": "20260910030835",
+        "name": "core_pipeline_acceptance"
+      },
+      {
+        "version": "20260910032537",
+        "name": "core_order_permissions"
+      },
+      {
+        "version": "20260910042640",
+        "name": "core_content_fidelity"
+      },
+      {
+        "version": "20260910060858",
+        "name": "core_native_tables"
+      },
+      {
+        "version": "20260910061431",
+        "name": "core_table_grid_offsets"
+      },
+      {
+        "version": "20260910071239",
+        "name": "core_media_compatibility"
+      },
+      {
+        "version": "20260910073352",
+        "name": "core_original_media_capacity"
+      },
+      {
+        "version": "20260910073804",
+        "name": "core_meaningful_stem_guard"
+      },
+      {
+        "version": "20260911020155",
+        "name": "explicit_core_helper_function_grants"
+      }
+    ]
+  },
+  "dvmahmkapgtjfqmoottt": {
+    "catalog": [
+      {
+        "result": {
+          "tables": null,
+          "function": null,
+          "triggers": null,
+          "dependencies": null
+        }
+      }
+    ],
+    "history": []
+  }
+}
