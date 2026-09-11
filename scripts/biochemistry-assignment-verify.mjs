@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {query,PRODUCTION,QA} from './helper-grants-lib.mjs';
+import {snapshot,hash} from './biochemistry-production-baseline.mjs';
+import {read,contentSql,programId,subjectId,studentId} from './biochemistry-program-assignment.mjs';
+assert.equal(process.env.ALS_PRODUCTION_IMPORT_REF,PRODUCTION);
+const before=read('.local-qa/biochemistry-assignment-before.json');
+assert.deepEqual(await query(PRODUCTION,contentSql),before.content,'All three subject banks, taxonomy and enrollments unchanged');
+const production=await snapshot(PRODUCTION),qa=await snapshot(QA);
+assert.deepEqual(qa,before.qa,'QA unchanged');
+assert.deepEqual(production.inventory,before.production.inventory,'Security unchanged');
+assert.deepEqual(production.migrations,before.production.migrations,'Migrations unchanged');
+for(const [name,sha] of Object.entries(before.quarantine))if(sha)assert.equal(hash(readFileSync(`docs/production-${name}-quarantine.json`)),sha);
+const mappings=await query(PRODUCTION,'select * from public.program_subjects order by program_id,display_order');
+assert.deepEqual(mappings.filter(m=>m.subject_id!==subjectId),before.mappings.filter(m=>m.subject_id!==subjectId));
+assert.deepEqual(mappings.filter(m=>m.subject_id===subjectId),[{program_id:programId,subject_id:subjectId,display_order:2}]);
+const test=read('docs/biochemistry-live-test.json'),testBefore=read('.local-qa/biochemistry-live-test-before.json');
+const rows=await query(PRODUCTION,`select q.id,q.subject_id,q.status from public.test_questions tq join public.questions q on q.id=tq.question_id where tq.test_id='${test.test_id}'`);
+assert.equal(rows.length,15);assert.ok(rows.every(q=>q.status==='active'));
+const counts=Object.fromEntries([...new Set(rows.map(q=>q.subject_id))].map(id=>[id,rows.filter(q=>q.subject_id===id).length]));assert.equal(Object.keys(counts).length,3);assert.equal(counts[subjectId],9);
+const priorAttempts=await query(PRODUCTION,`select * from public.test_attempts where id in (${testBefore.attempts.map(a=>`'${a.id}'`).join(',')}) order by id`);
+// Compare via JSON projection to tolerate equivalent timestamp formatting from SQL vs PostgREST.
+const stable=a=>({id:a.id,status:a.status,score:Number(a.score),question_order:a.question_order,option_order:a.option_order,correct_count:a.correct_count,incorrect_count:a.incorrect_count,unanswered_count:a.unanswered_count});
+assert.deepEqual(priorAttempts.map(stable),testBefore.attempts.map(stable),'Prior attempt grading/snapshots preserved');
+const oldSnapshots=await query(PRODUCTION,`select attempt_id,questions from private.attempt_snapshots where attempt_id in (${testBefore.attempts.map(a=>`'${a.id}'`).join(',')})`);
+assert.equal(oldSnapshots.length,testBefore.attempts.length);
+for(const s of oldSnapshots)assert.deepEqual(s.questions.map(q=>q.id).sort(),testBefore.questions.map(q=>q.question_id).sort(),'Old snapshots retain the original 13 questions');
+await query(PRODUCTION,`begin read only;
+ select set_config('request.jwt.claim.sub','${studentId}',true),set_config('request.jwt.claims','{"sub":"${studentId}","role":"authenticated"}',true);
+ set local role authenticated;
+ do $probe$ begin
+  if (select count(*) from public.subjects where name in ('Pathology','Microbiology','Biochemistry'))<>3 then raise exception 'Student subject visibility'; end if;
+  if (select count(*) from public.chapters where subject_id='${subjectId}')<>8 then raise exception 'Student BIO sections'; end if;
+  if not exists(select 1 from public.tests where id='${test.test_id}' and title='LIVE QA — Three Subject Acceptance') then raise exception 'Private test unavailable'; end if;
+  if exists(select 1 from public.questions) or exists(select 1 from public.question_answer_keys) then raise exception 'Raw question or answer leakage'; end if;
+ end $probe$; rollback;`);
+const report={production:PRODUCTION,qa:QA,content_unchanged:true,enrollments_unchanged:true,qa_unchanged:true,security_unchanged:true,migrations_unchanged:true,quarantine_unchanged:true,old_assignments_unchanged:true,exactly_one_biochemistry_mapping:true,assignment_runs:read('docs/biochemistry-program-assignment.json').runs,student_subjects:['Pathology','Microbiology','Biochemistry'],student_bio_sections:8,student_private_test_access:true,student_raw_bank_and_keys_denied:true,private_test_questions:15,question_counts_by_subject:counts,prior_attempts_preserved:true,before_counts:before.production.counts,after_counts:production.counts,content_fingerprint:hash(JSON.stringify(before.content)),qa_fingerprint:hash(JSON.stringify(qa))};
+writeFileSync('docs/biochemistry-assignment-verification.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));

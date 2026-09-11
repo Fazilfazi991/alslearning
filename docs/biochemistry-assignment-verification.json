@@ -1,0 +1,61 @@
+{
+  "production": "dvmahmkapgtjfqmoottt",
+  "qa": "xstssknlgdraulebdsfd",
+  "content_unchanged": true,
+  "enrollments_unchanged": true,
+  "qa_unchanged": true,
+  "security_unchanged": true,
+  "migrations_unchanged": true,
+  "quarantine_unchanged": true,
+  "old_assignments_unchanged": true,
+  "exactly_one_biochemistry_mapping": true,
+  "assignment_runs": [
+    {
+      "new_mappings": 1
+    },
+    {
+      "new_mappings": 0
+    }
+  ],
+  "student_subjects": [
+    "Pathology",
+    "Microbiology",
+    "Biochemistry"
+  ],
+  "student_bio_sections": 8,
+  "student_private_test_access": true,
+  "student_raw_bank_and_keys_denied": true,
+  "private_test_questions": 15,
+  "question_counts_by_subject": {
+    "16a8ce52-9e59-4914-af0a-c614cfe4826d": 3,
+    "6d9f0a3a-14d1-48a9-abe8-a5cc7f7f7fae": 3,
+    "7c243eff-1f33-4c96-a2cf-e65f08f9fcfa": 9
+  },
+  "prior_attempts_preserved": true,
+  "before_counts": {
+    "users": 2,
+    "tests": 1,
+    "attempts": 2,
+    "questions": 2472,
+    "options": 9888,
+    "keys": 2472,
+    "media": 124,
+    "storage_objects": 135,
+    "subjects": 3,
+    "chapters": 21
+  },
+  "after_counts": {
+    "users": 2,
+    "tests": 1,
+    "attempts": 3,
+    "questions": 2472,
+    "options": 9888,
+    "keys": 2472,
+    "media": 124,
+    "storage_objects": 135,
+    "subjects": 3,
+    "chapters": 21
+  },
+  "content_fingerprint": "9e4ed5cc226f9d3394858655f616fe64011de80261aef85ce1001138ed519849",
+  "qa_fingerprint": "03b547c99e703fe4c9ff4d388d6518943c1ef6a5dfdb278d16635d04b2d19e22"
+}

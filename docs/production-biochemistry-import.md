@@ -1,5 +1,7 @@
 # Biochemistry Production import — 11 September 2026
 
+Resolution: the program-assignment blocker documented below was subsequently resolved and live acceptance passed. See [Biochemistry program assignment report](biochemistry-program-assignment-report.md). The original import evidence below is retained as its historical record.
+
 ## A. Verdict
 
 BIOCHEMISTRY PRODUCTION IMPORT — FAIL

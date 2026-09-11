@@ -1,0 +1,63 @@
+{
+  "production": "dvmahmkapgtjfqmoottt",
+  "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+  "subject_id": "7c243eff-1f33-4c96-a2cf-e65f08f9fcfa",
+  "student": {
+    "id": "c4a4db85-7407-4da1-bc8f-36016920b3c9",
+    "email": "zorxdxb@gmail.com",
+    "role": "student",
+    "is_active": true
+  },
+  "enrollments": [
+    {
+      "id": "2feb5a41-cf7b-493b-b992-2259fc09c416",
+      "student_id": "c4a4db85-7407-4da1-bc8f-36016920b3c9",
+      "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+      "batch_id": "be7eb968-2e91-488a-8b23-7aae64db3e57",
+      "enrolled_on": "2026-09-11",
+      "access_expires_at": "2026-10-11T06:07:49.984+00:00",
+      "status": "active",
+      "payment_reference": null,
+      "created_at": "2026-09-11T06:07:51.615737+00:00",
+      "updated_at": "2026-09-11T06:07:51.615737+00:00",
+      "access_starts_at": "2026-09-11T06:07:49.981+00:00"
+    }
+  ],
+  "assignments_before": [
+    {
+      "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+      "subject_id": "16a8ce52-9e59-4914-af0a-c614cfe4826d",
+      "display_order": 0
+    },
+    {
+      "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+      "subject_id": "6d9f0a3a-14d1-48a9-abe8-a5cc7f7f7fae",
+      "display_order": 1
+    }
+  ],
+  "runs": [
+    {
+      "new_mappings": 1
+    },
+    {
+      "new_mappings": 0
+    }
+  ],
+  "assignments_after": [
+    {
+      "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+      "subject_id": "16a8ce52-9e59-4914-af0a-c614cfe4826d",
+      "display_order": 0
+    },
+    {
+      "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+      "subject_id": "6d9f0a3a-14d1-48a9-abe8-a5cc7f7f7fae",
+      "display_order": 1
+    },
+    {
+      "program_id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+      "subject_id": "7c243eff-1f33-4c96-a2cf-e65f08f9fcfa",
+      "display_order": 2
+    }
+  ]
+}
