@@ -1,7 +1,61 @@
-"use client";import Link from"next/link";import{useRouter}from"next/navigation";import{useEffect,useState}from"react";import{KeyRound,Mail}from"lucide-react";import{Button}from"@/components/ui/button";import{createClient}from"@/lib/supabase/client";
-const configured=Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL&&process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-export function LoginForm({expectedRole="student",initialError=""}:{expectedRole?:"student"|"teacher"|"admin";initialError?:string}){const router=useRouter(),[email,setEmail]=useState(""),[otp,setOtp]=useState(""),[password,setPassword]=useState(""),[sent,setSent]=useState(false),[qa,setQa]=useState(false),[qaAvailable,setQaAvailable]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(initialError),[cooldown,setCooldown]=useState(0);useEffect(()=>{void fetch("/api/auth/qa-password").then(r=>r.json()).then(x=>{const available=x.enabled===true;setQaAvailable(available);setQa(available)}).catch(()=>{})},[]);useEffect(()=>{if(!cooldown)return;const timer=setInterval(()=>setCooldown(x=>Math.max(0,x-1)),1000);return()=>clearInterval(timer)},[cooldown]);
-async function send(){setBusy(true);setError("");try{if(!configured)throw new Error("Authentication is not configured. Restart the app after setting NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.");const{error:e}=await createClient().auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:new URL("/auth/callback",window.location.origin).href}});if(e)throw e;setSent(true);setCooldown(60)}catch(e){setError(e instanceof Error?e.message:"Could not send the sign-in email.")}finally{setBusy(false)}}
-async function verify(){setBusy(true);setError("");try{const{error:e}=await createClient().auth.verifyOtp({email,token:otp,type:"email"});if(e)throw e;router.replace("/student");router.refresh()}catch(e){setError(e instanceof Error?e.message:"The code is invalid or expired.")}finally{setBusy(false)}}
-async function passwordLogin(){setBusy(true);setError("");try{const response=await fetch("/api/auth/qa-password",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,password,expectedRole})}),body=await response.json();if(!response.ok)throw new Error(body.error||"QA login failed.");router.replace(body.redirect);router.refresh()}catch(e){setError(e instanceof Error?e.message:"QA login failed.")}finally{setBusy(false)}}
-return <form className="mt-8 space-y-5" onSubmit={e=>{e.preventDefault();void(qa?passwordLogin():sent?verify():send())}}><label className="block text-sm font-bold">Email address<span className="relative mt-2 block"><Mail className="absolute left-4 top-3.5 text-muted" size={18}/><input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} disabled={sent&&!qa} className="h-12 w-full rounded-xl border border-line pl-11 pr-4"/></span></label>{qa&&<label className="block text-sm font-bold">Password<span className="relative mt-2 block"><KeyRound className="absolute left-4 top-3.5 text-muted" size={18}/><input required type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} className="h-12 w-full rounded-xl border border-line pl-11 pr-4"/></span></label>}{sent&&!qa&&<><p role="status" className="rounded-lg bg-blue-50 p-3 text-sm text-deep-blue">Check your email for a sign-in link. Open the newest link in this same browser to finish signing in.</p><details><summary className="cursor-pointer text-sm font-semibold text-brand">My email contains a code instead</summary><label className="block text-sm font-bold">One-time code<input required inputMode="numeric" autoComplete="one-time-code" value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g,""))} className="mt-2 h-12 w-full rounded-xl border px-4 tracking-[.25em]"/></label><Button disabled={busy} type="submit" className="mt-4 w-full">Verify &amp; sign in</Button></details></>}{error&&<p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}{(qa||!sent)&&<Button disabled={busy} type="submit" className="w-full">{busy?"Please wait…":qa?"Sign in":sent?"Verify & sign in":"Email me a sign-in link"}</Button>}{qaAvailable&&<div className="flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-line"/><span>or</span><span className="h-px flex-1 bg-line"/></div>}{qaAvailable&&<button type="button" className="w-full text-sm font-bold text-brand" onClick={()=>{setQa(x=>!x);setSent(false);setOtp("");setPassword("");setError("")}}>{qa?"Use email sign-in instead":"Use QA password instead"}</button>}{sent&&!qa&&<button type="button" disabled={cooldown>0||busy} onClick={()=>void send()} className="text-sm font-semibold text-brand disabled:text-muted">{cooldown?`Resend in ${cooldown}s`:"Resend sign-in email"}</button>}<p className="text-center text-sm text-muted">New to ALS? <Link href="/#courses" className="font-bold text-brand">Contact admissions</Link></p></form>}
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Eye, EyeOff, KeyRound, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+export function LoginForm({ initialError = "" }: { initialError?: string }) {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(initialError);
+
+  async function signIn() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/auth/password", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        setError(body.error || "Could not sign in. Please try again.");
+        return;
+      }
+      router.replace(body.redirect);
+      router.refresh();
+    } catch {
+      setError("Could not connect. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <form className="mt-8 space-y-5" aria-busy={busy} onSubmit={event => { event.preventDefault(); void signIn(); }}>
+    <div>
+      <label htmlFor="login-email" className="block text-sm font-bold">Email address</label>
+      <div className="relative mt-2">
+        <Mail aria-hidden="true" className="pointer-events-none absolute left-4 top-3.5 text-muted" size={18}/>
+        <input id="login-email" name="email" required type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} value={email} onChange={event => setEmail(event.target.value)} className="h-12 w-full rounded-xl border border-line pl-11 pr-4 text-base"/>
+      </div>
+    </div>
+    <div>
+      <label htmlFor="login-password" className="block text-sm font-bold">Password</label>
+      <div className="relative mt-2">
+        <KeyRound aria-hidden="true" className="pointer-events-none absolute left-4 top-3.5 text-muted" size={18}/>
+        <input id="login-password" name="password" required type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} className="h-12 w-full rounded-xl border border-line pl-11 pr-14 text-base"/>
+        <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} aria-controls="login-password" onClick={() => setShowPassword(value => !value)} className="absolute right-0 top-0 flex h-12 w-12 items-center justify-center rounded-xl text-muted hover:text-brand focus-visible:outline-2 focus-visible:outline-brand">
+          {showPassword ? <EyeOff aria-hidden="true" size={20}/> : <Eye aria-hidden="true" size={20}/>}
+        </button>
+      </div>
+    </div>
+    {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+    <Button disabled={busy} type="submit" className="w-full">{busy ? "Signing in…" : "Sign in"}</Button>
+    <p className="text-center text-sm text-muted">New to ALS? <Link href="/#courses" className="font-bold text-brand">Contact admissions</Link></p>
+  </form>;
+}
