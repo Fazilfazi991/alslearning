@@ -15,3 +15,49 @@ describe("test academic scope",()=>{
  it("rejects stale or unrelated manual selections",()=>{expect(testSelectionError(data,{...test,question_ids:["c"]})).not.toBeNull();expect(testSelectionError(data,{...test,question_ids:["a"]})).toBeNull();});
  it("preserves program, exam, topic and unsupported-type exclusions",()=>{for(const change of [{program_id:"other"},{exam_id:"other"},{type:"match_following"},{status:"review"}]) expect(eligibleTestQuestions({...data,questions:[{...question("a"),...change}]},test)).toEqual([]);});
 });
+import {inferTestScope,retainAllowedSelections} from "./test-question-scope";
+describe("mixed subject regression",()=>{
+ const mixed={...test,subject_id:"",question_ids:["a","c"]};
+ it("infers existing mixed subjects and sections without losing IDs",()=>{
+  const reopened=inferTestScope(data,mixed);
+  expect(reopened.selection_rules.scopes).toEqual([{subject_id:"micro",chapter_ids:["m4"],count:1},{subject_id:"patho",chapter_ids:["p1"],count:1}]);
+  expect(reopened.question_ids).toEqual(mixed.question_ids);
+  expect(testSelectionError(data,reopened)).toBeNull();
+ });
+ it("round-trips persisted multiple-subject manual scope",()=>{
+  const t=inferTestScope(data,mixed);
+  expect(inferTestScope(data,JSON.parse(JSON.stringify(t)))).toEqual(t);
+ });
+ it("keeps cross-filter selections independent of visible rows",()=>{
+  const t=inferTestScope(data,mixed);
+  const filtered=eligibleTestQuestions(data,t).filter(q=>q.subject_id==="patho");
+  expect(filtered.map(q=>q.id)).toEqual(["c"]);
+  expect(t.question_ids).toEqual(["a","c"]);
+  expect(testSelectionError(data,t)).toBeNull();
+ });
+ it("removes only questions in a removed allowed subject",()=>{
+  const t=inferTestScope(data,mixed);
+  expect(retainAllowedSelections(data,{...t,selection_rules:{scopes:[{subject_id:"micro",chapter_ids:[]}]}}).question_ids).toEqual(["a"]);
+ });
+ it("removes only questions outside a newly restricted section",()=>{
+  const t={...inferTestScope(data,mixed),question_ids:["a","b","c"]};
+  expect(retainAllowedSelections(data,t).question_ids).toEqual(["a","c"]);
+ });
+ it("validates each random quota independently and rejects fractional/oversized quotas",()=>{
+  const t={...inferTestScope(data,mixed),selection_mode:"generated"};
+  expect(testSelectionError(data,t)).toBeNull();
+  for(const count of [0,1.5,99])expect(testSelectionError(data,{...t,selection_rules:{scopes:[{subject_id:"patho",chapter_ids:[],count}]}})).not.toBeNull();
+ });
+ it("distinguishes loading and failure from loaded-empty",()=>{
+  const empty={...data,questions:[]};
+  expect(testSelectionError(empty,test,"loading")).toContain("Loading");
+  expect(testSelectionError(empty,test,"error")).toContain("Retry");
+  expect(testSelectionError(empty,{...test,selection_mode:"generated"})).toBe("No active questions are available for this scope.");
+ });
+ it("never reports an impossible 1-to-0 range",()=>{
+  for(const selection_mode of ["manual","generated"])expect(testSelectionError({...data,questions:[]},{...test,selection_mode})).not.toContain("1 and 0");
+ });
+ it("excludes Draft and Quarantine across every subject",()=>{
+  expect(eligibleTestQuestions(data,inferTestScope(data,mixed)).map(q=>q.id)).toEqual(["a","c","g"]);
+ });
+});

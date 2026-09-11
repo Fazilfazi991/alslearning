@@ -59,7 +59,7 @@ export type Test = Taxonomy & {
   show_answers: boolean;
   show_explanations: boolean;
   selection_mode: string;
-  selection_rules: { difficulty?: string };
+  selection_rules: { difficulty?: string; scopes?: { subject_id: string; chapter_ids: string[]; count?: number }[] };
   status: string;
   question_ids: string[];
   batch_ids: string[];
@@ -211,7 +211,8 @@ export function canManage(
       ))
   );
 }
-export async function loadCoreData(): Promise<CoreData> {
+export async function loadCoreData(mode?: "questions" | "tests" | "content"): Promise<CoreData> {
+  if (mode === "tests") return (await import("./test-repository")).loadTestWorkspace();
   const db = createClient();
   const [
     exams,
