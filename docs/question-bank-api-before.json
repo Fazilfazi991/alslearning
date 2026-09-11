@@ -1,0 +1,174 @@
+{
+  "project": "dvmahmkapgtjfqmoottt",
+  "at": "2026-09-11T11:22:41.330Z",
+  "kind": "Authenticated Admin API decomposition; not browser rendering timings",
+  "measurements": [
+    {
+      "name": "auth/getUser",
+      "ms": 1120,
+      "bytes": 1083
+    },
+    {
+      "name": "profile",
+      "ms": 428,
+      "bytes": 33,
+      "count": null
+    },
+    {
+      "name": "chapters",
+      "ms": 774,
+      "rows": 21,
+      "bytes": 6866,
+      "count": null
+    },
+    {
+      "name": "subjects",
+      "ms": 915,
+      "rows": 3,
+      "bytes": 718,
+      "count": null
+    },
+    {
+      "name": "batches",
+      "ms": 910,
+      "rows": 1,
+      "bytes": 531,
+      "count": null
+    },
+    {
+      "name": "topics",
+      "ms": 1354,
+      "rows": 0,
+      "bytes": 2,
+      "count": null
+    },
+    {
+      "name": "programs",
+      "ms": 1384,
+      "rows": 4,
+      "bytes": 1799,
+      "count": null
+    },
+    {
+      "name": "entrance_exams",
+      "ms": 1391,
+      "rows": 4,
+      "bytes": 1300,
+      "count": null
+    },
+    {
+      "name": "faculty_assignments",
+      "ms": 1390,
+      "rows": 0,
+      "bytes": 2,
+      "count": null
+    },
+    {
+      "name": "program_subjects",
+      "ms": 1424,
+      "rows": 3,
+      "bytes": 373,
+      "count": null
+    },
+    {
+      "name": "unrelated tests",
+      "ms": 385,
+      "rows": 1,
+      "bytes": 2032,
+      "count": null
+    },
+    {
+      "name": "unrelated learning content",
+      "ms": 374,
+      "rows": 0,
+      "bytes": 2,
+      "count": null
+    },
+    {
+      "name": "unrelated teacher bank",
+      "ms": 366,
+      "rows": 0,
+      "bytes": 2,
+      "count": null
+    },
+    {
+      "name": "full questions 0",
+      "ms": 6748,
+      "rows": 500,
+      "bytes": 1223830,
+      "count": null
+    },
+    {
+      "name": "full questions 500",
+      "ms": 6468,
+      "rows": 500,
+      "bytes": 1200835,
+      "count": null
+    },
+    {
+      "name": "full questions 1000",
+      "ms": 8043,
+      "rows": 500,
+      "bytes": 1545079,
+      "count": null
+    },
+    {
+      "name": "full questions 1500",
+      "ms": 6548,
+      "rows": 500,
+      "bytes": 1117698,
+      "count": null
+    },
+    {
+      "name": "full questions 2000",
+      "ms": 5634,
+      "rows": 472,
+      "bytes": 1033421,
+      "count": null
+    },
+    {
+      "name": "plain list 500",
+      "ms": 1783,
+      "rows": 500,
+      "bytes": 340494,
+      "count": null
+    },
+    {
+      "name": "options 500",
+      "ms": 5141,
+      "rows": 500,
+      "bytes": 420802,
+      "count": null
+    },
+    {
+      "name": "answer keys 500",
+      "ms": 1079,
+      "rows": 500,
+      "bytes": 62001,
+      "count": null
+    },
+    {
+      "name": "rich/explanation/tables 500",
+      "ms": 1109,
+      "rows": 500,
+      "bytes": 275584,
+      "count": null
+    },
+    {
+      "name": "media 500",
+      "ms": 748,
+      "rows": 500,
+      "bytes": 33001,
+      "count": null
+    },
+    {
+      "name": "exact count",
+      "ms": 835,
+      "bytes": 4,
+      "count": 2472
+    }
+  ],
+  "totalFullBankMs": 36054,
+  "totalRows": 2472,
+  "totalBytes": 6120859
+}

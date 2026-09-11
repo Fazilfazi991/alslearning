@@ -1,0 +1,15 @@
+{
+  "kind": "Chrome wall-clock DOM readiness, continuous 1-second observation; includes automation overhead",
+  "shellMs": 2489,
+  "listAndFiltersMs": 30891,
+  "networkProfiler": "CUA exposes DOM and console logs, but not browser Network/Performance APIs. API decomposition captured separately; no fabricated HAR/hydration timing.",
+  "interactions": {
+    "subjectMs": 184,
+    "sectionMs": 116,
+    "statusMs": 108,
+    "pageMs": 1212,
+    "searchMs": 128,
+    "detailMs": 2951,
+    "kind": "Chrome wall-clock action plus DOM observation after full bank was already downloaded"
+  }
+}

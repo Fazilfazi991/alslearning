@@ -1,0 +1,6 @@
+MOQ/
+docs/
+scripts/
+.local-qa/
+.env*
+*.tsbuildinfo
