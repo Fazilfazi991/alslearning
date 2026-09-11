@@ -23,18 +23,22 @@ async function metadata(user:string):Promise<Hierarchy> {
   }).catch(e=>{hierarchy=undefined;throw e;});
   hierarchy={user,expires:Date.now()+60_000,promise};return promise;
 }
-export async function loadTestWorkspace():Promise<CoreData> {
+export async function loadTestWorkspace(actor?:{id:string;role:string}):Promise<CoreData> {
   const db=createClient();
-  const auth=await db.auth.getUser();if(auth.error)throw new Error(auth.error.message);const user=auth.data.user;
-  if(!user)throw new Error("Sign in to continue.");
-  const [academic,profile,tests,assignments]=await Promise.all([
-    metadata(user.id),
-    db.from("profiles").select("role,is_active").eq("id",user.id).single(),
+  let identity = actor;
+  if (!identity) {
+    const auth = await db.auth.getUser(); if(auth.error)throw new Error(auth.error.message);
+    if(!auth.data.user)throw new Error("Sign in to continue.");
+    const profile = check(await db.from("profiles").select("role,is_active").eq("id",auth.data.user.id).single());
+    if(!profile?.is_active)throw new Error("Account is inactive.");
+    identity = {id:auth.data.user.id,role:profile.role};
+  }
+  const [academic,tests,assignments]=await Promise.all([
+    metadata(identity.id),
     db.from("tests").select("*,test_questions(question_id,display_order),test_batches(batch_id)").order("created_at",{ascending:false}),
     db.from("faculty_assignments").select("*"),
   ]);
-  const p=check(profile);if(!p?.is_active)throw new Error("Account is inactive.");
-  return {...academic,role:p.role,assignments:check(assignments)||[],questions:[],content:[],
+  return {...academic,role:identity.role,assignments:check(assignments)||[],questions:[],content:[],
     tests:(check(tests)||[]).map(t=>({...t,question_ids:t.test_questions.sort((a:{display_order:number},b:{display_order:number})=>a.display_order-b.display_order).map((q:{question_id:string})=>q.question_id),batch_ids:t.test_batches.map((b:{batch_id:string})=>b.batch_id)})) as Test[]};
 }
 export async function loadTestQuestionIndex(role:string):Promise<Question[]> {
