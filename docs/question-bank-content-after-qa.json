@@ -1,0 +1,189 @@
+{
+  "xstssknlgdraulebdsfd": {
+    "content": [
+      {
+        "name": "questions",
+        "count": 2533,
+        "hash": "915ba43fef8cadeaaf98015a4724c75d"
+      },
+      {
+        "name": "question_options",
+        "count": 10084,
+        "hash": "fa0f66f1b1ccf1b64814e55ef89cf27a"
+      },
+      {
+        "name": "question_answer_keys",
+        "count": 2540,
+        "hash": "6d93639093e92eb51b1ec6919171da00"
+      },
+      {
+        "name": "question_media",
+        "count": 244,
+        "hash": "261b41e3792e47bb1095ba940f014f5e"
+      },
+      {
+        "name": "subjects",
+        "count": 12,
+        "hash": "e50bf35635f32d1dd07dfdd3d14dbeb2"
+      },
+      {
+        "name": "chapters",
+        "count": 29,
+        "hash": "15329d34a8e085db98e0a361eba83394"
+      }
+    ],
+    "counts": [
+      {
+        "name": "Biochemistry",
+        "status": "draft",
+        "count": 5
+      },
+      {
+        "name": "Biochemistry",
+        "status": "active",
+        "count": 708
+      },
+      {
+        "name": "core-qa-1789009371866 Subject",
+        "status": "active",
+        "count": 1
+      },
+      {
+        "name": "core-qa-1789009942755 Subject",
+        "status": "active",
+        "count": 6
+      },
+      {
+        "name": "core-qa-1789011095400 Subject",
+        "status": "active",
+        "count": 5
+      },
+      {
+        "name": "core-qa-1789014755577 Subject",
+        "status": "active",
+        "count": 25
+      },
+      {
+        "name": "core-qa-1789017280008 Subject",
+        "status": "active",
+        "count": 5
+      },
+      {
+        "name": "core-qa-1789020957380 Subject",
+        "status": "active",
+        "count": 5
+      },
+      {
+        "name": "core-qa-1789020957380 Subject",
+        "status": "archived",
+        "count": 1
+      },
+      {
+        "name": "core-qa-1789092476190 Subject",
+        "status": "active",
+        "count": 5
+      },
+      {
+        "name": "core-qa-1789095893605 Subject",
+        "status": "active",
+        "count": 5
+      },
+      {
+        "name": "Microbiology",
+        "status": "draft",
+        "count": 2
+      },
+      {
+        "name": "Microbiology",
+        "status": "active",
+        "count": 791
+      },
+      {
+        "name": "Pathology",
+        "status": "draft",
+        "count": 5
+      },
+      {
+        "name": "Pathology",
+        "status": "active",
+        "count": 961
+      },
+      {
+        "name": "QA ONLY – Laboratory Science",
+        "status": "active",
+        "count": 3
+      }
+    ]
+  },
+  "dvmahmkapgtjfqmoottt": {
+    "content": [
+      {
+        "name": "questions",
+        "count": 2472,
+        "hash": "c39f23957fda67393211baf9645ae4b2"
+      },
+      {
+        "name": "question_options",
+        "count": 9888,
+        "hash": "a6c522b9bb465e593f1f6a099e47c8e6"
+      },
+      {
+        "name": "question_answer_keys",
+        "count": 2472,
+        "hash": "a6bfdbce0e235e6cd9486c52b0b175af"
+      },
+      {
+        "name": "question_media",
+        "count": 124,
+        "hash": "551af465b3c1d11fdd78dfc9f3f782ce"
+      },
+      {
+        "name": "subjects",
+        "count": 3,
+        "hash": "31f9b6e9269e5df7c50dec0483ac2e7d"
+      },
+      {
+        "name": "chapters",
+        "count": 21,
+        "hash": "d77ad3289108aa6fbbfa155c02a3f76b"
+      }
+    ],
+    "counts": [
+      {
+        "name": "Biochemistry",
+        "status": "draft",
+        "count": 5
+      },
+      {
+        "name": "Biochemistry",
+        "status": "active",
+        "count": 708
+      },
+      {
+        "name": "Microbiology",
+        "status": "draft",
+        "count": 2
+      },
+      {
+        "name": "Microbiology",
+        "status": "active",
+        "count": 791
+      },
+      {
+        "name": "Pathology",
+        "status": "draft",
+        "count": 5
+      },
+      {
+        "name": "Pathology",
+        "status": "active",
+        "count": 961
+      }
+    ]
+  },
+  "manifests": {
+    "docs/production-pathology-quarantine.json": null,
+    "docs/production-microbiology-quarantine.json": null,
+    "docs/production-biochemistry-quarantine.json": "de8db2b590038d19f2173382c023b1f4eeb80fbe23818d86670624c10159e1ac"
+  }
+}

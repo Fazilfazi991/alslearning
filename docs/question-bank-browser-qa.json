@@ -1,0 +1,28 @@
+{
+  "preview": "https://alslearning-3brjzav3u-faziils-projects.vercel.app",
+  "deployment": "dpl_4iLmfh1jEvbz6ioFxBuJy7cSNY8S",
+  "sha": "0eeb79dab2e3feb5acae31330318ac07d692f4ad",
+  "kind": "Chrome wall-clock includes locator/DOM automation overhead",
+  "cold": {
+    "shell": 2693,
+    "filters": 3503,
+    "listAndCount": 3953
+  },
+  "interactions": {
+    "subject": 581,
+    "section": 494,
+    "status": 458,
+    "nextPage": 2535,
+    "search": 711,
+    "detail": 3841
+  },
+  "desktop": {
+    "width": 1440,
+    "scrollWidth": 1425
+  },
+  "mobile": {
+    "width": 390,
+    "height": 844,
+    "scrollWidth": 375
+  }
+}

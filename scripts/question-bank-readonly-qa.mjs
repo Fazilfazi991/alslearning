@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {writeFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import {login,anonymous} from './biochemistry-client.mjs';
 import {productionImportClients} from './production-import-client.mjs';
 const production=process.argv[2]==='production';
@@ -28,6 +28,14 @@ for(const subject of subjects.filter(s=>['Pathology','Microbiology','Biochemistr
  assert.equal(q.question_options.length,4);assert.ok(q.question_answer_keys.length);report.representatives.push({subject:subject.name,id:q.id,prompt:q.prompt.slice(0,100),options:q.question_options.length,answers:q.question_answer_keys.length});
 }
 if(!production){
+ for(const sample of JSON.parse(readFileSync('docs/question-bank-representatives.json'))){
+  const q=(await timed(sample.case,db.from('questions').select(full).eq('id',sample.id).single())).data;
+  assert.ok(q.question_answer_keys.length);assert.ok(q.question_answer_keys.every(k=>q.question_options.some(o=>o.id===k.option_id)));
+  const rich=JSON.stringify([q.prompt_rich,q.explanation_rich,...q.question_options.map(o=>o.content_rich)]);
+  if(sample.case.includes('Q190'))assert.equal(q.question_media.filter(m=>m.kind==='solution').length,4);
+  if(sample.case.includes('image-only'))assert.equal(q.prompt,'');
+  report.representatives.push({case:sample.case,id:q.id,options:q.question_options.length,answers:q.question_answer_keys.length,media:q.question_media.length,tables:(rich.match(/"type":"table"/g)||[]).length,superscripts:(rich.match(/superscript/g)||[]).length,prompt:q.prompt.slice(0,100)});
+ }
  const student=(await login('student')).db;const anon=anonymous();
  for(const [name,client] of [['student',student],['anonymous',anon]])for(const [kind,q] of [['list',client.from('questions').select(columns).range(0,24)],['detail',client.from('questions').select(full).eq('id',first.data[0].id)]]){const r=await q;assert.ok(r.error||r.data.length===0,`${name} ${kind} denied`);report.checks.push(`${name} ${kind} denied`);}
  await student.auth.signOut({scope:'local'});
