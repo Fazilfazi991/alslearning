@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {writeFileSync,existsSync} from 'node:fs';
+import {productionImportClients} from './production-import-client.mjs';
+import {programId,subjectId,studentId,read,ok} from './biochemistry-program-assignment.mjs';
+const {admin}=await productionImportClients();
+const id='1781c9ea-76a3-4f26-a23f-56cc1176e7ef';
+const test=ok(await admin.from('tests').select('*').eq('id',id).single());assert.equal(test.program_id,programId);
+const batches=ok(await admin.from('test_batches').select('*').eq('test_id',id));assert.equal(batches.length,1);
+const enrolled=ok(await admin.from('enrollments').select('student_id,status').eq('batch_id',batches[0].batch_id).eq('status','active'));
+assert.deepEqual(enrolled.map(e=>e.student_id),[studentId],'Existing private batch must contain only the authorized Student');
+const priorQuestions=ok(await admin.from('test_questions').select('*').eq('test_id',id).order('display_order'));
+const oldAttempts=ok(await admin.from('test_attempts').select('*').eq('test_id',id).order('id'));
+assert.ok(oldAttempts.every(a=>a.status==='submitted'),'Do not modify test with in-progress attempt');
+const beforeFile='.local-qa/biochemistry-live-test-before.json';
+if(!existsSync(beforeFile))writeFileSync(beforeFile,JSON.stringify({test,batches,questions:priorQuestions,attempts:oldAttempts},null,2));
+const original=read(beforeFile);
+const rows=ok(await admin.from('questions').select('id,subject_id,chapter_id,status,source_label').in('id',original.questions.map(q=>q.question_id)));
+const pathId='16a8ce52-9e59-4914-af0a-c614cfe4826d',microId='6d9f0a3a-14d1-48a9-abe8-a5cc7f7f7fae';
+const selections=[...rows.filter(q=>q.subject_id===pathId&&q.status==='active').slice(0,3),...rows.filter(q=>q.subject_id===microId&&q.status==='active').slice(0,3)];assert.equal(selections.length,6);
+const manifest=read('docs/production-biochemistry-import-manifest.json');
+for(const [bio,n]of [[1,6],[3,5],[4,5],[5,19],[5,28],[5,35],[7,46],[8,10],[8,30]]){
+ const source=manifest.records.find(q=>q.bio===bio&&q.source_sequence===n);assert.equal(source.status,'active');
+ selections.push(ok(await admin.from('questions').select('id,subject_id,chapter_id,status,source_label').eq('id',source.question_id).single()));
+}
+const value={...test,title:'LIVE QA — Three Subject Acceptance',question_count:15,subject_id:null,chapter_id:null,topic_id:null,selection_mode:'manual',selection_rules:{scopes:[pathId,microId,subjectId].map(subject_id=>({subject_id,chapter_ids:[],count:selections.filter(q=>q.subject_id===subject_id).length}))}};
+ok(await admin.rpc('core_save_test',{value,question_ids:selections.map(q=>q.id),batch_ids:batches.map(b=>b.batch_id)}));
+assert.deepEqual(ok(await admin.from('test_attempts').select('*').in('id',original.attempts.map(a=>a.id)).order('id')),original.attempts,'Existing attempt history unchanged');
+writeFileSync('docs/biochemistry-live-test.json',JSON.stringify({test_id:id,title:value.title,batch_id:batches[0].batch_id,authorized_student:studentId,existing_test_updated:true,new_tests:0,enrollment_changes:0,questions:selections,prior_attempts_preserved:original.attempts.map(a=>a.id)},null,2)+'\n');
+console.log(JSON.stringify({test_id:id,title:value.title,questions:15,new_tests:0,existing_history_preserved:true}));
+await admin.auth.signOut({scope:'local'});

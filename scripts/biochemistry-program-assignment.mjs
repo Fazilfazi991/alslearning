@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {query,PRODUCTION,QA} from './helper-grants-lib.mjs';
+import {snapshot,hash} from './biochemistry-production-baseline.mjs';
+import {productionImportClients} from './production-import-client.mjs';
+export const programId='fa5c8e10-6485-4b65-b354-ccbfcc4a0a63';
+export const subjectId='7c243eff-1f33-4c96-a2cf-e65f08f9fcfa';
+export const studentId='c4a4db85-7407-4da1-bc8f-36016920b3c9';
+export const contentSql=['questions','question_options','question_answer_keys','question_media','chapters','subjects','enrollments'].map(t=>`select '${t}' name,count(*) count,md5(coalesce(string_agg(to_jsonb(r)::text,'' order by to_jsonb(r)::text),'')) hash from public.${t} r`).join(' union all ');
+export const read=p=>JSON.parse(readFileSync(p,'utf8'));
+export const ok=r=>{if(r.error)throw r.error;return r.data;};
+if(process.argv[2]==='assign'){
+ assert.equal(process.env.ALS_PRODUCTION_IMPORT_REF,PRODUCTION);
+ const file='.local-qa/biochemistry-assignment-before.json';
+ const {admin}=await productionImportClients();
+ const program=ok(await admin.from('programs').select('*').eq('id',programId).single());assert.equal(program.name,'DHS Long Term');assert.equal(program.status,'active');
+ const subject=ok(await admin.from('subjects').select('*').eq('id',subjectId).single());assert.equal(subject.name,'Biochemistry');assert.equal(subject.status,'active');
+ const student=ok(await admin.from('profiles').select('id,email,role,is_active').eq('id',studentId).single());assert.equal(student.email,'zorxdxb@gmail.com');assert.equal(student.is_active,true);
+ const enrollments=ok(await admin.from('enrollments').select('*').eq('student_id',studentId));
+ assert.ok(enrollments.some(e=>e.program_id===programId&&e.status==='active'&&(!e.access_starts_at||Date.parse(e.access_starts_at)<=Date.now())&&(!e.access_expires_at||Date.parse(e.access_expires_at)>Date.now())),'Student not legitimately enrolled in DHS');
+ const mappings=ok(await admin.from('program_subjects').select('*').order('program_id').order('display_order'));
+ if(!existsSync(file))writeFileSync(file,JSON.stringify({project:PRODUCTION,program,subject,student,enrollments,mappings,content:await query(PRODUCTION,contentSql),production:await snapshot(PRODUCTION),qa:await snapshot(QA),quarantine:Object.fromEntries(['pathology','microbiology','biochemistry'].map(s=>{const p=`docs/production-${s}-quarantine.json`;return [s,existsSync(p)?hash(readFileSync(p)):null];}))},null,2));
+ const before=read(file);assert.equal(before.project,PRODUCTION);
+ const found=mappings.filter(m=>m.program_id===programId&&m.subject_id===subjectId);assert.ok(found.length<=1);
+ if(!found.length)ok(await admin.from('program_subjects').insert({program_id:programId,subject_id:subjectId,display_order:2}));
+ const after=ok(await admin.from('program_subjects').select('*').order('program_id').order('display_order'));
+ assert.equal(after.filter(m=>m.program_id===programId&&m.subject_id===subjectId).length,1);
+ assert.deepEqual(after.filter(m=>m.subject_id!==subjectId),before.mappings.filter(m=>m.subject_id!==subjectId),'Existing assignments unchanged');
+ assert.deepEqual(await query(PRODUCTION,contentSql),before.content,'Content and enrollment unchanged');
+ const reportFile='docs/biochemistry-program-assignment.json';const report=existsSync(reportFile)?read(reportFile):{production:PRODUCTION,program_id:programId,subject_id:subjectId,student,enrollments,assignments_before:before.mappings,runs:[]};
+ report.assignments_after=after;report.runs.push({new_mappings:found.length?0:1});
+ writeFileSync(reportFile,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+ await admin.auth.signOut({scope:'local'});
+}
