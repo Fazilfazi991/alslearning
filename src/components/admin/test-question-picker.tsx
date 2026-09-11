@@ -8,7 +8,7 @@ import { RichContent } from "@/components/learning/rich-text";
 import { QuestionGallery } from "@/components/learning/question-gallery";
 
 function sourceIdentity(q: Question) {
-  const parts = q.source_label.split("|").map((part) => part.trim());
+  const parts = (q.source_label || "").split("|").map((part) => part.trim());
   return [parts.find((part) => /^Q\d+$/.test(part)), parts[0] || q.source_reference]
     .filter(Boolean).join(" · ");
 }
