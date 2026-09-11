@@ -26,3 +26,7 @@ it("shows per-subject quotas and a derived total without an editable combined ra
  expect(html).toContain("Total requested: 5");expect(html).not.toContain("Number of questions");expect(html).not.toContain("undefined");
  expect(html).toContain("No active questions are available for this scope.");
 });
+it("renders authorized lightweight bank rows without optional source labels",()=>{
+ const q={...newQuestion(),prompt:"Assigned question",source_label:undefined!};
+ expect(()=>renderToStaticMarkup(<TestQuestionPicker questions={[q]} selected={[]} onChange={()=>{}}/>)).not.toThrow();
+});
