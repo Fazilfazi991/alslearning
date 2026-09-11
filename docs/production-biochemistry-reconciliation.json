@@ -1,0 +1,343 @@
+{
+  "production_project": "dvmahmkapgtjfqmoottt",
+  "qa_project": "xstssknlgdraulebdsfd",
+  "source_hashes": [
+    {
+      "file": "app friendly format - JSO SIR 15 - Biochemistry of Major Biomolecules.docx",
+      "sha256": "11b1423f0f4bb6ca9f63656ec3d63e00226b4b6c96383ffae7d3d6e1b17685d8"
+    },
+    {
+      "file": "app friendly format - JSO SIR 16 - Vitamins and Minerals, Hemoglobin.docx",
+      "sha256": "a07ea0df2229536fca082e76c5de88a243eeb96b89758cf9be126a36c489a79b"
+    },
+    {
+      "file": "app friendly format - JSO SIR 17 - Enzymology, Techniques and Instrumentation, Biostatistics.docx",
+      "sha256": "8c3c3fcd2a886d900a1cea2a617f3e254fd28936916e285c8f53aa7b499233b5"
+    },
+    {
+      "file": "app friendly format - JSO SIR 14 -Molecular Biology.docx",
+      "sha256": "b9ae909c2faf3b63b38b2a9059359dc4fa5fea7084376d1e89afb9a41383f12a"
+    },
+    {
+      "file": "app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx",
+      "sha256": "9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08"
+    },
+    {
+      "file": "app friendly format - JSO SIR 19 - Clinical biochemistry.docx",
+      "sha256": "585cf396c088a50c9c391711fb6ab1ed63ba80bebb0cb6f6194532de594f9101"
+    },
+    {
+      "file": "app friendly format - JSO SIR 19 - Diagnostic Biochemistry.docx",
+      "sha256": "e2eb10f49392bd1b915a5d834b220eb51ccc6a81f638ca69afd62924366e76d9"
+    },
+    {
+      "file": "app friendly format - JSO SIR 20 - HORMONES,QC,TOXICOLOGY.docx",
+      "sha256": "82e126f998ecd542fb5814f2b1611a1ecc21ef8bbfeeef67ce56f46b37407c26"
+    }
+  ],
+  "before": {
+    "users": 2,
+    "tests": 1,
+    "attempts": 2,
+    "questions": 1759,
+    "options": 7036,
+    "keys": 1759,
+    "media": 124,
+    "storage_objects": 135,
+    "subjects": 3,
+    "chapters": 13
+  },
+  "after": {
+    "users": 2,
+    "tests": 1,
+    "attempts": 2,
+    "questions": 2472,
+    "options": 9888,
+    "keys": 2472,
+    "media": 124,
+    "storage_objects": 135,
+    "subjects": 3,
+    "chapters": 21
+  },
+  "subjects_before": [
+    {
+      "slug": "biochemistry",
+      "questions": 0,
+      "active": 0,
+      "draft": 0
+    },
+    {
+      "slug": "microbiology",
+      "questions": 793,
+      "active": 791,
+      "draft": 2
+    },
+    {
+      "slug": "pathology",
+      "questions": 966,
+      "active": 961,
+      "draft": 5
+    }
+  ],
+  "subjects_after": [
+    {
+      "slug": "biochemistry",
+      "questions": 713,
+      "active": 708,
+      "draft": 5
+    },
+    {
+      "slug": "microbiology",
+      "questions": 793,
+      "active": 791,
+      "draft": 2
+    },
+    {
+      "slug": "pathology",
+      "questions": 966,
+      "active": 961,
+      "draft": 5
+    }
+  ],
+  "reconciliation": [
+    {
+      "bio": 1,
+      "source": 32,
+      "active": 32,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 0
+    },
+    {
+      "bio": 2,
+      "source": 46,
+      "active": 46,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 0
+    },
+    {
+      "bio": 3,
+      "source": 44,
+      "active": 44,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 1
+    },
+    {
+      "bio": 4,
+      "source": 200,
+      "active": 200,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 0
+    },
+    {
+      "bio": 5,
+      "source": 42,
+      "active": 41,
+      "draft": 0,
+      "quarantine": 1,
+      "tables": 3
+    },
+    {
+      "bio": 6,
+      "source": 202,
+      "active": 197,
+      "draft": 5,
+      "quarantine": 0,
+      "tables": 1
+    },
+    {
+      "bio": 7,
+      "source": 85,
+      "active": 85,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 1
+    },
+    {
+      "bio": 8,
+      "source": 63,
+      "active": 63,
+      "draft": 0,
+      "quarantine": 0,
+      "tables": 2
+    }
+  ],
+  "first_run": {
+    "new_subjects": 0,
+    "new_chapters": 8,
+    "new_questions": 713,
+    "new_options": 2852,
+    "new_answer_keys": 713,
+    "new_tables": 8,
+    "new_import_identities": 713,
+    "unchanged_questions": 0,
+    "uploads": 0,
+    "new_quarantine_duplicates": 0
+  },
+  "second_run": {
+    "new_subjects": 0,
+    "new_chapters": 0,
+    "new_questions": 0,
+    "new_options": 0,
+    "new_answer_keys": 0,
+    "new_tables": 0,
+    "new_import_identities": 0,
+    "unchanged_questions": 713,
+    "uploads": 0,
+    "new_quarantine_duplicates": 0
+  },
+  "complete_payloads_verified": 713,
+  "first_run_verified": 12,
+  "tables": [
+    {
+      "question_id": "21289ce9-3edf-5b07-81ff-361f5e133296",
+      "role": "prompt_rich",
+      "table_sha256": "bf4d8ad11a82dc3f6b3f7dc7451aedc2d743b377834ccf6146ad70adef8d429e"
+    },
+    {
+      "question_id": "388aa286-509f-5d4b-9cea-9f9681b6d8e4",
+      "role": "prompt_rich",
+      "table_sha256": "7d8d7b7e82a641a9af819d73f395ff2fa0b81a49b0d457d645dd5757e646b7c3"
+    },
+    {
+      "question_id": "4ee3b7cf-a3bb-5bf4-9ae6-16ab4af25ccc",
+      "role": "explanation_rich",
+      "table_sha256": "a8d2adaff8072c3704f9daedafb6812a36bec1200445988d3817078ec9fb1028"
+    },
+    {
+      "question_id": "5e452286-ace0-59fc-a6cd-72f8c8a13603",
+      "role": "prompt_rich",
+      "table_sha256": "6f96e8f01c997bf73752cc24d376cc146f037472a9140402df178c9c921a40a6"
+    },
+    {
+      "question_id": "5eefebc0-3789-5897-a4ce-a4c8fbc44495",
+      "role": "prompt_rich",
+      "table_sha256": "e3b2bec2b9c7639d1186aad1fb47ce981893367fc7e483f5c580ffe070e32e30"
+    },
+    {
+      "question_id": "77bef041-e6dd-5d80-8f24-f4c168d3e235",
+      "role": "explanation_rich",
+      "table_sha256": "f0f92763b348ce4417ca352bb8e2a5ced5e46592057e2c08b37dd310942e0e69"
+    },
+    {
+      "question_id": "9dc7f6be-57ee-5b56-9eb3-ad3a02ef5f4b",
+      "role": "prompt_rich",
+      "table_sha256": "7b69d632cfd829bf52b685ec4e92dd1c48d910e626a2c836a6872feeb10b3e5c"
+    },
+    {
+      "question_id": "af118809-2f3b-5212-8a91-d89415745205",
+      "role": "prompt_rich",
+      "table_sha256": "12b427d9368b2a14d7f9deb45741234c5468679f6fbf63edc5898a4a6c5992b0"
+    }
+  ],
+  "integrity": {
+    "orphan_options": 0,
+    "orphan_keys": 0,
+    "duplicate_chapters": 0,
+    "duplicate_subjects": 0,
+    "duplicate_bio_identities": 0,
+    "attempt_insert": false,
+    "attempt_update": false,
+    "attempt_delete": false,
+    "orphan_tables": 0,
+    "orphan_tables_basis": "Canonical embedded AST; all eight blocks attached to exact source parent and full payload compared"
+  },
+  "security": {
+    "admin_authoring": "713 canonical RPC imports",
+    "student_authoring_denied": true,
+    "student_answer_keys_denied": true,
+    "direct_attempt_mutation_privileges": false,
+    "teacher_boundaries": "All function definitions and policies unchanged; assignment predicate verified; no Teacher created",
+    "rls_and_functions_unchanged": true,
+    "migrations_unchanged": true
+  },
+  "selection": {
+    "subjects": [
+      "Pathology",
+      "Microbiology",
+      "Biochemistry"
+    ],
+    "sections": [
+      "BIO 1 — Biochemistry of Major Biomolecules",
+      "BIO 2 — Vitamins and Minerals, Hemoglobin",
+      "BIO 3 — Enzymology, Techniques and Instrumentation, Biostatistics",
+      "BIO 4 — Molecular Biology",
+      "BIO 5 — Physical Chemistry, General Biochemistry",
+      "BIO 6 — Clinical Biochemistry",
+      "BIO 7 — Diagnostic Biochemistry",
+      "BIO 8 — Hormones, QC, Toxicology"
+    ],
+    "manual": 0,
+    "random": 0,
+    "drafts_excluded": 5,
+    "quarantine_excluded": 1,
+    "blocker": "Biochemistry has no compatible Production program assignment; application scope eligibility remains blocked.",
+    "active_bank_records": 708,
+    "existing_programs": [
+      {
+        "id": "fa5c8e10-6485-4b65-b354-ccbfcc4a0a63",
+        "name": "DHS Long Term",
+        "exam_id": null
+      },
+      {
+        "id": "00a5d604-0de5-4c88-abaf-0037f154dbdb",
+        "name": "DME Long Term",
+        "exam_id": null
+      },
+      {
+        "id": "599f9e5c-938c-4573-b578-146a4f36e02e",
+        "name": "MSc MLT Entrance",
+        "exam_id": "8181a204-3a9c-4540-9748-781b0362d43e"
+      },
+      {
+        "id": "af7d5547-5f87-4cd0-9c9e-aff78131f277",
+        "name": "CRE Crash Course",
+        "exam_id": "fabf8e37-46c9-47b6-a710-2525195d3fd7"
+      }
+    ],
+    "biochemistry_program_mappings": []
+  },
+  "existing_production_fingerprints_unchanged": true,
+  "qa_snapshot_unchanged": true,
+  "frontend_changed": false,
+  "vercel_changed": false,
+  "deployed": false,
+  "evidence_hashes": {
+    "production_security_before": "79d1110afc595eeaa88cd8bf16e8a36697ccdbf6a16ee767e7879b349337e97c",
+    "production_security_after": "79d1110afc595eeaa88cd8bf16e8a36697ccdbf6a16ee767e7879b349337e97c",
+    "protected_public_data_before": "98924b1b492c8a67dce156a525b944dea327db7284b5e170fa25f9d11c6ebd78",
+    "protected_public_data_after": "98924b1b492c8a67dce156a525b944dea327db7284b5e170fa25f9d11c6ebd78",
+    "qa_before": "03b547c99e703fe4c9ff4d388d6518943c1ef6a5dfdb278d16635d04b2d19e22",
+    "qa_after": "03b547c99e703fe4c9ff4d388d6518943c1ef6a5dfdb278d16635d04b2d19e22"
+  },
+  "qa_counts": {
+    "before": {
+      "users": 85,
+      "tests": 65,
+      "attempts": 111,
+      "questions": 2533,
+      "options": 10084,
+      "keys": 2540,
+      "media": 244,
+      "storage_objects": 244,
+      "subjects": 12,
+      "chapters": 29
+    },
+    "after": {
+      "users": 85,
+      "tests": 65,
+      "attempts": 111,
+      "questions": 2533,
+      "options": 10084,
+      "keys": 2540,
+      "media": 244,
+      "storage_objects": 244,
+      "subjects": 12,
+      "chapters": 29
+    }
+  },
+  "verdict": "BIOCHEMISTRY PRODUCTION IMPORT — FAIL"
+}

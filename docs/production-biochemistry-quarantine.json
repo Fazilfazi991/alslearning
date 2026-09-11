@@ -1,0 +1,264 @@
+[
+  {
+    "source_document": "app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx",
+    "source_sha256": "9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08",
+    "source_sequence": 31,
+    "source_key": "9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08:31",
+    "options": [
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Microsomes",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Microsomes"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Mitochondria",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Mitochondria"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Cytoplasm",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Cytoplasm"
+      },
+      {
+        "content_rich": {
+          "version": 1,
+          "blocks": [
+            {
+              "runs": [
+                {
+                  "text": "Peroxisome  ",
+                  "marks": []
+                }
+              ]
+            }
+          ]
+        },
+        "source_designation": "Incorrect",
+        "correct": false,
+        "content": "Peroxisome  "
+      }
+    ],
+    "media": [],
+    "anomalies": [],
+    "format_runs": [],
+    "prompt_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "31)",
+              "marks": [
+                "bold"
+              ]
+            },
+            {
+              "text": " ",
+              "marks": [
+                "bold"
+              ]
+            },
+            {
+              "text": "Which of the following cellular organelle extracted in the final step of differential centrifugation?",
+              "marks": [
+                "bold"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "source_question_type": "multiple_choice",
+    "explanation_rich": {
+      "version": 1,
+      "blocks": [
+        {
+          "runs": [
+            {
+              "text": "Correct Answer: C) Cytoplasm",
+              "marks": []
+            }
+          ]
+        }
+      ]
+    },
+    "marks": 1,
+    "negative_marks": 0,
+    "prompt": "31) Which of the following cellular organelle extracted in the final step of differential centrifugation?",
+    "explanation": "Correct Answer: C) Cytoplasm",
+    "type": "single_mcq",
+    "structural_errors": [
+      "Missing correct answer"
+    ],
+    "answer_conflict": true,
+    "content_review": "CONTENT REVIEW REQUIRED",
+    "rich_text": true,
+    "source_reference_candidates": [],
+    "source_type": "standard",
+    "bio": 5,
+    "subhead": "BIO 5 — Physical Chemistry, General Biochemistry",
+    "scoped_source_identity": "298ec6e1790f00e4c705fa3b8124f0080e9fd39964614202573c911f5cde1f0b",
+    "review_reasons": [],
+    "quarantine_reasons": [
+      "MISSING CORRECT OPTION MARKER — DO NOT INFER FROM SOLUTION"
+    ],
+    "technical_reasons": [],
+    "marked_answers": [],
+    "answer_claims": [
+      {
+        "raw": "Correct Answer: C) Cytoplasm",
+        "label": "C",
+        "named_answer": "Cytoplasm",
+        "exact_named_option_matches": [
+          "C"
+        ]
+      }
+    ],
+    "cancelled": false,
+    "displayed_number": 31,
+    "stem_without_display_number": "Which of the following cellular organelle extracted in the final step of differential centrifugation?",
+    "native_tables": 0,
+    "source_order": [
+      {
+        "role": "question",
+        "option": null,
+        "source": [
+          "paragraph"
+        ],
+        "canonical": [
+          "paragraph"
+        ],
+        "text_exact_ignoring_whitespace": true
+      },
+      {
+        "role": "option",
+        "option": 1,
+        "source": [
+          "paragraph"
+        ],
+        "canonical": [
+          "paragraph"
+        ],
+        "text_exact_ignoring_whitespace": true
+      },
+      {
+        "role": "option",
+        "option": 2,
+        "source": [
+          "paragraph"
+        ],
+        "canonical": [
+          "paragraph"
+        ],
+        "text_exact_ignoring_whitespace": true
+      },
+      {
+        "role": "option",
+        "option": 3,
+        "source": [
+          "paragraph"
+        ],
+        "canonical": [
+          "paragraph"
+        ],
+        "text_exact_ignoring_whitespace": true
+      },
+      {
+        "role": "option",
+        "option": 4,
+        "source": [
+          "paragraph"
+        ],
+        "canonical": [
+          "paragraph"
+        ],
+        "text_exact_ignoring_whitespace": true
+      },
+      {
+        "role": "solution",
+        "option": null,
+        "source": [
+          "paragraph"
+        ],
+        "canonical": [
+          "paragraph"
+        ],
+        "text_exact_ignoring_whitespace": true
+      }
+    ],
+    "format_inventory": {
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "superscript": false,
+      "subscript": false
+    },
+    "scientific_inventory": {
+      "unicode_superscript": false,
+      "unicode_subscript": false,
+      "greek": false,
+      "arrows": false,
+      "math_symbols": false,
+      "mu": false,
+      "angstrom": false,
+      "formula_candidate": false,
+      "isotope_candidate": false
+    },
+    "previous_paper_evidence": [],
+    "source_literal_exam_codes": [],
+    "scientific_characters": [],
+    "image_only_stem": false,
+    "table_only_stem": false,
+    "analytical_types": {
+      "single_mcq": true,
+      "genuine_multiple_select": false,
+      "assertion_reason": false,
+      "matching_combination": false,
+      "multi_statement_combination": false,
+      "image_only": false,
+      "table_containing": false
+    },
+    "classification": "QUARANTINE",
+    "disposition": "Recoverable source manifest; never inserted as usable question"
+  }
+]
