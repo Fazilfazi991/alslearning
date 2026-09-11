@@ -3,145 +3,205 @@
   "measurements": [
     {
       "name": "first page",
-      "ms": 763,
+      "ms": 757,
       "rows": 25,
       "bytes": 17294,
       "count": null
     },
     {
       "name": "next page",
-      "ms": 591,
+      "ms": 912,
       "rows": 25,
       "bytes": 17539,
       "count": null
     },
     {
       "name": "exact total",
-      "ms": 1064,
+      "ms": 721,
       "bytes": 4,
       "count": 2533
     },
     {
       "name": "subjects",
-      "ms": 219,
+      "ms": 225,
       "rows": 12,
       "bytes": 968,
       "count": null
     },
     {
       "name": "chapters",
-      "ms": 363,
+      "ms": 368,
       "rows": 29,
       "bytes": 3964,
       "count": null
     },
     {
       "name": "Pathology active",
-      "ms": 501,
+      "ms": 816,
       "rows": 25,
       "bytes": 14781,
       "count": 961
     },
     {
       "name": "Pathology draft",
-      "ms": 489,
+      "ms": 496,
       "rows": 5,
       "bytes": 3161,
       "count": 5
     },
     {
       "name": "Pathology section",
-      "ms": 590,
+      "ms": 255,
       "rows": 25,
       "bytes": 15534,
       "count": null
     },
     {
       "name": "Pathology search",
-      "ms": 375,
+      "ms": 369,
       "rows": 4,
       "bytes": 2296,
       "count": null
     },
     {
       "name": "Microbiology active",
-      "ms": 440,
+      "ms": 456,
       "rows": 25,
       "bytes": 15729,
       "count": 791
     },
     {
       "name": "Microbiology draft",
-      "ms": 429,
+      "ms": 457,
       "rows": 2,
       "bytes": 1207,
       "count": 2
     },
     {
       "name": "Microbiology section",
-      "ms": 247,
+      "ms": 250,
       "rows": 25,
       "bytes": 17106,
       "count": null
     },
     {
       "name": "Microbiology search",
-      "ms": 330,
+      "ms": 396,
       "rows": 3,
       "bytes": 2067,
       "count": null
     },
     {
       "name": "Biochemistry active",
-      "ms": 453,
+      "ms": 468,
       "rows": 25,
       "bytes": 17294,
       "count": 708
     },
     {
       "name": "Biochemistry draft",
-      "ms": 438,
+      "ms": 409,
       "rows": 5,
       "bytes": 3432,
       "count": 5
     },
     {
       "name": "Biochemistry section",
-      "ms": 212,
+      "ms": 236,
       "rows": 25,
       "bytes": 17623,
       "count": null
     },
     {
       "name": "Biochemistry search",
-      "ms": 319,
+      "ms": 327,
       "rows": 15,
       "bytes": 11688,
       "count": null
     },
     {
       "name": "empty search",
-      "ms": 595,
+      "ms": 653,
       "rows": 0,
       "bytes": 2,
       "count": null
     },
     {
       "name": "Biochemistry detail",
-      "ms": 292,
+      "ms": 541,
       "bytes": 2363,
       "count": null
     },
     {
       "name": "Microbiology detail",
-      "ms": 215,
+      "ms": 229,
       "bytes": 2611,
       "count": null
     },
     {
       "name": "Pathology detail",
-      "ms": 210,
+      "ms": 230,
       "bytes": 2586,
+      "count": null
+    },
+    {
+      "name": "Pathology Q190 four images",
+      "ms": 221,
+      "bytes": 6670,
+      "count": null
+    },
+    {
+      "name": "Pathology GIF",
+      "ms": 229,
+      "bytes": 6670,
+      "count": null
+    },
+    {
+      "name": "Microbiology table",
+      "ms": 224,
+      "bytes": 5640,
+      "count": null
+    },
+    {
+      "name": "Microbiology EMF",
+      "ms": 221,
+      "bytes": 5781,
+      "count": null
+    },
+    {
+      "name": "MICRO 4 Q71 image-only",
+      "ms": 218,
+      "bytes": 4657,
+      "count": null
+    },
+    {
+      "name": "Biochemistry table",
+      "ms": 218,
+      "bytes": 3809,
+      "count": null
+    },
+    {
+      "name": "Biochemistry isotope superscripts",
+      "ms": 213,
+      "bytes": 2399,
+      "count": null
+    },
+    {
+      "name": "Biochemistry Unicode subscripts and charges",
+      "ms": 234,
+      "bytes": 2690,
+      "count": null
+    },
+    {
+      "name": "Biochemistry long explanation table",
+      "ms": 242,
+      "bytes": 4439,
+      "count": null
+    },
+    {
+      "name": "Biochemistry scientific formula",
+      "ms": 233,
+      "bytes": 2279,
       "count": null
     }
   ],
@@ -175,6 +235,106 @@
       "prompt": "Statement I: Washed red cells are used to prevent allergic transfusion reactions.\nStatement II: Wash",
       "options": 4,
       "answers": 1
+    },
+    {
+      "case": "Pathology Q190 four images",
+      "id": "5cd928bc-2e6c-5881-be56-5c720dcd154d",
+      "options": 4,
+      "answers": 1,
+      "media": 4,
+      "tables": 0,
+      "superscripts": 0,
+      "prompt": "The oxygen-hemoglobin dissociation curve is:"
+    },
+    {
+      "case": "Pathology GIF",
+      "id": "5cd928bc-2e6c-5881-be56-5c720dcd154d",
+      "options": 4,
+      "answers": 1,
+      "media": 4,
+      "tables": 0,
+      "superscripts": 0,
+      "prompt": "The oxygen-hemoglobin dissociation curve is:"
+    },
+    {
+      "case": "Microbiology table",
+      "id": "0dbc2d62-6fc1-5437-924a-8941e2afa2e9",
+      "options": 4,
+      "answers": 1,
+      "media": 1,
+      "tables": 1,
+      "superscripts": 0,
+      "prompt": "Match the given sterilant or disinfectants with their efficacy and choose the best answer given belo"
+    },
+    {
+      "case": "Microbiology EMF",
+      "id": "16295d50-0e23-507b-8c43-74216af66604",
+      "options": 4,
+      "answers": 1,
+      "media": 1,
+      "tables": 0,
+      "superscripts": 0,
+      "prompt": "Structures important in the microscopic identification of Coccidioides immitis are:"
+    },
+    {
+      "case": "MICRO 4 Q71 image-only",
+      "id": "7cccf803-55fb-56fa-990f-1a4c46ea3675",
+      "options": 4,
+      "answers": 1,
+      "media": 1,
+      "tables": 0,
+      "superscripts": 0,
+      "prompt": ""
+    },
+    {
+      "case": "Biochemistry table",
+      "id": "21289ce9-3edf-5b07-81ff-361f5e133296",
+      "options": 4,
+      "answers": 1,
+      "media": 0,
+      "tables": 1,
+      "superscripts": 0,
+      "prompt": "42) Match the following\nList I (Biomedical Waste)\tList II (Colour Code)\nA. Catheter tube\t1. Blue\nB. "
+    },
+    {
+      "case": "Biochemistry isotope superscripts",
+      "id": "37e43be0-35c8-52bd-b123-5ba3c62699a5",
+      "options": 4,
+      "answers": 1,
+      "media": 0,
+      "tables": 0,
+      "superscripts": 5,
+      "prompt": "35) Which of the following not detected by GM counter but detected by liquid scintillator?"
+    },
+    {
+      "case": "Biochemistry Unicode subscripts and charges",
+      "id": "34253e05-4fd0-5b60-8da3-fe812e6dfcee",
+      "options": 4,
+      "answers": 1,
+      "media": 0,
+      "tables": 0,
+      "superscripts": 0,
+      "prompt": "46) Find the correct ABG interpretation, ABG Report: pH = 7.50, PaCO₂ = 28 mmHg, HCO₃⁻ = 22 mEq/L"
+    },
+    {
+      "case": "Biochemistry long explanation table",
+      "id": "5eefebc0-3789-5897-a4ce-a4c8fbc44495",
+      "options": 4,
+      "answers": 1,
+      "media": 0,
+      "tables": 1,
+      "superscripts": 0,
+      "prompt": "5) Match the following correctly \nI.\tOxidoreductase \ta. fumarase\nII.\tHydrolase\tb. amino acyl tRNA sy"
+    },
+    {
+      "case": "Biochemistry scientific formula",
+      "id": "3a205392-b1e4-5674-94ee-4894253efdd4",
+      "options": 4,
+      "answers": 1,
+      "media": 0,
+      "tables": 0,
+      "superscripts": 0,
+      "prompt": "30. Which of the following equations are used for calculating standard deviation?"
     }
   ]
 }

@@ -1,0 +1,196 @@
+[
+  {
+    "case": "Pathology Q190 four images",
+    "id": "5cd928bc-2e6c-5881-be56-5c720dcd154d",
+    "subject": "Pathology",
+    "section": "PATHO 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis",
+    "prompt": "The oxygen-hemoglobin dissociation curve is:",
+    "source_label": "CONTENT REVIEW REQUIRED | PATHO 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis | app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx | Q190 | batch=als-pathology-client-20260910-v1 | source=5a1b81dab4ffc092f44d501eecf377524acc8a559f61675e8349d7c4ed9a4f82:190",
+    "explanation_length": 10,
+    "has_table": false,
+    "has_super": false,
+    "has_sub": false,
+    "media": [
+      {
+        "kind": "solution",
+        "type": "image/png",
+        "original": null,
+        "position": 0
+      },
+      {
+        "kind": "solution",
+        "type": "image/jpeg",
+        "original": null,
+        "position": 1
+      },
+      {
+        "kind": "solution",
+        "type": "image/png",
+        "original": null,
+        "position": 2
+      },
+      {
+        "kind": "solution",
+        "type": "image/gif",
+        "original": null,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "case": "Pathology GIF",
+    "id": "5cd928bc-2e6c-5881-be56-5c720dcd154d",
+    "subject": "Pathology",
+    "section": "PATHO 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis",
+    "prompt": "The oxygen-hemoglobin dissociation curve is:",
+    "source_label": "CONTENT REVIEW REQUIRED | PATHO 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis | app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx | Q190 | batch=als-pathology-client-20260910-v1 | source=5a1b81dab4ffc092f44d501eecf377524acc8a559f61675e8349d7c4ed9a4f82:190",
+    "explanation_length": 10,
+    "has_table": false,
+    "has_super": false,
+    "has_sub": false,
+    "media": [
+      {
+        "kind": "solution",
+        "type": "image/png",
+        "original": null,
+        "position": 0
+      },
+      {
+        "kind": "solution",
+        "type": "image/jpeg",
+        "original": null,
+        "position": 1
+      },
+      {
+        "kind": "solution",
+        "type": "image/png",
+        "original": null,
+        "position": 2
+      },
+      {
+        "kind": "solution",
+        "type": "image/gif",
+        "original": null,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "case": "Microbiology table",
+    "id": "0dbc2d62-6fc1-5437-924a-8941e2afa2e9",
+    "subject": "Microbiology",
+    "section": "MICRO 1 - General Microbiology",
+    "prompt": "Match the given sterilant or disinfectants with their efficacy and choose the best answer given below.\nSterila",
+    "source_label": "MICRO 1 - General Microbiology | app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx | Q12 | batch=als-microbiology-client-20260910-v1 | source=d4f08f98c6e1b0206a59c9334261fcc1cb3a9a3e1fa9e25c3d7015719a27ce7b:12",
+    "explanation_length": 48,
+    "has_table": true,
+    "has_super": false,
+    "has_sub": false,
+    "media": [
+      {
+        "kind": "solution",
+        "type": "image/png",
+        "original": null,
+        "position": 0
+      }
+    ]
+  },
+  {
+    "case": "Microbiology EMF",
+    "id": "16295d50-0e23-507b-8c43-74216af66604",
+    "subject": "Microbiology",
+    "section": "MICRO 3 - Mycology",
+    "prompt": "Structures important in the microscopic identification of Coccidioides immitis are:",
+    "source_label": "MICRO 3 - Mycology | app friendly format - JSO SIR 9 - MYCOLOGY.docx | Q57 | batch=als-microbiology-client-20260910-v1 | source=eabc7021575dcc137487eb8ae25831302b11dd96fa8dd2e3dad044afe8c7c7de:57",
+    "explanation_length": 554,
+    "has_table": false,
+    "has_super": false,
+    "has_sub": false,
+    "media": [
+      {
+        "kind": "solution",
+        "type": "image/png",
+        "original": {
+          "sha256": "f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac",
+          "filename": "image7.emf",
+          "mime_type": "image/x-emf",
+          "storage_path": "331c06ef-5252-457e-9b53-fea7439e8304/als-microbiology-client-20260910-v1/16295d50-0e23-507b-8c43-74216af66604/solution-0-f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac.emf"
+        },
+        "position": 0
+      }
+    ]
+  },
+  {
+    "case": "MICRO 4 Q71 image-only",
+    "id": "7cccf803-55fb-56fa-990f-1a4c46ea3675",
+    "subject": "Microbiology",
+    "section": "MICRO 4 - Parasitology",
+    "prompt": "",
+    "source_label": "MICRO 4 - Parasitology | app friendly format - JSO SIR 10 - PARASITOLOGY.docx | Q71 | batch=als-microbiology-client-20260910-v1 | source=ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc:71",
+    "explanation_length": 358,
+    "has_table": false,
+    "has_super": false,
+    "has_sub": false,
+    "media": [
+      {
+        "kind": "stem",
+        "type": "image/jpeg",
+        "original": null,
+        "position": 0
+      }
+    ]
+  },
+  {
+    "case": "Biochemistry table",
+    "id": "21289ce9-3edf-5b07-81ff-361f5e133296",
+    "subject": "Biochemistry",
+    "section": "BIO 5 — Physical Chemistry, General Biochemistry",
+    "prompt": "42) Match the following\nList I (Biomedical Waste)\tList II (Colour Code)\nA. Catheter tube\t1. Blue\nB. Used syrin",
+    "source_label": "BIO 5 — Physical Chemistry, General Biochemistry | app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx | Q42 | visible=42 | batch=als-biochemistry-client-20260911-v1 | source=9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08:42 | identity=d9aadd14aae2bb8f29adb56620c32a705fc10a5f81ad3e9dedd4411b4843a0f6",
+    "explanation_length": 37,
+    "has_table": true,
+    "has_super": false,
+    "has_sub": false,
+    "media": []
+  },
+  {
+    "case": "Biochemistry isotope superscripts",
+    "id": "37e43be0-35c8-52bd-b123-5ba3c62699a5",
+    "bio": 5,
+    "source_sequence": 35,
+    "source_key": "9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08:35",
+    "prompt": "35) Which of the following not detected by GM counter but detected by liquid scintillator?",
+    "source_label": "BIO 5 — Physical Chemistry, General Biochemistry | app friendly format - JSO SIR 18 - Physical Chemistry, General Biochemistry.docx | Q35 | visible=35 | batch=als-biochemistry-client-20260911-v1 | source=9c14707ccd518786d7dbf87b0ab7bcdefd50a62d54facc0d157fb7989849ce08:35 | identity=0bb276381578f759719028baa33bdbd5efac00ab949ba359afdbcab84571d7d1",
+    "explanation_length": 21
+  },
+  {
+    "case": "Biochemistry Unicode subscripts and charges",
+    "id": "34253e05-4fd0-5b60-8da3-fe812e6dfcee",
+    "bio": 7,
+    "source_sequence": 46,
+    "source_key": "e2eb10f49392bd1b915a5d834b220eb51ccc6a81f638ca69afd62924366e76d9:46",
+    "prompt": "46) Find the correct ABG interpretation, ABG Report: pH = 7.50, PaCO₂ = 28 mmHg, HCO₃⁻ = 22 mEq/L",
+    "source_label": "BIO 7 — Diagnostic Biochemistry | app friendly format - JSO SIR 19 - Diagnostic Biochemistry.docx | Q46 | visible=46 | batch=als-biochemistry-client-20260911-v1 | source=e2eb10f49392bd1b915a5d834b220eb51ccc6a81f638ca69afd62924366e76d9:46 | identity=7c300d586f667ac080e861d0a4fe8a296bc7d6cdfc73d5de128917c309c5aa57",
+    "explanation_length": 48
+  },
+  {
+    "case": "Biochemistry long explanation table",
+    "id": "5eefebc0-3789-5897-a4ce-a4c8fbc44495",
+    "bio": 3,
+    "source_sequence": 5,
+    "source_key": "8c3c3fcd2a886d900a1cea2a617f3e254fd28936916e285c8f53aa7b499233b5:5",
+    "prompt": "5) Match the following correctly \nI.\tOxidoreductase \ta. fumarase\nII.\tHydrolase\tb. amino acyl tRNA synthase\nIII.\tLyase\tc. urease\nIV.\tLigase\td. catalase",
+    "source_label": "BIO 3 — Enzymology, Techniques and Instrumentation, Biostatistics | app friendly format - JSO SIR 17 - Enzymology, Techniques and Instrumentation, Biostatistics.docx | Q5 | visible=5 | batch=als-biochemistry-client-20260911-v1 | source=8c3c3fcd2a886d900a1cea2a617f3e254fd28936916e285c8f53aa7b499233b5:5 | identity=dfd2ec95173b3cbc35e50facd1eff5538d99d7976d2e386beb64d86a77d8133e",
+    "explanation_length": 57
+  },
+  {
+    "case": "Biochemistry scientific formula",
+    "id": "3a205392-b1e4-5674-94ee-4894253efdd4",
+    "bio": 8,
+    "source_sequence": 30,
+    "source_key": "82e126f998ecd542fb5814f2b1611a1ecc21ef8bbfeeef67ce56f46b37407c26:30",
+    "prompt": "30. Which of the following equations are used for calculating standard deviation?",
+    "source_label": "BIO 8 — Hormones, QC, Toxicology | app friendly format - JSO SIR 20 - HORMONES,QC,TOXICOLOGY.docx | Q30 | visible=30 | batch=als-biochemistry-client-20260911-v1 | source=82e126f998ecd542fb5814f2b1611a1ecc21ef8bbfeeef67ce56f46b37407c26:30 | identity=eb0f773104771afb8f739f11f39311f03e225681cd3d6d51d9a13e864c6e2788",
+    "explanation_length": 31
+  }
+]

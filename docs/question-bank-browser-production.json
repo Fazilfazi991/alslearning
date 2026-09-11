@@ -1,0 +1,25 @@
+{
+  "deployment": "dpl_GwDLLt5QKhrQoXRwqRzgfaw2HoTR",
+  "sha": "0eeb79dab2e3feb5acae31330318ac07d692f4ad",
+  "url": "https://alslearning.vercel.app/admin/questions",
+  "measurement": "Chrome automation wall-clock; no browser network/hydration trace",
+  "milliseconds": {
+    "shell": 3026,
+    "filters": 3916,
+    "listAndCount": 4071,
+    "subject": 814,
+    "section": 619,
+    "next": 3476,
+    "search": 930,
+    "detail": 3878,
+    "pathologyDraft": 906,
+    "biochemistryDraft": 866,
+    "status": 751,
+    "mobileNext": 2031,
+    "back": 10058
+  },
+  "desktop": { "viewportWidth": 1440, "documentWidth": 1425, "pass": true },
+  "mobile": { "viewportWidth": 390, "viewportHeight": 844, "documentWidth": 375, "pass": true },
+  "imageOnly": { "textEmpty": true, "imageWidth": 200, "imageHeight": 133, "complete": true },
+  "contentSaved": false
+}
