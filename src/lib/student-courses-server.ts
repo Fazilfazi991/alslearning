@@ -25,20 +25,16 @@ export async function getStudentCourse(slug: string, requestedSubject?: string) 
   const subjects = (mapping.data ?? []).flatMap(m => m.subjects ? [m.subjects] : []) as unknown as CourseSubject[];
   subjects.sort((a, b) => a.name.localeCompare(b.name));
   const selected = selectedCourseSubject(subjects, requestedSubject);
-  const countsPromise = Promise.all(subjects.map(async s => {
-    const result = await db.from("recorded_classes").select("id", { count: "exact", head: true }).eq("status", "published").eq("subject_id", s.id);
-    if (result.error) throw new Error("Recording counts could not be loaded. Please try again.");
-    return { subjectId: s.id, count: result.count ?? 0 };
-  }));
-  const [recordings, resources, counts] = await Promise.all([
-    selected ? db.from("recorded_classes")
+  const subjectIds = subjects.map(s => s.id);
+  const [recordings, resources] = await Promise.all([
+    subjectIds.length ? db.from("recorded_classes")
       .select("id,title,subject_id,chapter_id,topic_label,subtopic,provider_video_id,duration_seconds,chapters(name)")
-      .eq("status", "published").eq("subject_id", selected.id).order("sort_order").order("id") : { data: [], error: null },
-    selected ? db.from("learning_content").select("id,title,kind,slug,subject_id")
-      .eq("status", "active").eq("program_id", program.id).eq("subject_id", selected.id).order("display_order") : { data: [], error: null },
-    countsPromise,
+      .eq("status", "published").in("subject_id", subjectIds).order("sort_order").order("id") : { data: [], error: null },
+    subjectIds.length ? db.from("learning_content").select("id,title,kind,slug,subject_id")
+      .eq("status", "active").eq("program_id", program.id).in("subject_id", subjectIds).order("display_order") : { data: [], error: null },
   ]);
   if (recordings.error || resources.error) throw new Error("Learning content could not be loaded. Please try again.");
+  const counts = subjects.map(s => ({ subjectId: s.id, count: (recordings.data ?? []).filter(r => r.subject_id === s.id).length }));
   return { program, enrollment, subjects, selected, counts, recordings: (recordings.data ?? []) as unknown as CourseRecording[], resources: resources.data ?? [] };
 }
 export async function studentRecordingCount() {
