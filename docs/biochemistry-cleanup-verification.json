@@ -1,0 +1,44 @@
+{
+  "test": {
+    "id": "11ddb0d2-19ba-510d-9512-340c1160d2f6",
+    "status": "archived",
+    "question_count": 15,
+    "total_marks": 15
+  },
+  "attempts": [
+    {
+      "id": "aba12e34-4242-4082-9e7c-2396ba640ab3",
+      "status": "submitted",
+      "score": 5,
+      "correct_count": 5,
+      "incorrect_count": 10,
+      "unanswered_count": 0,
+      "started_at": "2026-09-11T08:30:06.698982+00:00"
+    },
+    {
+      "id": "8fa9f43a-4fa0-4a73-9992-4192e2b69b12",
+      "status": "submitted",
+      "score": 1,
+      "correct_count": 1,
+      "incorrect_count": 1,
+      "unanswered_count": 13,
+      "started_at": "2026-09-11T08:19:17.078896+00:00"
+    },
+    {
+      "id": "a61b5eca-9814-45b2-be44-eee4abd997e9",
+      "status": "submitted",
+      "score": 1,
+      "correct_count": 1,
+      "incorrect_count": 1,
+      "unanswered_count": 13,
+      "started_at": "2026-09-11T08:17:31.394287+00:00"
+    }
+  ],
+  "exactly_one_disposable_test": true,
+  "new_attempt_denied": true,
+  "historical_review_preserved": true,
+  "real_source_bank_retained": true,
+  "active": 708,
+  "draft": 5,
+  "quarantine": 1
+}

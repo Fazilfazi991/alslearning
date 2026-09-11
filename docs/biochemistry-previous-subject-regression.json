@@ -1,0 +1,20 @@
+[
+  {
+    "subject": "pathology",
+    "attempt": "e3462e11-db3e-41c2-9e71-47f251d08a1f",
+    "history": 4,
+    "questions": 10,
+    "media_fetched": 4,
+    "tables": 0,
+    "image_only": 0
+  },
+  {
+    "subject": "microbiology",
+    "attempt": "498ea629-561b-44ab-ade2-9b6e427f2c12",
+    "history": 3,
+    "questions": 11,
+    "media_fetched": 14,
+    "tables": 5,
+    "image_only": 1
+  }
+]
