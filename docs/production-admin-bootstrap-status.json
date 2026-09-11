@@ -1,0 +1,16 @@
+{
+  "project": "dvmahmkapgtjfqmoottt",
+  "email": "fazil4fazi@gmail.com",
+  "invitationSent": true,
+  "userId": "0a4b8cc3-c796-4765-8973-78225e366a4d",
+  "profile": [
+    {
+      "id": "0a4b8cc3-c796-4765-8973-78225e366a4d",
+      "email": "fazil4fazi@gmail.com",
+      "role": "admin",
+      "is_active": true
+    }
+  ],
+  "emailConfirmed": true,
+  "requiresUserAcceptance": false
+}

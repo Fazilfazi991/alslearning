@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync, writeFileSync, existsSync, renameSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { clients, ok, QA_REF } from "./pathology-client.mjs";
+import { productionImportClients } from "./production-import-client.mjs";
 import {
   identity,
   batch,
@@ -25,8 +26,9 @@ assert.deepEqual(
   [791, 2, 4],
 );
 assert.equal(new Set(input.map((q) => q.source_key)).size, 797);
-const { admin, fixture } = await clients();
-const file = "docs/microbiology-import-manifest.json",
+const production = process.argv.includes("--production");
+const { admin, fixture, project } = await (production ? productionImportClients() : clients());
+const file = `docs/${production ? "production-" : ""}microbiology-import-manifest.json`,
   prior = existsSync(file) ? read(file) : null;
 const owner = prior?.upload_owner || fixture.users.admin.id;
 const run = {
@@ -98,7 +100,7 @@ for (const [i, name] of chapterNames.entries()) {
 const taxonomy = { subject, exam, chapters };
 const manifest = {
   batch,
-  qa_project: QA_REF,
+  ...(production ? {production_project: project} : {qa_project: QA_REF}),
   upload_owner: owner,
   taxonomy,
   records: [],
@@ -128,7 +130,7 @@ for (const { value } of expected)
       value,
       "Existing source content changed; refusing overwrite",
     );
-const progressFile = ".local-qa/microbiology-import-progress.json";
+const progressFile = `.local-qa/${production ? "production-" : ""}microbiology-import-progress.json`;
 const checkpoint = () =>
   writeFileSync(
     progressFile,

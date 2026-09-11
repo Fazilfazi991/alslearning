@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { clients, ok, QA_REF } from "./pathology-client.mjs";
+import { productionImportClients } from "./production-import-client.mjs";
 import {
   identity,
   batch,
@@ -20,9 +21,11 @@ if (
   input.filter((q) => classify(q) === "draft").length !== 5
 )
   throw Error("Preflight classification changed");
-const { admin, fixture } = await clients();
-const oldManifest = existsSync("docs/pathology-import-manifest.json")
-  ? JSON.parse(readFileSync("docs/pathology-import-manifest.json", "utf8"))
+const production = process.argv.includes("--production");
+const manifestFile = `docs/${production ? "production-" : ""}pathology-import-manifest.json`;
+const { admin, fixture, project } = await (production ? productionImportClients() : clients());
+const oldManifest = existsSync(manifestFile)
+  ? JSON.parse(readFileSync(manifestFile, "utf8"))
   : null;
 const owner = oldManifest?.upload_owner || fixture.users.admin.id;
 const subject = ok(
@@ -78,7 +81,7 @@ for (let i = 0; i < expected.length; i += 80)
     existing.set(row.id, row);
 const manifest = {
   batch,
-  qa_project: QA_REF,
+  ...(production ? {production_project: project} : {qa_project: QA_REF}),
   upload_owner: owner,
   taxonomy,
   records: [],
@@ -198,7 +201,7 @@ manifest.records.sort(
 );
 manifest.runs.push(run);
 writeFileSync(
-  "docs/pathology-import-manifest.json",
+  manifestFile,
   JSON.stringify(manifest, null, 2) + "\n",
 );
 console.log(JSON.stringify(run));

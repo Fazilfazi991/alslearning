@@ -1,0 +1,364 @@
+{
+  "sources": [
+    {
+      "subject": "pathology",
+      "file": "app friendly format - JSO SIR 1 - Haemopoiesis, Anaemia, Leukemia, Hemostasis.docx",
+      "expected": "5a1b81dab4ffc092f44d501eecf377524acc8a559f61675e8349d7c4ed9a4f82",
+      "actual": "5a1b81dab4ffc092f44d501eecf377524acc8a559f61675e8349d7c4ed9a4f82",
+      "match": true
+    },
+    {
+      "subject": "pathology",
+      "file": "app friendly format - JSO SIR 2 - Clinical pathology.docx",
+      "expected": "503c8c980ba4a18e5fa676a3535391dfd49f606af542714b23a47e27a3d7f362",
+      "actual": "503c8c980ba4a18e5fa676a3535391dfd49f606af542714b23a47e27a3d7f362",
+      "match": true
+    },
+    {
+      "subject": "pathology",
+      "file": "app friendly format - JSO SIR 3 - Routine and Special Haematological Investigations.docx",
+      "expected": "26e8c2395c0fea51196c68fa71fdd3aa313b0ffc35444dad05bffe2918999bb6",
+      "actual": "26e8c2395c0fea51196c68fa71fdd3aa313b0ffc35444dad05bffe2918999bb6",
+      "match": true
+    },
+    {
+      "subject": "pathology",
+      "file": "app friendly format - JSO SIR 4 - Cytology and Cytogenetics.docx",
+      "expected": "229d529c0219cebfb4b4eaa2d7fe4bbcab014711fb05643cd2d56bb5e4fbfddd",
+      "actual": "229d529c0219cebfb4b4eaa2d7fe4bbcab014711fb05643cd2d56bb5e4fbfddd",
+      "match": true
+    },
+    {
+      "subject": "pathology",
+      "file": "app friendly format - JSO SIR 5 - Histopathology.docx",
+      "expected": "ff12d756f56b5f07055775b2c3e8371abb61a5087d75b8f884aedeb817716195",
+      "actual": "ff12d756f56b5f07055775b2c3e8371abb61a5087d75b8f884aedeb817716195",
+      "match": true
+    },
+    {
+      "subject": "pathology",
+      "file": "app friendly format - JSO SIR 6 - Blood Banking.docx",
+      "expected": "4ba3e48fd961a59eaedc14932f8e1998fae126e21ce5ddcd215834382c49264a",
+      "actual": "4ba3e48fd961a59eaedc14932f8e1998fae126e21ce5ddcd215834382c49264a",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 7 - GENERAL MICROBIOLOGY.docx",
+      "expected": "d4f08f98c6e1b0206a59c9334261fcc1cb3a9a3e1fa9e25c3d7015719a27ce7b",
+      "actual": "d4f08f98c6e1b0206a59c9334261fcc1cb3a9a3e1fa9e25c3d7015719a27ce7b",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 8 - BACTERIOLOGY.docx",
+      "expected": "29439b42a1c3584afd9f096ef45d6e38187a31e06d8f137ba019a04449ed575c",
+      "actual": "29439b42a1c3584afd9f096ef45d6e38187a31e06d8f137ba019a04449ed575c",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 9 - MYCOLOGY.docx",
+      "expected": "eabc7021575dcc137487eb8ae25831302b11dd96fa8dd2e3dad044afe8c7c7de",
+      "actual": "eabc7021575dcc137487eb8ae25831302b11dd96fa8dd2e3dad044afe8c7c7de",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 10 - PARASITOLOGY.docx",
+      "expected": "ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc",
+      "actual": "ec4e9d48c1812e305629dfbf908c2a36c831be9a15c7c49364fb6c6d5c33d2fc",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 11 - VIROLOGY.docx",
+      "expected": "345fcb3d2c530c3e81c623c748b143e31a8eba4e606eaff67ad119bb2f54e56c",
+      "actual": "345fcb3d2c530c3e81c623c748b143e31a8eba4e606eaff67ad119bb2f54e56c",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 12 - Applied Microbiology.docx",
+      "expected": "074e4c6cdec076c00c289b267d24758f975d173d911b314ad747b964d5abe4f7",
+      "actual": "074e4c6cdec076c00c289b267d24758f975d173d911b314ad747b964d5abe4f7",
+      "match": true
+    },
+    {
+      "subject": "microbiology",
+      "file": "app friendly format - JSO SIR 13 - Immunology.docx",
+      "expected": "c22511774d37465259774e4c8b1fff137b89e374deebb7b0b990e8dad268653c",
+      "actual": "c22511774d37465259774e4c8b1fff137b89e374deebb7b0b990e8dad268653c",
+      "match": true
+    }
+  ],
+  "databases": {
+    "xstssknlgdraulebdsfd": {
+      "before": [
+        {
+          "counts": {
+            "keys": 1827,
+            "draft": 7,
+            "media": 244,
+            "tests": 56,
+            "users": 83,
+            "active": 1812,
+            "objects": 244,
+            "options": 7232,
+            "attempts": 107,
+            "chapters": 21,
+            "questions": 1820
+          }
+        }
+      ],
+      "history": [
+        {
+          "version": "20260905044506",
+          "name": "academic_platform_foundation"
+        },
+        {
+          "version": "20260905052130",
+          "name": "harden_academic_rls"
+        },
+        {
+          "version": "20260905052748",
+          "name": "auth_profiles_and_recording_state"
+        },
+        {
+          "version": "20260905053528",
+          "name": "teacher_writes_and_storage_access"
+        },
+        {
+          "version": "20260905054242",
+          "name": "checkpoint_questions_and_live_teacher"
+        },
+        {
+          "version": "20260905060734",
+          "name": "classroom_state_and_permissions"
+        },
+        {
+          "version": "20260905062434",
+          "name": "fix_attempt_scoring"
+        },
+        {
+          "version": "20260905062543",
+          "name": "fix_live_presence_functions"
+        },
+        {
+          "version": "20260905063243",
+          "name": "sync_profile_role_from_app_metadata"
+        },
+        {
+          "version": "20260905063800",
+          "name": "protect_question_answer_keys"
+        },
+        {
+          "version": "20260905064804",
+          "name": "launch_readiness"
+        },
+        {
+          "version": "20260905072244",
+          "name": "deterministic_attempts"
+        },
+        {
+          "version": "20260910024559",
+          "name": "core_content_pipeline"
+        },
+        {
+          "version": "20260910030225",
+          "name": "core_pipeline_guards"
+        },
+        {
+          "version": "20260910030835",
+          "name": "core_pipeline_acceptance"
+        },
+        {
+          "version": "20260910032537",
+          "name": "core_order_permissions"
+        },
+        {
+          "version": "20260910042640",
+          "name": "core_content_fidelity"
+        },
+        {
+          "version": "20260910060858",
+          "name": "core_native_tables"
+        },
+        {
+          "version": "20260910061431",
+          "name": "core_table_grid_offsets"
+        },
+        {
+          "version": "20260910071239",
+          "name": "core_media_compatibility"
+        },
+        {
+          "version": "20260910073352",
+          "name": "core_original_media_capacity"
+        },
+        {
+          "version": "20260910073804",
+          "name": "core_meaningful_stem_guard"
+        },
+        {
+          "version": "20260911020155",
+          "name": "explicit_core_helper_function_grants"
+        }
+      ],
+      "after": [
+        {
+          "counts": {
+            "keys": 1827,
+            "draft": 7,
+            "media": 244,
+            "tests": 56,
+            "users": 83,
+            "active": 1812,
+            "objects": 244,
+            "options": 7232,
+            "attempts": 107,
+            "chapters": 21,
+            "questions": 1820
+          }
+        }
+      ]
+    },
+    "dvmahmkapgtjfqmoottt": {
+      "before": [
+        {
+          "counts": {
+            "keys": 0,
+            "draft": 0,
+            "media": 0,
+            "tests": 0,
+            "users": 0,
+            "active": 0,
+            "objects": 0,
+            "options": 0,
+            "attempts": 0,
+            "chapters": 0,
+            "questions": 0
+          }
+        }
+      ],
+      "history": [
+        {
+          "version": "20260905044506",
+          "name": "academic_platform_foundation"
+        },
+        {
+          "version": "20260905052130",
+          "name": "harden_academic_rls"
+        },
+        {
+          "version": "20260905052748",
+          "name": "auth_profiles_and_recording_state"
+        },
+        {
+          "version": "20260905053528",
+          "name": "teacher_writes_and_storage_access"
+        },
+        {
+          "version": "20260905054242",
+          "name": "checkpoint_questions_and_live_teacher"
+        },
+        {
+          "version": "20260905060734",
+          "name": "classroom_state_and_permissions"
+        },
+        {
+          "version": "20260905062434",
+          "name": "fix_attempt_scoring"
+        },
+        {
+          "version": "20260905062543",
+          "name": "fix_live_presence_functions"
+        },
+        {
+          "version": "20260905063243",
+          "name": "sync_profile_role_from_app_metadata"
+        },
+        {
+          "version": "20260905063800",
+          "name": "protect_question_answer_keys"
+        },
+        {
+          "version": "20260905064804",
+          "name": "launch_readiness"
+        },
+        {
+          "version": "20260905072244",
+          "name": "deterministic_attempts"
+        },
+        {
+          "version": "20260910024559",
+          "name": "core_content_pipeline"
+        },
+        {
+          "version": "20260910030225",
+          "name": "core_pipeline_guards"
+        },
+        {
+          "version": "20260910030835",
+          "name": "core_pipeline_acceptance"
+        },
+        {
+          "version": "20260910032537",
+          "name": "core_order_permissions"
+        },
+        {
+          "version": "20260910042640",
+          "name": "core_content_fidelity"
+        },
+        {
+          "version": "20260910060858",
+          "name": "core_native_tables"
+        },
+        {
+          "version": "20260910061431",
+          "name": "core_table_grid_offsets"
+        },
+        {
+          "version": "20260910071239",
+          "name": "core_media_compatibility"
+        },
+        {
+          "version": "20260910073352",
+          "name": "core_original_media_capacity"
+        },
+        {
+          "version": "20260910073804",
+          "name": "core_meaningful_stem_guard"
+        },
+        {
+          "version": "20260911020155",
+          "name": "explicit_core_helper_function_grants"
+        }
+      ],
+      "after": [
+        {
+          "counts": {
+            "keys": 0,
+            "draft": 0,
+            "media": 0,
+            "tests": 0,
+            "users": 0,
+            "active": 0,
+            "objects": 0,
+            "options": 0,
+            "attempts": 0,
+            "chapters": 0,
+            "questions": 0
+          }
+        }
+      ]
+    }
+  },
+  "nonUserProbe": [
+    {
+      "current_user": "postgres",
+      "uid": null,
+      "service_role_can_execute": false
+    }
+  ]
+}

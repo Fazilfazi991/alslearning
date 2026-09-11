@@ -1,0 +1,99 @@
+{
+  "originals": 11,
+  "derivatives": 11,
+  "allPublicRequestsDenied": true,
+  "results": [
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a8a565a7-af98-58c5-a779-b7233cd73aaa/solution-1-20981c714d3214db7f3a7bfd633039b4279f810f7e29330ef45da9e261355228.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/c50c6b8e-ffae-5e1e-afb0-b779510446a2/solution-1-bc2fa31f4956e3a68b38bc65ad21af6b600ae73a3834aed0e4efeec7af40b7bb.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/c50c6b8e-ffae-5e1e-afb0-b779510446a2/solution-1-abd5a6b0f106c5e7232c5d1a6f684568bf85043edc8eb932393cbf3f41a92d39.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a8a565a7-af98-58c5-a779-b7233cd73aaa/solution-1-331855a176c1f40c344f454cff9e5097068a677e4a246f18356a172288da86e4.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a30c5c20-c5fa-59c7-9c2a-5a78a0b00791/solution-0-10dbbe7a55f52ef0a9720f9833b8a8fbb57373011190fec4e2d751555dfd1a18.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a8a565a7-af98-58c5-a779-b7233cd73aaa/solution-2-c8e5b9129639156dbab1b697650a6e61754e71142357533007ce3f6f9a69a28f.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a8a565a7-af98-58c5-a779-b7233cd73aaa/solution-2-7c8705289555a3aff36679ee9f2c52f3f4e22c398a28e47e210928747209cf00.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a30c5c20-c5fa-59c7-9c2a-5a78a0b00791/solution-0-aa855051d34b04c0dfa6634661571c50e66eb6133d53e78e045eea2c668702d3.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/54cde87b-b26e-5f09-ad59-0022c9ffcde4/solution-0-0d406f0cb019deb61b03b8bd6ef707a085420051f2b39d7e34214578c69a4ca1.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/16295d50-0e23-507b-8c43-74216af66604/solution-0-f67220bcb894a58f5828dbbaf7460793b7ca225f57e2130ddc12ca80dfd48eac.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/16295d50-0e23-507b-8c43-74216af66604/solution-0-9c598faca89ad9507b38412c98f0a61f0f9b6dfcc46ed3ae9a2e2d018678c5a5.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/54cde87b-b26e-5f09-ad59-0022c9ffcde4/solution-0-e8f92523fac1ecf0ccaafb8438b853d7fe937264c83a93d2e4edbb5ca6019012.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/f380d650-4cb8-5af4-9194-be0398932cfd/solution-1-dd9fdf5a3d27f59042b152b640c53bcc5c592a7ed04344653571e7dffacfd12c.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/62898bc8-b708-5350-87b9-549541480b49/solution-1-4d3e5e3fb7e3864c07a8e60ff51274a359d568a61308c26a81f2db67976eddcd.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/62898bc8-b708-5350-87b9-549541480b49/solution-1-3a89019958a3d603fe838a735551bff5b1f0e35c342b4188039ce702dc891ca7.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/f380d650-4cb8-5af4-9194-be0398932cfd/solution-1-e7fd0be18877b4dcffc20e2a4c1fb46ee3fd71bd28e7c2db50bdbcd7362ca79b.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/5521eb9d-15ac-5d19-bec2-f7ecdf3ceb92/solution-0-1c6a831a3f2398b2dc0c55826a1e1a74a682b5ca9c57a83d4797f1344a97972d.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/5f4d8451-9889-50d5-947d-149c6f9b70c5/solution-1-3e1af874f514246f887423d0ad91c32896d99d5ab64d23f15ae7631a6a818e19.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/5f4d8451-9889-50d5-947d-149c6f9b70c5/solution-1-a58a72ea5a77c42c91ad64617fcfd5d6e6078af7b2d57d227a92d608faa15caa.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/5521eb9d-15ac-5d19-bec2-f7ecdf3ceb92/solution-0-077460488f94475dffd95edcf23ac90e78af5ac8b639fe3767d68f776298058f.png",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a3db1d60-b916-51ab-8f77-25e758eb319e/solution-0-62a543f7bd6a8d2cfa75964aed24ecb310d41c6e97970ddb69677fe4deacede2.emf",
+      "status": 400
+    },
+    {
+      "path": "0a4b8cc3-c796-4765-8973-78225e366a4d/als-microbiology-client-20260910-v1/a3db1d60-b916-51ab-8f77-25e758eb319e/solution-0-132eef529c4ab0559cd57014f196a4e4f7839eaaccb33eae731e3ddbffd549ea.png",
+      "status": 400
+    }
+  ],
+  "gif": {
+    "gifPublicStatus": 400,
+    "publicAccessDenied": true
+  }
+}
