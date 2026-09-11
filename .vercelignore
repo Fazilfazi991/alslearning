@@ -10,3 +10,4 @@ admin ui/
 admin ui.zip
 stitch_als_learning_nexus/
 stitch_als_learning_nexus.zip
+**/*.test.*
