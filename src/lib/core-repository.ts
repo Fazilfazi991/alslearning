@@ -67,6 +67,8 @@ export type Test = Taxonomy & {
   status: string;
   question_ids: string[];
   batch_ids: string[];
+  created_at?: string;
+  updated_at?: string;
 };
 export type Content = Taxonomy & {
   id: string;

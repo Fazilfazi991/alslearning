@@ -13,7 +13,7 @@ function sourceIdentity(q: Question) {
     .filter(Boolean).join(" · ");
 }
 
-function QuestionPreview({ question }: { question: Question }) {
+export function QuestionPreview({ question }: { question: Question }) {
  const [q,setQ]=useState(question.options.length ? question : null);
  const [error,setError]=useState("");
  useEffect(()=>{if(question.options.length)return;let live=true;loadQuestionPreview(question.id).then(value=>{if(live)setQ(value);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[question]);
