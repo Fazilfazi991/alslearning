@@ -8,7 +8,7 @@ import { useAuthorIdentity } from "./author-identity";
 import { LoadedTestForm } from "./loaded-test-form";
 import { TestScopeFields } from "./test-scope-fields";
 import { inferTestScope, retainAllowedSelections } from "@/lib/test-question-scope";
-import { TestQuestionPicker } from "./test-question-picker";
+import { QuestionPreview, TestQuestionPicker } from "./test-question-picker";
 import { localDateTime } from "@/lib/core-time";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -45,7 +45,11 @@ import {
 } from "@/lib/question-media";
 import { PrivateImage } from "@/components/learning/private-image";
 import { mediaAlt, questionLabel, conversionLabel } from "@/lib/question-media";
-import { loadAdminTestResults, loadTestQuestionPage, type TestQuestionPage } from "@/lib/test-repository";
+import { loadAdminTestResults, loadQuestionPreview, loadTestQuestionPage, type TestQuestionPage } from "@/lib/test-repository";
+
+const adminDate = (value?: string) => value
+  ? `${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(new Date(value))} UTC`
+  : "Not saved";
 
 export function CoreManager({
   mode,
@@ -326,7 +330,8 @@ export function CoreManager({
                     <p>{x.total_marks ?? "Per attempt"} marks</p>
                     <p>{x.max_attempts === null ? "Unlimited" : x.max_attempts} attempts</p>
                     <p>{data.programs.find((p) => p.id === x.program_id)?.name || "No program"}</p>
-                    <p className="sm:col-span-2">{x.available_from ? new Date(x.available_from).toLocaleString() : "Available immediately"} → {x.available_until ? new Date(x.available_until).toLocaleString() : "No end date"}</p>
+                    <p className="sm:col-span-2">{x.available_from ? adminDate(x.available_from) : "Available immediately"} → {x.available_until ? adminDate(x.available_until) : "No end date"}</p>
+                    <p className="sm:col-span-2">Updated {adminDate(x.updated_at)}</p>
                   </div>
                 )}
               </div>
@@ -816,6 +821,9 @@ export function TestForm({
   const [questionPage,setQuestionPage]=useState(0);
   const [bank,setBank]=useState<{key:string;status:"ready"|"error";value:TestQuestionPage;error?:string}>({key:"",status:"ready",value:{rows:[],total:0,scope_total:0,by_subject:{}}});
   const [previewOpen,setPreviewOpen]=useState(false);
+  const [previewQuestion,setPreviewQuestion]=useState<Question|null>(null);
+  const [previewLoading,setPreviewLoading]=useState(false);
+  const [previewError,setPreviewError]=useState("");
   const [results,setResults]=useState<Record<string,unknown>|null>(null);
   const scoped = hasTestScope(data, t);
   const examId=t.exam_id,programId=t.program_id,subjectId=t.subject_id,chapterId=t.chapter_id,topicId=t.topic_id,selectionRules=t.selection_rules;
@@ -847,6 +855,19 @@ export function TestForm({
   const total = eligible
     .filter((q) => t.question_ids.includes(q.id))
     .reduce((s, q) => s + Number(q.marks), 0);
+  async function togglePreview(){
+    if(previewOpen){setPreviewOpen(false);return;}
+    setPreviewOpen(true);setPreviewQuestion(null);setPreviewError("");
+    if(!scoped)return;
+    setPreviewLoading(true);
+    try{
+      let questionId=t.selection_mode==="manual"?t.question_ids[0]:undefined;
+      if(!questionId){const sample=await loadTestQuestionPage(t,0,"",visibleSubject,visibleSection);questionId=sample.rows[0]?.id;}
+      if(questionId)setPreviewQuestion(await loadQuestionPreview(questionId));
+      else setPreviewError("No representative active question is available for this configuration.");
+    }catch(error){setPreviewError(error instanceof Error?error.message:"Preview could not be loaded.");}
+    finally{setPreviewLoading(false);}
+  }
   return (
     <form
       className="space-y-4"
@@ -1067,8 +1088,8 @@ export function TestForm({
         onChange={(v) => setT({ ...t, status: v })}
       />
       <Section title="Review & publish">
-        <button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>setPreviewOpen(v=>!v)}>{previewOpen?"Close preview":"Preview test"}</button>
-        {previewOpen&&<div className="rounded-lg bg-surface p-4 text-sm"><p className="font-bold">{t.title||"Untitled test"}</p><p>{t.type==="mock"?"Mock exam":"Practice test"} · {t.selection_mode==="manual"?t.question_ids.length:t.question_count} questions · {t.duration_minutes} minutes</p><p className="mt-2 whitespace-pre-wrap text-muted">{t.instructions||"No additional instructions."}</p><p className="mt-2 text-xs text-muted">Preview does not create a Student attempt. Random questions are selected only when an attempt starts.</p></div>}
+        <button type="button" disabled={previewLoading} className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void togglePreview()}>{previewLoading?"Loading preview…":previewOpen?"Close preview":"Preview test"}</button>
+        {previewOpen&&<div className="rounded-lg bg-surface p-4 text-sm"><p className="font-bold">{t.title||"Untitled test"}</p><p>{t.type==="mock"?"Mock exam":"Practice test"} · {t.selection_mode==="manual"?t.question_ids.length:t.question_count} questions · {t.duration_minutes} minutes</p><p className="mt-2 whitespace-pre-wrap text-muted">{t.instructions||"No additional instructions."}</p><p className="mt-2 text-xs text-muted">Preview does not create a Student attempt. Random questions are selected only when an attempt starts.</p>{previewLoading&&<p role="status" className="mt-3">Loading representative question…</p>}{previewError&&<p role="alert" className="mt-3 text-red-800">{previewError}</p>}{previewQuestion&&<div className="mt-3 rounded-lg border border-line bg-white"><p className="p-3 font-bold">Representative question</p><QuestionPreview question={previewQuestion}/></div>}</div>}
         {value.id&&<button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void loadAdminTestResults(value.id).then(v=>setResults(v as Record<string,unknown>))}>View results</button>}
         {results&&<div className="rounded-lg bg-surface p-4 text-sm"><p><b>{String(results.attempt_count??0)}</b> attempts · Average score {String(results.average_score??"—")}</p></div>}
       </Section>
