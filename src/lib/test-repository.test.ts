@@ -1,7 +1,8 @@
 import {beforeEach,describe,expect,it,vi} from "vitest";
-const mock=vi.hoisted(()=>({requests:[] as {table:string;select?:string}[],role:"admin"}));
+const mock=vi.hoisted(()=>({requests:[] as {table:string;select?:string}[],rpc:[] as {name:string;args:unknown}[],role:"admin"}));
 vi.mock("./supabase/client",()=>({createClient:()=>({
  auth:{getUser:async()=>({data:{user:{id:"admin-id"}},error:null})},
+ rpc:async(name:string,args:unknown)=>{mock.rpc.push({name,args});return {data:{rows:[{id:"q1",prompt:"Q",status:"active",marks:1}],total:1,scope_total:1,by_subject:{subject:1}},error:null};},
  from:(table:string)=>{
   const entry:{table:string;select?:string}={table};mock.requests.push(entry);
   const result=()=>({data:table==="profiles"?{role:mock.role,is_active:true}:[],error:null});
@@ -9,9 +10,10 @@ vi.mock("./supabase/client",()=>({createClient:()=>({
   return chain;
  }
 })}));
-import {clearTestHierarchy,loadTestWorkspace,loadTestQuestionIndex} from "./test-repository";
+import {clearTestHierarchy,loadTestWorkspace,loadTestQuestionPage} from "./test-repository";
+import {newTest} from "./core-repository";
 describe("test workspace fetch boundaries",()=>{
- beforeEach(()=>{mock.requests=[];clearTestHierarchy();});
+ beforeEach(()=>{mock.requests=[];mock.rpc=[];clearTestHierarchy();});
  it("renders the test list without question, media, option, answer-key, or learning-content queries",async()=>{
   const data=await loadTestWorkspace();
   expect(data.questions).toEqual([]);
@@ -29,10 +31,9 @@ describe("test workspace fetch boundaries",()=>{
   await loadTestWorkspace({id:"admin-id",role:"admin"});
   expect(mock.requests.some(r=>r.table==="profiles")).toBe(false);
  });
- it("loads only the question index for editor availability",async()=>{
-  await loadTestQuestionIndex("admin");
-  expect(mock.requests).toHaveLength(1);
-  expect(mock.requests[0].table).toBe("questions");
-  expect(mock.requests[0].select).not.toMatch(/rich|media|explanation|options|answer_keys/);
+ it("pages the manual selector through one lightweight server RPC",async()=>{
+  const page=await loadTestQuestionPage({...newTest(),exam_id:"exam",program_id:"program",subject_id:"subject"},2,"anaemia");
+  expect(page.rows).toHaveLength(1);expect(mock.requests).toHaveLength(0);
+  expect(mock.rpc).toEqual([{name:"core_test_question_page",args:expect.objectContaining({page_number:2,page_size:20,search_text:"anaemia"})}]);
  });
 });

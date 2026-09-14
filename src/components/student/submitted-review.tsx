@@ -94,6 +94,7 @@ export function SubmittedReview({ review }: { review: Review }) {
                     %
                   </>
                 )}
+                {review.passed !== null && review.passed !== undefined && <> · {review.passed ? "Passed" : "Not passed"}</>}
               </p>
             </>
           ) : (
@@ -102,21 +103,21 @@ export function SubmittedReview({ review }: { review: Review }) {
             </p>
           )}
         </div>
-        {canCount && (
+        {(canCount || review.correct !== undefined) && (
           <dl className={styles.stats}>
             <div>
               <dt>Correct</dt>
-              <dd>{outcomes.filter((s) => s === "correct").length}</dd>
+              <dd>{review.correct ?? outcomes.filter((s) => s === "correct").length}</dd>
             </div>
             <div>
               <dt>Incorrect</dt>
-              <dd>{outcomes.filter((s) => s === "incorrect").length}</dd>
+              <dd>{review.incorrect ?? outcomes.filter((s) => s === "incorrect").length}</dd>
             </div>
             <div>
               <dt>Attempted</dt>
               <dd>
-                {answers.filter((a) => a.selected_option_ids.length).length}
-                <span> / {answers.length}</span>
+                {review.unanswered !== undefined && review.unanswered !== null ? (review.correct??0)+(review.incorrect??0) : answers.filter((a) => a.selected_option_ids.length).length}
+                <span> / {review.unanswered !== undefined && review.unanswered !== null ? (review.correct??0)+(review.incorrect??0)+review.unanswered : answers.length}</span>
               </dd>
             </div>
           </dl>
