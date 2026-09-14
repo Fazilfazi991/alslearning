@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseYouTubeInput, validateRecording, youtubeEmbedUrl, topicsForSubject, orderRecordings, type Recording } from "./recorded-classes";
+import { completionEligible, nextUnansweredInteraction, parseYouTubeInput, validateRecording, youtubeEmbedUrl, topicsForSubject, orderRecordings, type RecordedClassInteraction, type Recording } from "./recorded-classes";
 import { clientRecordings } from "../../scripts/recorded-classes-client-content.mjs";
 const id = "xNBduyugQSc";
 describe("YouTube normalization", () => {
@@ -8,6 +8,27 @@ describe("YouTube normalization", () => {
   it("allows a missing link", () => expect(parseYouTubeInput(" ")).toBeNull());
   it("preserves a leading hyphen in IDs", () => expect(parseYouTubeInput("https://youtu.be/-oF7W3AvhmU")).toBe("-oF7W3AvhmU"));
   it("builds only an ID-based privacy embed", () => { expect(youtubeEmbedUrl(id)).toBe(`https://www.youtube-nocookie.com/embed/${id}`); expect(() => youtubeEmbedUrl("https://studio.youtube.com/video/"+id+"/edit")).toThrow(); });
+});
+describe("Native interaction progression", () => {
+  const interactions = [
+    {id:"one",timestamp_seconds:10,required_before_continue:true},
+    {id:"optional",timestamp_seconds:15,required_before_continue:false},
+    {id:"two",timestamp_seconds:20,required_before_continue:true},
+  ] as RecordedClassInteraction[];
+  it("triggers the first unanswered required interaction crossed by normal play or seeking", () => {
+    expect(nextUnansweredInteraction(interactions,new Set(),5,25)?.id).toBe("one");
+    expect(nextUnansweredInteraction(interactions,new Set(["one"]),5,25)?.id).toBe("two");
+  });
+  it("does not interrupt for completed, optional, backwards, or uncrossed interactions", () => {
+    expect(nextUnansweredInteraction(interactions,new Set(["one","two"]),5,25)).toBeNull();
+    expect(nextUnansweredInteraction(interactions,new Set(),11,19)).toBeNull();
+    expect(nextUnansweredInteraction(interactions,new Set(),25,5)).toBeNull();
+  });
+  it("requires 95 percent and every required response for completion", () => {
+    expect(completionEligible(95,100,["one","two"],new Set(["one","two"]))).toBe(true);
+    expect(completionEligible(94.99,100,["one","two"],new Set(["one","two"]))).toBe(false);
+    expect(completionEligible(100,100,["one","two"],new Set(["one"]))).toBe(false);
+  });
 });
 describe("Recorded class authoring", () => {
   const base = {title:"Hemostasis",subject_id:"a",chapter_id:"b",status:"draft" as const,videoInput:"",sort_order:0};

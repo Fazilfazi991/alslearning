@@ -2,8 +2,12 @@ export type RecordingStatus = "draft" | "published" | "archived";
 export type Recording = {
   id: string; subject_id: string; chapter_id: string; topic_label: string | null;
   subtopic: string | null; title: string; description: string | null;
-  provider: "youtube"; provider_video_id: string | null; status: RecordingStatus;
+  provider: "youtube" | "native"; provider_video_id: string | null; status: RecordingStatus;
   sort_order: number; duration_seconds: number | null; thumbnail_url: string | null;
+  storage_provider: "r2" | null; storage_key: string | null; source_storage_key: string | null;
+  poster_storage_key: string | null; mime_type: string | null; file_size: number | null;
+  width: number | null; height: number | null; checksum_sha256: string | null;
+  original_provider: "youtube" | null; original_provider_video_id: string | null;
   teacher_id: string | null; updated_at: string; published_at: string | null;
 };
 export type RecordingSubject = { id: string; name: string };
@@ -29,6 +33,20 @@ export function parseYouTubeInput(input: string): string | null {
   if (host === "studio.youtube.com") id = url.pathname.match(/^\/video\/([^/]+)\/edit\/?$/)?.[1] ?? null;
   if (!id || !videoIdPattern.test(id)) throw new Error("Enter a supported YouTube URL with a valid video ID.");
   return id;
+}
+
+export type RecordedClassInteraction = {
+  id: string; timestamp_seconds: number; question: string; options: string[];
+  required_before_continue: boolean; allow_retry: boolean; show_explanation_after_answer: boolean;
+};
+
+export function nextUnansweredInteraction(interactions: RecordedClassInteraction[], answered: Set<string>, from: number, to: number) {
+  if (to < from) return null;
+  return interactions.find(item => item.required_before_continue && !answered.has(item.id) && item.timestamp_seconds > from && item.timestamp_seconds <= to) ?? null;
+}
+
+export function completionEligible(position: number, duration: number, requiredIds: string[], answered: Set<string>) {
+  return duration > 0 && position / duration >= 0.95 && requiredIds.every(id => answered.has(id));
 }
 export function youtubeEmbedUrl(id: string) {
   if (!videoIdPattern.test(id)) throw new Error("Invalid video ID");

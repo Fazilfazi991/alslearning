@@ -14,7 +14,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
       const rows = visible.filter(r => r.chapter_id === t.id);
       const labels = [...new Set(rows.map(r => r.topic_label || t.name))];
       return labels.map(label => <section key={`${t.id}-${label}`} className="rounded-xl border border-line bg-white p-4"><h3 className="font-semibold">{label}</h3>{[...new Set(rows.filter(r => (r.topic_label || t.name) === label).map(r => r.subtopic || ""))].map(group => <div key={group} className="mt-3">{group && <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">{group}</h4>}<div className="divide-y divide-line">{rows.filter(r => (r.topic_label || t.name) === label && (r.subtopic || "") === group).map(r => <Link key={r.id} href={`/student/recorded-classes/${r.id}`} className="flex min-w-0 items-center gap-3 rounded-lg py-3 hover:bg-surface focus-visible:outline-brand">
-        <RecordingThumbnail videoId={r.provider_video_id!}/>
+        {r.provider_video_id ? <RecordingThumbnail videoId={r.provider_video_id}/> : <span className="grid aspect-video w-24 shrink-0 place-items-center rounded bg-deep-blue/10 text-brand sm:w-28"><PlayCircle size={26}/></span>}
         <div className="min-w-0 flex-1"><p className="break-words text-sm font-semibold">{r.title}</p><p className="mt-1 text-xs text-muted">{r.duration_seconds ? `${Math.ceil(r.duration_seconds / 60)} min` : "Recorded lesson"}{r.teacher_id && teachers.find(t => t.id === r.teacher_id) ? ` · ${teachers.find(t => t.id === r.teacher_id)?.name}` : ""}</p></div><PlayCircle aria-hidden="true" size={22} className="shrink-0 text-brand"/>
       </Link>)}</div></div>)}</section>);
     })}</section>)}

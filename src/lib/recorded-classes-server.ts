@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import { orderRecordings, type Recording, type RecordingSubject, type RecordingTopic } from "./recorded-classes";
 
-const columns = "id,subject_id,chapter_id,topic_label,subtopic,title,description,provider,provider_video_id,status,sort_order,duration_seconds,thumbnail_url,teacher_id,updated_at,published_at";
+const columns = "id,subject_id,chapter_id,topic_label,subtopic,title,description,provider,provider_video_id,status,sort_order,duration_seconds,thumbnail_url,teacher_id,updated_at,published_at,storage_provider,storage_key,source_storage_key,poster_storage_key,mime_type,file_size,width,height,checksum_sha256,original_provider,original_provider_video_id";
 export async function studentRecordings() {
   await requireRole(["student"]);
   const db = await createClient();
