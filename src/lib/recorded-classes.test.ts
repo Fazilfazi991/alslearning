@@ -15,13 +15,17 @@ describe("Native interaction progression", () => {
     {id:"optional",timestamp_seconds:15,required_before_continue:false},
     {id:"two",timestamp_seconds:20,required_before_continue:true},
   ] as RecordedClassInteraction[];
-  it("triggers the first unanswered required interaction crossed by normal play or seeking", () => {
+  it("triggers the first unanswered interaction crossed by normal playback", () => {
     expect(nextUnansweredInteraction(interactions,new Set(),5,25)?.id).toBe("one");
-    expect(nextUnansweredInteraction(interactions,new Set(["one"]),5,25)?.id).toBe("two");
+    expect(nextUnansweredInteraction(interactions,new Set(["one"]),5,25)?.id).toBe("optional");
   });
-  it("does not interrupt for completed, optional, backwards, or uncrossed interactions", () => {
-    expect(nextUnansweredInteraction(interactions,new Set(["one","two"]),5,25)).toBeNull();
-    expect(nextUnansweredInteraction(interactions,new Set(),11,19)).toBeNull();
+  it("limits seek blocking to unanswered required interactions", () => {
+    expect(nextUnansweredInteraction(interactions,new Set(["one"]),5,25,true)?.id).toBe("two");
+    expect(nextUnansweredInteraction(interactions,new Set(["one","two"]),5,25,true)).toBeNull();
+  });
+  it("does not interrupt for completed, backwards, or uncrossed interactions", () => {
+    expect(nextUnansweredInteraction(interactions,new Set(["one","optional","two"]),5,25)).toBeNull();
+    expect(nextUnansweredInteraction(interactions,new Set(),16,19)).toBeNull();
     expect(nextUnansweredInteraction(interactions,new Set(),25,5)).toBeNull();
   });
   it("requires 95 percent and every required response for completion", () => {

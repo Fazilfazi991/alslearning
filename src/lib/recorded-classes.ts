@@ -40,9 +40,9 @@ export type RecordedClassInteraction = {
   required_before_continue: boolean; allow_retry: boolean; show_explanation_after_answer: boolean;
 };
 
-export function nextUnansweredInteraction(interactions: RecordedClassInteraction[], answered: Set<string>, from: number, to: number) {
+export function nextUnansweredInteraction(interactions: RecordedClassInteraction[], answered: Set<string>, from: number, to: number, requiredOnly = false) {
   if (to < from) return null;
-  return interactions.find(item => item.required_before_continue && !answered.has(item.id) && item.timestamp_seconds > from && item.timestamp_seconds <= to) ?? null;
+  return interactions.find(item => (!requiredOnly || item.required_before_continue) && !answered.has(item.id) && item.timestamp_seconds > from && item.timestamp_seconds <= to) ?? null;
 }
 
 export function completionEligible(position: number, duration: number, requiredIds: string[], answered: Set<string>) {
