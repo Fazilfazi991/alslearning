@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, it } from "vitest";
-import { TestForm } from "./core-manager";
+import { AdminTestResults, TestForm } from "./core-manager";
 import { TestQuestionPicker } from "./test-question-picker";
 import { newQuestion, newTest, type CoreData } from "@/lib/core-repository";
 const data: CoreData = {exams:[],programs:[],subjects:[{id:"micro",name:"Microbiology"}],chapters:[{id:"m4",name:"MICRO 4 — Parasitology",subject_id:"micro"},{id:"p1",name:"PATHO 1",subject_id:"patho"}],topics:[],batches:[],questions:[],tests:[],content:[],role:"admin",assignments:[],mappings:[{program_id:"program",subject_id:"micro"}]};
@@ -29,4 +29,8 @@ it("shows per-subject quotas and a derived total without an editable combined ra
 it("renders authorized lightweight bank rows without optional source labels",()=>{
  const q={...newQuestion(),prompt:"Assigned question",source_label:undefined!};
  expect(()=>renderToStaticMarkup(<TestQuestionPicker questions={[q]} selected={[]} onChange={()=>{}}/>)).not.toThrow();
+});
+it("shows every required Admin attempt-result field",()=>{
+ const html=renderToStaticMarkup(<AdminTestResults value={{attempt_count:1,average_score:7.5,attempts:[{student:"QA Student",attempt_number:2,started_at:"2026-09-14T10:00:00Z",submitted_at:"2026-09-14T10:15:00Z",score:7.5,correct:8,incorrect:1,unanswered:1,status:"submitted"}]}}/>);
+ for(const text of ["QA Student","Attempt 2","Started","Submitted","Score","Correct","Incorrect","Unanswered","7.5"]) expect(html).toContain(text);
 });

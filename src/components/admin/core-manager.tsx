@@ -51,6 +51,37 @@ const adminDate = (value?: string) => value
   ? `${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(new Date(value))} UTC`
   : "Not saved";
 
+export function AdminTestResults({ value }: { value: Record<string, unknown> }) {
+  const attempts = Array.isArray(value.attempts)
+    ? value.attempts.filter((attempt): attempt is Record<string, unknown> => !!attempt && typeof attempt === "object")
+    : [];
+  return (
+    <div className="space-y-3 rounded-lg bg-surface p-4 text-sm">
+      <p><b>{String(value.attempt_count ?? 0)}</b> attempts · Average score {String(value.average_score ?? "—")}</p>
+      {attempts.length === 0 ? <p className="text-muted">No Student attempts yet.</p> : (
+        <ul className="grid gap-3" aria-label="Student attempt results">
+          {attempts.map((attempt, index) => (
+            <li key={`${String(attempt.student)}-${String(attempt.started_at)}-${index}`} className="rounded-lg border border-line bg-white p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <p className="font-bold">{String(attempt.student ?? "Student")} · Attempt {String(attempt.attempt_number ?? "—")}</p>
+                <span className="rounded-full bg-surface px-2 py-1 text-xs font-semibold capitalize">{String(attempt.status ?? "unknown").replaceAll("_", " ")}</span>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <p><span className="block text-xs text-muted">Started</span>{adminDate(typeof attempt.started_at === "string" ? attempt.started_at : undefined)}</p>
+                <p><span className="block text-xs text-muted">Submitted</span>{adminDate(typeof attempt.submitted_at === "string" ? attempt.submitted_at : undefined)}</p>
+                <p><span className="block text-xs text-muted">Score</span>{String(attempt.score ?? "—")}</p>
+                <p><span className="block text-xs text-muted">Correct</span>{String(attempt.correct ?? 0)}</p>
+                <p><span className="block text-xs text-muted">Incorrect</span>{String(attempt.incorrect ?? 0)}</p>
+                <p><span className="block text-xs text-muted">Unanswered</span>{String(attempt.unanswered ?? 0)}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function CoreManager({
   mode,
 }: {
@@ -1091,7 +1122,7 @@ export function TestForm({
         <button type="button" disabled={previewLoading} className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void togglePreview()}>{previewLoading?"Loading preview…":previewOpen?"Close preview":"Preview test"}</button>
         {previewOpen&&<div className="rounded-lg bg-surface p-4 text-sm"><p className="font-bold">{t.title||"Untitled test"}</p><p>{t.type==="mock"?"Mock exam":"Practice test"} · {t.selection_mode==="manual"?t.question_ids.length:t.question_count} questions · {t.duration_minutes} minutes</p><p className="mt-2 whitespace-pre-wrap text-muted">{t.instructions||"No additional instructions."}</p><p className="mt-2 text-xs text-muted">Preview does not create a Student attempt. Random questions are selected only when an attempt starts.</p>{previewLoading&&<p role="status" className="mt-3">Loading representative question…</p>}{previewError&&<p role="alert" className="mt-3 text-red-800">{previewError}</p>}{previewQuestion&&<div className="mt-3 rounded-lg border border-line bg-white"><p className="p-3 font-bold">Representative question</p><QuestionPreview question={previewQuestion}/></div>}</div>}
         {value.id&&<button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void loadAdminTestResults(value.id).then(v=>setResults(v as Record<string,unknown>))}>View results</button>}
-        {results&&<div className="rounded-lg bg-surface p-4 text-sm"><p><b>{String(results.attempt_count??0)}</b> attempts · Average score {String(results.average_score??"—")}</p></div>}
+        {results&&<AdminTestResults value={results}/>} 
       </Section>
       {selectionError && t.status !== "active" && (
         <p role="status" className="text-sm text-muted">{selectionError}</p>
