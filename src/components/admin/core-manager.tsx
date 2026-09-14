@@ -1122,7 +1122,7 @@ export function TestForm({
         <button type="button" disabled={previewLoading} className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void togglePreview()}>{previewLoading?"Loading preview…":previewOpen?"Close preview":"Preview test"}</button>
         {previewOpen&&<div className="rounded-lg bg-surface p-4 text-sm"><p className="font-bold">{t.title||"Untitled test"}</p><p>{t.type==="mock"?"Mock exam":"Practice test"} · {t.selection_mode==="manual"?t.question_ids.length:t.question_count} questions · {t.duration_minutes} minutes</p><p className="mt-2 whitespace-pre-wrap text-muted">{t.instructions||"No additional instructions."}</p><p className="mt-2 text-xs text-muted">Preview does not create a Student attempt. Random questions are selected only when an attempt starts.</p>{previewLoading&&<p role="status" className="mt-3">Loading representative question…</p>}{previewError&&<p role="alert" className="mt-3 text-red-800">{previewError}</p>}{previewQuestion&&<div className="mt-3 rounded-lg border border-line bg-white"><p className="p-3 font-bold">Representative question</p><QuestionPreview question={previewQuestion}/></div>}</div>}
         {value.id&&<button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void loadAdminTestResults(value.id).then(v=>setResults(v as Record<string,unknown>))}>View results</button>}
-        {results&&<AdminTestResults value={results}/>} 
+        {results&&<AdminTestResults value={results}/>}
       </Section>
       {selectionError && t.status !== "active" && (
         <p role="status" className="text-sm text-muted">{selectionError}</p>
