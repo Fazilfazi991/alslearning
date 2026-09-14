@@ -13,6 +13,7 @@ type Payload = {
 export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId: string; title: string }) {
   const video = useRef<HTMLVideoElement>(null);
   const previousTime = useRef(0); const lastSaved = useRef(0);
+  const seeking = useRef(false);
   const [payload, setPayload] = useState<Payload | null>(null);
   const [error, setError] = useState(""); const [loading, setLoading] = useState(true);
   const [active, setActive] = useState<RecordedClassInteraction | null>(null);
@@ -34,7 +35,7 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
     finally { setLoading(false); }
   }, [recordingId]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
   useEffect(() => {
     if (!payload) return;
     const delay = Math.max(60_000, new Date(payload.expiresAt).getTime() - Date.now() - 10 * 60_000);
@@ -52,8 +53,8 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
     await createClient().rpc("save_recorded_class_progress", { target: recordingId, position_seconds: element.currentTime, duration_seconds: element.duration });
     setSaving(false);
   }
-  function checkCrossing(current: number) {
-    const item = nextUnansweredInteraction(interactions, answered, previousTime.current, current);
+  function checkCrossing(current: number, requiredOnly = false) {
+    const item = nextUnansweredInteraction(interactions, answered, previousTime.current, current, requiredOnly);
     previousTime.current = current;
     if (item && video.current) { video.current.pause(); video.current.currentTime = item.timestamp_seconds; setSelected(null); setFeedback(null); setActive(item); }
   }
@@ -68,16 +69,16 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
   function continueClass() { setActive(null); setFeedback(null); if (video.current) { video.current.currentTime = Math.max(video.current.currentTime, (active?.timestamp_seconds ?? 0) + 0.05); void video.current.play(); } }
 
   return <section aria-label="Recording player" className="min-w-0">
-    <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-950">
-      {payload && <video ref={video} key={payload.playbackUrl} className="h-full w-full" controls playsInline preload="metadata" poster={payload.posterUrl ?? undefined}
+    <div className={`relative overflow-hidden rounded-xl bg-slate-950 ${active ? "sm:aspect-video" : "aspect-video"}`}>
+      {payload && <video ref={video} key={payload.playbackUrl} className={`${active ? "hidden sm:block" : "block"} h-full w-full`} controls playsInline preload="metadata" poster={payload.posterUrl ?? undefined}
         src={payload.playbackUrl} aria-label={title}
         onLoadedMetadata={e => { const resume = Number(payload.progress?.last_position_seconds ?? 0); if (resume > 0 && resume < e.currentTarget.duration - 2) e.currentTarget.currentTime = resume; }}
-        onTimeUpdate={e => { checkCrossing(e.currentTarget.currentTime); void saveProgress(); }}
-        onSeeked={e => checkCrossing(e.currentTarget.currentTime)} onPause={() => void saveProgress(true)} onEnded={() => void saveProgress(true)}
+        onTimeUpdate={e => { if (!seeking.current) checkCrossing(e.currentTarget.currentTime); void saveProgress(); }}
+        onSeeking={() => { seeking.current = true; }} onSeeked={e => { checkCrossing(e.currentTarget.currentTime, true); seeking.current = false; }} onPause={() => void saveProgress(true)} onEnded={() => void saveProgress(true)}
         onWaiting={() => setLoading(true)} onPlaying={() => setLoading(false)} onError={() => setError("Playback was interrupted. Retry to request a fresh secure link.")}/>} 
       {loading && <p role="status" className="pointer-events-none absolute inset-x-0 top-3 text-center text-sm text-white">Loading video…</p>}
       {error && <div role="alert" className="absolute inset-0 grid place-content-center gap-3 bg-slate-950/95 p-5 text-center text-sm text-white"><p>{error}</p><button className="mx-auto min-h-11 rounded-lg border border-white/60 px-4 font-semibold" onClick={() => void load()}>Retry playback</button></div>}
-      {active && <div className="absolute inset-0 overflow-y-auto bg-slate-950/95 p-4 text-white sm:grid sm:place-items-center">
+      {active && <div className="relative bg-slate-950/95 p-4 text-white sm:absolute sm:inset-0 sm:grid sm:place-items-center sm:overflow-y-auto">
         <div className="mx-auto w-full max-w-xl rounded-xl bg-white p-5 text-ink shadow-2xl"><p className="text-xs font-bold uppercase tracking-widest text-brand">Quick Check</p><h2 className="mt-2 text-lg font-bold">{active.question}</h2>
           <div className="mt-4 space-y-2">{active.options.map((option,index) => <label key={index} className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border p-3 ${selected === index ? "border-brand bg-brand/5" : "border-line"}`}><input type="radio" name={`interaction-${active.id}`} checked={selected === index} disabled={!!feedback} onChange={() => setSelected(index)}/><span>{option}</span></label>)}</div>
           {feedback ? <div className={`mt-4 rounded-lg p-3 text-sm ${feedback.is_correct ? "bg-green-50 text-green-900" : "bg-amber-50 text-amber-950"}`}><strong>{feedback.is_correct ? "Correct" : "Response saved"}</strong>{feedback.explanation && <p className="mt-1">{feedback.explanation}</p>}</div> : null}
