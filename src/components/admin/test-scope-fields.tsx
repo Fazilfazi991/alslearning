@@ -3,7 +3,7 @@ import type {CoreData,Test} from "@/lib/core-repository";
 import {canManage} from "@/lib/core-repository";
 import {eligibleTestQuestions,testScopes,type SubjectScope} from "@/lib/test-question-scope";
 import {Select,TaxonomyFields,fieldClass,Field} from "./core-fields";
-export function TestScopeFields({value:t,data,onChange}:{value:Test;data:CoreData;onChange:(t:Test)=>void}) {
+export function TestScopeFields({value:t,data,onChange,availableBySubject}:{value:Test;data:CoreData;onChange:(t:Test)=>void;availableBySubject?:Record<string,number>}) {
  const multi=!!t.selection_rules.scopes;
  function scopes(next:SubjectScope[]) {onChange({...t,subject_id:"",chapter_id:"",topic_id:"",selection_rules:{...t.selection_rules,scopes:next},question_count:next.reduce((n,s)=>n+(s.count||0),0)});}
  const subjects=data.subjects.filter(s=>data.mappings.some(m=>m.program_id===t.program_id&&m.subject_id===s.id)&&canManage(data,"tests",{...t,subject_id:s.id}));
@@ -21,7 +21,7 @@ export function TestScopeFields({value:t,data,onChange}:{value:Test;data:CoreDat
    {testScopes(t).map(scope=>{
     const name=data.subjects.find(s=>s.id===scope.subject_id)?.name||"Subject";
     const sections=data.chapters.filter(c=>c.subject_id===scope.subject_id&&(!c.program_id||c.program_id===t.program_id));
-    const available=eligibleTestQuestions(data,t).filter(q=>q.subject_id===scope.subject_id).length;
+    const available=availableBySubject?.[scope.subject_id]??eligibleTestQuestions(data,t).filter(q=>q.subject_id===scope.subject_id).length;
     const change=(v:SubjectScope)=>scopes(testScopes(t).map(s=>s.subject_id===v.subject_id?v:s));
     return <section key={scope.subject_id} className="min-w-0 space-y-3 rounded-lg border border-line p-3" aria-label={name+" scope"}>
      <div className="flex items-center justify-between gap-2"><strong>{name}</strong><button type="button" className="min-h-11 px-2 text-sm text-brand" aria-label={"Remove "+name} onClick={()=>scopes(testScopes(t).filter(s=>s.subject_id!==scope.subject_id))}>Remove</button></div>

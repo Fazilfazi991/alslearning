@@ -41,15 +41,17 @@ export async function loadTestWorkspace(actor?:{id:string;role:string}):Promise<
   return {...academic,role:identity.role,assignments:check(assignments)||[],questions:[],content:[],
     tests:(check(tests)||[]).map(t=>({...t,question_ids:t.test_questions.sort((a:{display_order:number},b:{display_order:number})=>a.display_order-b.display_order).map((q:{question_id:string})=>q.question_id),batch_ids:t.test_batches.map((b:{batch_id:string})=>b.batch_id)})) as Test[]};
 }
-export async function loadTestQuestionIndex(role:string):Promise<Question[]> {
-  const db=createClient(),rows:Question[]=[];
-  if(role==="teacher")return check(await db.rpc("core_test_bank"))||[];
-  for(let offset=0;;offset+=1000){
-    const page=check(await db.from("questions").select("id,exam_id,program_id,subject_id,chapter_id,topic_id,type,status,difficulty,marks,prompt,source_label,source_reference").order("id").range(offset,offset+999))||[];
-    rows.push(...page.map(q=>({...q,negative_marks:0,source_type:"standard",exam_year:"",exam_session:"",options:[],media:[],explanation:"",stem_image_path:"",explanation_image_path:"",source_label:q.source_label||"",source_reference:q.source_reference||""})) as Question[]);
-    if(page.length<1000)break;
-  }
-  return rows;
+export type TestQuestionPage = {rows:Question[];total:number;scope_total:number;by_subject:Record<string,number>};
+type TestQuestionScope = Pick<Test,"exam_id"|"program_id"|"subject_id"|"chapter_id"|"topic_id"|"selection_rules">;
+export async function loadTestQuestionPage(test:TestQuestionScope,page:number,search:string,viewSubject="",viewChapter=""):Promise<TestQuestionPage> {
+  const result=check(await createClient().rpc("core_test_question_page",{
+    scope:{exam_id:test.exam_id||null,program_id:test.program_id||null,subject_id:test.subject_id||null,chapter_id:test.chapter_id||null,topic_id:test.topic_id||null,selection_rules:test.selection_rules,view_subject_id:viewSubject||null,view_chapter_id:viewChapter||null},
+    page_number:page,page_size:20,search_text:search,
+  })) as {rows:Record<string,unknown>[];total:number;scope_total:number;by_subject:Record<string,number>};
+  return {...result,rows:(result.rows||[]).map(q=>({...q,negative_marks:0,source_type:"standard",exam_year:"",exam_session:"",options:[],media:[],explanation:"",stem_image_path:"",explanation_image_path:"",source_label:q.source_label||"",source_reference:q.source_reference||""})) as unknown as Question[]};
+}
+export async function loadAdminTestResults(id:string) {
+  return check(await createClient().rpc("core_admin_test_results",{target_test:id}));
 }
 export async function loadQuestionPreview(id:string):Promise<Question> {
   const q=check(await createClient().from("questions").select("*,question_options!question_options_question_id_fkey(id,content,content_rich,display_order),question_answer_keys(option_id),question_media(*)").eq("id",id).single());

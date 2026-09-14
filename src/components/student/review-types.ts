@@ -6,6 +6,11 @@ export type Review = {
   results_visible: boolean;
   score: number | null;
   total_marks: number;
+  correct?: number | null;
+  incorrect?: number | null;
+  unanswered?: number | null;
+  negative_marks?: number | null;
+  passed?: boolean | null;
   answers: {
     question_id: string;
     prompt: string;

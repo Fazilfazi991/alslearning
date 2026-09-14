@@ -50,7 +50,11 @@ export type Test = Taxonomy & {
   question_count: number;
   total_marks: number;
   default_negative_marks: number;
-  max_attempts: number;
+  max_attempts: number | null;
+  internal_description: string;
+  instructions: string;
+  target_score: number | null;
+  pass_percentage: number | null;
   available_from: string;
   available_until: string;
   randomize_questions: boolean;
@@ -134,12 +138,16 @@ export const newTest = (): Test => ({
   ...emptyTaxonomy,
   id: crypto.randomUUID(),
   title: "",
-  type: "mock",
+  type: "practice",
   duration_minutes: 30,
   question_count: 1,
   total_marks: 0,
   default_negative_marks: 0,
   max_attempts: 1,
+  internal_description: "",
+  instructions: "",
+  target_score: null,
+  pass_percentage: null,
   available_from: "",
   available_until: "",
   randomize_questions: false,

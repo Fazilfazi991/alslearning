@@ -1,356 +1,48 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { QuestionGallery } from "@/components/learning/question-gallery";
-import { RichContent } from "@/components/learning/rich-text";
-import { mediaPositions } from "@/lib/rich-text";
-import type { RichText } from "@/lib/rich-text";
-import type { QuestionMedia } from "@/lib/question-media";
-import { SubmittedReview } from "./submitted-review";
-import type { Review } from "./review-types";
-type Option = { id: string; content: string; content_rich?: RichText };
-type Question = {
-  id: string;
-  prompt: string;
-  prompt_rich?: RichText;
-  stem_media?: QuestionMedia[];
-  type: string;
-  stem_image_path: string | null;
-  options: Option[];
-};
-type History = {
-  id: string;
-  status: string;
-  started_at: string;
-  submitted_at: string | null;
-  score: number | null;
-};
-type Attempt = {
-  id: string;
-  status: string;
-  expires_at: string;
-  option_order: Record<string, string[]>;
-  questions: Question[];
-  answers: Record<string, string[]>;
-};
-const button =
-  "min-h-11 rounded-lg bg-brand px-4 py-2 font-semibold text-white disabled:opacity-50";
-export function CoreTestEngine({
-  data,
-}: {
-  data: {
-    test: {
-      id: string;
-      title: string;
-      duration_minutes: number;
-      question_count: number;
-      max_attempts: number;
-      can_start?: boolean;
-    };
-    attempts: History[];
-  };
-}) {
-  const [history, setHistory] = useState(data.attempts),
-    [attempt, setAttempt] = useState<Attempt | null>(null),
-    [review, setReview] = useState<Review | null>(null),
-    [index, setIndex] = useState(0),
-    [remaining, setRemaining] = useState(0),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  const submitting = useRef(false);
-  const expiredSubmission = useRef<string | null>(null);
-  useEffect(() => {
-    if (!review) return;
-    const frame = requestAnimationFrame(() =>
-      window.scrollTo({ top: 0, behavior: "instant" }),
-    );
-    return () => cancelAnimationFrame(frame);
-  }, [review]);
-  const refresh = useCallback(async () => {
-    const r = await createClient().rpc("core_attempt_history", {
-      target_test: data.test.id,
-    });
-    if (r.error) throw new Error(r.error.message);
-    setHistory(r.data || []);
-  }, [data.test.id]);
-  const reviewAttempt = useCallback(async (id: string) => {
-    const r = await createClient().rpc("get_test_review", {
-      target_attempt: id,
-    });
-    if (r.error) throw new Error(r.error.message);
-    setReview(r.data);
-    setAttempt(null);
-  }, []);
-  const open = useCallback(
-    async (id: string) => {
-      const r = await createClient().rpc("core_attempt_payload", {
-        target_attempt: id,
-      });
-      if (r.error) throw new Error(r.error.message);
-      if (r.data.status !== "in_progress") {
-        await reviewAttempt(id);
-        await refresh();
-      } else {
-        setAttempt(r.data);
-        setReview(null);
-        setIndex(0);
-      }
-    },
-    [reviewAttempt, refresh],
-  );
-  useEffect(() => {
-    const current = data.attempts.find((a) => a.status === "in_progress");
-    if (current)
-      void Promise.resolve(
-        createClient().rpc("core_attempt_payload", {
-          target_attempt: current.id,
-        }),
-      )
-        .then(async (r) => {
-          if (r.error) throw new Error(r.error.message);
-          if (r.data.status === "in_progress") setAttempt(r.data);
-          else {
-            await reviewAttempt(current.id);
-            await refresh();
-          }
-        })
-        .catch((e) => setError(e.message));
-  }, [data.attempts, reviewAttempt, refresh]);
-  const submit = useCallback(
-    async (id: string) => {
-      if (submitting.current) return;
-      submitting.current = true;
-      setBusy(true);
-      setError("");
-      try {
-        const r = await createClient().rpc("submit_test_attempt", {
-          target_attempt: id,
-        });
-        if (r.error) throw new Error(r.error.message);
-        await reviewAttempt(id);
-        await refresh();
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Submission failed");
-      } finally {
-        submitting.current = false;
-        setBusy(false);
-      }
-    },
-    [reviewAttempt, refresh],
-  );
-  useEffect(() => {
-    if (!attempt) return;
-    const tick = () => {
-      const left = Math.max(
-        0,
-        Math.ceil((new Date(attempt.expires_at).getTime() - Date.now()) / 1000),
-      );
-      setRemaining(left);
-      if (
-        left === 0 &&
-        !submitting.current &&
-        expiredSubmission.current !== attempt.id
-      ) {
-        expiredSubmission.current = attempt.id;
-        void submit(attempt.id);
-      }
-    };
-    tick();
-    const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
-  }, [attempt, submit]);
-  async function start() {
-    setBusy(true);
-    setError("");
-    try {
-      const r = await createClient().rpc("start_test_attempt", {
-        target_test: data.test.id,
-      });
-      if (r.error) throw new Error(r.error.message);
-      await open(r.data.id);
-      await refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Cannot start");
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function answer(q: Question, id: string) {
-    if (!attempt || busy) return;
-    setBusy(true);
-    setError("");
-    const prior = attempt.answers[q.id] || [];
-    const selected =
-      q.type === "multiple_mcq"
-        ? prior.includes(id)
-          ? prior.filter((x) => x !== id)
-          : [...prior, id]
-        : [id];
-    const r = await createClient().rpc("save_attempt_answer", {
-      target_attempt: attempt.id,
-      target_question: q.id,
-      option_ids: selected,
-    });
-    if (r.error) setError(r.error.message);
-    else
-      setAttempt({
-        ...attempt,
-        answers: { ...attempt.answers, [q.id]: selected },
-      });
-    setBusy(false);
-  }
-  const q = attempt?.questions[index];
-  return (
-    <div
-      className={`mx-auto ${review ? "max-w-5xl py-4 sm:py-6" : "max-w-3xl p-4 sm:p-6"}`}
-    >
-      <h1 className="mb-4 text-2xl font-bold">{data.test.title}</h1>
-      {error && (
-        <p role="alert" className="my-3 rounded bg-red-50 p-3 text-red-800">
-          {error}
-        </p>
-      )}
-      {attempt && q ? (
-        <section className="card p-4 sm:p-6">
-          <div className="mb-4 flex flex-wrap justify-between gap-3">
-            <span>
-              Question {index + 1} of {attempt.questions.length}
-            </span>
-            <strong role="timer">
-              {Math.floor(remaining / 60)}:
-              {String(remaining % 60).padStart(2, "0")}
-            </strong>
-          </div>
-          {(q.prompt.trim() || mediaPositions(q.prompt_rich).length > 0) && (
-            <div className="min-w-0 whitespace-pre-wrap text-lg font-bold">
-              <RichContent
-                value={q.prompt_rich}
-                fallback={q.prompt}
-                media={q.stem_media}
-                kind="stem"
-              />
-            </div>
-          )}
-          <QuestionGallery
-            kind="stem"
-            media={mediaPositions(q.prompt_rich).length ? [] : q.stem_media}
-            legacy={q.stem_image_path}
-          />
-          <fieldset className="my-5 space-y-3">
-            <legend className="mb-2 text-sm">
-              {q.type === "multiple_mcq"
-                ? "Select all correct answers"
-                : "Select one answer"}
-            </legend>
-            {[...q.options]
-              .sort(
-                (a, b) =>
-                  (attempt.option_order[q.id] || []).indexOf(a.id) -
-                  (attempt.option_order[q.id] || []).indexOf(b.id),
-              )
-              .map((o) => (
-                <label
-                  key={o.id}
-                  className="flex min-h-12 items-start gap-3 rounded-lg border p-3"
-                >
-                  <input
-                    disabled={busy || remaining === 0}
-                    type={q.type === "multiple_mcq" ? "checkbox" : "radio"}
-                    name="answer"
-                    checked={(attempt.answers[q.id] || []).includes(o.id)}
-                    onChange={() => void answer(q, o.id)}
-                  />
-                  <RichContent value={o.content_rich} fallback={o.content} />
-                </label>
-              ))}
-          </fieldset>
-          <div className="flex flex-wrap justify-between gap-3">
-            <button
-              disabled={busy || index === 0}
-              className={button}
-              onClick={() => setIndex((i) => i - 1)}
-            >
-              Previous
-            </button>
-            {index < attempt.questions.length - 1 && (
-              <button
-                disabled={busy}
-                className={button}
-                onClick={() => setIndex((i) => i + 1)}
-              >
-                Next
-              </button>
-            )}
-            <button
-              disabled={busy}
-              className={button}
-              onClick={() => void submit(attempt.id)}
-            >
-              {busy ? "Saving…" : "Submit test"}
-            </button>
-          </div>
-        </section>
-      ) : (
-        <>
-          {review && <SubmittedReview review={review} />}
-          <section className="card p-4">
-            <p>
-              {data.test.question_count} questions ·{" "}
-              {data.test.duration_minutes} minutes · {data.test.max_attempts}{" "}
-              attempts allowed
-            </p>
-            <button
-              disabled={
-                busy ||
-                data.test.can_start === false ||
-                history.length >= data.test.max_attempts
-              }
-              className={`${button} mt-4`}
-              onClick={() => void start()}
-            >
-              Start attempt
-            </button>
-            {history.length >= data.test.max_attempts && (
-              <p className="mt-2 text-sm">Attempt limit reached.</p>
-            )}
-          </section>
-          <section className="card mt-5 p-4">
-            <h2 className="text-lg font-bold">Attempt history</h2>
-            {!history.length && (
-              <p className="mt-2 text-sm text-muted">No attempts yet.</p>
-            )}
-            {history.map((a, i) => (
-              <div
-                className="flex flex-wrap items-center justify-between gap-3 border-b py-3"
-                key={a.id}
-              >
-                <div>
-                  <p>
-                    Attempt {history.length - i} ·{" "}
-                    {a.status.replaceAll("_", " ")}
-                  </p>
-                  <p className="text-sm text-muted">
-                    {new Date(a.started_at).toLocaleString()}
-                    {a.score !== null ? ` · Score ${a.score}` : ""}
-                  </p>
-                </div>
-                <button
-                  className="min-h-11 rounded border px-3"
-                  onClick={() =>
-                    void (
-                      a.status === "in_progress"
-                        ? open(a.id)
-                        : reviewAttempt(a.id)
-                    ).catch((e) => setError(e.message))
-                  }
-                >
-                  {a.status === "in_progress" ? "Resume" : "View result"}
-                </button>
-              </div>
-            ))}
-          </section>
-        </>
-      )}
-    </div>
-  );
+import {useCallback,useEffect,useRef,useState} from "react";
+import {Bookmark,Check,ChevronLeft,ChevronRight,Clock3,Grid3X3,X} from "lucide-react";
+import {createClient} from "@/lib/supabase/client";
+import {QuestionGallery} from "@/components/learning/question-gallery";
+import {RichContent} from "@/components/learning/rich-text";
+import {mediaPositions} from "@/lib/rich-text";
+import type {RichText} from "@/lib/rich-text";
+import type {QuestionMedia} from "@/lib/question-media";
+import {SubmittedReview} from "./submitted-review";
+import type {Review} from "./review-types";
+
+type Option={id:string;content:string;content_rich?:RichText};
+type Question={id:string;prompt:string;prompt_rich?:RichText;stem_media?:QuestionMedia[];type:string;stem_image_path:string|null;subject_name?:string;chapter_name?:string;options:Option[]};
+type History={id:string;status:string;started_at:string;submitted_at:string|null;score:number|null;total_marks?:number;attempt_number?:number};
+type Attempt={id:string;status:string;expires_at:string;option_order:Record<string,string[]>;marked_for_review:string[];questions:Question[];answers:Record<string,string[]>};
+type Test={id:string;title:string;type:string;instructions?:string;duration_minutes:number;question_count:number;total_marks:number|null;max_attempts:number|null;attempts_used?:number;can_start?:boolean;subjects?:string[];default_negative_marks?:number;target_score?:number|null;pass_percentage?:number|null;available_from?:string|null;available_until?:string|null};
+const primary="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 font-semibold text-white disabled:opacity-50";
+const secondary="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-2 font-semibold disabled:opacity-50";
+const typeLabel=(type:string)=>type==="mock"||type==="full_exam"?"Mock exam":"Practice test";
+
+export function CoreTestEngine({data}:{data:{test:Test;attempts:History[]}}){
+ const[history,setHistory]=useState(data.attempts),[attempt,setAttempt]=useState<Attempt|null>(null),[review,setReview]=useState<Review|null>(null),[index,setIndex]=useState(0),[remaining,setRemaining]=useState(0),[error,setError]=useState(""),[busy,setBusy]=useState(false),[confirm,setConfirm]=useState(false),[palette,setPalette]=useState(false);
+ const submitting=useRef(false),expiredSubmission=useRef<string|null>(null);
+ const refresh=useCallback(async()=>{const r=await createClient().rpc("core_attempt_history",{target_test:data.test.id});if(r.error)throw new Error(r.error.message);setHistory(r.data||[]);},[data.test.id]);
+ const reviewAttempt=useCallback(async(id:string)=>{const r=await createClient().rpc("get_test_review",{target_attempt:id});if(r.error)throw new Error(r.error.message);setReview(r.data);setAttempt(null);},[]);
+ const open=useCallback(async(id:string)=>{const r=await createClient().rpc("core_attempt_payload",{target_attempt:id});if(r.error)throw new Error(r.error.message);if(r.data.status!=="in_progress"){await reviewAttempt(id);await refresh();}else{setAttempt({...r.data,marked_for_review:r.data.marked_for_review||[]});setReview(null);setIndex(0);}},[refresh,reviewAttempt]);
+ useEffect(()=>{const current=data.attempts.find(a=>a.status==="in_progress");if(!current)return;const timer=window.setTimeout(()=>void open(current.id).catch(e=>setError(e.message)),0);return()=>window.clearTimeout(timer);},[data.attempts,open]);
+ const submit=useCallback(async(id:string)=>{if(submitting.current)return;submitting.current=true;setBusy(true);setError("");try{const r=await createClient().rpc("submit_test_attempt",{target_attempt:id});if(r.error)throw new Error(r.error.message);setConfirm(false);await reviewAttempt(id);await refresh();}catch(e){setError(e instanceof Error?e.message:"Submission failed");}finally{submitting.current=false;setBusy(false);}},[refresh,reviewAttempt]);
+ useEffect(()=>{if(!attempt)return;const tick=()=>{const left=Math.max(0,Math.ceil((new Date(attempt.expires_at).getTime()-Date.now())/1000));setRemaining(left);if(left===0&&!submitting.current&&expiredSubmission.current!==attempt.id){expiredSubmission.current=attempt.id;void submit(attempt.id);}};tick();const timer=setInterval(tick,1000);return()=>clearInterval(timer);},[attempt,submit]);
+ useEffect(()=>{if(!review)return;const frame=requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"instant"}));return()=>cancelAnimationFrame(frame);},[review]);
+ async function start(){if(busy)return;setBusy(true);setError("");try{const r=await createClient().rpc("start_test_attempt",{target_test:data.test.id});if(r.error)throw new Error(r.error.message);await open(r.data.id);await refresh();}catch(e){setError(e instanceof Error?e.message:"Cannot start");}finally{setBusy(false);}}
+ async function saveAnswer(q:Question,selected:string[]){if(!attempt||busy||remaining===0)return;const previous=attempt.answers[q.id]||[];setAttempt({...attempt,answers:{...attempt.answers,[q.id]:selected}});setBusy(true);const r=await createClient().rpc("save_attempt_answer",{target_attempt:attempt.id,target_question:q.id,option_ids:selected});if(r.error){setError(r.error.message);setAttempt({...attempt,answers:{...attempt.answers,[q.id]:previous}});}setBusy(false);}
+ async function choose(q:Question,id:string){const prior=attempt?.answers[q.id]||[];await saveAnswer(q,q.type==="multiple_mcq"?(prior.includes(id)?prior.filter(x=>x!==id):[...prior,id]):[id]);}
+ async function flag(qid:string){if(!attempt)return;const marked=!attempt.marked_for_review.includes(qid);const before=attempt.marked_for_review;setAttempt({...attempt,marked_for_review:marked?[...before,qid]:before.filter(id=>id!==qid)});const r=await createClient().rpc("set_attempt_review_flag",{target_attempt:attempt.id,target_question:qid,marked});if(r.error){setError(r.error.message);setAttempt({...attempt,marked_for_review:before});}}
+ const q=attempt?.questions[index],answered=attempt?Object.values(attempt.answers).filter(ids=>ids.length).length:0,flags=attempt?.marked_for_review.length||0;
+ const attemptsRemaining=data.test.max_attempts===null?"Unlimited":Math.max(0,data.test.max_attempts-history.length);
+ if(review)return <div className="mx-auto max-w-5xl py-4 sm:py-6"><h1 className="mb-4 px-4 text-2xl font-bold sm:px-0">{data.test.title}</h1>{error&&<Alert text={error}/>}<SubmittedReview review={review}/><History rows={history} open={id=>void reviewAttempt(id).catch(e=>setError(e.message))}/></div>;
+ if(!attempt)return <div className="mx-auto max-w-3xl p-4 pb-24 sm:p-6"><p className="text-xs font-bold uppercase tracking-wide text-brand">{typeLabel(data.test.type)}</p><h1 className="mt-2 text-2xl font-bold sm:text-3xl">{data.test.title}</h1>{error&&<Alert text={error}/>}<section className="card mt-5 p-5 sm:p-7" aria-label="Test details"><dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3"><Detail label="Subjects" value={data.test.subjects?.join(", ")||"Program assessment"}/><Detail label="Questions" value={data.test.question_count}/><Detail label="Duration" value={`${data.test.duration_minutes} minutes`}/><Detail label="Attempts remaining" value={attemptsRemaining}/><Detail label="Negative marking" value={data.test.default_negative_marks?`${data.test.default_negative_marks} per wrong answer`:"Off"}/><Detail label="Pass criterion" value={data.test.pass_percentage!==null&&data.test.pass_percentage!==undefined?`${data.test.pass_percentage}%`:data.test.target_score!==null&&data.test.target_score!==undefined?`${data.test.target_score} marks`:"None"}/></dl>{data.test.instructions&&<div className="mt-5 border-t border-line pt-5"><h2 className="font-bold">Instructions</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">{data.test.instructions}</p></div>}<p className="mt-5 text-sm text-muted">The timer starts only after you choose Start test. Questions are not shown before the attempt begins.</p><button disabled={busy||data.test.can_start===false} className={`${primary} mt-5 w-full sm:w-auto`} onClick={()=>void start()}>{busy?"Starting…":"Start test"}</button>{data.test.can_start===false&&<p className="mt-2 text-sm text-muted">This test cannot be started at the moment.</p>}</section><History rows={history} open={id=>void (history.find(a=>a.id===id)?.status==="in_progress"?open(id):reviewAttempt(id)).catch(e=>setError(e.message))}/></div>;
+ if(!q)return <div className="p-6">No questions are available in this attempt.</div>;
+ const order=attempt.option_order[q.id]||[];const options=[...q.options].sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+ return <div className="mx-auto max-w-6xl p-4 pb-28 sm:p-6"><header className="mb-4 flex flex-wrap items-center gap-3"><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold uppercase text-brand">{data.test.title}</p><p className="text-sm font-semibold">Question {index+1} of {attempt.questions.length}</p></div><span role="timer" aria-live="off" className={`flex items-center gap-2 rounded-lg bg-white px-3 py-2 font-bold ${remaining<60?"text-red-700":"text-ink"}`}><Clock3 size={17}/>{Math.floor(remaining/60)}:{String(remaining%60).padStart(2,"0")}</span><button className={secondary} onClick={()=>setConfirm(true)}>Finish</button></header><div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]"><section className="card min-w-0 p-4 sm:p-6"><div className="flex items-start justify-between gap-3"><p className="text-xs font-bold uppercase text-muted">{[q.subject_name,q.chapter_name].filter(Boolean).join(" · ")}</p><button className={`flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-3 text-xs font-bold ${attempt.marked_for_review.includes(q.id)?"bg-amber-50 text-amber-800":"bg-surface text-muted"}`} onClick={()=>void flag(q.id)}><Bookmark size={15} fill={attempt.marked_for_review.includes(q.id)?"currentColor":"none"}/>Review</button></div>{(q.prompt.trim()||mediaPositions(q.prompt_rich).length>0)&&<div className="mt-4 min-w-0 whitespace-pre-wrap text-lg font-bold"><RichContent value={q.prompt_rich} fallback={q.prompt} media={q.stem_media} kind="stem"/></div>}<QuestionGallery kind="stem" media={mediaPositions(q.prompt_rich).length?[]:q.stem_media} legacy={q.stem_image_path}/><fieldset className="mt-5 space-y-3"><legend className="mb-2 text-sm text-muted">{q.type==="multiple_mcq"?"Select all correct answers":"Select one answer"}</legend>{options.map((o,i)=><label key={o.id} className={`flex min-h-14 cursor-pointer items-start gap-3 rounded-xl border p-4 ${attempt.answers[q.id]?.includes(o.id)?"border-brand bg-brand/5 ring-1 ring-brand/20":"border-line"}`}><input className="mt-1" disabled={busy||remaining===0} type={q.type==="multiple_mcq"?"checkbox":"radio"} name={q.id} checked={(attempt.answers[q.id]||[]).includes(o.id)} onChange={()=>void choose(q,o.id)}/><span className="grid size-7 shrink-0 place-items-center rounded-full border text-xs font-bold">{attempt.answers[q.id]?.includes(o.id)?<Check size={14}/>:String.fromCharCode(65+i)}</span><RichContent value={o.content_rich} fallback={o.content}/></label>)}</fieldset><div className="mt-4 flex items-center justify-between"><button className="min-h-11 text-sm font-semibold text-muted" disabled={busy||!(attempt.answers[q.id]||[]).length} onClick={()=>void saveAnswer(q,[])}>Clear answer</button><span role="status" className="text-xs text-muted">{busy?"Saving…":"Saved"}</span></div><div className="mt-5 flex justify-between gap-3 border-t border-line pt-5"><button disabled={busy||index===0} className={secondary} onClick={()=>setIndex(i=>i-1)}><ChevronLeft size={17}/>Previous</button><button disabled={busy} className={primary} onClick={()=>index<attempt.questions.length-1?setIndex(i=>i+1):setConfirm(true)}>{index<attempt.questions.length-1?"Next":"Review & submit"}<ChevronRight size={17}/></button></div></section><Palette attempt={attempt} index={index} jump={setIndex} className="hidden lg:block"/></div><button className="fixed bottom-20 left-1/2 z-30 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full bg-deep-blue px-5 text-sm font-bold text-white shadow-xl lg:hidden" onClick={()=>setPalette(true)}><Grid3X3 size={17}/>Questions</button>{palette&&<div className="fixed inset-0 z-50 bg-ink/40 lg:hidden" onClick={()=>setPalette(false)}><div className="absolute inset-x-0 bottom-0 max-h-[75vh] overflow-auto rounded-t-2xl bg-white p-5 pb-8" onClick={e=>e.stopPropagation()}><div className="flex justify-between"><h2 className="font-bold">Questions</h2><button aria-label="Close question navigator" className="size-10" onClick={()=>setPalette(false)}><X/></button></div><Palette attempt={attempt} index={index} jump={i=>{setIndex(i);setPalette(false);}}/></div></div>}{confirm&&<div className="fixed inset-0 z-50 grid place-items-center bg-ink/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="submit-heading" className="card w-full max-w-md p-6"><h2 id="submit-heading" className="text-xl font-bold">Submit this test?</h2><dl className="mt-4 grid grid-cols-3 gap-2 text-center text-sm"><Detail label="Answered" value={answered}/><Detail label="Unanswered" value={attempt.questions.length-answered}/><Detail label="For review" value={flags}/></dl><p className="mt-4 text-sm text-muted">Submission is final for this attempt.</p><div className="mt-6 flex justify-end gap-3"><button className={secondary} onClick={()=>setConfirm(false)}>Keep reviewing</button><button disabled={busy} className={primary} onClick={()=>void submit(attempt.id)}>{busy?"Submitting…":"Confirm submit"}</button></div></div></div>}{error&&<div className="fixed inset-x-4 bottom-20 z-40 mx-auto max-w-xl"><Alert text={error}/></div>}</div>;
 }
+
+function Detail({label,value}:{label:string;value:React.ReactNode}){return <div className="rounded-lg bg-surface p-3"><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 font-bold">{value}</dd></div>}
+function Alert({text}:{text:string}){return <p role="alert" className="my-3 rounded-lg bg-red-50 p-3 text-sm text-red-800">{text}</p>}
+function Palette({attempt,index,jump,className=""}:{attempt:Attempt;index:number;jump:(i:number)=>void;className?:string}){const answered=Object.values(attempt.answers).filter(x=>x.length).length;return <aside className={`card h-fit p-4 ${className}`} aria-label="Question navigator"><h2 className="font-bold">Question navigator</h2><div className="mt-4 grid grid-cols-5 gap-2">{attempt.questions.map((q,i)=><button key={q.id} onClick={()=>jump(i)} aria-label={`Question ${i+1}${attempt.answers[q.id]?.length?", answered":""}${attempt.marked_for_review.includes(q.id)?", marked for review":""}`} className={`relative grid size-10 place-items-center rounded-lg border text-xs font-bold ${i===index?"border-deep-blue ring-2 ring-deep-blue/20":attempt.answers[q.id]?.length?"border-brand bg-brand text-white":"border-line"}`}>{i+1}{attempt.marked_for_review.includes(q.id)&&<Bookmark size={9} className="absolute right-1 top-1" fill="currentColor"/>}</button>)}</div><div className="mt-4 space-y-1 text-xs text-muted"><p>Answered: {answered}</p><p>Unanswered: {attempt.questions.length-answered}</p><p>For review: {attempt.marked_for_review.length}</p></div></aside>}
+function History({rows,open}:{rows:History[];open:(id:string)=>void}){return <section className="card mt-5 p-4 sm:p-5"><h2 className="font-bold">Attempt history</h2>{!rows.length?<p className="mt-2 text-sm text-muted">No attempts yet.</p>:<div className="mt-2 divide-y divide-line">{rows.map((a,i)=><div className="flex flex-wrap items-center justify-between gap-3 py-3" key={a.id}><div><p className="font-semibold">Attempt {a.attempt_number??rows.length-i} · {a.status.replaceAll("_"," ")}</p><p className="text-xs text-muted">{new Date(a.started_at).toLocaleString()}{a.score!==null?` · Score ${a.score}${a.total_marks?` / ${a.total_marks}`:""}`:""}</p></div><button className={secondary} onClick={()=>open(a.id)}>{a.status==="in_progress"?"Continue":"View result"}</button></div>)}</div>}</section>}

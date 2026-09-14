@@ -45,6 +45,7 @@ import {
 } from "@/lib/question-media";
 import { PrivateImage } from "@/components/learning/private-image";
 import { mediaAlt, questionLabel, conversionLabel } from "@/lib/question-media";
+import { loadAdminTestResults, loadTestQuestionPage, type TestQuestionPage } from "@/lib/test-repository";
 
 export function CoreManager({
   mode,
@@ -61,6 +62,8 @@ export function CoreManager({
     [status, setStatus] = useState(""),
     [subject, setSubject] = useState(""),
     [chapter, setChapter] = useState(""),
+    [testType, setTestType] = useState(""),
+    [program, setProgram] = useState(""),
     [sourceType, setSourceType] = useState(""),
     [reviewOnly, setReviewOnly] = useState(false),
     [page, setPage] = useState(0);
@@ -148,6 +151,9 @@ export function CoreManager({
     return (
       canManage(data, mode, x) &&
       (!status || x.status === status) &&
+      (mode !== "tests" || !testType || ("type" in x && x.type === testType)) &&
+      (mode !== "tests" || !program || x.program_id === program) &&
+      (mode !== "tests" || !subject || ("selection_rules" in x && (x.subject_id === subject || x.selection_rules.scopes?.some((scope) => scope.subject_id === subject)))) &&
       (!isQuestion ||
         ((!subject || x.subject_id === subject) &&
           (!chapter || x.chapter_id === chapter) &&
@@ -273,6 +279,13 @@ export function CoreManager({
           </label>
         </div>
       )}
+      {mode === "tests" && (
+        <div className="mb-5 grid gap-3 sm:grid-cols-3">
+          <Select label="Filter by type" value={testType} items={[{id:"practice",name:"Practice"},{id:"mock",name:"Mock"}]} onChange={(v)=>{setTestType(v);setPage(0);}} />
+          <Select label="Filter by program" value={program} items={data.programs} onChange={(v)=>{setProgram(v);setPage(0);}} />
+          <Select label="Filter by subject" value={subject} items={data.subjects} onChange={(v)=>{setSubject(v);setPage(0);}} />
+        </div>
+      )}
       <div className="space-y-3">
         {rows.slice(page * 20, page * 20 + 20).map((x) => (
           <article className="card min-w-0 p-4" key={x.id}>
@@ -308,10 +321,13 @@ export function CoreManager({
                   </>
                 )}
                 {"total_marks" in x && (
-                  <p className="text-sm text-muted">
-                    {x.question_count} questions · {x.total_marks} marks ·{" "}
-                    {x.max_attempts} attempts
-                  </p>
+                  <div className="mt-2 grid gap-1 text-sm text-muted sm:grid-cols-2 lg:grid-cols-4">
+                    <p>{x.question_count} questions · {x.duration_minutes} min</p>
+                    <p>{x.total_marks ?? "Per attempt"} marks</p>
+                    <p>{x.max_attempts === null ? "Unlimited" : x.max_attempts} attempts</p>
+                    <p>{data.programs.find((p) => p.id === x.program_id)?.name || "No program"}</p>
+                    <p className="sm:col-span-2">{x.available_from ? new Date(x.available_from).toLocaleString() : "Available immediately"} → {x.available_until ? new Date(x.available_until).toLocaleString() : "No end date"}</p>
+                  </div>
                 )}
               </div>
               <button
@@ -786,18 +802,46 @@ export function TestForm({
   data,
   busy,
   save,
+  remoteQuestions = false,
 }: {
   value: Test;
   data: CoreData;
   busy: boolean;
   save: (q: Test) => Promise<void>;
+  remoteQuestions?: boolean;
 }) {
   const [t, setT] = useState(() => inferTestScope(data, value)),
     [search, setSearch] = useState("");
   const [visibleSubject, setVisibleSubject] = useState(""), [visibleSection, setVisibleSection] = useState("");
+  const [questionPage,setQuestionPage]=useState(0);
+  const [bank,setBank]=useState<{key:string;status:"ready"|"error";value:TestQuestionPage;error?:string}>({key:"",status:"ready",value:{rows:[],total:0,scope_total:0,by_subject:{}}});
+  const [previewOpen,setPreviewOpen]=useState(false);
+  const [results,setResults]=useState<Record<string,unknown>|null>(null);
   const scoped = hasTestScope(data, t);
-  const eligible = eligibleTestQuestions(data, t);
-  const selectionError = testSelectionError(data, t);
+  const examId=t.exam_id,programId=t.program_id,subjectId=t.subject_id,chapterId=t.chapter_id,topicId=t.topic_id,selectionRules=t.selection_rules;
+  const bankKey=JSON.stringify([examId,programId,subjectId,chapterId,topicId,selectionRules,questionPage,search,visibleSubject,visibleSection]);
+  useEffect(()=>{
+    if(!remoteQuestions||!scoped){return;}
+    let live=true;
+    const scope={exam_id:examId,program_id:programId,subject_id:subjectId,chapter_id:chapterId,topic_id:topicId,selection_rules:selectionRules};
+    void loadTestQuestionPage(scope,questionPage,search,visibleSubject,visibleSection).then(value=>{if(live)setBank({key:bankKey,status:"ready",value});}).catch(error=>{if(live)setBank(current=>({...current,key:bankKey,status:"error",error:error.message}));});
+    return()=>{live=false;};
+  },[remoteQuestions,scoped,examId,programId,subjectId,chapterId,topicId,selectionRules,questionPage,search,visibleSubject,visibleSection,bankKey]);
+  const bankStatus=bank.key===bankKey?bank.status:"loading";
+  const eligible = remoteQuestions ? bank.value.rows : eligibleTestQuestions(data, t);
+  const available = remoteQuestions ? bank.value.scope_total : eligible.length;
+  const selectionError = remoteQuestions ? (()=>{
+    if(!scoped)return "Choose a subject and a valid section within the program first.";
+    if(bankStatus==="loading")return "Loading current question availability…";
+    if(bankStatus==="error")return "Question availability could not be loaded. Retry before publishing.";
+    if(!available)return "No active questions are available for this scope.";
+    if(t.selection_mode==="generated"){
+      if(t.selection_rules.scopes){for(const scope of t.selection_rules.scopes){const count=bank.value.by_subject[scope.subject_id]||0;if(!Number.isInteger(scope.count)||!scope.count||scope.count<1||scope.count>count)return `Choose 1–${count} questions for ${data.subjects.find(x=>x.id===scope.subject_id)?.name}.`; }return null;}
+      return Number.isInteger(t.question_count)&&t.question_count>0&&t.question_count<=available?null:`Choose between 1 and ${available} available active questions.`;
+    }
+    return t.question_ids.length>0&&new Set(t.question_ids).size===t.question_ids.length?null:"Select at least one active question.";
+  })() : testSelectionError(data, t);
+  const blockingError=t.status==="active"?selectionError:!t.title.trim()?"Enter a title to save this Draft.":null;
   const subject = data.subjects.find((s) => s.id === t.subject_id);
   const section = data.chapters.find((s) => s.id === t.chapter_id);
   const total = eligible
@@ -808,7 +852,7 @@ export function TestForm({
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!selectionError) void save(t);
+        if (!blockingError) void save(t);
       }}
     >
       <Section title="Test details" open>
@@ -824,18 +868,11 @@ export function TestForm({
           label="Test type"
           value={t.type}
           required
-          items={[
-            "mock",
-            "subject",
-            "chapter",
-            "topic",
-            "daily",
-            "weekly",
-            "revision",
-            "full_exam",
-          ].map((id) => ({ id, name: id.replaceAll("_", " ") }))}
+          items={[...new Set(["practice","mock",t.type])].map((id) => ({ id, name: id==="practice"?"Practice test":id==="mock"?"Mock exam":id.replaceAll("_", " ") }))}
           onChange={(v) => setT({ ...t, type: v })}
         />
+        <Field label="Internal description (Admin only)"><textarea className={`${input} min-h-20`} value={t.internal_description||""} onChange={e=>setT({...t,internal_description:e.target.value})}/></Field>
+        <Field label="Student instructions"><textarea className={`${input} min-h-24`} value={t.instructions||""} onChange={e=>setT({...t,instructions:e.target.value})}/></Field>
         <div className="grid gap-4 sm:grid-cols-3">
           <NumberField
             label="Duration (minutes)"
@@ -843,24 +880,35 @@ export function TestForm({
             value={t.duration_minutes}
             onChange={(v) => setT({ ...t, duration_minutes: v })}
           />
-          <NumberField
-            label="Attempts allowed"
-            min={1}
-            value={t.max_attempts}
-            onChange={(v) => setT({ ...t, max_attempts: v })}
-          />
-          <NumberField
-            label="Negative marks per wrong answer"
-            step={0.25}
-            value={t.default_negative_marks}
-            onChange={(v) => setT({ ...t, default_negative_marks: v })}
-          />
+          <div><label className="flex min-h-11 items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={t.max_attempts===null} onChange={e=>setT({...t,max_attempts:e.target.checked?null:1})}/>Unlimited attempts</label>{t.max_attempts!==null&&<NumberField label="Attempts allowed" min={1} value={t.max_attempts} onChange={(v) => setT({ ...t, max_attempts: v })}/>}</div>
+          <div><label className="flex min-h-11 items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={t.default_negative_marks>0} onChange={e=>setT({...t,default_negative_marks:e.target.checked?0.25:0})}/>Negative marking</label>{t.default_negative_marks>0&&<NumberField label="Marks deducted per wrong answer" min={0.01} step={0.25} value={t.default_negative_marks} onChange={(v) => setT({ ...t, default_negative_marks: v })}/>}</div>
         </div>
+        <Select label="Pass criterion" value={t.target_score!==null?"marks":t.pass_percentage!==null?"percentage":"none"} items={[{id:"none",name:"No pass criterion"},{id:"marks",name:"Pass mark"},{id:"percentage",name:"Pass percentage"}]} onChange={v=>setT({...t,target_score:v==="marks"?0:null,pass_percentage:v==="percentage"?0:null})}/>
+        {t.target_score !== null && (
+          <NumberField
+            label="Pass mark"
+            min={0}
+            step={0.5}
+            value={t.target_score}
+            onChange={(v) => setT({ ...t, target_score: v })}
+          />
+        )}
+        {t.pass_percentage !== null && (
+          <NumberField
+            label="Pass percentage"
+            min={0}
+            value={t.pass_percentage}
+            onChange={(v) =>
+              setT({ ...t, pass_percentage: Math.min(100, v) })
+            }
+          />
+        )}
       </Section>
       <Section title="Academic scope" open>
-        <TestScopeFields value={t} data={data} onChange={next => {
+        <TestScopeFields value={t} data={data} availableBySubject={remoteQuestions?bank.value.by_subject:undefined} onChange={next => {
           setVisibleSubject(""); setVisibleSection("");
-          setT(retainAllowedSelections(data, next));
+          setQuestionPage(0);
+          setT(remoteQuestions?{...next,question_ids:[]}:retainAllowedSelections(data, next));
         }}/>
       </Section>
       <Section title="Question selection" open>
@@ -870,7 +918,7 @@ export function TestForm({
         <div className="grid gap-1 text-sm sm:grid-cols-2" aria-live="polite">
           <p>Subject: {t.selection_rules.scopes ? "Multiple subjects" : subject?.name}</p>
           <p>Section: {t.selection_rules.scopes ? "Configured per subject" : section?.name ?? `All ${subject?.name} sections`}</p>
-          <p>Available Active Questions: {eligible.length}</p>
+          <p>Available Active Questions: {available}</p>
           <p>{t.selection_mode === "manual" ? `Selected: ${t.question_ids.length}` : `Requested: ${t.question_count}`}</p>
         </div>
         <Select
@@ -892,14 +940,15 @@ export function TestForm({
               label="Difficulty rule"
               value={t.selection_rules?.difficulty || ""}
               items={["easy", "medium", "hard"].map((id) => ({ id, name: id }))}
-              onChange={(v) =>
-                setT({ ...t, selection_rules: { ...t.selection_rules, difficulty: v } })
-              }
+              onChange={(v) => {
+                setQuestionPage(0);
+                setT({ ...t, selection_rules: { ...t.selection_rules, difficulty: v } });
+              }}
             />
             {t.selection_rules.scopes ? <p className="text-sm font-semibold">Total requested: {t.selection_rules.scopes.reduce((n, scope) => n + (scope.count || 0), 0)}</p> : <NumberField
               label="Number of questions"
               min={1}
-              disabled={!eligible.length}
+              disabled={!available}
               value={t.question_count}
               onChange={(v) => setT({ ...t, question_count: v })}
             />}
@@ -911,21 +960,22 @@ export function TestForm({
         ) : (
           <>
             {t.selection_rules.scopes && <div className="grid gap-3 sm:grid-cols-2">
-              <Select label="Visible subject" value={visibleSubject} items={data.subjects.filter(s => t.selection_rules.scopes?.some(scope => scope.subject_id === s.id))} onChange={v => {setVisibleSubject(v);setVisibleSection("");}}/>
-              <Select label="Visible section" value={visibleSection} items={data.chapters.filter(c => (!visibleSubject || c.subject_id === visibleSubject) && eligible.some(q => q.chapter_id === c.id))} onChange={setVisibleSection}/>
+              <Select label="Visible subject" value={visibleSubject} items={data.subjects.filter(s => t.selection_rules.scopes?.some(scope => scope.subject_id === s.id))} onChange={v => {setVisibleSubject(v);setVisibleSection("");setQuestionPage(0);}}/>
+              <Select label="Visible section" value={visibleSection} items={data.chapters.filter(c => !visibleSubject || c.subject_id === visibleSubject)} onChange={v=>{setVisibleSection(v);setQuestionPage(0);}}/>
             </div>}
             <Field label="Search active questions">
               <input
                 className={input}
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {setSearch(e.target.value);setQuestionPage(0);}}
               />
             </Field>
             <TestQuestionPicker
               key={[t.subject_id, t.chapter_id, t.topic_id, visibleSubject, visibleSection, search].join(":")}
-              questions={eligible.filter((q) => (!visibleSubject || q.subject_id === visibleSubject) && (!visibleSection || q.chapter_id === visibleSection) && [questionLabel(q), q.source_label, q.source_reference].join(" ").toLowerCase().includes(search.toLowerCase()))}
+              questions={eligible.filter((q) => (!visibleSubject || q.subject_id === visibleSubject) && (!visibleSection || q.chapter_id === visibleSection) && (remoteQuestions||[questionLabel(q), q.source_label, q.source_reference].join(" ").toLowerCase().includes(search.toLowerCase())))}
               selected={t.question_ids}
               onChange={(question_ids) => setT({ ...t, question_ids })}
+              {...(remoteQuestions?{page:questionPage,total:bank.value.total,pageSize:20,onPageChange:setQuestionPage}:{})}
             />
             {t.question_ids.some(
               (id) => !eligible.some((q) => q.id === id),
@@ -946,8 +996,7 @@ export function TestForm({
               </button>
             )}
             <p className="text-sm font-semibold">
-              {t.question_ids.length} selected · Total marks: {total}{" "}
-              (calculated)
+              {t.question_ids.length} selected · {remoteQuestions?"Total marks calculated when saved":`Total marks: ${total} (calculated)`}
             </p>
           </>
         )}
@@ -1002,6 +1051,12 @@ export function TestForm({
             {label}
           </label>
         ))}
+        {t.randomize_options && (
+          <p role="status" className="text-xs text-warning">
+            Confirm every question is safe to shuffle. Options such as “all of
+            the above” or answers that depend on option order can change meaning.
+          </p>
+        )}
         <p className="text-xs text-muted">
           Completed attempts keep their original questions and review rules when
           this test is edited.
@@ -1011,10 +1066,19 @@ export function TestForm({
         value={t.status}
         onChange={(v) => setT({ ...t, status: v })}
       />
-      {selectionError && (
+      <Section title="Review & publish">
+        <button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>setPreviewOpen(v=>!v)}>{previewOpen?"Close preview":"Preview test"}</button>
+        {previewOpen&&<div className="rounded-lg bg-surface p-4 text-sm"><p className="font-bold">{t.title||"Untitled test"}</p><p>{t.type==="mock"?"Mock exam":"Practice test"} · {t.selection_mode==="manual"?t.question_ids.length:t.question_count} questions · {t.duration_minutes} minutes</p><p className="mt-2 whitespace-pre-wrap text-muted">{t.instructions||"No additional instructions."}</p><p className="mt-2 text-xs text-muted">Preview does not create a Student attempt. Random questions are selected only when an attempt starts.</p></div>}
+        {value.id&&<button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void loadAdminTestResults(value.id).then(v=>setResults(v as Record<string,unknown>))}>View results</button>}
+        {results&&<div className="rounded-lg bg-surface p-4 text-sm"><p><b>{String(results.attempt_count??0)}</b> attempts · Average score {String(results.average_score??"—")}</p></div>}
+      </Section>
+      {selectionError && t.status !== "active" && (
         <p role="status" className="text-sm text-muted">{selectionError}</p>
       )}
-      <button disabled={busy || !!selectionError} className={`${button} w-full`}>
+      {blockingError && (
+        <p role="status" className="text-sm text-muted">{blockingError}</p>
+      )}
+      <button disabled={busy || !!blockingError} className={`${button} w-full`}>
         {busy ? "Saving…" : "Save test"}
       </button>
     </form>

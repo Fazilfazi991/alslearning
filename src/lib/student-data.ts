@@ -28,13 +28,7 @@ export async function getStudentPortalData() {
         )
         .in("status", ["scheduled", "live"])
         .order("starts_at"),
-      db
-        .from("tests")
-        .select(
-          "id,title,slug,type,duration_minutes,question_count,total_marks,available_from,available_until,program_id",
-        )
-        .eq("status", "active")
-        .order("available_from"),
+      db.rpc("core_student_test_catalog"),
       db
         .from("video_progress")
         .select("content_id,position_seconds,completed,updated_at")
@@ -55,11 +49,17 @@ export async function getStudentPortalData() {
     enrollments: (enrollments.data || []).filter(e=>e.programs && e.status==="active" && (!e.batch_id || e.batches) && (!e.access_starts_at || new Date(e.access_starts_at)<=new Date()) && (!e.access_expires_at || new Date(e.access_expires_at)>new Date())),
     content: content.data || [],
     sessions: sessions.data || [],
-    tests: tests.data || [],
+    tests: (tests.data || []) as StudentTestSummary[],
     progress: progress.data || [],
     attempts: (attempts.data || []) as {id:string;test_id:string;started_at:string;submitted_at:string|null;score:number|null;status:string}[],
   };
 }
+
+export type StudentTestSummary={
+ id:string;slug:string;title:string;type:string;duration_minutes:number;question_count:number;total_marks:number|null;
+ available_from:string|null;available_until:string|null;program_id:string;subjects:string[];attempts_used:number;max_attempts:number|null;
+ last_score:number|null;state:"available"|"in_progress"|"completed"|"upcoming"|"closed";
+};
 
 export async function getCourseDetail(slug: string) {
   const user = await currentUser();

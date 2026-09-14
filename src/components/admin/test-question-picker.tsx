@@ -39,19 +39,27 @@ function QuestionPreview({ question }: { question: Question }) {
   );
 }
 
-export function TestQuestionPicker({ questions, selected, onChange }: {
+export function TestQuestionPicker({ questions, selected, onChange, page:controlledPage, total:controlledTotal, pageSize=10, onPageChange }: {
   questions: Question[];
   selected: string[];
   onChange: (ids: string[]) => void;
+  page?: number;
+  total?: number;
+  pageSize?: number;
+  onPageChange?: (page:number)=>void;
 }) {
-  const [page, setPage] = useState(0);
+  const [localPage, setLocalPage] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
-  const pageSize = 10;
-  const pages = Math.max(1, Math.ceil(questions.length / pageSize));
+  const remote=onPageChange!==undefined;
+  const page=controlledPage??localPage;
+  const total=controlledTotal??questions.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const rows=remote?questions:questions.slice(page * pageSize, (page + 1) * pageSize);
+  const changePage=(next:number)=>{setPreview(null);if(onPageChange)onPageChange(next);else setLocalPage(next);};
   return (
     <div className="min-w-0 space-y-3">
       <div className="divide-y divide-line rounded-lg border border-line">
-        {questions.slice(page * pageSize, (page + 1) * pageSize).map((q) => (
+        {rows.map((q) => (
           <div key={q.id} className="min-w-0">
             <div className="flex min-w-0 items-center gap-2 px-3 py-1">
               <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 py-2 text-sm">
@@ -76,10 +84,10 @@ export function TestQuestionPicker({ questions, selected, onChange }: {
       </div>
       <nav aria-label="Question pages" className="flex items-center justify-between gap-2 text-sm">
         <button type="button" className="min-h-11 px-3 disabled:opacity-40" disabled={!page}
-          onClick={() => { setPage(page - 1); setPreview(null); }}>Previous</button>
+          onClick={() => changePage(page - 1)}>Previous</button>
         <span>Page {page + 1} of {pages}</span>
         <button type="button" className="min-h-11 px-3 disabled:opacity-40" disabled={page + 1 >= pages}
-          onClick={() => { setPage(page + 1); setPreview(null); }}>Next</button>
+          onClick={() => changePage(page + 1)}>Next</button>
       </nav>
     </div>
   );
