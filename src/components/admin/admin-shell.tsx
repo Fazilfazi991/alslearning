@@ -9,7 +9,8 @@ import { LogoutButton } from "@/components/shared/logout-button";
 const items = [
   { href: "/admin", label: "Dashboard", Icon: Home },
   { href: "/admin/students", label: "Enrollments", Icon: Users },
-  { href: "/admin/teachers", label: "Faculty assignments", Icon: UserRound },
+  { href: "/admin/teachers", label: "Faculty directory", Icon: UserRound },
+  { href: "/admin/teacher-accounts", label: "Teacher logins", Icon: UserRound },
   { href: "/admin/academic", label: "Programs & Syllabus", Icon: LibraryBig },
   { href: "/admin/questions", label: "Question Bank", Icon: FileQuestion },
   { href: "/admin/tests", label: "Tests", Icon: ClipboardCheck },

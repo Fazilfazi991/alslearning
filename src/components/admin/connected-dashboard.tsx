@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 
 const metrics = [
   { label: "Students", table: "profiles", filter: ["role", "student"], href: "/admin/students" },
-  { label: "Teachers", table: "profiles", filter: ["role", "teacher"], href: "/admin/teachers" },
+  { label: "Faculty", table: "faculty_members", filter: null, href: "/admin/teachers" },
+  { label: "Teacher login accounts", table: "profiles", filter: ["role", "teacher"], href: "/admin/teacher-accounts" },
   { label: "Active programs", table: "programs", filter: ["status", "active"], href: "/admin/academic" },
   { label: "Subjects", table: "subjects", filter: null, href: "/admin/academic" },
   { label: "Active questions", table: "questions", filter: ["status", "active"], href: "/admin/questions" },

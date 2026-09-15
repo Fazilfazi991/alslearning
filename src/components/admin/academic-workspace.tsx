@@ -42,6 +42,7 @@ import type {
   QuestionType,
   RecordStatus,
 } from "@/types/academic";
+import { facultyCounts, loadFacultyDirectory, subjectNames, type FacultyDirectory } from "@/lib/faculty-directory";
 
 const panel = "rounded-lg border border-[#e6cbd5] bg-white";
 const input =
@@ -154,6 +155,8 @@ function Structure({
   const [kind, setKind] = useState<AcademicEntityKind>("program"),
     [search, setSearch] = useState(""),
     [editing, setEditing] = useState<AcademicEntity | null>(null),[actionError,setActionError]=useState("");
+  const [faculty, setFaculty] = useState<FacultyDirectory | null>(null);
+  useEffect(() => { let active = true; void loadFacultyDirectory().then(value => { if (active) setFaculty(value); }).catch(() => {}); return () => { active = false; }; }, []);
   const runAction=async(action:()=>Promise<void>)=>{setActionError("");try{await action()}catch(e){setActionError(e instanceof Error?e.message:"Could not save the change")}};
   const list = useMemo(
     () =>
@@ -230,6 +233,7 @@ function Structure({
         ))}
       </nav>
       <section className={`${panel} min-w-0 p-4 sm:p-6`}>
+        {faculty && kind === "subject" && <div className="mb-5 rounded border border-[#ead1da] bg-[#faf8ff] p-3 text-sm"><p className="font-bold text-deep-blue">Subject faculty</p><div className="mt-3 flex flex-wrap gap-2">{facultyCounts(faculty).map(count => <span key={count.id} className="rounded border bg-white px-3 py-2 text-xs"><strong>{count.name}: {count.count} faculty</strong><span className="block max-w-72 text-muted">{faculty.members.filter(member => member.is_active && subjectNames(member.id,faculty).includes(count.name)).map(member => member.full_name).join(" · ") || "None assigned"}</span></span>)}</div></div>}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <label className="relative block flex-1">
             <Search className="absolute left-3 top-3 text-muted" size={17} />
@@ -302,6 +306,7 @@ function Structure({
                       {item.name}
                     </button>
                     <p className="text-xs text-muted">/{item.slug}</p>
+                    {kind === "program" && faculty && <p className="mt-1 text-xs text-muted">{facultyCounts(faculty).filter(count => ((item.metadata?.subjectIds || []) as string[]).includes(count.id)).map(count => `${count.name}: ${count.count} faculty`).join(" · ")}</p>}
                   </td>
                   <td className="p-3 text-muted">
                     {workspace.entities.find((x) => x.id === item.parentId)
