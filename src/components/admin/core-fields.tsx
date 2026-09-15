@@ -64,6 +64,7 @@ export function TaxonomyFields({
   programRequired = false,
   subjectRequired = true,
   sectionMode = false,
+  canonicalProgramLabel = false,
 }: {
   value: Taxonomy;
   onChange: (v: Taxonomy) => void;
@@ -71,6 +72,7 @@ export function TaxonomyFields({
   programRequired?: boolean;
   subjectRequired?: boolean;
   sectionMode?: boolean;
+  canonicalProgramLabel?: boolean;
 }) {
   const allowed = (v: Partial<Taxonomy>) =>
     data.role === "admin" ||
@@ -101,6 +103,7 @@ export function TaxonomyFields({
       <Select
         label="Program"
         value={value.program_id}
+        emptyLabel={canonicalProgramLabel ? "Canonical / shared Subject bank" : undefined}
         required={
           programRequired ||
           (data.role === "teacher" &&
