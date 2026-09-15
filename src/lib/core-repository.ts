@@ -185,7 +185,7 @@ const check = (error: { message: string } | null) => {
 export function canManage(
   data: CoreData,
   mode: "questions" | "tests" | "content",
-  target?: Taxonomy,
+  target?: Partial<Taxonomy>,
 ) {
   return (
     data.role === "admin" ||

@@ -5,10 +5,11 @@ import {eligibleTestQuestions,testScopes,type SubjectScope} from "@/lib/test-que
 import {Select,TaxonomyFields,fieldClass,Field} from "./core-fields";
 export function TestScopeFields({value:t,data,onChange,availableBySubject}:{value:Test;data:CoreData;onChange:(t:Test)=>void;availableBySubject?:Record<string,number>}) {
  const multi=!!t.selection_rules.scopes;
+ const multiAuthorized=data.role==="admin"||data.assignments.some(a=>a.can_manage_tests&&!a.subject_id&&(!a.exam_id||a.exam_id===t.exam_id)&&(!a.program_id||a.program_id===t.program_id));
  function scopes(next:SubjectScope[]) {onChange({...t,subject_id:"",chapter_id:"",topic_id:"",selection_rules:{...t.selection_rules,scopes:next},question_count:next.reduce((n,s)=>n+(s.count||0),0)});}
  const subjects=data.subjects.filter(s=>data.mappings.some(m=>m.program_id===t.program_id&&m.subject_id===s.id)&&canManage(data,"tests",{...t,subject_id:s.id}));
  return <div className="space-y-4">
-  <Select label="Academic scope mode" required value={multi?"multiple":"single"} items={[{id:"single",name:"Single subject"},{id:"multiple",name:"Multiple subjects"}]} onChange={v=>{
+  <Select label="Academic scope mode" required value={multi?"multiple":"single"} items={[{id:"single",name:"Single subject"},...(multiAuthorized?[{id:"multiple",name:"Multiple subjects"}]:[])]} onChange={v=>{
    if(v==="multiple")scopes(testScopes(t).map(s=>({...s,count:1})));
    else {const first=testScopes(t)[0];const {scopes:removed,...rules}=t.selection_rules;void removed;onChange({...t,subject_id:first?.subject_id||"",chapter_id:first?.chapter_ids.length===1?first.chapter_ids[0]:"",selection_rules:rules,question_count:1});}
   }}/>

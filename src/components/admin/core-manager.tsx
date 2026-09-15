@@ -427,7 +427,7 @@ export function CoreManager({
       </nav>
       {editing && (
         <Editor
-          title={`Edit ${mode === "questions" ? "question" : mode === "tests" ? "test" : "content"}`}
+          title={`${rows.some(row=>row.id===editing.id)?"Edit":"Add"} ${mode === "questions" ? "question" : mode === "tests" ? "test" : "content"}`}
           close={() => {
             if (!busy) setEditing(null);
           }}
@@ -858,6 +858,8 @@ export function TestForm({
   const [previewLoading,setPreviewLoading]=useState(false);
   const [previewError,setPreviewError]=useState("");
   const [results,setResults]=useState<Record<string,unknown>|null>(null);
+  const [resultsError,setResultsError]=useState("");
+  const [resultsLoading,setResultsLoading]=useState(false);
   const scoped = hasTestScope(data, t);
   const examId=t.exam_id,programId=t.program_id,subjectId=t.subject_id,chapterId=t.chapter_id,topicId=t.topic_id,selectionRules=t.selection_rules;
   const bankKey=JSON.stringify([examId,programId,subjectId,chapterId,topicId,selectionRules,questionPage,search,visibleSubject,visibleSection]);
@@ -1123,7 +1125,8 @@ export function TestForm({
       <Section title="Review & publish">
         <button type="button" disabled={previewLoading} className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void togglePreview()}>{previewLoading?"Loading preview…":previewOpen?"Close preview":"Preview test"}</button>
         {previewOpen&&<div className="rounded-lg bg-surface p-4 text-sm"><p className="font-bold">{t.title||"Untitled test"}</p><p>{t.type==="mock"?"Mock exam":"Practice test"} · {t.selection_mode==="manual"?t.question_ids.length:t.question_count} questions · {t.duration_minutes} minutes</p><p className="mt-2 whitespace-pre-wrap text-muted">{t.instructions||"No additional instructions."}</p><p className="mt-2 text-xs text-muted">Preview does not create a Student attempt. Random questions are selected only when an attempt starts.</p>{previewLoading&&<p role="status" className="mt-3">Loading representative question…</p>}{previewError&&<p role="alert" className="mt-3 text-red-800">{previewError}</p>}{previewQuestion&&<div className="mt-3 rounded-lg border border-line bg-white"><p className="p-3 font-bold">Representative question</p><QuestionPreview question={previewQuestion}/></div>}</div>}
-        {value.id&&<button type="button" className="min-h-11 rounded border px-4 font-semibold" onClick={()=>void loadAdminTestResults(value.id).then(v=>setResults(v as Record<string,unknown>))}>View results</button>}
+        {value.created_at&&<button type="button" disabled={resultsLoading} className="min-h-11 rounded border px-4 font-semibold" onClick={()=>{setResultsError("");setResultsLoading(true);void loadAdminTestResults(value.id).then(v=>{if(!v)throw Error("Results are outside your assigned scope.");setResults(v as Record<string,unknown>);}).catch(()=>setResultsError("Could not load authorized results. Please retry.")).finally(()=>setResultsLoading(false));}}>{resultsLoading?"Loading results…":"View results"}</button>}
+        {resultsError&&<p role="alert" className="text-sm text-red-800">{resultsError}</p>}
         {results&&<AdminTestResults value={results}/>}
       </Section>
       {selectionError && t.status !== "active" && (

@@ -28,6 +28,7 @@ export function QuestionPreview({ question }: { question: Question }) {
           <li key={i} className="flex min-w-0 gap-2">
             <span>{String.fromCharCode(65 + i)}.</span>
             <RichContent value={option.content_rich} fallback={option.content} />
+            {option.correct && <span className="font-semibold text-green-800">Correct</span>}
           </li>
         ))}
       </ol>
