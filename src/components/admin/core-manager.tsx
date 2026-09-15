@@ -646,6 +646,7 @@ export function QuestionForm({
         <TaxonomyFields
           value={q}
           data={data}
+          canonicalProgramLabel={Boolean(q.id) && q.program_id == null}
           onChange={(v) => setQ({ ...q, ...v })}
         />
         <Select

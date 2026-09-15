@@ -15,13 +15,13 @@ export async function questionBankIdentity(actor?:QuestionActor):Promise<Questio
 export async function loadQuestionBankMetadata(actor:QuestionActor):Promise<CoreData> {
   await questionBankIdentity(actor);const academic=await loadAcademicMetadata(actor.id);
   if(actor.role==="admin")return {...academic,role:actor.role,assignments:[],questions:[],tests:[],content:[]};
-  const {data,error}=await createClient().from("faculty_assignments").select("subject_id,program_id,can_manage_questions").eq("faculty_id",actor.id).eq("can_manage_questions",true);
+  const {data,error}=await createClient().from("faculty_assignments").select("exam_id,program_id,subject_id,can_manage_content,can_manage_questions,can_manage_tests").eq("faculty_id",actor.id).eq("can_manage_questions",true);
   if(error)throw Error("Could not load assigned subjects. Please retry.");
   const subjectIds=new Set((data||[]).map(row=>row.subject_id).filter((value):value is string=>typeof value==="string"));
   const programIds=new Set((data||[]).map(row=>row.program_id).filter((value):value is string=>typeof value==="string"));
   const subjects=academic.subjects.filter(row=>subjectIds.has(row.id)||academic.mappings.some(link=>programIds.has(link.program_id)&&link.subject_id===row.id));
   const visible=new Set(subjects.map(row=>row.id));
-  return {...academic,subjects,chapters:academic.chapters.filter(row=>!!row.subject_id&&visible.has(row.subject_id)),topics:academic.topics.filter(row=>!!row.subject_id&&visible.has(row.subject_id)),role:actor.role,assignments:[],questions:[],tests:[],content:[]};
+  return {...academic,subjects,chapters:academic.chapters.filter(row=>!!row.subject_id&&visible.has(row.subject_id)),topics:academic.topics.filter(row=>!!row.subject_id&&visible.has(row.subject_id)),role:actor.role,assignments:data||[],questions:[],tests:[],content:[]};
 }
 type SearchHierarchy=Pick<CoreData,"subjects"|"chapters">;
 function filtered(filters:QuestionFilters,hierarchy:SearchHierarchy,head=false){

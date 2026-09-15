@@ -27,6 +27,8 @@ describe("bounded authenticated question-bank queries",()=>{
   mock.metadata.mockResolvedValue({exams:[],programs:[],batches:[],subjects:[{id:"assigned",name:"Assigned"},{id:"other",name:"Other"}],chapters:[{id:"a",subject_id:"assigned"},{id:"o",subject_id:"other"}],topics:[{id:"at",subject_id:"assigned"},{id:"ot",subject_id:"other"}],mappings:[]});
   const data=await loadQuestionBankMetadata({id:"teacher",role:"teacher"});
   expect(data.subjects.map(row=>row.id)).toEqual(["assigned"]);expect(data.chapters.map(row=>row.id)).toEqual(["a"]);expect(data.topics.map(row=>row.id)).toEqual(["at"]);
+  expect(data.assignments).toEqual(mock.assignments);
+  expect(mock.requests[0].calls).toContainEqual(["select","exam_id,program_id,subject_id,can_manage_content,can_manage_questions,can_manage_tests"]);
   expect(mock.requests.map(request=>request.table)).toEqual(["faculty_assignments"]);expect(mock.requests[0].calls).toContainEqual(["eq","faculty_id","teacher"]);
  });
 });
