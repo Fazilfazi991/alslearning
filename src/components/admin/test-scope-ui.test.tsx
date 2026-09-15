@@ -34,3 +34,8 @@ it("shows every required Admin attempt-result field",()=>{
  const html=renderToStaticMarkup(<AdminTestResults value={{attempt_count:1,average_score:7.5,attempts:[{student:"QA Student",attempt_number:2,started_at:"2026-09-14T10:00:00Z",submitted_at:"2026-09-14T10:15:00Z",score:7.5,correct:8,incorrect:1,unanswered:1,status:"submitted"}]}}/>);
  for(const text of ["QA Student","Attempt 2","Started","Submitted","Score","Correct","Incorrect","Unanswered","7.5"]) expect(html).toContain(text);
 });
+it("hides Multi Subject authoring when Teacher has only Subject-level test assignments",()=>{
+ const teacher={...data,role:"teacher",assignments:[{exam_id:"exam",program_id:"program",subject_id:"micro",can_manage_tests:true,can_manage_questions:true,can_manage_content:true}]};
+ const html=renderToStaticMarkup(<TestForm value={{...newTest(),exam_id:"exam",program_id:"program",subject_id:"micro"}} data={teacher} busy={false} save={async()=>{}}/>);
+ expect(html).toContain("Single subject");expect(html).not.toContain("Multiple subjects");
+});

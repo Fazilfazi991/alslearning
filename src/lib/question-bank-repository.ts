@@ -2,8 +2,8 @@ import {createClient} from "./supabase/client";
 import type {CoreData,Question} from "./core-repository";
 import {loadAcademicMetadata,loadQuestionPreview} from "./test-repository";
 import {QUESTION_PAGE_SIZE,questionSearch,type QuestionFilters} from "./question-bank";
-export const QUESTION_LIST_COLUMNS="id,prompt,subject_id,chapter_id,status,type,marks,source_label,source_reference,created_at";
-export type QuestionRow=Pick<Question,"id"|"prompt"|"subject_id"|"chapter_id"|"status"|"type"|"marks"|"source_label"|"source_reference">;
+export const QUESTION_LIST_COLUMNS="id,prompt,exam_id,program_id,subject_id,chapter_id,status,type,marks,source_label,source_reference,created_at";
+export type QuestionRow=Pick<Question,"id"|"prompt"|"exam_id"|"program_id"|"subject_id"|"chapter_id"|"status"|"type"|"marks"|"source_label"|"source_reference">;
 export type QuestionActor={id:string;role:string};
 export async function questionBankIdentity(actor?:QuestionActor):Promise<QuestionActor> {
   if(actor){if(!["admin","teacher"].includes(actor.role))throw Error("Author access required.");return actor;}
