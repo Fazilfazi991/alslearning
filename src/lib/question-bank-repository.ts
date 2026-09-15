@@ -6,15 +6,22 @@ export const QUESTION_LIST_COLUMNS="id,prompt,subject_id,chapter_id,status,type,
 export type QuestionRow=Pick<Question,"id"|"prompt"|"subject_id"|"chapter_id"|"status"|"type"|"marks"|"source_label"|"source_reference">;
 export type QuestionActor={id:string;role:string};
 export async function questionBankIdentity(actor?:QuestionActor):Promise<QuestionActor> {
-  if(actor){if(actor.role!=="admin")throw Error("Admin access required.");return actor;}
+  if(actor){if(!["admin","teacher"].includes(actor.role))throw Error("Author access required.");return actor;}
   const db=createClient();const auth=await db.auth.getUser();if(auth.error||!auth.data.user)throw Error("Sign in required.");
   const {data,error}=await db.from("profiles").select("role,is_active").eq("id",auth.data.user.id).single();
-  if(error||!data?.is_active||data.role!=="admin")throw Error("Admin access required.");return {id:auth.data.user.id,role:data.role};
+  if(error||!data?.is_active||!["admin","teacher"].includes(data.role))throw Error("Author access required.");return {id:auth.data.user.id,role:data.role};
 }
 // Identity comes from the existing server guard; every query still uses session RLS.
 export async function loadQuestionBankMetadata(actor:QuestionActor):Promise<CoreData> {
   await questionBankIdentity(actor);const academic=await loadAcademicMetadata(actor.id);
-  return {...academic,role:actor.role,assignments:[],questions:[],tests:[],content:[]};
+  if(actor.role==="admin")return {...academic,role:actor.role,assignments:[],questions:[],tests:[],content:[]};
+  const {data,error}=await createClient().from("faculty_assignments").select("subject_id,program_id,can_manage_questions").eq("faculty_id",actor.id).eq("can_manage_questions",true);
+  if(error)throw Error("Could not load assigned subjects. Please retry.");
+  const subjectIds=new Set((data||[]).map(row=>row.subject_id).filter((value):value is string=>typeof value==="string"));
+  const programIds=new Set((data||[]).map(row=>row.program_id).filter((value):value is string=>typeof value==="string"));
+  const subjects=academic.subjects.filter(row=>subjectIds.has(row.id)||academic.mappings.some(link=>programIds.has(link.program_id)&&link.subject_id===row.id));
+  const visible=new Set(subjects.map(row=>row.id));
+  return {...academic,subjects,chapters:academic.chapters.filter(row=>!!row.subject_id&&visible.has(row.subject_id)),topics:academic.topics.filter(row=>!!row.subject_id&&visible.has(row.subject_id)),role:actor.role,assignments:[],questions:[],tests:[],content:[]};
 }
 type SearchHierarchy=Pick<CoreData,"subjects"|"chapters">;
 function filtered(filters:QuestionFilters,hierarchy:SearchHierarchy,head=false){

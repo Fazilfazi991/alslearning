@@ -68,8 +68,10 @@ function assert(error: { message: string } | null) {
   if (error) throw new Error(error.message);
 }
 
-export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
+export async function loadAcademicWorkspace(section: "structure" | "questions" | "tests" | "live" = "structure"): Promise<AcademicWorkspace> {
   const db = createClient();
+  if (section === "tests" || section === "live") return { entities: [], questions: [] };
+  const skip = () => Promise.resolve({ data: [], error: null });
   const [
     exams,
     programs,
@@ -86,7 +88,7 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
     db.from("chapters").select("*").order("display_order"),
     db.from("topics").select("*").order("display_order"),
     db.from("batches").select("*").order("created_at"),
-    db
+    section === "questions" ? db
       .from("learning_content")
       .select("*")
       .in("kind", [
@@ -97,12 +99,12 @@ export async function loadAcademicWorkspace(): Promise<AcademicWorkspace> {
         "image",
         "external_link",
       ])
-      .order("display_order"),
-    db
+      .order("display_order") : skip(),
+    section === "questions" ? db
       .from("questions")
       .select("*,question_options!question_options_question_id_fkey(*),question_answer_keys(option_id)")
       .order("created_at", { ascending: false })
-      .range(0, 24),
+      .range(0, 24) : skip(),
   ]);
   [
     exams,

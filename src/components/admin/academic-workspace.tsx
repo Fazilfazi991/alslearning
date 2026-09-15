@@ -76,20 +76,17 @@ export function AcademicWorkspaceManager({
     questions: [],
   });
   const [loading, setLoading] = useState(true),
-    [connectionError, setConnectionError] = useState("");
+    [connectionError, setConnectionError] = useState(""),
+    [retry, setRetry] = useState(0);
   useEffect(() => {
     let active = true;
-    void loadAcademicWorkspace()
+    void loadAcademicWorkspace(section)
       .then((data) => {
         if (active) setWorkspace(data);
       })
-      .catch((error) => {
+      .catch(() => {
         if (active)
-          setConnectionError(
-            error instanceof Error
-              ? error.message
-              : "Could not load academic data.",
-          );
+          setConnectionError("Could not load academic records. Please retry.");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -97,7 +94,7 @@ export function AcademicWorkspaceManager({
     return () => {
       active = false;
     };
-  }, []);
+  }, [section, retry]);
   const update = useCallback((fn: (current: AcademicWorkspace) => AcademicWorkspace) =>
     setWorkspace((current) => fn(current)),[]);
   return (
@@ -132,13 +129,13 @@ export function AcademicWorkspaceManager({
           role="alert"
           className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-800"
         >
-          Academic records could not be loaded: {connectionError}
+          {connectionError} <button type="button" className={secondary} onClick={()=>{setConnectionError("");setLoading(true);setRetry(value=>value+1)}}>Retry</button>
         </p>
       )}
-      {!loading && section === "structure" && (
+      {!loading && !connectionError && section === "structure" && (
         <Structure workspace={workspace} update={update} />
       )}
-      {section === "questions" && (
+      {!connectionError && section === "questions" && (
         <Questions workspace={workspace} update={update} />
       )}
       {section === "tests" && <Tests />}

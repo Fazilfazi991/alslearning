@@ -103,6 +103,7 @@ export function CoreManager({
     [reviewOnly, setReviewOnly] = useState(false),
     [page, setPage] = useState(0);
   const refresh = useCallback(async () => {
+    setError("");
     setData(await loadCoreData(mode, actor));
   }, [mode, actor]);
   useEffect(() => {
@@ -111,8 +112,8 @@ export function CoreManager({
       .then((v) => {
         if (live) setData(v);
       })
-      .catch((e) => {
-        if (live) setError(e.message);
+      .catch(() => {
+        if (live) setError("Could not load records. Please retry.");
       });
     return () => {
       live = false;
@@ -140,7 +141,7 @@ export function CoreManager({
         {error && (
           <button
             className={button}
-            onClick={() => void refresh().catch((e) => setError(e.message))}
+            onClick={() => void refresh().catch(() => setError("Could not load records. Please retry."))}
           >
             Retry
           </button>

@@ -67,16 +67,16 @@ export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
   const refresh = async () => {
     try {
       setError("");
-      setData(await loadAdminData());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to load data");
+      setData(await loadAdminData(mode));
+    } catch {
+      setError("Could not load records. Please retry.");
     }
   };
   useEffect(() => {
     let active=true;
-    void loadAdminData().then(value=>{if(active)setData(value)}).catch(e=>{if(active)setError(e instanceof Error?e.message:"Unable to load data")});
+    void loadAdminData(mode).then(value=>{if(active)setData(value)}).catch(()=>{if(active)setError("Could not load records. Please retry.")});
     return()=>{active=false};
-  }, []);
+  }, [mode]);
   async function run(fn: () => Promise<void>) {
     setBusy(true);
     try {
@@ -89,7 +89,7 @@ export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
     }
   }
   if (!data)
-    return <div><h1 className="text-3xl font-bold">{mode === "enrollments" ? "Enrollment Management" : mode === "faculty" ? "Faculty Management" : "Learning Content"}</h1>{error ? <section role="alert" className={`${box} mt-6 text-red-800`}>{error}</section> : <section role="status" aria-label="Loading records" className={`${box} mt-6 space-y-4`}><div className="skeleton h-6 w-40 rounded"/><div className="skeleton h-16 rounded"/><div className="skeleton h-16 rounded"/></section>}</div>;
+    return <div><h1 className="text-3xl font-bold">{mode === "enrollments" ? "Enrollment Management" : mode === "faculty" ? "Faculty Management" : "Learning Content"}</h1>{error ? <section role="alert" className={`${box} mt-6 text-red-800`}>{error}<button type="button" className="ml-3 rounded border px-3 py-2" onClick={()=>void refresh()}>Retry</button></section> : <section role="status" aria-label="Loading records" className={`${box} mt-6 space-y-4`}><div className="skeleton h-6 w-40 rounded"/><div className="skeleton h-16 rounded"/><div className="skeleton h-16 rounded"/></section>}</div>;
   return (
     <div>
       <header className="mb-6">
