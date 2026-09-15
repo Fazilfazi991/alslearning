@@ -135,8 +135,8 @@ export function CoreManager({
   }
   if (!data)
     return (
-      <section className="card p-6" role="status">
-        {error || "Loading academic records…"}
+      <section className="card space-y-4 p-6" role={error ? "alert" : "status"} aria-label={error ? undefined : "Loading academic records"}>
+        {error ? error : <><div className="skeleton h-6 w-40 rounded"/><div className="skeleton h-14 rounded"/><div className="skeleton h-14 rounded"/></>}
         {error && (
           <button
             className={button}

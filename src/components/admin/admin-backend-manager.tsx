@@ -89,9 +89,7 @@ export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
     }
   }
   if (!data)
-    return (
-      <section className={box}>{error || "Loading Supabase data…"}</section>
-    );
+    return <div><h1 className="text-3xl font-bold">{mode === "enrollments" ? "Enrollment Management" : mode === "faculty" ? "Faculty Management" : "Learning Content"}</h1>{error ? <section role="alert" className={`${box} mt-6 text-red-800`}>{error}</section> : <section role="status" aria-label="Loading records" className={`${box} mt-6 space-y-4`}><div className="skeleton h-6 w-40 rounded"/><div className="skeleton h-16 rounded"/><div className="skeleton h-16 rounded"/></section>}</div>;
   return (
     <div>
       <header className="mb-6">
@@ -107,7 +105,7 @@ export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
           }
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Changes are persisted to Supabase and enforced by row-level security.
+          Manage the access and learning records assigned to ALS accounts.
         </p>
       </header>
       {error && (
@@ -310,8 +308,7 @@ function Faculty({ data, busy, run }: Props) {
           Add assignment
         </button>
         <p className="text-xs text-muted">
-          Faculty accounts must already exist in Supabase Auth; this safely
-          connects their profile without exposing administrative credentials.
+          Faculty accounts must already be activated before assignments can be added.
         </p>
       </form>
       <div className="space-y-4">
