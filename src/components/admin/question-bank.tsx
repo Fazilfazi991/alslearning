@@ -24,7 +24,7 @@ function QuestionBankContent(){
   const [revision,setRevision]=useState(0),[metadataRevision,setMetadataRevision]=useState(0);
   const [detail,setDetail]=useState<{id:string;value?:Question;error?:string}|null>(null);
   const [busy,setBusy]=useState(false),[saveError,setSaveError]=useState(""),[notice,setNotice]=useState("");
-  const identity=actor?.role==="admin"?actor:undefined;
+  const identity=actor&&["admin","teacher"].includes(actor.role)?actor:undefined;
   const metadataKey=`${identity?.id}:${metadataRevision}`;
   const academic=metadata?.key===metadataKey?metadata.data:undefined;
   const hierarchy=academic||emptyHierarchy;
@@ -63,7 +63,7 @@ function QuestionBankContent(){
   },[countKey,ready]);
   async function open(id:string){if(!identity)return;setSaveError("");setDetail({id});try{const value=await loadQuestionDetail(identity,id);setDetail(current=>current?.id===id?{id,value}:current);}catch{setDetail(current=>current?.id===id?{id,error:"Could not open this question. Please retry."}:current);}}
   async function save(value:Question){setBusy(true);setSaveError("");try{await saveCoreQuestion(value);setDetail(null);setRevision(v=>v+1);setNotice("Question saved.");}catch{setSaveError("Could not save the question. Check the fields, connection and Admin access, then retry.");}finally{setBusy(false);}}
-  if(!identity)return <p role="alert">Admin access required. Sign in again to continue.</p>;
+  if(!identity)return <p role="alert">Author access required. Sign in again to continue.</p>;
   return <div className="min-w-0">
     <header className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">Question Bank</h1><p className="mt-1 text-sm text-muted">Manage published questions and drafts.</p></div><button className={actionClass} disabled={!academic} onClick={()=>{setSaveError("");const value=newQuestion();setDetail({id:value.id,value});}}>Add question</button></header>
     {notice&&<p role="status" className="mb-3 text-green-800">{notice}</p>}

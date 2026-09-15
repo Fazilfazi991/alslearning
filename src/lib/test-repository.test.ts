@@ -10,7 +10,7 @@ vi.mock("./supabase/client",()=>({createClient:()=>({
   return chain;
  }
 })}));
-import {clearTestHierarchy,loadTestWorkspace,loadTestQuestionPage} from "./test-repository";
+import {clearTestHierarchy,loadAcademicMetadata,loadTestWorkspace,loadTestQuestionPage} from "./test-repository";
 import {newTest} from "./core-repository";
 describe("test workspace fetch boundaries",()=>{
  beforeEach(()=>{mock.requests=[];mock.rpc=[];clearTestHierarchy();});
@@ -35,5 +35,11 @@ describe("test workspace fetch boundaries",()=>{
   const page=await loadTestQuestionPage({...newTest(),exam_id:"exam",program_id:"program",subject_id:"subject"},2,"anaemia");
   expect(page.rows).toHaveLength(1);expect(mock.requests).toHaveLength(0);
   expect(mock.rpc).toEqual([{name:"core_test_question_page",args:expect.objectContaining({page_number:2,page_size:20,search_text:"anaemia"})}]);
+ });
+ it("isolates cached academic hierarchy by authenticated user",async()=>{
+  await loadAcademicMetadata("admin-id");await loadAcademicMetadata("admin-id");
+  expect(mock.requests.filter(r=>r.table==="subjects")).toHaveLength(1);
+  await loadAcademicMetadata("teacher-id");
+  expect(mock.requests.filter(r=>r.table==="subjects")).toHaveLength(2);
  });
 });

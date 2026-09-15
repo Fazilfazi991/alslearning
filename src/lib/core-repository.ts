@@ -182,21 +182,6 @@ export const newContent = (): Content => ({
 const check = (error: { message: string } | null) => {
   if (error) throw new Error(error.message);
 };
-async function all<T>(
-  fetch: (
-    from: number,
-    to: number,
-  ) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
-) {
-  const rows: T[] = [];
-  for (let offset = 0; ; offset += 500) {
-    const r = await fetch(offset, offset + 499);
-    check(r.error);
-    rows.push(...(r.data || []));
-    if ((r.data?.length || 0) < 500) break;
-  }
-  return { data: rows, error: null };
-}
 export function canManage(
   data: CoreData,
   mode: "questions" | "tests" | "content",
@@ -221,126 +206,32 @@ export function canManage(
       ))
   );
 }
-export async function loadCoreData(mode?: "questions" | "tests" | "content", actor?: {id:string;role:string}): Promise<CoreData> {
+export async function loadCoreData(mode: "questions" | "tests" | "content", actor?: {id:string;role:string}): Promise<CoreData> {
   if (mode === "tests") return (await import("./test-repository")).loadTestWorkspace(actor);
+  if (mode === "questions") throw new Error("Use the paginated Question Bank workspace.");
   const db = createClient();
-  const [
-    exams,
-    programs,
-    subjects,
-    chapters,
-    topics,
-    batches,
-    questions,
-    tests,
-    content,
-    profile,
-    assignments,
-    mappings,
-    bank,
-  ] = await Promise.all([
-    all((from, to) =>
-      db.from("entrance_exams").select("*").order("name").range(from, to),
-    ),
-    all((from, to) =>
-      db.from("programs").select("*").order("name").range(from, to),
-    ),
-    all((from, to) =>
-      db.from("subjects").select("*").order("name").range(from, to),
-    ),
-    all((from, to) =>
-      db.from("chapters").select("*").order("name").range(from, to),
-    ),
-    all((from, to) =>
-      db.from("topics").select("*").order("name").range(from, to),
-    ),
-    all((from, to) =>
-      db.from("batches").select("*").order("name").range(from, to),
-    ),
-    all((from, to) =>
-      db
-        .from("questions")
-        .select(
-          "*,question_options!question_options_question_id_fkey(id,content,content_rich,display_order),question_answer_keys(option_id),question_media(*)",
-        )
-        .order("created_at", { ascending: false })
-        .range(from, to),
-    ),
-    all((from, to) =>
-      db
-        .from("tests")
-        .select("*,test_questions(question_id),test_batches(batch_id)")
-        .order("created_at", { ascending: false })
-        .range(from, to),
-    ),
-    all((from, to) =>
-      db
-        .from("learning_content")
-        .select("*,content_batch_access(batch_id)")
-        .order("display_order")
-        .range(from, to),
-    ),
-    db.auth.getUser(),
-    db.from("faculty_assignments").select("*"),
-    db.from("program_subjects").select("program_id,subject_id"),
-    db.rpc("core_test_bank"),
+  let identity=actor;
+  if(!identity){
+    const auth=await db.auth.getUser();
+    check(auth.error);
+    if(!auth.data.user)throw new Error("Sign in to continue.");
+    const profile=await db.from("profiles").select("role,is_active").eq("id",auth.data.user.id).single();
+    check(profile.error);
+    if(!profile.data?.is_active)throw new Error("Account is inactive.");
+    identity={id:auth.data.user.id,role:profile.data.role};
+  }
+  const [academic,content,assignments]=await Promise.all([
+    import("./test-repository").then(repository=>repository.loadAcademicMetadata(identity.id)),
+    db.from("learning_content").select("*,content_batch_access(batch_id)").order("display_order"),
+    db.from("faculty_assignments").select("exam_id,program_id,subject_id,can_manage_content,can_manage_questions,can_manage_tests"),
   ]);
-  for (const r of [
-    exams,
-    programs,
-    subjects,
-    chapters,
-    topics,
-    batches,
-    questions,
-    tests,
-    content,
-    assignments,
-    mappings,
-    bank,
-  ])
-    check(r.error);
+  check(content.error);check(assignments.error);
   return {
+    ...academic,
     assignments: assignments.data || [],
-    mappings: mappings.data || [],
-    exams: exams.data || [],
-    programs: programs.data || [],
-    subjects: subjects.data || [],
-    chapters: chapters.data || [],
-    topics: topics.data || [],
-    batches: batches.data || [],
-    role: profile.data.user?.app_metadata.role || "",
-    questions: [
-      ...(bank.data || []),
-      ...(questions.data || []).map((q) => ({
-        ...q,
-        exam_year: q.exam_year?.toString() || "",
-        media: q.question_media || [],
-        options: q.question_options
-          .sort(
-            (a: { display_order: number }, b: { display_order: number }) =>
-              a.display_order - b.display_order,
-          )
-          .map(
-            (o: { id: string; content: string; content_rich?: RichText }) => ({
-              content: o.content,
-              content_rich: o.content_rich,
-              correct: q.question_answer_keys.some(
-                (k: { option_id: string }) => k.option_id === o.id,
-              ),
-            }),
-          ),
-      })),
-    ].filter(
-      (q, i, items) => items.findLastIndex((x) => x.id === q.id) === i,
-    ) as Question[],
-    tests: (tests.data || []).map((t) => ({
-      ...t,
-      question_ids: t.test_questions.map(
-        (x: { question_id: string }) => x.question_id,
-      ),
-      batch_ids: t.test_batches.map((x: { batch_id: string }) => x.batch_id),
-    })) as Test[],
+    role: identity.role,
+    questions: [],
+    tests: [],
     content: (content.data || []).map((c) => ({
       ...c,
       batch_ids: c.content_batch_access.map(

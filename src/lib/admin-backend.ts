@@ -1,7 +1,17 @@
 import { createClient } from "@/lib/supabase/client";
 
-export async function loadAdminData() {
+export type AdminModule = "enrollments" | "faculty" | "content" | "tests" | "checkpoints";
+const moduleFields: Record<AdminModule, readonly string[]> = {
+  enrollments: ["profiles", "programs", "batches", "enrollments"],
+  faculty: ["profiles", "programs", "subjects", "batches", "assignments", "batchFaculty"],
+  content: ["profiles", "programs", "subjects", "chapters", "topics", "content"],
+  tests: ["programs", "subjects", "batches", "questions", "tests"],
+  checkpoints: ["content", "questions", "checkpoints"],
+};
+export async function loadAdminData(mode: AdminModule) {
   const db = createClient();
+  const needs = new Set(moduleFields[mode]);
+  const skip = () => Promise.resolve({ data: [], error: null });
   const [
     profiles,
     programs,
@@ -17,39 +27,40 @@ export async function loadAdminData() {
     tests,
     checkpoints,
   ] = await Promise.all([
-    db
+    needs.has("profiles") ? db
       .from("profiles")
       .select("id,full_name,email,role,is_active")
-      .order("full_name"),
-    db.from("programs").select("id,name,exam_id,status,access_validity_days").order("name"),
-    db.from("batches").select("id,name,program_id,status,access_starts_at,access_expires_at").order("name"),
-    db.from("subjects").select("id,name").order("name"),
-    db.from("chapters").select("id,name,subject_id").order("name"),
-    db.from("topics").select("id,name,subject_id,chapter_id").order("name"),
-    db
+      .eq("role", mode === "enrollments" ? "student" : "teacher")
+      .order("full_name") : skip(),
+    needs.has("programs") ? db.from("programs").select("id,name,exam_id,status,access_validity_days").order("name") : skip(),
+    needs.has("batches") ? db.from("batches").select("id,name,program_id,status,access_starts_at,access_expires_at").order("name") : skip(),
+    needs.has("subjects") ? db.from("subjects").select("id,name").order("name") : skip(),
+    needs.has("chapters") ? db.from("chapters").select("id,name,subject_id").order("name") : skip(),
+    needs.has("topics") ? db.from("topics").select("id,name,subject_id,chapter_id").order("name") : skip(),
+    needs.has("enrollments") ? db
       .from("enrollments")
       .select("*")
-      .order("created_at", { ascending: false }),
-    db
+      .order("created_at", { ascending: false }) : skip(),
+    needs.has("assignments") ? db
       .from("faculty_assignments")
       .select("*")
-      .order("created_at", { ascending: false }),
-    db.from("batch_faculty").select("*"),
-    db.from("learning_content").select("*").order("display_order"),
-    db
+      .order("created_at", { ascending: false }) : skip(),
+    needs.has("batchFaculty") ? db.from("batch_faculty").select("*") : skip(),
+    needs.has("content") ? db.from("learning_content").select("*").order("display_order") : skip(),
+    needs.has("questions") ? db
       .from("questions")
       .select("id,prompt,subject_id,status")
       .eq("status", "active")
       .order("created_at", { ascending: false })
-      .limit(200),
-    db
+      .limit(200) : skip(),
+    needs.has("tests") ? db
       .from("tests")
       .select("*,test_questions(question_id),test_batches(batch_id)")
-      .order("created_at", { ascending: false }),
-    db
+      .order("created_at", { ascending: false }) : skip(),
+    needs.has("checkpoints") ? db
       .from("video_checkpoints")
       .select("*,questions(prompt),learning_content(title)")
-      .order("trigger_seconds"),
+      .order("trigger_seconds") : skip(),
   ]);
   for (const result of [
     profiles,
