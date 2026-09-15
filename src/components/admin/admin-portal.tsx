@@ -7,12 +7,14 @@ import { CoreManager } from "./core-manager";
 import { QuestionBank } from "./question-bank";
 import { AdminBackendManager } from "./admin-backend-manager";
 import { ConnectedDashboard } from "./connected-dashboard";
+import { FacultyDirectoryManager } from "./faculty-directory";
 
 export function AdminPortal() {
   const path = usePathname();
   let page: React.ReactNode = <ConnectedDashboard />;
   if (path === "/admin/students") page = <AdminBackendManager mode="enrollments" />;
-  else if (path === "/admin/teachers") page = <AdminBackendManager mode="faculty" />;
+  else if (path === "/admin/teachers") page = <FacultyDirectoryManager />;
+  else if (path === "/admin/teacher-accounts") page = <AdminBackendManager mode="faculty" />;
   else if (path === "/admin/courses") page = <CoreManager mode="content" />;
   else if (path === "/admin/academic") page = <AcademicWorkspaceManager />;
   else if (path === "/admin/questions" || path === "/admin/question-bank") page = <QuestionBank />;
