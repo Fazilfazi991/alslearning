@@ -117,8 +117,7 @@ export function AcademicWorkspaceManager({
                   : "Programs & Syllabus"}
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-muted">
-            Configurable entrance-exam content backed by Supabase and database
-            authorization policies.
+            Manage programs, subjects and syllabus structure.
           </p>
         </div>
         <span className="rounded-full bg-green-50 px-3 py-2 text-xs font-bold text-green-800">
@@ -126,16 +125,14 @@ export function AcademicWorkspaceManager({
         </span>
       </header>
       {loading && (
-        <p className={`${panel} p-6 text-sm text-muted`}>
-          Loading academic data…
-        </p>
+        <div className={`${panel} space-y-4 p-6`} role="status" aria-label="Loading academic structure"><div className="skeleton h-6 w-48 rounded"/><div className="skeleton h-14 rounded"/><div className="skeleton h-14 rounded"/></div>
       )}
       {connectionError && (
         <p
           role="alert"
           className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-800"
         >
-          Backend error: {connectionError}
+          Academic records could not be loaded: {connectionError}
         </p>
       )}
       {!loading && section === "structure" && (
