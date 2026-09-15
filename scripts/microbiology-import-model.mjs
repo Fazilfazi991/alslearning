@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import {displayStem} from './question-reference-cleanup-model.mjs';
 export const batch = "als-microbiology-client-20260910-v1";
 export const chapterNames = [
   "General Microbiology",
@@ -52,8 +53,7 @@ export function questionPayload(q, taxonomy, owner) {
     subject_id: taxonomy.subject.id,
     chapter_id: chapter.id,
     topic_id: null,
-    prompt: q.prompt,
-    prompt_rich: q.prompt_rich,
+    ...displayStem(q,id,'Microbiology'),
     explanation: q.explanation,
     explanation_rich: q.explanation_rich,
     type: q.type,

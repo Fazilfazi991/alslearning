@@ -1,6 +1,7 @@
 import {readFileSync,existsSync} from "node:fs";
 import {describe,it,expect} from "vitest";
 import {sourceIdentity,questionPayload,classify,chapterNames} from "./biochemistry-import-model.mjs";
+import {confirmedSourceReferenceCount} from './question-reference-cleanup-model.mjs';
 const file=".local-qa/biochemistry-preflight-records.json";
 const rows=existsSync(file)?JSON.parse(readFileSync(file,"utf8")):[];
 const taxonomy={exam:{id:"exam"},subject:{id:"subject"},chapters:chapterNames.map((name,i)=>({name,id:`chapter-${i}`}))};
@@ -18,7 +19,9 @@ describe.skipIf(!rows.length)("Biochemistry deterministic import",()=>{
   it("preserves all payload text, tables, option order, keys and scientific AST",()=>{
     for(const q of rows.filter(q=>classify(q)!=="quarantine")){
       const p=questionPayload(q,taxonomy);
-      expect(p.prompt_rich).toEqual(q.prompt_rich);expect(p.explanation_rich).toEqual(q.explanation_rich);
+      if(q.bio===8&&[20,24,25].includes(q.source_sequence))expect(p.prompt).not.toEqual(q.prompt);
+      else expect(p.prompt_rich).toEqual(q.prompt_rich);
+      expect(p.explanation_rich).toEqual(q.explanation_rich);
       expect(p.options).toEqual(q.options.map(o=>({content:o.content,content_rich:o.content_rich,correct:o.correct})));
       expect(p.media).toEqual([]);expect(p.type).toBe("single_mcq");
       expect(questionPayload(q,taxonomy)).toEqual(p);
@@ -27,6 +30,7 @@ describe.skipIf(!rows.length)("Biochemistry deterministic import",()=>{
   it("keeps PSC shorthand without inventing a four-digit year",()=>{
     const p=questionPayload(rows.find(q=>q.bio===8&&q.source_sequence===24),taxonomy);
     expect(p.source_reference).toBe("PSC 063/23");expect(p.source_type).toBe("previous_exam");expect(p.exam_year).toBeNull();
+    expect(p.prompt).not.toContain('PSC 063/23');expect(confirmedSourceReferenceCount).toBe(154);
   });
   it("keeps numberless stems unchanged with separate traceability",()=>{
     for(const q of rows.filter(q=>q.displayed_number===null)){

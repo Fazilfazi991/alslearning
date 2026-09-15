@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import {displayStem} from './question-reference-cleanup-model.mjs';
 import { identity, projectQuestion, questionSelect } from "./microbiology-import-model.mjs";
 export { identity, projectQuestion, questionSelect };
 export const batch = "als-biochemistry-client-20260911-v1";
@@ -19,7 +20,7 @@ export function questionPayload(q,taxonomy) {
   const refs=q.previous_paper_evidence;
   return {
     id:identity(sourceIdentity(q)),exam_id:taxonomy.exam.id,program_id:null,subject_id:taxonomy.subject.id,chapter_id:chapter.id,topic_id:null,
-    prompt:q.prompt,prompt_rich:q.prompt_rich,explanation:q.explanation,explanation_rich:q.explanation_rich,type:q.type,status:classify(q),difficulty:"medium",marks:q.marks,negative_marks:q.negative_marks,
+    ...displayStem(q,identity(sourceIdentity(q)),'Biochemistry'),explanation:q.explanation,explanation_rich:q.explanation_rich,type:q.type,status:classify(q),difficulty:"medium",marks:q.marks,negative_marks:q.negative_marks,
     source_type:refs.length?"previous_exam":"standard",source_reference:refs.length?refs.join(" | "):null,exam_year:null,exam_session:null,
     source_label:`${classify(q)==="draft"?"CONTENT REVIEW REQUIRED | ":""}${chapter.name} | ${q.source_document} | Q${q.source_sequence} | visible=${q.displayed_number??"absent"} | batch=${batch} | source=${q.source_key} | identity=${sourceIdentity(q)}`,
     options:q.options.map(o=>({content:o.content,content_rich:o.content_rich,correct:o.correct})),media:[],
