@@ -14,6 +14,7 @@ export type LiveClassConfiguration = {
   pocUploadRecoveryDelayMs: number;
   pocMotionOverlay: boolean;
   pocMaxRecordingSeconds: number | null;
+  pocHoldFinalUpload: boolean;
   missingRealtime: string[];
   missingR2: string[];
   missingTurn: string[];
@@ -38,6 +39,7 @@ export function liveClassConfiguration(): LiveClassConfiguration {
     pocUploadRecoveryDelayMs: Number.isInteger(recoveryDelay) && recoveryDelay >= 0 && recoveryDelay <= 60_000 ? recoveryDelay : 0,
     pocMotionOverlay: enabled("ALS_LIVE_POC_MOTION_OVERLAY"),
     pocMaxRecordingSeconds: Number.isInteger(maxRecordingSeconds) && maxRecordingSeconds >= 60 && maxRecordingSeconds <= 3 * 60 * 60 ? maxRecordingSeconds : null,
+    pocHoldFinalUpload: enabled("ALS_LIVE_POC_HOLD_FINAL_UPLOAD"),
     missingRealtime,
     missingR2,
     missingTurn,
