@@ -24,16 +24,35 @@ export async function closeProviderTracks(tracks: ClosableTrack[]) {
   }
   const closed: string[] = [];
   const failed: string[] = [];
+  for (const track of tracks) {
+    if (!providerSession(track) || !track.provider_mid) failed.push(track.id);
+  }
   for (const [sessionId, group] of grouped) {
     try {
       const response = await cloudflareRealtime.closeTracks(sessionId, group.mids);
-      response.tracks?.forEach((result, index) => {
-        if (!result.errorCode) closed.push(group.ids[index]);
+      if (response.errorCode || !response.tracks) {
+        failed.push(...group.ids);
+        continue;
+      }
+      const byMid = new Map(response.tracks.map(result => [result.mid, result]));
+      group.mids.forEach((mid, index) => {
+        const result = byMid.get(mid) || response.tracks?.[index];
+        if (result && !result.errorCode) closed.push(group.ids[index]);
         else failed.push(group.ids[index]);
       });
-      if (!response.tracks) closed.push(...group.ids);
     } catch {
-      failed.push(...group.ids);
+      // A timed-out or duplicate close is an uncertain result. Inspect the
+      // provider session: a missing mid proves that cleanup already won.
+      try {
+        const state = await cloudflareRealtime.inspectSession(sessionId);
+        const remaining = new Set((state.tracks || []).map(track => track.mid).filter(Boolean));
+        group.mids.forEach((mid, index) => {
+          if (remaining.has(mid)) failed.push(group.ids[index]);
+          else closed.push(group.ids[index]);
+        });
+      } catch {
+        failed.push(...group.ids);
+      }
     }
   }
   return { closed: [...new Set(closed)], failed: [...new Set(failed)] };

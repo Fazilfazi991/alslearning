@@ -7,7 +7,7 @@ import { validateMultipartCompletion, type AcknowledgedPart } from "@/lib/live-c
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 
 type Body = {
-  action?: "begin" | "stop" | "sign" | "acknowledge" | "reconcile" | "complete" | "validate" | "interrupt" | "abort" | "publish" | "unpublish";
+  action?: "begin" | "stop" | "sign" | "acknowledge" | "reconcile" | "complete" | "validate" | "interrupt" | "abort" | "review" | "publish" | "unpublish";
   recordingId?: string;
   segmentId?: string;
   contentType?: string;
@@ -39,23 +39,29 @@ async function ownedSegment(db: Awaited<ReturnType<typeof createClient>>, classI
 
 export async function GET(request: Request, context: RouteContext<"/api/live-classes/[classId]/recordings">) {
   const { classId } = await context.params;
-  const recordingId = new URL(request.url).searchParams.get("recordingId") || "";
+  const parameters = new URL(request.url).searchParams;
+  const recordingId = parameters.get("recordingId") || "";
+  const review = parameters.get("review") === "1";
   if (!uuid.test(recordingId)) return failure("Invalid recording", 400);
   const db = await createClient();
   const { data: auth } = await db.auth.getUser();
   if (!auth.user) return failure("Unauthorized", 401);
   try {
     const authorization = await authorizeLiveClass(db, auth.user.id, classId, "playback");
+    if (review && authorization.role !== "admin") throw new LiveAuthorizationError("Admin review is required");
     const { data: recording } = await db.from("class_recordings")
       .select("id,status,published_at,mime_type,duration_seconds").eq("id", recordingId).eq("session_id", classId).maybeSingle();
     if (!recording) throw new LiveAuthorizationError("Recording is unavailable", 404);
     if (!authorization.isClassManager && (recording.status !== "published" || !recording.published_at)) throw new LiveAuthorizationError("Recording is not published");
-    const { data: segments, error } = await db.from("live_recording_segments")
-      .select("id,segment_number,object_key,mime_type,duration_seconds,total_bytes").eq("recording_id", recordingId).eq("status", "ready").order("segment_number");
+    let segmentQuery = db.from("live_recording_segments")
+      .select("id,segment_number,object_key,mime_type,duration_seconds,client_reported_duration_seconds,total_bytes")
+      .eq("recording_id", recordingId);
+    segmentQuery = review ? segmentQuery.in("status", ["validating", "ready"]) : segmentQuery.eq("status", "ready");
+    const { data: segments, error } = await segmentQuery.order("segment_number");
     if (error || !segments?.length) throw new LiveAuthorizationError("No playable recording segment is ready", 409);
     const signed = await Promise.all(segments.map(async segment => {
       const playback = await r2RecordingStorage.playbackUrl(segment.object_key);
-      return { id: segment.id, segmentNumber: segment.segment_number, mimeType: segment.mime_type, durationSeconds: segment.duration_seconds, byteLength: segment.total_bytes, ...playback };
+      return { id: segment.id, segmentNumber: segment.segment_number, mimeType: segment.mime_type, durationSeconds: segment.duration_seconds || segment.client_reported_duration_seconds, byteLength: segment.total_bytes, ...playback };
     }));
     return NextResponse.json({ recording: { id: recording.id, status: recording.status, durationSeconds: recording.duration_seconds }, segments: signed }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
@@ -79,7 +85,8 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
     const configuration = assertLiveFeature("recording");
     assertLiveFeature(body.mode);
     if (!configuration.r2Configured) return failure(`R2 is not configured (${configuration.missingR2.join(", ")})`, 503);
-    const authorization = await authorizeLiveClass(db, auth.user.id, classId, body.action === "publish" || body.action === "unpublish" ? "manage" : "record");
+    const managerAction = body.action === "review" || body.action === "publish" || body.action === "unpublish";
+    const authorization = await authorizeLiveClass(db, auth.user.id, classId, managerAction ? "manage" : "record");
     assertClassroomMode(authorization.session, body.mode);
 
     if (body.action === "begin") {
@@ -112,6 +119,35 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       }
       await db.from("class_recordings").update({ status: "recording", error_message: null }).eq("id", recordingId);
       return NextResponse.json({ recordingId, segmentId, segmentNumber, partSize: upload.partSize, contentType });
+    }
+
+    if (body.action === "review") {
+      if (authorization.role !== "admin" || !body.recordingId || !uuid.test(body.recordingId)) throw new LiveAuthorizationError("Admin review is required");
+      const { data: recording } = await db.from("class_recordings")
+        .select("id,status,client_validated_at").eq("id", body.recordingId).eq("session_id", classId).maybeSingle();
+      if (!recording || recording.status !== "validating" || !recording.client_validated_at) return failure("Teacher validation evidence is incomplete", 409);
+      const { data: segments, error: segmentError } = await db.from("live_recording_segments")
+        .select("id,status,object_key,total_bytes,client_validated_at,client_reported_duration_seconds")
+        .eq("recording_id", recording.id).order("segment_number");
+      if (segmentError || !segments?.length || segments.some(segment => segment.status !== "validating" || !segment.client_validated_at || !segment.client_reported_duration_seconds)) {
+        return failure("Every uploaded segment needs Teacher playback evidence before Admin review", 409);
+      }
+      const verified = await Promise.all(segments.map(async segment => ({ segment, object: await r2RecordingStorage.verify(segment.object_key) })));
+      if (verified.some(value => value.object.byteLength !== value.segment.total_bytes)) return failure("Remote object size changed after upload validation", 409);
+      const at = new Date().toISOString();
+      await Promise.all(verified.map(value => db.from("live_recording_segments").update({
+        status: "ready",
+        verified_at: at,
+        duration_seconds: value.segment.client_reported_duration_seconds,
+      }).eq("id", value.segment.id).eq("status", "validating")));
+      const { error: recordingError } = await db.from("class_recordings").update({
+        status: "ready",
+        verified_at: at,
+        duration_seconds: verified.reduce((sum, value) => sum + Number(value.segment.client_reported_duration_seconds || 0), 0),
+        total_bytes: verified.reduce((sum, value) => sum + value.object.byteLength, 0),
+      }).eq("id", recording.id).eq("status", "validating");
+      if (recordingError) throw recordingError;
+      return NextResponse.json({ status: "ready", verifiedAt: at });
     }
 
     if ((body.action === "publish" || body.action === "unpublish")) {
@@ -214,15 +250,26 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       if (!Number.isFinite(body.durationSeconds) || body.durationSeconds! <= 0 || body.durationSeconds! > 24 * 60 * 60 || body.seekable !== true || body.hasAudio !== true || body.hasVideo !== true) return failure("Playback validation did not pass", 400);
       const object = await r2RecordingStorage.verify(segment.object_key);
       const at = new Date().toISOString();
-      await db.from("live_recording_segments").update({ status: "ready", verified_at: at, duration_seconds: body.durationSeconds, total_bytes: object.byteLength }).eq("id", segment.id).eq("status", "validating");
-      const { data: segments } = await db.from("live_recording_segments").select("status,duration_seconds,total_bytes").eq("recording_id", segment.recording_id);
-      const allReady = Boolean(segments?.length) && segments!.every(value => value.status === "ready");
-      if (allReady) await db.from("class_recordings").update({
-        status: "ready", verified_at: at,
-        duration_seconds: segments!.reduce((sum, value) => sum + Number(value.duration_seconds || 0), 0),
+      await db.from("live_recording_segments").update({
+        client_validated_at: at,
+        client_reported_duration_seconds: body.durationSeconds,
+        client_reported_seekable: true,
+        client_reported_has_audio: true,
+        client_reported_has_video: true,
+        total_bytes: object.byteLength,
+      }).eq("id", segment.id).eq("status", "validating");
+      const { data: segments } = await db.from("live_recording_segments").select("status,client_validated_at,total_bytes").eq("recording_id", segment.recording_id);
+      const allClientValidated = Boolean(segments?.length) && segments!.every(value => value.status === "validating" && value.client_validated_at);
+      if (allClientValidated) await db.from("class_recordings").update({
+        status: "validating",
+        client_validated_at: at,
+        client_reported_duration_seconds: body.durationSeconds,
+        client_reported_seekable: true,
+        client_reported_has_audio: true,
+        client_reported_has_video: true,
         total_bytes: segments!.reduce((sum, value) => sum + Number(value.total_bytes || 0), 0),
       }).eq("id", segment.recording_id);
-      return NextResponse.json({ status: allReady ? "ready" : "validating" });
+      return NextResponse.json({ status: "validating", clientValidated: allClientValidated, adminReviewRequired: true });
     }
 
     if (body.action === "interrupt") {

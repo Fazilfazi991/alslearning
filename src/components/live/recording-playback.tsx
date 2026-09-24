@@ -15,7 +15,7 @@ type Segment = {
   expiresAt: string;
 };
 
-export function RecordingPlayback({ classId, recordingId, title }: { classId: string; recordingId: string; title: string }) {
+export function RecordingPlayback({ classId, recordingId, title, review = false }: { classId: string; recordingId: string; title: string; review?: boolean }) {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [active, setActive] = useState(0);
   const [error, setError] = useState("");
@@ -27,7 +27,7 @@ export function RecordingPlayback({ classId, recordingId, title }: { classId: st
     if (preservePosition && videoRef.current) resumeAtRef.current = videoRef.current.currentTime;
     setLoading(true); setError("");
     try {
-      const response = await fetch(`/api/live-classes/${classId}/recordings?recordingId=${recordingId}`, { cache: "no-store", referrerPolicy: "no-referrer" });
+      const response = await fetch(`/api/live-classes/${classId}/recordings?recordingId=${recordingId}${review ? "&review=1" : ""}`, { cache: "no-store", referrerPolicy: "no-referrer" });
       const value = await response.json() as { segments?: Segment[]; error?: string };
       if (!response.ok || !value.segments?.length) throw new Error(value.error || "No playable lesson segment is available");
       setSegments(value.segments);
@@ -35,7 +35,7 @@ export function RecordingPlayback({ classId, recordingId, title }: { classId: st
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Recording playback is unavailable");
     } finally { setLoading(false); }
-  }, [classId, recordingId]);
+  }, [classId, recordingId, review]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void renew(false), 0);
@@ -51,8 +51,8 @@ export function RecordingPlayback({ classId, recordingId, title }: { classId: st
 
   const segment = segments[active];
   return <div className="mx-auto max-w-5xl">
-    <Link href="/student/live-classes" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand"><ChevronLeft size={18}/>Live classes</Link>
-    <div className="mt-4 flex flex-wrap items-start justify-between gap-3"><div><p className="eyebrow">Published class recording</p><h1 className="mt-2 text-2xl font-bold">{title}</h1><p className="mt-2 text-sm text-muted">Private playback links expire automatically and are renewed while this page remains authorized.</p></div><Button variant="secondary" onClick={() => void renew()} disabled={loading}><RefreshCw size={17}/>Renew playback</Button></div>
+    {!review && <Link href="/student/live-classes" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand"><ChevronLeft size={18}/>Live classes</Link>}
+    <div className={`${review ? "" : "mt-4"} flex flex-wrap items-start justify-between gap-3`}><div><p className="eyebrow">{review ? "Admin verification preview" : "Published class recording"}</p><h1 className="mt-2 text-2xl font-bold">{title}</h1><p className="mt-2 text-sm text-muted">{review ? "Play every segment and check decoding, audio, seeking, and intended teaching content before approval." : "Private playback links expire automatically and are renewed while this page remains authorized."}</p></div><Button variant="secondary" onClick={() => void renew()} disabled={loading}><RefreshCw size={17}/>Renew playback</Button></div>
     {error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-900">{error}</p>}
     <section className="card mt-5 overflow-hidden p-0">
       <div className="aspect-video bg-[#101a38]">

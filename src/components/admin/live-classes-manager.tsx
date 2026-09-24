@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CalendarPlus, Radio, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RecordingPlayback } from "@/components/live/recording-playback";
 import { academicLocalToUtc, formatAcademicDate, utcToAcademicLocalInput } from "@/lib/live-class/date";
 
 type Named = { id: string; name: string };
 type Teacher = Named & { email: string | null };
-type Recording = { id: string; status: string; total_bytes: number; duration_seconds: number | null; verified_at: string | null; published_at: string | null; error_message: string | null };
+type Recording = { id: string; status: string; total_bytes: number; duration_seconds: number | null; client_validated_at: string | null; verified_at: string | null; published_at: string | null; error_message: string | null };
 type Session = {
   id: string; title: string; status: string; starts_at: string | null; ends_at: string | null; recording_enabled: boolean; max_receivers: number | null;
   attendeeCount?: number; attendanceSeconds?: number;
@@ -24,6 +25,7 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
   const [sessions, setSessions] = useState(initialSessions);
   const [busy, setBusy] = useState("");
   const [editing, setEditing] = useState("");
+  const [reviewing, setReviewing] = useState("");
   const [message, setMessage] = useState("");
   const [programId, setProgramId] = useState(programs[0]?.id || "");
   const [teachingHours, setTeachingHours] = useState(40);
@@ -86,14 +88,22 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
     finally { setBusy(""); }
   }
 
-  async function publication(classId: string, recordingId: string, action: "publish" | "unpublish") {
+  async function publication(classId: string, recordingId: string, action: "review" | "publish" | "unpublish") {
     setBusy(recordingId); setMessage("");
     try {
       const response = await fetch(`/api/live-classes/${classId}/recordings`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, recordingId, mode: "classroom" }) });
       const value = await response.json() as { status?: string; error?: string };
       if (!response.ok) throw new Error(value.error || "Recording publication failed");
-      setSessions(current => current.map(item => item.id !== classId ? item : { ...item, class_recordings: item.class_recordings.map(recording => recording.id === recordingId ? { ...recording, status: value.status || recording.status, published_at: action === "publish" ? new Date().toISOString() : null } : recording) }));
-      setMessage(action === "publish" ? "Validated recording published to eligible students." : "Recording removed from student playback.");
+      const now = new Date().toISOString();
+      setSessions(current => current.map(item => item.id !== classId ? item : { ...item, class_recordings: item.class_recordings.map(recording => recording.id === recordingId ? {
+        ...recording,
+        status: value.status || recording.status,
+        verified_at: action === "review" ? now : recording.verified_at,
+        published_at: action === "publish" ? now : action === "unpublish" ? null : recording.published_at,
+      } : recording) }));
+      if (action === "review") { setReviewing(""); setMessage("Recording approved after Admin playback review. It remains unpublished."); }
+      if (action === "publish") setMessage("Validated recording published to eligible students.");
+      if (action === "unpublish") setMessage("Recording removed from student playback.");
     } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Recording publication failed"); }
     finally { setBusy(""); }
   }
@@ -125,7 +135,7 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
       <div className="mt-4 grid gap-4 lg:grid-cols-2">{sessions.map(session => <article key={session.id} className="card p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wide text-brand">{first(session.subjects)?.name || "Live learning"}</p><h3 className="mt-2 text-lg font-bold">{session.title}</h3></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase">{session.status}</span></div><p className="mt-3 text-sm text-muted">{first(session.programs)?.name || "Program"} · {first(session.batches)?.name || "Cohort"}</p><p className="mt-1 text-sm text-muted">{first(session.profiles)?.full_name || "Teacher"} · {formatAcademicDate(session.starts_at, timeZone)}</p><div className="mt-4 flex flex-wrap gap-2"><Link href={`/admin/live-classes/${session.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-white"><Radio size={16}/>Open classroom</Link>{["draft", "scheduled"].includes(session.status) && <><Button variant="secondary" disabled={busy === session.id} onClick={() => setEditing(current => current === session.id ? "" : session.id)}>Edit schedule</Button><Button variant="secondary" disabled={busy === session.id} onClick={() => void control(session.id, "cancel")}>Cancel</Button></>}</div>
           {editing === session.id && <form className="mt-4 grid gap-3 rounded-xl border border-line p-3 sm:grid-cols-2" onSubmit={event => void reschedule(event, session)}><Field label="Title"><input name="title" required maxLength={180} defaultValue={session.title} className="control"/></Field><span/><Field label={`Starts (${timeZone})`}><input name="startsAt" type="datetime-local" required defaultValue={utcToAcademicLocalInput(session.starts_at, timeZone)} className="control"/></Field><Field label={`Ends (${timeZone})`}><input name="endsAt" type="datetime-local" required defaultValue={utcToAcademicLocalInput(session.ends_at, timeZone)} className="control"/></Field><Button className="sm:col-span-2" disabled={busy === session.id}>Save schedule</Button></form>}
           <p className="mt-3 text-xs font-semibold text-muted">Attendance: {session.attendeeCount || 0} unique participant(s) · {Math.round((session.attendanceSeconds || 0) / 60)} interval minutes</p>
-          {!!session.class_recordings.length && <div className="mt-4 space-y-2 border-t border-line pt-4"><h4 className="text-sm font-bold">Recording review</h4>{session.class_recordings.map(recording => <div key={recording.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface p-3 text-sm"><div><b className="capitalize">{recording.status}</b><p className="text-xs text-muted">{(recording.total_bytes / 1048576).toFixed(1)} MiB{recording.verified_at ? " · validated" : " · validation pending"}</p></div>{recording.status === "ready" && recording.verified_at && <button disabled={busy === recording.id} onClick={() => void publication(session.id, recording.id, "publish")} className="min-h-11 font-bold text-brand">Publish</button>}{recording.status === "published" && <button disabled={busy === recording.id} onClick={() => void publication(session.id, recording.id, "unpublish")} className="min-h-11 font-bold text-red-700">Unpublish</button>}</div>)}</div>}
+          {!!session.class_recordings.length && <div className="mt-4 space-y-2 border-t border-line pt-4"><h4 className="text-sm font-bold">Recording review</h4>{session.class_recordings.map(recording => { const reviewKey = `${session.id}:${recording.id}`; return <div key={recording.id} className="rounded-lg bg-surface p-3 text-sm"><div className="flex flex-wrap items-center justify-between gap-2"><div><b className="capitalize">{recording.status}</b><p className="text-xs text-muted">{(recording.total_bytes / 1048576).toFixed(1)} MiB{recording.verified_at ? " · Admin verified" : recording.client_validated_at ? " · Teacher playback evidence received" : " · validation pending"}</p></div><div className="flex flex-wrap gap-2">{recording.status === "validating" && recording.client_validated_at && <Button variant="secondary" disabled={busy === recording.id} onClick={() => setReviewing(current => current === reviewKey ? "" : reviewKey)}>{reviewing === reviewKey ? "Close review" : "Review media"}</Button>}{recording.status === "ready" && recording.verified_at && <Button variant="secondary" disabled={busy === recording.id} onClick={() => void publication(session.id, recording.id, "publish")}>Publish</Button>}{recording.status === "published" && <Button variant="ghost" disabled={busy === recording.id} onClick={() => void publication(session.id, recording.id, "unpublish")} className="text-red-700">Unpublish</Button>}</div></div>{reviewing === reviewKey && <div className="mt-4 border-t border-line pt-4"><RecordingPlayback classId={session.id} recordingId={recording.id} title={session.title} review/><p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-950">Approval records an Admin trust decision. Confirm every segment decodes, seeks, contains Teacher audio and the intended teaching visual, and excludes private classroom panels.</p><Button className="mt-3" disabled={busy === recording.id} onClick={() => void publication(session.id, recording.id, "review")}>Approve after playback review</Button></div>}</div>; })}</div>}
         </article>)}{!sessions.length && <div className="card p-7 text-sm text-muted">No native classes have been scheduled.</div>}</div>
     </section>
   </div>;

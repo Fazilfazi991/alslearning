@@ -62,6 +62,8 @@ export function NativeClassroom({
   const [participant, setParticipant] = useState(initialParticipant);
   const [participants, setParticipants] = useState(initialParticipants);
   const [messages, setMessages] = useState(initialMessages);
+  const [hasOlderMessages, setHasOlderMessages] = useState(initialMessages.length === 50);
+  const [loadingEarlierMessages, setLoadingEarlierMessages] = useState(false);
   const [polls, setPolls] = useState(initialPolls);
   const [message, setMessage] = useState("");
   const [pollQuestion, setPollQuestion] = useState("");
@@ -94,6 +96,12 @@ export function NativeClassroom({
   const recordingStopRef = useRef<(() => void) | null>(null);
   const reconnectTimerRef = useRef<number | null>(null);
   const joinInFlightRef = useRef(false);
+  const trackRefreshPromiseRef = useRef<Promise<void> | null>(null);
+  const trackRefreshPendingRef = useRef(false);
+  const latestMessageRef = useRef(initialMessages.at(-1) ? {
+    createdAt: initialMessages.at(-1)!.created_at,
+    id: initialMessages.at(-1)!.id,
+  } : null);
 
   const endpoint = `/api/live-classes/${session.id}`;
   const api = useCallback(async <T,>(path: string, body: Record<string, unknown>) => {
@@ -151,6 +159,33 @@ export function NativeClassroom({
     if (data) setPolls(data as unknown as Poll[]);
   }, [session.id]);
 
+  const refreshMessages = useCallback(async () => {
+    const cursor = latestMessageRef.current;
+    const db = createClient();
+    const result = cursor
+      ? await db.rpc("live_messages_since", {
+        target_session: session.id,
+        after_created_at: cursor.createdAt,
+        after_id: cursor.id,
+        page_size: 100,
+      })
+      : await db.rpc("live_message_page", {
+        target_session: session.id,
+        before_created_at: null,
+        before_id: null,
+        page_size: 50,
+      });
+    const additions = (result.data || []) as unknown as Message[];
+    if (!additions.length) return;
+    setMessages(current => {
+      const byId = new Map(current.map(value => [value.id, value]));
+      additions.forEach(value => byId.set(value.id, value));
+      return [...byId.values()].sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+    });
+    const latest = additions.at(-1)!;
+    latestMessageRef.current = { createdAt: latest.created_at, id: latest.id };
+  }, [session.id]);
+
   const subscribeAvailable = useCallback(async (peer: RTCPeerConnection, id: string) => {
     const response = await fetch(`${endpoint}/media?mode=${mode}`, { cache: "no-store" });
     const discovery = await response.json() as { tracks?: { id: string; owner_id: string; kind: RemoteTrack["kind"] }[]; error?: string };
@@ -175,38 +210,103 @@ export function NativeClassroom({
     await api("media", { action: "renegotiate", connectionId: id, sessionDescription: peer.localDescription });
   }, [api, endpoint, lowData, mode, user.id]);
 
+  const requestTrackRefresh = useCallback(() => {
+    if (!peerRef.current || !connectionId) return Promise.resolve();
+    trackRefreshPendingRef.current = true;
+    if (trackRefreshPromiseRef.current) return trackRefreshPromiseRef.current;
+    const operation = queue(async () => {
+      while (trackRefreshPendingRef.current) {
+        trackRefreshPendingRef.current = false;
+        if (peerRef.current) await subscribeAvailable(peerRef.current, connectionId);
+      }
+    });
+    trackRefreshPromiseRef.current = operation;
+    void operation.then(() => {
+      if (trackRefreshPromiseRef.current === operation) trackRefreshPromiseRef.current = null;
+    }, () => {
+      if (trackRefreshPromiseRef.current === operation) trackRefreshPromiseRef.current = null;
+    });
+    return operation;
+  }, [connectionId, queue, subscribeAvailable]);
+
   useEffect(() => {
     const db = createClient();
+    let messageTimer: number | null = null;
+    let participantTimer: number | null = null;
+    let pollTimer: number | null = null;
+    const coalesce = (kind: "message" | "participant" | "poll") => {
+      const current = kind === "message" ? messageTimer : kind === "participant" ? participantTimer : pollTimer;
+      if (current !== null) window.clearTimeout(current);
+      const timer = window.setTimeout(() => {
+        if (kind === "message") { messageTimer = null; void refreshMessages(); }
+        if (kind === "participant") { participantTimer = null; void refreshParticipant(); void refreshParticipants(); }
+        if (kind === "poll") { pollTimer = null; void refreshPolls(); }
+      }, 150);
+      if (kind === "message") messageTimer = timer;
+      if (kind === "participant") participantTimer = timer;
+      if (kind === "poll") pollTimer = timer;
+    };
     const channel = db.channel(`class:${session.id}`, { config: { private: true } })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_messages", filter: `session_id=eq.${session.id}` }, () => {
-        void db.rpc("live_message_payload", { target_session: session.id }).then(({ data }) => { if (data) setMessages(data as unknown as Message[]); });
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "live_participants", filter: `session_id=eq.${session.id}` }, () => {
-        void refreshParticipant(); void refreshParticipants();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "live_questions", filter: `session_id=eq.${session.id}` }, () => void refreshPolls())
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_question_responses" }, () => void refreshPolls())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_messages", filter: `session_id=eq.${session.id}` }, () => coalesce("message"))
+      .on("postgres_changes", { event: "*", schema: "public", table: "live_participants", filter: `session_id=eq.${session.id}` }, () => coalesce("participant"))
+      .on("postgres_changes", { event: "*", schema: "public", table: "live_questions", filter: `session_id=eq.${session.id}` }, () => coalesce("poll"))
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_question_responses" }, () => coalesce("poll"))
       .on("postgres_changes", { event: "*", schema: "public", table: "live_published_tracks", filter: `session_id=eq.${session.id}` }, () => {
-        if (peerRef.current && connectionId) void queue(() => subscribeAvailable(peerRef.current!, connectionId)).catch(() => undefined);
+        void requestTrackRefresh().catch(() => undefined);
       })
       .subscribe();
-    void listRecordingRecoveries().then(values => setRecoveries(values.filter(value => value.classId === session.id && value.status !== "ready"))).catch(() => undefined);
-    return () => { void db.removeChannel(channel); };
-  }, [connectionId, queue, refreshParticipant, refreshParticipants, refreshPolls, session.id, subscribeAvailable]);
+    return () => {
+      if (messageTimer !== null) window.clearTimeout(messageTimer);
+      if (participantTimer !== null) window.clearTimeout(participantTimer);
+      if (pollTimer !== null) window.clearTimeout(pollTimer);
+      void db.removeChannel(channel);
+    };
+  }, [refreshMessages, refreshParticipant, refreshParticipants, refreshPolls, requestTrackRefresh, session.id]);
+
+  useEffect(() => {
+    const publishedIds = new Set(recordings.filter(value => value.status === "published").map(value => value.id));
+    void listRecordingRecoveries().then(async values => {
+      const scoped = values.filter(value => value.classId === session.id);
+      const releasable = scoped.filter(value => publishedIds.has(value.recordingId));
+      await Promise.all(releasable.map(value => deleteRecordingRecovery(value.segmentId)));
+      setRecoveries(scoped.filter(value => !publishedIds.has(value.recordingId)));
+    }).catch(() => undefined);
+  }, [recordings, session.id]);
 
   useEffect(() => {
     if (!connectionId || !peerRef.current) return;
-    const interval = window.setInterval(() => {
-      if (peerRef.current) void queue(() => subscribeAvailable(peerRef.current!, connectionId)).catch(() => undefined);
-    }, 8_000);
-    return () => window.clearInterval(interval);
-  }, [connectionId, queue, subscribeAvailable]);
+    let cancelled = false;
+    let timer: number | null = null;
+    let delay = 60_000;
+    const schedule = () => {
+      const jitter = Math.floor(Math.random() * 5_000);
+      timer = window.setTimeout(async () => {
+        try {
+          await requestTrackRefresh();
+          delay = 60_000;
+        } catch {
+          delay = Math.min(delay * 2, 300_000);
+        }
+        if (!cancelled) schedule();
+      }, delay + jitter);
+    };
+    schedule();
+    return () => { cancelled = true; if (timer !== null) window.clearTimeout(timer); };
+  }, [connectionId, requestTrackRefresh]);
 
   useEffect(() => {
     if (!connectionId) return;
     const heartbeat = window.setInterval(() => void api("media", { action: "heartbeat", connectionId }).catch(() => setConnectionState("reconnecting")), 15_000);
     return () => window.clearInterval(heartbeat);
   }, [api, connectionId]);
+
+  useEffect(() => {
+    if (!manager || !["live", "completed"].includes(session.status)) return;
+    const reconcile = () => void api("control", { action: "reconcile" }).catch(() => undefined);
+    reconcile();
+    const timer = window.setInterval(reconcile, 30_000);
+    return () => window.clearInterval(timer);
+  }, [api, manager, session.status]);
 
   useEffect(() => {
     const peer = peerRef.current;
@@ -216,7 +316,7 @@ export function NativeClassroom({
     let samples = 0;
     const interval = window.setInterval(() => void sampler.sample().then(sample => {
       setStats(sample); samples += 1;
-      if (samples % 15 === 0) void api("media", {
+      if (samples % 30 === 0) void api("media", {
         action: "stats", connectionId, stats: {
           sampledFrom: started, sampledTo: new Date().toISOString(), audioBytes: sample.audioBytes, videoBytes: sample.videoBytes,
           screenBytes: sample.screenBytes, packetsLost: sample.packetsLost, jitterMs: sample.jitterMs, rttMs: sample.rttMs,
@@ -390,6 +490,31 @@ export function NativeClassroom({
     if (sendError) setError(sendError.message); else setMessage("");
   }
 
+  async function loadEarlierMessages() {
+    const oldest = messages[0];
+    if (!oldest || loadingEarlierMessages) return;
+    setLoadingEarlierMessages(true);
+    try {
+      const { data, error: pageError } = await createClient().rpc("live_message_page", {
+        target_session: session.id,
+        before_created_at: oldest.created_at,
+        before_id: oldest.id,
+        page_size: 50,
+      });
+      if (pageError) throw pageError;
+      const earlier = (data || []) as unknown as Message[];
+      setHasOlderMessages(earlier.length === 50);
+      if (earlier.length) setMessages(current => {
+        const byId = new Map([...earlier, ...current].map(value => [value.id, value]));
+        return [...byId.values()].sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+      });
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Earlier messages could not be loaded");
+    } finally {
+      setLoadingEarlierMessages(false);
+    }
+  }
+
   async function toggleHand() {
     const raised = !participant?.raised_hand;
     const { error: handError } = await createClient().rpc("set_raised_hand", { target_session: session.id, raised });
@@ -506,8 +631,13 @@ export function NativeClassroom({
       await saveRecordingRecovery({ segmentId: begun.segmentId, recordingId: begun.recordingId, classId: session.id, title: session.title, mimeType, partSize: begun.partSize, status: "uploading", updatedAt: new Date().toISOString() });
       await api("recordings", { action: "complete", segmentId: begun.segmentId });
       await validateLocalSegment(begun.segmentId);
-      await deleteRecordingRecovery(begun.segmentId);
-      setRecordingStatus("Ready for Admin review"); setRecoveries(current => current.filter(value => value.segmentId !== begun.segmentId));
+      const validatingRecovery: StoredRecordingRecovery = {
+        segmentId: begun.segmentId, recordingId: begun.recordingId, classId: session.id, title: session.title,
+        mimeType, partSize: begun.partSize, status: "validating", updatedAt: new Date().toISOString(),
+      };
+      await saveRecordingRecovery(validatingRecovery);
+      setRecordingStatus("Uploaded — awaiting Admin review");
+      setRecoveries(current => [...current.filter(value => value.segmentId !== begun.segmentId), validatingRecovery]);
     } catch (reason) {
       if (activeSegmentId) await api("recordings", { action: "interrupt", segmentId: activeSegmentId }).catch(() => undefined);
       setError(reason instanceof DOMException && reason.name === "QuotaExceededError" ? "Browser recording storage is full. Stop recording and download the recoverable segment." : reason instanceof Error ? reason.message : "Recording failed");
@@ -535,8 +665,10 @@ export function NativeClassroom({
       await api("recordings", { action: "stop", segmentId: recovery.segmentId });
       await api("recordings", { action: "complete", segmentId: recovery.segmentId });
       await validateLocalSegment(recovery.segmentId);
-      await deleteRecordingRecovery(recovery.segmentId);
-      setRecoveries(current => current.filter(value => value.segmentId !== recovery.segmentId)); setRecordingStatus("Recovered recording is ready for review");
+      const validatingRecovery = { ...recovery, status: "validating" as const, updatedAt: new Date().toISOString() };
+      await saveRecordingRecovery(validatingRecovery);
+      setRecoveries(current => [...current.filter(value => value.segmentId !== recovery.segmentId), validatingRecovery]);
+      setRecordingStatus("Recovered upload is awaiting Admin review");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Recovery failed"); setRecordingStatus("Recovery still available"); }
     finally { ownership.release(); }
   }
@@ -568,7 +700,7 @@ export function NativeClassroom({
       {notice && <p role="status" className="mb-4 rounded-xl bg-blue-50 p-4 text-sm text-blue-950">{notice}</p>}
       <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="min-w-0 space-y-4">
-          <div id="als-live-stage" className="relative aspect-video min-h-[220px] overflow-hidden rounded-2xl bg-[#101a38] shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+          <div id="als-live-stage" className="relative aspect-video min-h-[200px] overflow-hidden rounded-2xl bg-[#101a38] shadow-[0_0_0_1px_rgba(255,255,255,.08)] sm:min-h-[220px]">
             {visual && !lowData ? <RemoteVideo key={visual.id} stream={visual.stream} label={`${visual.kind} teaching stream`}/> : manager ? <video ref={localVideoRef} autoPlay muted playsInline className="h-full w-full object-contain" aria-label="Muted Teacher preview"/> : <div className="grid h-full place-items-center p-6 text-center text-white"><div><VideoOff className="mx-auto text-white/60" size={38}/><h2 className="mt-4 text-xl font-bold">{lowData ? "Audio-only mode" : connectionState === "connected" ? "Waiting for teaching visuals" : "Ready to join"}</h2><p className="mt-2 text-sm text-blue-100">{lowData ? "Visual teaching content is not currently shown." : "Students join receive-only and are not asked for camera or microphone access."}</p></div></div>}
             <video ref={screenPreviewRef} muted playsInline className="hidden" aria-hidden="true"/>
             {remoteTracks.filter(track => track.kind === "microphone").map(track => <RemoteAudio key={track.id} stream={track.stream}/>)}
@@ -594,12 +726,12 @@ export function NativeClassroom({
             <canvas ref={canvasRef} className="hidden"/>
             <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button><span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
             {(!configuration.recordingEnabled || !configuration.r2Configured) && <p className="mt-3 text-sm text-muted">Recording unavailable: {configuration.recordingEnabled ? `missing ${configuration.missingR2.join(", ")}` : "ALS_LIVE_RECORDING_ENABLED is disabled"}.</p>}
-            {!!recoveries.length && <div className="mt-4 space-y-2"><h3 className="text-sm font-bold">Recoverable local segments</h3>{recoveries.map(recovery => <div key={recovery.segmentId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-3 text-sm"><span>{recovery.title} · {recovery.status}</span><span className="flex gap-2"><button className="min-h-11 px-3 font-bold text-brand" onClick={() => void resumeRecovery(recovery)}>Resume upload</button><button className="min-h-11 px-3 font-bold" onClick={() => void downloadRecoveredSegment(recovery.segmentId)}>Download</button></span></div>)}</div>}
+            {!!recoveries.length && <div className="mt-4 space-y-2"><div><h3 className="text-sm font-bold">Recoverable local segments</h3><p className="mt-1 text-xs text-muted">The local recovery copy is retained until the remote recording is reviewed and published.</p></div>{recoveries.map(recovery => <div key={recovery.segmentId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-3 text-sm"><span>{recovery.title} · {recovery.status}</span><span className="flex gap-2">{recovery.status !== "validating" && <button className="min-h-11 px-3 font-bold text-brand" onClick={() => void resumeRecovery(recovery)}>Resume upload</button>}<button className="min-h-11 px-3 font-bold" onClick={() => void downloadRecoveredSegment(recovery.segmentId)}>Download</button></span></div>)}</div>}
             {!!recordings.length && <div className="mt-4 grid gap-2 sm:grid-cols-2">{recordings.map(value => <div className="rounded-lg bg-surface p-3 text-sm" key={value.id}><b className="capitalize">{value.status}</b><p className="mt-1 text-muted">{(value.total_bytes / 1048576).toFixed(1)} MiB {value.duration_seconds ? `· ${Math.round(value.duration_seconds)} seconds` : ""}</p>{value.error_message && <p className="mt-1 text-red-800">{value.error_message}</p>}</div>)}</div>}
           </section>}
         </section>
         <aside className="min-w-0 space-y-4">
-          <section className="card flex min-h-[420px] flex-col p-4"><h2 className="font-bold">Class chat</h2><div className="my-4 max-h-[360px] flex-1 space-y-3 overflow-y-auto" aria-live="polite">{messages.map(value => <div key={value.id} className="rounded-lg bg-surface p-3"><b className="text-xs">{value.sender_name || "Participant"}</b><p className="mt-1 break-words text-sm">{value.body}</p></div>)}{!messages.length && <p className="text-sm text-muted">No class messages yet.</p>}</div><label className="text-xs font-bold text-muted">Message<textarea maxLength={4000} value={message} onChange={event => setMessage(event.target.value)} className="mt-1 min-h-20 w-full rounded-lg border border-line p-3 text-base font-normal text-ink"/></label><Button className="mt-2" onClick={() => void sendMessage()}>Send</Button></section>
+          <section className="card flex min-h-[420px] flex-col p-4"><h2 className="font-bold">Class chat</h2><div className="my-4 max-h-[360px] flex-1 space-y-3 overflow-y-auto" aria-live="polite">{hasOlderMessages && <Button variant="ghost" className="w-full" disabled={loadingEarlierMessages} onClick={() => void loadEarlierMessages()}>{loadingEarlierMessages ? "Loading earlier messages…" : "Load earlier messages"}</Button>}{messages.map(value => <div key={value.id} className="rounded-lg bg-surface p-3"><b className="text-xs">{value.sender_name || "Participant"}</b><p className="mt-1 break-words text-sm">{value.body}</p></div>)}{!messages.length && <p className="text-sm text-muted">No class messages yet.</p>}</div><label className="text-xs font-bold text-muted">Message<textarea maxLength={4000} value={message} onChange={event => setMessage(event.target.value)} className="mt-1 min-h-20 w-full rounded-lg border border-line p-3 text-base font-normal text-ink"/></label><Button className="mt-2" onClick={() => void sendMessage()}>Send</Button></section>
           {manager && <section className="card p-4"><h2 className="font-bold">Hands and publishing grants</h2><div className="mt-3 space-y-3">{participants.filter(value => value.raised_hand || !value.left_at).map(value => <div key={value.user_id} className="rounded-lg border border-line p-3"><div className="flex items-center justify-between gap-2"><b className="text-sm">{value.full_name || "Student"}</b>{value.raised_hand && <Hand size={17} className="text-brand"/>}</div><div className="mt-2 grid grid-cols-2 gap-2"><button className="min-h-11 rounded-lg border px-2 text-xs font-bold" onClick={() => void changeGrant(value.user_id, "microphone", !value.audio_publish_allowed)}>{value.audio_publish_allowed ? <MicOff className="mx-auto" size={16}/> : <Mic className="mx-auto" size={16}/>} {value.audio_publish_allowed ? "Revoke mic" : "Grant mic"}</button><button className="min-h-11 rounded-lg border px-2 text-xs font-bold" onClick={() => void changeGrant(value.user_id, "presenter", !value.screen_publish_allowed)}>{value.screen_publish_allowed ? "Revoke screen" : "Grant screen"}</button></div><button className="mt-2 min-h-11 w-full rounded-lg text-xs font-bold text-red-700" onClick={() => void removeParticipant(value.user_id)}>Remove from class</button></div>)}{!participants.length && <p className="text-sm text-muted">No participants have joined.</p>}</div></section>}
         </aside>
       </div>

@@ -4,6 +4,7 @@ import { assertLiveFeature } from "@/lib/live-class/config";
 import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError, mayPublish } from "@/lib/live-class/authorization";
 import { cloudflareRealtime, CloudflareRealtimeError, getIceServers, type PublishedTrackKind, type SdpDescription } from "@/lib/live-class/provider";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
+import { closeProviderTracks } from "@/lib/live-class/transport-cleanup";
 
 type Body = {
   action?: "create" | "publish" | "subscribe" | "unsubscribe" | "renegotiate" | "close" | "heartbeat" | "leave" | "stats";
@@ -46,23 +47,15 @@ async function ownedConnection(db: Awaited<ReturnType<typeof createClient>>, cla
 }
 
 async function forceCloseTracks(db: Awaited<ReturnType<typeof createClient>>, tracks: Track[]) {
-  const grouped = new Map<string, { mids: string[]; ids: string[] }>();
-  for (const track of tracks) {
-    const sessionId = providerSession(track);
-    if (!sessionId) continue;
-    const value = grouped.get(sessionId) || { mids: [], ids: [] };
-    value.mids.push(track.provider_mid);
-    value.ids.push(track.id);
-    grouped.set(sessionId, value);
-  }
-  for (const [sessionId, value] of grouped) {
-    const response = await cloudflareRealtime.closeTracks(sessionId, value.mids);
-    const closed = value.ids.filter((_, index) => !response.tracks?.[index]?.errorCode);
-    const failed = value.ids.filter((_, index) => Boolean(response.tracks?.[index]?.errorCode));
-    if (closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: new Date().toISOString() }).in("id", closed);
-    if (failed.length) await db.from("live_published_tracks").update({ status: "failed", closed_at: new Date().toISOString() }).in("id", failed);
-    if (failed.length) throw new CloudflareRealtimeError("Cloudflare could not close every requested publication", 502, true);
-  }
+  const result = await closeProviderTracks(tracks);
+  if (result.closed.length) await db.from("live_published_tracks").update({
+    status: "closed", closed_at: new Date().toISOString(), cleanup_retry_at: null, last_cleanup_error: null,
+  }).in("id", result.closed);
+  if (result.failed.length) await db.from("live_published_tracks").update({
+    status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
+    last_cleanup_error: "Provider close is unresolved",
+  }).in("id", result.failed);
+  if (result.failed.length) throw new CloudflareRealtimeError("Cloudflare could not close every requested publication", 502, true);
 }
 
 export async function GET(request: Request, context: RouteContext<"/api/live-classes/[classId]/media">) {
