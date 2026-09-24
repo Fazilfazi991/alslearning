@@ -11,7 +11,7 @@ type Named = { id: string; name: string };
 type Teacher = Named & { email: string | null };
 type Recording = { id: string; status: string; total_bytes: number; duration_seconds: number | null; client_validated_at: string | null; verified_at: string | null; published_at: string | null; error_message: string | null };
 type Session = {
-  id: string; title: string; status: string; starts_at: string | null; ends_at: string | null; recording_enabled: boolean; max_receivers: number | null;
+  id: string; title: string; status: string; provider: string; starts_at: string | null; ends_at: string | null; recording_enabled: boolean; max_receivers: number | null;
   attendeeCount?: number; attendanceSeconds?: number;
   programs: { name: string } | { name: string }[] | null; subjects: { name: string } | { name: string }[] | null;
   batches: { name: string } | { name: string }[] | null; profiles: { full_name: string } | { full_name: string }[] | null;
@@ -91,7 +91,9 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
   async function publication(classId: string, recordingId: string, action: "review" | "publish" | "unpublish") {
     setBusy(recordingId); setMessage("");
     try {
-      const response = await fetch(`/api/live-classes/${classId}/recordings`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, recordingId, mode: "classroom" }) });
+      const session = sessions.find(value => value.id === classId);
+      const mode = session?.provider === "cloudflare-poc" ? "poc" : "classroom";
+      const response = await fetch(`/api/live-classes/${classId}/recordings`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, recordingId, mode }) });
       const value = await response.json() as { status?: string; error?: string };
       if (!response.ok) throw new Error(value.error || "Recording publication failed");
       const now = new Date().toISOString();
