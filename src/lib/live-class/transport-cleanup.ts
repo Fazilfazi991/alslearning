@@ -1,5 +1,5 @@
 import "server-only";
-import { cloudflareRealtime } from "./provider";
+import { cloudflareRealtime, CloudflareRealtimeError } from "./provider";
 
 export type ClosableTrack = {
   id: string;
@@ -23,6 +23,7 @@ export async function closeProviderTracks(tracks: ClosableTrack[]) {
     grouped.set(sessionId, group);
   }
   const closed: string[] = [];
+  const expired: string[] = [];
   const failed: string[] = [];
   for (const track of tracks) {
     if (!providerSession(track) || !track.provider_mid) failed.push(track.id);
@@ -40,20 +41,25 @@ export async function closeProviderTracks(tracks: ClosableTrack[]) {
         if (result && !result.errorCode) closed.push(group.ids[index]);
         else failed.push(group.ids[index]);
       });
-    } catch {
+    } catch (closeError) {
+      if (closeError instanceof CloudflareRealtimeError && closeError.status === 410 && closeError.code === "session_error") {
+        expired.push(...group.ids);
+        continue;
+      }
       // A timed-out or duplicate close is an uncertain result. Inspect the
       // provider session: a missing mid proves that cleanup already won.
       try {
         const state = await cloudflareRealtime.inspectSession(sessionId);
-        const remaining = new Set((state.tracks || []).map(track => track.mid).filter(Boolean));
+        const remaining = new Set((state.tracks || []).filter(track => !track.status || !["closed", "inactive"].includes(track.status)).map(track => track.mid).filter(Boolean));
         group.mids.forEach((mid, index) => {
           if (remaining.has(mid)) failed.push(group.ids[index]);
           else closed.push(group.ids[index]);
         });
-      } catch {
-        failed.push(...group.ids);
+      } catch (inspectError) {
+        if (inspectError instanceof CloudflareRealtimeError && inspectError.status === 410 && inspectError.code === "session_error") expired.push(...group.ids);
+        else failed.push(...group.ids);
       }
     }
   }
-  return { closed: [...new Set(closed)], failed: [...new Set(failed)] };
+  return { closed: [...new Set(closed)], expired: [...new Set(expired)], failed: [...new Set(failed)] };
 }

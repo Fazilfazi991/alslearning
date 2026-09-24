@@ -8,7 +8,7 @@ import {
   acquireRecordingOwnership, deleteRecordingRecovery, downloadRecoveredSegment, listRecordingChunks, listRecordingRecoveries,
   saveRecordingChunk, saveRecordingRecovery, type StoredRecordingRecovery,
 } from "@/lib/live-class/recording-store";
-import { PeerStatsSampler, type LiveStatsSample } from "@/lib/live-class/stats";
+import { emptyLiveStats, PeerStatsSampler, StatsIntervalAccumulator, type LiveStatsSample } from "@/lib/live-class/stats";
 import { formatAcademicDate } from "@/lib/live-class/date";
 import { Hand, Maximize, Mic, MicOff, MonitorUp, PhoneOff, Radio, RefreshCw, Video, VideoOff } from "lucide-react";
 
@@ -31,16 +31,14 @@ type Session = {
 };
 type Configuration = {
   realtimeConfigured: boolean; r2Configured: boolean; turnConfigured: boolean; recordingEnabled: boolean; forceRelay: boolean;
+  pocInterruptUploadPart: number | null;
   missingRealtime: string[]; missingR2: string[]; missingTurn: string[];
 };
 type RecordingRow = { id: string; status: string; total_bytes: number; duration_seconds: number | null; published_at: string | null; error_message: string | null };
 type RemoteTrack = { id: string; kind: "microphone" | "camera" | "screen"; ownerId: string; stream: MediaStream };
 type Published = { id: string; kind: "microphone" | "camera" | "screen"; mid: string; track: MediaStreamTrack };
 
-const emptyStats: LiveStatsSample = {
-  sampledAt: 0, audioBytes: 0, videoBytes: 0, screenBytes: 0, audioKbps: 0, videoKbps: 0, screenKbps: 0,
-  packetsLost: 0, jitterMs: null, rttMs: null, candidateType: null, width: null, height: null, framesPerSecond: null,
-};
+const emptyStats: LiveStatsSample = emptyLiveStats();
 const first = <T,>(value: T | T[] | null | undefined) => Array.isArray(value) ? value[0] : value;
 const waitForIce = (peer: RTCPeerConnection) => new Promise<void>(resolve => {
   if (peer.iceGatheringState === "complete") return resolve();
@@ -90,10 +88,13 @@ export function NativeClassroom({
   const screenPreviewRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const midMapRef = useRef(new Map<string, { id: string; kind: RemoteTrack["kind"]; ownerId: string }>());
+  const publicationKindByMidRef = useRef(new Map<string, Published["kind"]>());
+  const trackKindByIdentifierRef = useRef(new Map<string, Published["kind"]>());
   const subscribedRef = useRef(new Set<string>());
   const operationRef = useRef(Promise.resolve());
   const reconnectsRef = useRef(0);
   const recordingStopRef = useRef<(() => void) | null>(null);
+  const interruptedUploadPartsRef = useRef(new Set<string>());
   const reconnectTimerRef = useRef<number | null>(null);
   const joinInFlightRef = useRef(false);
   const trackRefreshPromiseRef = useRef<Promise<void> | null>(null);
@@ -311,18 +312,32 @@ export function NativeClassroom({
   useEffect(() => {
     const peer = peerRef.current;
     if (!peer || !connectionId) return;
-    const sampler = new PeerStatsSampler(peer, () => screenStreamRef.current?.getVideoTracks()[0]?.id || null);
-    const started = new Date().toISOString();
+    const sampler = new PeerStatsSampler(peer, ({ direction, mid, trackIdentifier }) => {
+      if (mid) {
+        const kind = direction === "received" ? midMapRef.current.get(mid)?.kind : publicationKindByMidRef.current.get(mid);
+        if (kind) return kind;
+      }
+      return trackIdentifier ? trackKindByIdentifierRef.current.get(trackIdentifier) || null : null;
+    });
+    let accumulated = new StatsIntervalAccumulator();
     let samples = 0;
     const interval = window.setInterval(() => void sampler.sample().then(sample => {
-      setStats(sample); samples += 1;
-      if (samples % 30 === 0) void api("media", {
-        action: "stats", connectionId, stats: {
-          sampledFrom: started, sampledTo: new Date().toISOString(), audioBytes: sample.audioBytes, videoBytes: sample.videoBytes,
-          screenBytes: sample.screenBytes, packetsLost: sample.packetsLost, jitterMs: sample.jitterMs, rttMs: sample.rttMs,
-          candidateType: sample.candidateType, reconnectCount: reconnectsRef.current,
-        },
-      }).catch(() => undefined);
+      setStats(sample); samples += 1; accumulated.add(sample);
+      if (samples % 30 === 0) {
+        const completed = accumulated;
+        accumulated = new StatsIntervalAccumulator();
+        void api("media", {
+          action: "stats", connectionId, stats: {
+            sampledFrom: completed.sampledFrom, sampledTo: new Date().toISOString(),
+            sentMicrophoneBytes: completed.bytes.sent.microphone, sentCameraBytes: completed.bytes.sent.camera,
+            sentScreenBytes: completed.bytes.sent.screen, sentUnclassifiedBytes: completed.bytes.sent.unclassified,
+            receivedMicrophoneBytes: completed.bytes.received.microphone, receivedCameraBytes: completed.bytes.received.camera,
+            receivedScreenBytes: completed.bytes.received.screen, receivedUnclassifiedBytes: completed.bytes.received.unclassified,
+            packetsLost: completed.packetsLost, jitterMs: sample.jitterMs, rttMs: sample.rttMs,
+            candidateType: sample.candidateType, reconnectCount: reconnectsRef.current,
+          },
+        }).catch(() => undefined);
+      }
     }).catch(() => undefined), 2_000);
     return () => window.clearInterval(interval);
   }, [api, connectionId]);
@@ -379,7 +394,8 @@ export function NativeClassroom({
       if (recovery) {
         peerRef.current?.close();
         remoteTracks.forEach(value => value.stream.getTracks().forEach(track => track.stop()));
-        midMapRef.current.clear(); subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
+        midMapRef.current.clear(); publicationKindByMidRef.current.clear(); trackKindByIdentifierRef.current.clear();
+        subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
       const peer = new RTCPeerConnection({
@@ -390,6 +406,7 @@ export function NativeClassroom({
       peer.ontrack = event => {
         const identity = midMapRef.current.get(event.transceiver.mid || "");
         if (!identity) return;
+        trackKindByIdentifierRef.current.set(event.track.id, identity.kind);
         setRemoteTracks(current => [...current.filter(value => value.id !== identity.id), { ...identity, stream: new MediaStream([event.track]) }]);
       };
       peer.onconnectionstatechange = () => {
@@ -406,7 +423,7 @@ export function NativeClassroom({
       peerRef.current = peer; setConnectionId(created.connectionId);
       await queue(() => subscribeAvailable(peer, created.connectionId));
       setConnectionState(peer.connectionState === "connected" ? "connected" : "joining");
-      if (localStreamRef.current?.active && (manager ? preflightReady : participant?.audio_publish_allowed)) await publishLocal(peer, created.connectionId, localStreamRef.current.getTracks());
+      if (localStreamRef.current?.active && (manager || participant?.audio_publish_allowed)) await publishLocal(peer, created.connectionId, localStreamRef.current.getTracks());
       if (recovery) setNotice("Classroom media reconnected. Re-share the teaching screen if screen capture was active.");
     } catch (reason) { setConnectionState("failed"); setError(reason instanceof Error ? reason.message : "Could not join classroom"); }
     finally { joinInFlightRef.current = false; }
@@ -426,6 +443,10 @@ export function NativeClassroom({
       action: "publish", connectionId: id, sessionDescription: peer.localDescription, publications,
     });
     await peer.setRemoteDescription(response.sessionDescription);
+    response.tracks.forEach((value, index) => {
+      publicationKindByMidRef.current.set(value.mid, value.kind);
+      trackKindByIdentifierRef.current.set(entries[index].track.id, value.kind);
+    });
     setPublished(current => [...current.filter(value => !entries.some(entry => entry.kind === value.kind)), ...response.tracks.map((value, index) => ({ ...value, track: entries[index].track }))]);
   }
 
@@ -456,14 +477,16 @@ export function NativeClassroom({
         publications: [{ kind: "screen", mid: transceiver.mid! }],
       });
       await peerRef.current.setRemoteDescription(response.sessionDescription);
+      publicationKindByMidRef.current.set(response.tracks[0].mid, "screen");
+      trackKindByIdentifierRef.current.set(track.id, "screen");
       setPublished(current => [...current.filter(value => value.kind !== "screen"), { ...response.tracks[0], track }]);
       const publicationId = response.tracks[0].id;
-      track.onended = () => {
+      track.addEventListener("ended", () => {
         screenStreamRef.current = null;
         setPublished(current => current.filter(value => value.id !== publicationId));
         void api("media", { action: "close", connectionId, trackIds: [publicationId] }).catch(() => undefined);
         setNotice("Screen sharing ended. The recording canvas will fall back to the Teacher camera or holding slate.");
-      };
+      }, { once: true });
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Screen sharing failed"); }
   }
 
@@ -546,11 +569,21 @@ export function NativeClassroom({
       .find(type => MediaRecorder.isTypeSupported(type)) || "";
   }
 
-  async function uploadPart(segmentId: string, part: RecordingPart) {
+  async function uploadPart(segmentId: string, part: RecordingPart, allowPocInterruption = false) {
     const digest = await sha256Hex(part.bytes);
     let response: Response | null = null;
     for (let attempt = 0; attempt < 4; attempt += 1) {
       const signed = await api<{ url: string }>("recordings", { action: "sign", segmentId, partNumber: part.partNumber, byteLength: part.bytes.byteLength, sha256: digest });
+      const injectionKey = `${segmentId}:${part.partNumber}`;
+      const injectInterruption = allowPocInterruption && mode === "poc" && configuration.pocInterruptUploadPart === part.partNumber && !interruptedUploadPartsRef.current.has(injectionKey);
+      if (injectInterruption) {
+        interruptedUploadPartsRef.current.add(injectionKey);
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort("POC multipart interruption"), 10);
+        try { await fetch(signed.url, { method: "PUT", body: part.bytes as BodyInit, signal: controller.signal }); }
+        finally { window.clearTimeout(timer); }
+        throw new Error(`POC test interrupted multipart PUT for part ${part.partNumber} before acknowledgement`);
+      }
       response = await fetch(signed.url, { method: "PUT", body: part.bytes as BodyInit }).catch(() => null);
       if (response?.ok) break;
       await new Promise(resolve => window.setTimeout(resolve, 500 * 2 ** attempt));
@@ -589,7 +622,8 @@ export function NativeClassroom({
         video.onerror = () => { window.clearTimeout(timeout); reject(new Error("Recorded media seek validation failed")); };
         video.currentTime = seekTarget;
       });
-      await api("recordings", { action: "validate", segmentId, durationSeconds: duration, seekable: video.seekable.length > 0, hasAudio: true, hasVideo: true });
+      const fullSha256 = await sha256Hex(new Uint8Array(await blob.arrayBuffer()));
+      await api("recordings", { action: "validate", segmentId, durationSeconds: duration, seekable: video.seekable.length > 0, hasAudio: true, hasVideo: true, fullSha256 });
     } finally { URL.revokeObjectURL(url); }
   }
 
@@ -610,6 +644,7 @@ export function NativeClassroom({
       activeSegmentId = begun.segmentId;
       const canvas = canvasRef.current!; canvas.width = 1280; canvas.height = 720;
       const context = canvas.getContext("2d")!;
+      let pocFrame = 0;
       const draw = () => {
         context.fillStyle = "#101a38"; context.fillRect(0, 0, canvas.width, canvas.height);
         const primaryVideo = screenStreamRef.current ? screenPreviewRef.current : localVideoRef.current;
@@ -621,6 +656,20 @@ export function NativeClassroom({
         }
         if (screenStreamRef.current && localStreamRef.current?.getVideoTracks().length && localVideoRef.current) {
           context.drawImage(localVideoRef.current, canvas.width - 272, canvas.height - 174, 240, 135);
+        }
+        if (mode === "poc" && configuration.pocInterruptUploadPart) {
+          // Deterministic motion keeps the bounded recovery proof near the
+          // configured encoder bitrate even when the shared lab slide is static.
+          // It is enabled only with the explicit POC interruption harness.
+          let seed = ++pocFrame;
+          for (let y = 0; y < 120; y += 6) for (let x = 0; x < 240; x += 6) {
+            seed = (seed * 1664525 + 1013904223) >>> 0;
+            context.fillStyle = `rgba(${seed & 255},${seed >>> 8 & 255},${seed >>> 16 & 255},.42)`;
+            context.fillRect(20 + x, 20 + y, 6, 6);
+          }
+          context.fillStyle = "rgba(16,26,56,.84)"; context.fillRect(20, 140, 240, 28);
+          context.fillStyle = "white"; context.font = "600 14px sans-serif"; context.textAlign = "left";
+          context.fillText(`POC recovery frame ${pocFrame}`, 30, 159);
         }
       };
       drawTimer = window.setInterval(draw, 100); draw();
@@ -640,7 +689,7 @@ export function NativeClassroom({
         chain = chain.then(async () => {
           await saveRecordingChunk({ id: `${begun.segmentId}:${currentSequence.toString().padStart(8, "0")}`, segmentId: begun.segmentId, recordingId: begun.recordingId, sequence: currentSequence, mimeType, bytes: event.data, createdAt: new Date().toISOString() });
           const bytes = new Uint8Array(await event.data.arrayBuffer());
-          for (const part of assembler.push(bytes)) await uploadPart(begun.segmentId, part);
+          for (const part of assembler.push(bytes)) await uploadPart(begun.segmentId, part, true);
         }).catch(reason => { pipelineError = reason; if (media.state === "recording") media.stop(); });
       };
       media.onerror = event => { pipelineError = event.error || new Error("MediaRecorder stopped unexpectedly"); setRecordingStatus("Interrupted — recover locally"); if (media.state === "recording") media.stop(); };
@@ -741,8 +790,8 @@ export function NativeClassroom({
             {!manager && <Button variant={participant?.raised_hand ? "primary" : "secondary"} onClick={() => void toggleHand()}><Hand size={17}/>{participant?.raised_hand ? "Lower hand" : "Raise hand"}</Button>}
             {!manager && connectionId && <Button variant="ghost" onClick={() => void toggleLowData()}>{lowData ? <Video size={17}/> : <VideoOff size={17}/>} {lowData ? "Restore visuals" : "Audio only"}</Button>}
           </div>
-          <section className="card grid gap-3 p-4 sm:grid-cols-3 xl:grid-cols-6" aria-label="Connection measurements">
-            <Metric label="Audio" value={`${stats.audioKbps.toFixed(0)} kbps`}/><Metric label="Video" value={`${stats.videoKbps.toFixed(0)} kbps`}/><Metric label="Screen" value={`${stats.screenKbps.toFixed(0)} kbps`}/><Metric label="Loss" value={`${stats.packetsLost}`}/><Metric label="RTT" value={stats.rttMs === null ? "—" : `${stats.rttMs.toFixed(0)} ms`}/><Metric label="Path" value={stats.candidateType || "—"}/>
+          <section className="card grid gap-3 p-4 sm:grid-cols-3 xl:grid-cols-7" aria-label="Connection measurements">
+            <Metric label="Microphone" value={`RX ${stats.kbps.received.microphone.toFixed(0)} · TX ${stats.kbps.sent.microphone.toFixed(0)} kbps`}/><Metric label="Camera" value={`RX ${stats.kbps.received.camera.toFixed(0)} · TX ${stats.kbps.sent.camera.toFixed(0)} kbps`}/><Metric label="Screen" value={`RX ${stats.kbps.received.screen.toFixed(0)} · TX ${stats.kbps.sent.screen.toFixed(0)} kbps`}/><Metric label="Unclassified" value={`RX ${stats.kbps.received.unclassified.toFixed(0)} · TX ${stats.kbps.sent.unclassified.toFixed(0)} kbps`}/><Metric label="Loss" value={`${stats.packetsLost}`}/><Metric label="RTT" value={stats.rttMs === null ? "—" : `${stats.rttMs.toFixed(0)} ms`}/><Metric label="Path" value={stats.candidateType || "—"}/>
           </section>
           {manager && <section className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">Teacher-only presentation recording</h2><p className="mt-1 text-sm text-muted">Canvas-composed teaching visual plus Teacher microphone only. Classroom audio and chat are excluded.</p></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold">{recordingStatus}</span></div>
             <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">Share the teaching application or tab—not the classroom tab or a display containing private information. Browser storage improves recovery but is not an absolute durability guarantee.</p>

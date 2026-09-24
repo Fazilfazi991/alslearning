@@ -7,12 +7,14 @@ type CleanupRow = Omit<ClosableTrack, "live_media_connections"> & {
   status: "active" | "closing" | "failed";
   cleanup_attempts: number;
   cleanup_retry_at: string | null;
+  provider_reconciliation_outcome: "confirmed_closed" | "confirmed_absent_or_expired" | "unresolved" | null;
   live_media_connections?:
     | { provider_session_id: string; status: string }
     | { provider_session_id: string; status: string }[];
 };
 
 function due(row: CleanupRow, forced: Set<string>, forceAll: boolean) {
+  if (row.provider_reconciliation_outcome === "confirmed_closed" || row.provider_reconciliation_outcome === "confirmed_absent_or_expired") return false;
   if (forceAll || forced.has(row.connection_id)) return true;
   const connection = Array.isArray(row.live_media_connections)
     ? row.live_media_connections[0]
@@ -28,7 +30,7 @@ function retryAt(attempts: number) {
 }
 
 async function reconcileRows(db: SupabaseClient, table: "live_published_tracks" | "live_track_subscriptions", rows: CleanupRow[]) {
-  if (!rows.length) return { closed: 0, failed: 0 };
+  if (!rows.length) return { closed: 0, expired: 0, failed: 0 };
   const ids = rows.map(row => row.id);
   const now = new Date().toISOString();
   const { error: closingError } = await db.from(table).update({ status: "closing", last_cleanup_error: null }).in("id", ids);
@@ -37,8 +39,28 @@ async function reconcileRows(db: SupabaseClient, table: "live_published_tracks" 
   if (result.closed.length) {
     const { error } = await db.from(table).update({
       status: "closed", closed_at: now, cleanup_retry_at: null, last_cleanup_error: null,
+      provider_reconciliation_outcome: "confirmed_closed", provider_reconciled_at: now,
+      provider_reconciliation_http_status: 200, provider_reconciliation_error_code: null,
+      provider_reconciliation_detail: "Provider close acknowledged or inspection confirmed the mid absent",
     }).in("id", result.closed);
     if (error) throw error;
+  }
+  if (result.expired.length) {
+    const expiredFailedIds = rows.filter(row => row.status === "failed" && result.expired.includes(row.id)).map(row => row.id);
+    const expiredActiveIds = result.expired.filter(id => !expiredFailedIds.includes(id));
+    const evidence = {
+      cleanup_retry_at: null, provider_reconciliation_outcome: "confirmed_absent_or_expired", provider_reconciled_at: now,
+      provider_reconciliation_http_status: 410, provider_reconciliation_error_code: "session_error",
+      provider_reconciliation_detail: "Cloudflare reports the provider session expired or closed; the session-specific mid is no longer reusable",
+    };
+    if (expiredActiveIds.length) {
+      const { error } = await db.from(table).update({ ...evidence, status: "closed", closed_at: now, last_cleanup_error: null }).in("id", expiredActiveIds);
+      if (error) throw error;
+    }
+    if (expiredFailedIds.length) {
+      const { error } = await db.from(table).update(evidence).in("id", expiredFailedIds);
+      if (error) throw error;
+    }
   }
   const failed = new Set(result.failed);
   await Promise.all(rows.filter(row => failed.has(row.id)).map(async row => {
@@ -46,10 +68,13 @@ async function reconcileRows(db: SupabaseClient, table: "live_published_tracks" 
     const { error } = await db.from(table).update({
       status: "failed", cleanup_attempts: attempts, cleanup_retry_at: retryAt(attempts),
       last_cleanup_error: "Provider close is unresolved; scheduled for reconciliation",
+      provider_reconciliation_outcome: "unresolved", provider_reconciled_at: now,
+      provider_reconciliation_http_status: null, provider_reconciliation_error_code: null,
+      provider_reconciliation_detail: "Provider close and follow-up inspection did not establish a terminal outcome",
     }).eq("id", row.id);
     if (error) throw error;
   }));
-  return { closed: result.closed.length, failed: result.failed.length };
+  return { closed: result.closed.length, expired: result.expired.length, failed: result.failed.length };
 }
 
 export async function reconcileClassTransport(
@@ -60,7 +85,7 @@ export async function reconcileClassTransport(
   const { data: candidates, error: candidateError } = await db.rpc("live_transport_cleanup_candidates", { target_session: classId });
   if (candidateError) throw candidateError;
   const forced = new Set<string>((candidates || []).map((candidate: { connection_id: string }) => candidate.connection_id));
-  const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,live_media_connections!inner(provider_session_id,status)";
+  const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,provider_reconciliation_outcome,live_media_connections!inner(provider_session_id,status)";
   const [publicationQuery, subscriptionQuery] = await Promise.all([
     db.from("live_published_tracks").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]),
     db.from("live_track_subscriptions").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]).not("provider_mid", "is", null),
@@ -86,8 +111,10 @@ export async function reconcileClassTransport(
   return {
     candidates: forced.size,
     closedPublications: publicationResult.closed,
+    expiredPublications: publicationResult.expired,
     failedPublications: publicationResult.failed,
     closedSubscriptions: subscriptionResult.closed,
+    expiredSubscriptions: subscriptionResult.expired,
     failedSubscriptions: subscriptionResult.failed,
   };
 }

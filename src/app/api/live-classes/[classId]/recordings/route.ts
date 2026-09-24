@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { assertLiveFeature } from "@/lib/live-class/config";
 import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError } from "@/lib/live-class/authorization";
 import { r2RecordingStorage } from "@/lib/live-class/recording-storage";
-import { validateMultipartCompletion, type AcknowledgedPart } from "@/lib/live-class/recording-parts";
+import { reconcileMultipartState, validateMultipartCompletion, type AcknowledgedPart } from "@/lib/live-class/recording-parts";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 
 type Body = {
@@ -15,6 +15,7 @@ type Body = {
   partNumber?: number;
   byteLength?: number;
   sha256?: string;
+  fullSha256?: string;
   etag?: string;
   durationSeconds?: number;
   seekable?: boolean;
@@ -24,7 +25,7 @@ type Body = {
 };
 type Segment = {
   id: string; recording_id: string; session_id: string; owner_id: string; segment_number: number; status: string;
-  object_key: string; upload_id: string; mime_type: string; part_size: number; total_bytes: number;
+  object_key: string; upload_id: string; mime_type: string; part_size: number; total_bytes: number; object_sha256: string | null;
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const sha256 = /^[0-9a-f]{64}$/;
@@ -32,7 +33,7 @@ const failure = (message: string, status: number) => NextResponse.json({ error: 
 
 async function ownedSegment(db: Awaited<ReturnType<typeof createClient>>, classId: string, userId: string, segmentId: string) {
   if (!uuid.test(segmentId)) throw new LiveAuthorizationError("Invalid recording segment", 400);
-  const { data } = await db.from("live_recording_segments").select("id,recording_id,session_id,owner_id,segment_number,status,object_key,upload_id,mime_type,part_size,total_bytes")
+  const { data } = await db.from("live_recording_segments").select("id,recording_id,session_id,owner_id,segment_number,status,object_key,upload_id,mime_type,part_size,total_bytes,object_sha256")
     .eq("id", segmentId).eq("session_id", classId).eq("owner_id", userId).maybeSingle();
   if (!data) throw new LiveAuthorizationError("Recording segment is unavailable", 404);
   return data as Segment;
@@ -99,7 +100,8 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         const { data } = await db.from("class_recordings").select("id,owner_id,status").eq("id", recordingId).eq("session_id", classId).eq("owner_id", auth.user.id).maybeSingle();
         if (!data || !["recording", "uploading", "interrupted", "failed"].includes(data.status)) throw new LiveAuthorizationError("Recording cannot accept another segment", 409);
       } else {
-        const { data: existing } = await db.from("class_recordings").select("id,status").eq("session_id", classId).neq("status", "aborted").limit(1).maybeSingle();
+        const { data: existing } = await db.from("class_recordings").select("id,status").eq("session_id", classId)
+          .in("status", ["recording", "uploading", "interrupted", "failed", "validating", "ready"]).limit(1).maybeSingle();
         if (existing) throw new LiveAuthorizationError("This class already has a logical recording; recover or continue its segments", 409);
         recordingId = crypto.randomUUID();
         const { error } = await db.from("class_recordings").insert({ id: recordingId, session_id: classId, owner_id: auth.user.id, status: "recording", mime_type: contentType });
@@ -128,13 +130,13 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         .select("id,status,client_validated_at").eq("id", body.recordingId).eq("session_id", classId).maybeSingle();
       if (!recording || recording.status !== "validating" || !recording.client_validated_at) return failure("Teacher validation evidence is incomplete", 409);
       const { data: segments, error: segmentError } = await db.from("live_recording_segments")
-        .select("id,status,object_key,total_bytes,client_validated_at,client_reported_duration_seconds")
+        .select("id,status,object_key,total_bytes,object_sha256,client_validated_at,client_reported_duration_seconds")
         .eq("recording_id", recording.id).order("segment_number");
       if (segmentError || !segments?.length || segments.some(segment => segment.status !== "validating" || !segment.client_validated_at || !segment.client_reported_duration_seconds)) {
         return failure("Every uploaded segment needs Teacher playback evidence before Admin review", 409);
       }
-      const verified = await Promise.all(segments.map(async segment => ({ segment, object: await r2RecordingStorage.verify(segment.object_key) })));
-      if (verified.some(value => value.object.byteLength !== value.segment.total_bytes)) return failure("Remote object size changed after upload validation", 409);
+      const verified = await Promise.all(segments.map(async segment => ({ segment, object: await r2RecordingStorage.digest(segment.object_key) })));
+      if (verified.some(value => value.object.byteLength !== value.segment.total_bytes || value.object.sha256 !== value.segment.object_sha256)) return failure("Remote object bytes changed after upload validation", 409);
       const at = new Date().toISOString();
       await Promise.all(verified.map(value => db.from("live_recording_segments").update({
         status: "ready",
@@ -224,13 +226,16 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
           });
         } catch { throw listError; }
       }
-      const byNumber = new Map(providerParts.map(part => [part.partNumber, part]));
+      const reconciled = reconcileMultipartState((known.data || []).map(part => ({
+        partNumber: part.part_number, byteLength: part.byte_length, sha256: part.sha256, etag: part.etag,
+      })), providerParts);
+      const acknowledgedAt = new Date().toISOString();
+      await Promise.all(reconciled.recovered.map(part => db.from("live_recording_parts").update({
+        etag: part.etag, acknowledged_at: acknowledgedAt,
+      }).eq("segment_id", segment.id).eq("part_number", part.partNumber).is("etag", null)));
       return NextResponse.json({
-        parts: (known.data || []).map(part => ({
-          partNumber: part.part_number, byteLength: part.byte_length, sha256: part.sha256,
-          acknowledgedEtag: part.etag, providerEtag: byNumber.get(part.part_number)?.etag || null,
-          present: Boolean(byNumber.get(part.part_number)),
-        })),
+        recoveredAcknowledgements: reconciled.recovered.length,
+        parts: reconciled.parts.map(part => ({ ...part, acknowledgedEtag: part.etag })),
       });
     }
 
@@ -269,8 +274,9 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
     }
 
     if (body.action === "validate") {
-      if (!Number.isFinite(body.durationSeconds) || body.durationSeconds! <= 0 || body.durationSeconds! > 24 * 60 * 60 || body.seekable !== true || body.hasAudio !== true || body.hasVideo !== true) return failure("Playback validation did not pass", 400);
-      const object = await r2RecordingStorage.verify(segment.object_key);
+      if (!Number.isFinite(body.durationSeconds) || body.durationSeconds! <= 0 || body.durationSeconds! > 24 * 60 * 60 || body.seekable !== true || body.hasAudio !== true || body.hasVideo !== true || !body.fullSha256 || !sha256.test(body.fullSha256)) return failure("Playback validation did not pass", 400);
+      const object = await r2RecordingStorage.digest(segment.object_key);
+      if (object.sha256 !== body.fullSha256) return failure("Remote recording bytes do not match the locally recovered capture", 409);
       const at = new Date().toISOString();
       await db.from("live_recording_segments").update({
         client_validated_at: at,
@@ -279,6 +285,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         client_reported_has_audio: true,
         client_reported_has_video: true,
         total_bytes: object.byteLength,
+        object_sha256: object.sha256,
         error_message: null,
       }).eq("id", segment.id).eq("status", "validating");
       const { data: segments } = await db.from("live_recording_segments").select("status,client_validated_at,total_bytes").eq("recording_id", segment.recording_id);

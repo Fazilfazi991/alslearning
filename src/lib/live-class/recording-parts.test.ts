@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateMultipartCompletion } from "./recording-parts";
+import { reconcileMultipartState, validateMultipartCompletion } from "./recording-parts";
 
 const size = 8 * 1024 * 1024;
 const sha = "a".repeat(64);
@@ -35,5 +35,22 @@ describe("validateMultipartCompletion", () => {
     expect(() => validateMultipartCompletion([
       { partNumber: 1, etag: '"one"', byteLength: 1, sha256: sha },
     ], [{ partNumber: 1, etag: '"different"', byteLength: 1 }], size)).toThrow("does not match");
+  });
+});
+
+describe("reconcileMultipartState", () => {
+  it("recovers an R2 ETag when PUT succeeded before local acknowledgement", () => {
+    const result = reconcileMultipartState([
+      { partNumber: 1, etag: null, byteLength: size, sha256: sha },
+    ], [{ partNumber: 1, etag: '"remote"', byteLength: size }]);
+    expect(result.recovered).toEqual([{ partNumber: 1, etag: '"remote"' }]);
+    expect(result.parts[0].present).toBe(true);
+  });
+
+  it("rejects unknown provider parts and conflicting acknowledged ETags", () => {
+    expect(() => reconcileMultipartState([], [{ partNumber: 1, etag: '"remote"', byteLength: size }])).toThrow("not signed");
+    expect(() => reconcileMultipartState([
+      { partNumber: 1, etag: '"local"', byteLength: size, sha256: sha },
+    ], [{ partNumber: 1, etag: '"remote"', byteLength: size }])).toThrow("ETag");
   });
 });
