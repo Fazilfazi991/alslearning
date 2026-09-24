@@ -33,6 +33,7 @@ type Configuration = {
   realtimeConfigured: boolean; r2Configured: boolean; turnConfigured: boolean; recordingEnabled: boolean; forceRelay: boolean;
   pocInterruptUploadPart: number | null;
   pocUploadRecoveryDelayMs: number; pocMotionOverlay: boolean; pocMaxRecordingSeconds: number | null;
+  pocHoldFinalUpload: boolean;
   missingRealtime: string[]; missingR2: string[]; missingTurn: string[];
 };
 type RecordingTelemetry = {
@@ -95,6 +96,7 @@ export function NativeClassroom({
   const [message, setMessage] = useState("");
   const [pollQuestion, setPollQuestion] = useState("");
   const [connectionId, setConnectionId] = useState<string | null>(null);
+  const [classStatus, setClassStatus] = useState(session.status);
   const [connectionState, setConnectionState] = useState<"idle" | "joining" | "connected" | "reconnecting" | "failed" | "ended">("idle");
   const [remoteTracks, setRemoteTracks] = useState<RemoteTrack[]>([]);
   const [published, setPublished] = useState<Published[]>([]);
@@ -334,12 +336,12 @@ export function NativeClassroom({
   }, [api, connectionId]);
 
   useEffect(() => {
-    if (!manager || !["live", "completed"].includes(session.status)) return;
+    if (!manager || !["live", "completed"].includes(classStatus)) return;
     const reconcile = () => void api("control", { action: "reconcile" }).catch(() => undefined);
     reconcile();
     const timer = window.setInterval(reconcile, 30_000);
     return () => window.clearInterval(timer);
-  }, [api, manager, session.status]);
+  }, [api, manager, classStatus]);
 
   useEffect(() => {
     const peers = [peerRef.current, publisherPeerRef.current].filter((peer): peer is RTCPeerConnection => Boolean(peer));
@@ -572,7 +574,22 @@ export function NativeClassroom({
   }
 
   async function lifecycle(action: "start" | "end" | "cancel") {
-    try { const result = await api<{ status: string }>("control", { action }); setNotice(`Class is now ${result.status}.`); if (action === "end") setConnectionState("ended"); }
+    try {
+      if (action === "end") recordingStopRef.current?.();
+      const result = await api<{ status: string }>("control", { action });
+      setNotice(`Class is now ${result.status}.`);
+      if (result.status === "live" || result.status === "completed" || result.status === "cancelled") setClassStatus(result.status);
+      if (action === "end") {
+        if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+        peerRef.current?.close(); publisherPeerRef.current?.close();
+        localStreamRef.current?.getTracks().forEach(track => track.stop());
+        screenStreamRef.current?.getTracks().forEach(track => track.stop());
+        remoteTracks.forEach(value => value.stream.getTracks().forEach(track => track.stop()));
+        setConnectionId(null); setPublished([]); setRemoteTracks([]);
+        setConnectionState("ended");
+      }
+    }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Class status change failed"); }
   }
 
@@ -708,7 +725,7 @@ export function NativeClassroom({
   }
 
   async function startRecording() {
-    if (!manager || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured) return;
+    if (user.role !== "teacher" || user.id !== session.faculty_id || classStatus !== "live" || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured) return;
     const mimeType = recordingMimeType();
     if (!mimeType) return setError("This browser does not expose a supported MediaRecorder container.");
     const audio = localStreamRef.current?.getAudioTracks()[0];
@@ -791,9 +808,18 @@ export function NativeClassroom({
       }
       await stopped; await chain;
       if (pipelineError) throw pipelineError;
-      for (const part of assembler.finish()) await uploadPart(begun.segmentId, part);
+      const finalParts = assembler.finish();
       await api("recordings", { action: "stop", segmentId: begun.segmentId });
       await saveRecordingRecovery({ segmentId: begun.segmentId, recordingId: begun.recordingId, classId: session.id, title: session.title, mimeType, partSize: begun.partSize, status: "uploading", updatedAt: new Date().toISOString() });
+      if (mode === "poc" && configuration.pocHoldFinalUpload && recordingTelemetryRef.current.uploadedBytes >= begun.partSize && finalParts.length) {
+        setRecordingStatus("Final part held — resume from local recovery after class end");
+        setRecoveries(current => [...current.filter(value => value.segmentId !== begun.segmentId), {
+          segmentId: begun.segmentId, recordingId: begun.recordingId, classId: session.id, title: session.title,
+          mimeType, partSize: begun.partSize, status: "uploading", updatedAt: new Date().toISOString(),
+        }]);
+        return;
+      }
+      for (const part of finalParts) await uploadPart(begun.segmentId, part);
       await api("recordings", { action: "complete", segmentId: begun.segmentId });
       await validateLocalSegment(begun.segmentId);
       const validatingRecovery: StoredRecordingRecovery = {
@@ -827,6 +853,11 @@ export function NativeClassroom({
       const parts: RecordingPart[] = [];
       for (const chunk of chunks) parts.push(...assembler.push(new Uint8Array(await chunk.bytes.arrayBuffer())));
       parts.push(...assembler.finish());
+      const capturedBytes = parts.reduce((sum, part) => sum + part.bytes.byteLength, 0);
+      const uploadedBytes = parts.filter(part => present.has(part.partNumber)).reduce((sum, part) => sum + part.bytes.byteLength, 0);
+      recordingTelemetryRef.current = { ...emptyRecordingTelemetry, capturedBytes, uploadedBytes };
+      setRecordingTelemetry({ ...recordingTelemetryRef.current });
+      setRecordedBytes(uploadedBytes);
       for (const part of parts) if (!present.has(part.partNumber)) await uploadPart(recovery.segmentId, part);
       await api("recordings", { action: "stop", segmentId: recovery.segmentId });
       await api("recordings", { action: "complete", segmentId: recovery.segmentId });
@@ -858,7 +889,7 @@ export function NativeClassroom({
       <header className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0"><p className="eyebrow">{first(session.subjects)?.name || "ALS live classroom"}</p><h1 className="mt-2 text-2xl font-bold text-balance sm:text-3xl">{session.title}</h1>
           <p className="mt-2 text-sm text-muted">{first(session.profiles)?.full_name || "Assigned Teacher"} · {formatAcademicDate(session.starts_at, timeZone)} · {first(session.batches)?.name || "Eligible cohort"}</p></div>
-        <div className="flex flex-wrap gap-2"><span className="inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold ring-1 ring-line"><Radio size={15} className={session.status === "live" ? "text-brand" : "text-muted"}/>{session.status}</span>{manager && session.status === "scheduled" && <Button onClick={() => void lifecycle("start")}>Start class</Button>}{manager && session.status === "live" && <Button onClick={() => void lifecycle("end")} className="bg-red-700!">End class</Button>}</div>
+        <div className="flex flex-wrap gap-2"><span className="inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold ring-1 ring-line"><Radio size={15} className={classStatus === "live" ? "text-brand" : "text-muted"}/>{classStatus}</span>{manager && classStatus === "scheduled" && <Button onClick={() => void lifecycle("start")}>Start class</Button>}{manager && classStatus === "live" && <Button onClick={() => void lifecycle("end")} className="bg-red-700!">End class</Button>}</div>
       </header>
       {(!entryEnabled || !configuration.realtimeConfigured) && <p className="mb-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-950" role="status">Live entry is disabled. {!entryEnabled ? `${mode === "poc" ? "ALS_LIVE_POC_ENABLED" : "ALS_LIVE_CLASS_ENABLED"} is not enabled.` : `Missing ${configuration.missingRealtime.join(", ")}.`} The academic portal remains available; no successful media state is simulated.</p>}
       {!configuration.turnConfigured && <p className="mb-4 rounded-xl border border-line bg-white p-3 text-sm text-muted">TURN fallback is not configured. Missing {configuration.missingTurn.join(", ")}; SFU app credentials are not reused as TURN credentials.</p>}
@@ -873,7 +904,7 @@ export function NativeClassroom({
             <button onClick={() => void document.getElementById("als-live-stage")?.requestFullscreen?.()} className="absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-xl bg-black/55 text-white" aria-label="View teaching stage fullscreen"><Maximize size={19}/></button>
           </div>
           <div className="card flex flex-wrap items-center gap-2 p-3">
-            {!connectionId ? <Button disabled={!entryEnabled || !configuration.realtimeConfigured || session.status !== "live" || connectionState === "joining"} onClick={() => void join()}>{connectionState === "joining" ? <RefreshCw size={17}/> : <Radio size={17}/>}Join classroom</Button> : <span className="inline-flex min-h-11 items-center rounded-lg bg-green-50 px-4 text-sm font-bold text-green-800">{connectionState}</span>}
+            {!connectionId ? <Button disabled={!entryEnabled || !configuration.realtimeConfigured || classStatus !== "live" || connectionState === "joining"} onClick={() => void join()}>{connectionState === "joining" ? <RefreshCw size={17}/> : <Radio size={17}/>}Join classroom</Button> : <span className="inline-flex min-h-11 items-center rounded-lg bg-green-50 px-4 text-sm font-bold text-green-800">{connectionState}</span>}
             {manager && <Button variant="secondary" onClick={() => void preflight()}>{preflightReady ? <Mic size={17}/> : <Video size={17}/>}Device preflight</Button>}
             {manager && <label className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm font-semibold"><input type="checkbox" checked={cameraRequested} onChange={event => setCameraRequested(event.target.checked)}/>Camera preview</label>}
             {manager && <label className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm font-semibold"><span className="sr-only">Media profile</span><select value={mediaProfile} onChange={event => setMediaProfile(event.target.value as "lecture" | "demonstration")} className="bg-transparent"><option value="lecture">Lecture / slides</option><option value="demonstration">Demonstration / motion</option></select></label>}
@@ -887,10 +918,10 @@ export function NativeClassroom({
           <section className="card grid gap-3 p-4 sm:grid-cols-3 xl:grid-cols-7" aria-label="Connection measurements">
             <Metric label="Microphone" value={`RX ${stats.kbps.received.microphone.toFixed(0)} · TX ${stats.kbps.sent.microphone.toFixed(0)} kbps`}/><Metric label="Camera" value={`RX ${stats.kbps.received.camera.toFixed(0)} · TX ${stats.kbps.sent.camera.toFixed(0)} kbps`}/><Metric label="Screen" value={`RX ${stats.kbps.received.screen.toFixed(0)} · TX ${stats.kbps.sent.screen.toFixed(0)} kbps`}/><Metric label="Unclassified" value={`RX ${stats.kbps.received.unclassified.toFixed(0)} · TX ${stats.kbps.sent.unclassified.toFixed(0)} kbps`}/><Metric label="Loss" value={`${stats.packetsLost}`}/><Metric label="RTT" value={stats.rttMs === null ? "—" : `${stats.rttMs.toFixed(0)} ms`}/><Metric label="Path" value={stats.candidateType || "—"}/>
           </section>
-          {manager && <section className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">Teacher-only presentation recording</h2><p className="mt-1 text-sm text-muted">Canvas-composed teaching visual plus Teacher microphone only. Classroom audio and chat are excluded.</p></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold">{recordingStatus}</span></div>
+          {user.role === "teacher" && user.id === session.faculty_id && <section className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">Teacher-only presentation recording</h2><p className="mt-1 text-sm text-muted">Canvas-composed teaching visual plus Teacher microphone only. Classroom audio and chat are excluded.</p></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold">{recordingStatus}</span></div>
             <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">Share the teaching application or tab—not the classroom tab or a display containing private information. Browser storage improves recovery but is not an absolute durability guarantee.</p>
             <canvas ref={canvasRef} className="hidden"/>
-            <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button><span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
+            <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || classStatus !== "live" || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button><span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
             {mode === "poc" && <p className="mt-2 text-xs tabular-nums text-muted" aria-label="POC recording telemetry">Captured {(recordingTelemetry.capturedBytes / 1048576).toFixed(1)} MiB · backlog {((recordingTelemetry.capturedBytes - recordingTelemetry.uploadedBytes) / 1048576).toFixed(1)} MiB · queue {recordingTelemetry.queuedChunks} (max {recordingTelemetry.maxQueuedChunks}) · retries {recordingTelemetry.retryCount} · ack {recordingTelemetry.lastAcknowledgementMs === null ? "—" : `${Math.round(recordingTelemetry.lastAcknowledgementMs)} ms`} (max {Math.round(recordingTelemetry.maxAcknowledgementMs)} ms)</p>}
             {(!configuration.recordingEnabled || !configuration.r2Configured) && <p className="mt-3 text-sm text-muted">Recording unavailable: {configuration.recordingEnabled ? `missing ${configuration.missingR2.join(", ")}` : "ALS_LIVE_RECORDING_ENABLED is disabled"}.</p>}
             {!!recoveries.length && <div className="mt-4 space-y-2"><div><h3 className="text-sm font-bold">Recoverable local segments</h3><p className="mt-1 text-xs text-muted">The local recovery copy is retained until the remote recording is reviewed and published.</p></div>{recoveries.map(recovery => <div key={recovery.segmentId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-3 text-sm"><span>{recovery.title} · {recovery.status}</span><span className="flex gap-2">{recovery.status !== "validating" && <button className="min-h-11 px-3 font-bold text-brand" onClick={() => void resumeRecovery(recovery)}>Resume upload</button>}<button className="min-h-11 px-3 font-bold" onClick={() => void downloadRecoveredSegment(recovery.segmentId)}>Download</button></span></div>)}</div>}

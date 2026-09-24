@@ -8,6 +8,7 @@ export type LiveClassSession = {
   batch_id: string | null;
   subject_id: string | null;
   status: "draft" | "scheduled" | "live" | "completed" | "cancelled";
+  ended_at: string | null;
   starts_at: string | null;
   ends_at: string | null;
   join_opens_at: string | null;
@@ -51,7 +52,7 @@ export async function authorizeLiveClass(
   const db = database as DbClient;
   const [profileResult, sessionResult] = await Promise.all([
     db.from("profiles").select("id,role,is_active").eq("id", userId).single(),
-    db.from("live_sessions").select("id,faculty_id,program_id,batch_id,subject_id,status,starts_at,ends_at,join_opens_at,join_closes_at,recording_enabled,provider,max_receivers").eq("id", classId).single(),
+    db.from("live_sessions").select("id,faculty_id,program_id,batch_id,subject_id,status,ended_at,starts_at,ends_at,join_opens_at,join_closes_at,recording_enabled,provider,max_receivers").eq("id", classId).single(),
   ]);
   const profile = profileResult.data as { id: string; role: AppRole; is_active: boolean } | null;
   const session = sessionResult.data as LiveClassSession | null;
