@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ClipboardCheck, FileQuestion, Grid2X2, Home, LibraryBig, UserRound, Users, Video, X } from "lucide-react";
+import { BookOpen, ClipboardCheck, FileQuestion, Grid2X2, Home, LibraryBig, Radio, UserRound, Users, Video, X } from "lucide-react";
 import { ALSLogo } from "@/components/shared/als-logo";
 import { LogoutButton } from "@/components/shared/logout-button";
 
@@ -14,6 +14,7 @@ const items = [
   { href: "/admin/academic", label: "Programs & Syllabus", Icon: LibraryBig },
   { href: "/admin/questions", label: "Question Bank", Icon: FileQuestion },
   { href: "/admin/tests", label: "Tests", Icon: ClipboardCheck },
+  { href: "/admin/live-classes", label: "Live Classes", Icon: Radio },
   { href: "/admin/recorded-classes", label: "Recorded Classes", Icon: Video },
   { href: "/admin/courses", label: "Videos & Materials", Icon: BookOpen },
 ] as const;
