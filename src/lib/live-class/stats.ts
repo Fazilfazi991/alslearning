@@ -50,8 +50,9 @@ export class PeerStatsSampler {
       }
       if (value.type === "candidate-pair" && value.state === "succeeded" && (value.nominated || value.selected)) {
         if (typeof value.currentRoundTripTime === "number") rttMs = value.currentRoundTripTime * 1000;
+        const local = report.get(value.localCandidateId);
         const remote = report.get(value.remoteCandidateId);
-        candidateType = remote?.candidateType || null;
+        candidateType = local?.candidateType || remote?.candidateType || null;
       }
     });
     return { sampledAt: Date.now(), audioBytes, videoBytes, screenBytes, audioKbps, videoKbps, screenKbps, packetsLost, jitterMs, rttMs, candidateType, width, height, framesPerSecond };

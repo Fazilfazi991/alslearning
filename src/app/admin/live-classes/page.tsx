@@ -10,7 +10,7 @@ export default async function Page() {
     db.from("subjects").select("id,name").eq("status", "active").order("name"),
     db.from("batches").select("id,name,program_id").in("status", ["upcoming", "active"]).order("name"),
     db.from("profiles").select("id,full_name,email").eq("role", "teacher").eq("is_active", true).order("full_name"),
-    db.from("live_sessions").select("id,title,status,starts_at,ends_at,recording_enabled,max_receivers,programs(name),subjects(name),batches(name),profiles!live_sessions_faculty_id_fkey(full_name),class_recordings(id,status,total_bytes,duration_seconds,client_validated_at,verified_at,published_at,error_message)").eq("provider", "cloudflare").order("starts_at", { ascending: false }).limit(100),
+    db.from("live_sessions").select("id,title,status,provider,starts_at,ends_at,recording_enabled,max_receivers,programs(name),subjects(name),batches(name),profiles!live_sessions_faculty_id_fkey(full_name),class_recordings(id,status,total_bytes,duration_seconds,client_validated_at,verified_at,published_at,error_message)").in("provider", ["cloudflare", "cloudflare-poc"]).order("starts_at", { ascending: false }).limit(100),
     db.from("live_usage_summaries").select("audio_bytes,video_bytes,screen_bytes").limit(10000),
     db.from("live_attendance_intervals").select("session_id,user_id,started_at,ended_at").limit(10000),
   ]);

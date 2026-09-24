@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSameOriginRequest } from "@/lib/request-origin";
 import { createClient } from "@/lib/supabase/server";
 import { assertLiveFeature } from "@/lib/live-class/config";
 import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError } from "@/lib/live-class/authorization";
@@ -16,11 +17,14 @@ type Body = {
   startsAt?: string;
   endsAt?: string;
 };
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// PostgreSQL's uuid type accepts the full canonical 8-4-4-4-12 form. Do not
+// reject database-issued or synthetic UUIDs solely because their version or
+// variant bits are not encoded like an RFC 4122 random UUID.
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const failure = (message: string, status: number) => NextResponse.json({ error: message }, { status });
 
 export async function POST(request: Request, context: RouteContext<"/api/live-classes/[classId]/control">) {
-  if (request.headers.get("origin") && request.headers.get("origin") !== new URL(request.url).origin) return failure("Invalid origin", 403);
+  if (!isSameOriginRequest(request)) return failure("Invalid origin", 403);
   const { classId } = await context.params;
   const db = await createClient();
   const { data: auth } = await db.auth.getUser();
@@ -82,10 +86,13 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
     }
 
     if (!body.targetUserId || !uuid.test(body.targetUserId)) return failure("A valid participant is required", 400);
-    const { data: participant } = await db.from("live_participants").select("user_id,removed_at,profiles!inner(role,is_active)")
-      .eq("session_id", classId).eq("user_id", body.targetUserId).maybeSingle();
-    const participantProfile = participant && (Array.isArray(participant.profiles) ? participant.profiles[0] : participant.profiles);
-    if (!participant || participant.removed_at || participantProfile?.role !== "student" || !participantProfile.is_active) throw new LiveAuthorizationError("Student participant is unavailable", 404);
+    // The roster function is manager-scoped and security-definer. Using it here
+    // avoids depending on profile visibility policies while still excluding
+    // removed, inactive, and non-student accounts.
+    const { data: roster, error: rosterError } = await db.rpc("live_participant_roster", { target_session: classId });
+    if (rosterError) throw rosterError;
+    const participant = (roster || []).find((value: { user_id: string }) => value.user_id === body.targetUserId);
+    if (!participant) throw new LiveAuthorizationError("Student participant is unavailable", 404);
 
     if (body.action === "grant") {
       if (!body.grant || typeof body.granted !== "boolean") return failure("Invalid publishing grant", 400);

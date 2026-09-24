@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSameOriginRequest } from "@/lib/request-origin";
 import { createClient } from "@/lib/supabase/server";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 
@@ -6,11 +7,11 @@ type Body = {
   title?: string; programId?: string; subjectId?: string; batchId?: string; teacherId?: string;
   startsAt?: string; endsAt?: string; recordingEnabled?: boolean; maxReceivers?: number | null;
 };
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const error = (message: string, status: number) => NextResponse.json({ error: message }, { status });
 
 export async function POST(request: Request) {
-  if (request.headers.get("origin") && request.headers.get("origin") !== new URL(request.url).origin) return error("Invalid origin", 403);
+  if (!isSameOriginRequest(request)) return error("Invalid origin", 403);
   const db = await createClient();
   const { data: auth } = await db.auth.getUser();
   if (!auth.user) return error("Unauthorized", 401);

@@ -30,7 +30,7 @@ type Session = {
   subjects: { name: string } | { name: string }[] | null; profiles: { full_name: string } | { full_name: string }[] | null;
 };
 type Configuration = {
-  realtimeConfigured: boolean; r2Configured: boolean; turnConfigured: boolean; recordingEnabled: boolean;
+  realtimeConfigured: boolean; r2Configured: boolean; turnConfigured: boolean; recordingEnabled: boolean; forceRelay: boolean;
   missingRealtime: string[]; missingR2: string[]; missingTurn: string[];
 };
 type RecordingRow = { id: string; status: string; total_bytes: number; duration_seconds: number | null; published_at: string | null; error_message: string | null };
@@ -382,7 +382,11 @@ export function NativeClassroom({
         midMapRef.current.clear(); subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
-      const peer = new RTCPeerConnection({ iceServers: created.iceServers, bundlePolicy: "max-bundle" });
+      const peer = new RTCPeerConnection({
+        iceServers: created.iceServers,
+        bundlePolicy: "max-bundle",
+        iceTransportPolicy: mode === "poc" && configuration.forceRelay ? "relay" : "all",
+      });
       peer.ontrack = event => {
         const identity = midMapRef.current.get(event.transceiver.mid || "");
         if (!identity) return;
@@ -565,8 +569,27 @@ export function NativeClassroom({
     try {
       const video = document.createElement("video"); video.preload = "metadata"; video.src = url;
       await new Promise<void>((resolve, reject) => { video.onloadedmetadata = () => resolve(); video.onerror = () => reject(new Error("Recorded media could not be decoded")); });
-      if (!Number.isFinite(video.duration) || video.duration <= 0 || !video.videoWidth) throw new Error("Recorded media metadata is incomplete");
-      await api("recordings", { action: "validate", segmentId, durationSeconds: video.duration, seekable: video.seekable.length > 0, hasAudio: true, hasVideo: true });
+      // MediaRecorder WebM commonly exposes Infinity until the browser probes
+      // the final cluster. A far seek forces Chromium to calculate the real
+      // duration without rewriting the captured media.
+      if (!Number.isFinite(video.duration)) {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = window.setTimeout(() => reject(new Error("Recorded media duration probing timed out")), 5_000);
+          video.onseeked = () => { window.clearTimeout(timeout); resolve(); };
+          video.onerror = () => { window.clearTimeout(timeout); reject(new Error("Recorded media could not be seeked")); };
+          video.currentTime = 24 * 60 * 60;
+        });
+      }
+      const duration = video.duration;
+      if (!Number.isFinite(duration) || duration <= 0 || !video.videoWidth) throw new Error("Recorded media metadata is incomplete");
+      const seekTarget = Math.min(Math.max(duration / 2, 0.01), Math.max(duration - 0.01, 0.01));
+      await new Promise<void>((resolve, reject) => {
+        const timeout = window.setTimeout(() => reject(new Error("Recorded media seek validation timed out")), 5_000);
+        video.onseeked = () => { window.clearTimeout(timeout); resolve(); };
+        video.onerror = () => { window.clearTimeout(timeout); reject(new Error("Recorded media seek validation failed")); };
+        video.currentTime = seekTarget;
+      });
+      await api("recordings", { action: "validate", segmentId, durationSeconds: duration, seekable: video.seekable.length > 0, hasAudio: true, hasVideo: true });
     } finally { URL.revokeObjectURL(url); }
   }
 

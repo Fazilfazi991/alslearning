@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { assertLiveFeature } from "@/lib/live-class/config";
 import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError, mayPublish } from "@/lib/live-class/authorization";
 import { cloudflareRealtime, CloudflareRealtimeError, getIceServers, type PublishedTrackKind, type SdpDescription } from "@/lib/live-class/provider";
+import { isSameOriginRequest } from "@/lib/request-origin";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { closeProviderTracks } from "@/lib/live-class/transport-cleanup";
 
@@ -25,14 +26,13 @@ type Track = {
   live_media_connections?: { provider_session_id: string } | { provider_session_id: string }[];
 };
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const validDescription = (value: unknown): value is SdpDescription => {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<SdpDescription>;
   return (candidate.type === "offer" || candidate.type === "answer") && typeof candidate.sdp === "string" && candidate.sdp.length > 20 && candidate.sdp.length < 2_000_000;
 };
 const jsonError = (message: string, status: number, headers?: HeadersInit) => NextResponse.json({ error: message }, { status, headers });
-const sameOrigin = (request: Request) => !request.headers.get("origin") || request.headers.get("origin") === new URL(request.url).origin;
 const providerSession = (track: Track) => {
   const value = Array.isArray(track.live_media_connections) ? track.live_media_connections[0] : track.live_media_connections;
   return value?.provider_session_id;
@@ -58,6 +58,29 @@ async function forceCloseTracks(db: Awaited<ReturnType<typeof createClient>>, tr
   if (result.failed.length) throw new CloudflareRealtimeError("Cloudflare could not close every requested publication", 502, true);
 }
 
+async function closeSubscriptions(
+  db: Awaited<ReturnType<typeof createClient>>,
+  connection: Pick<Connection, "id" | "provider_session_id">,
+) {
+  const { data } = await db.from("live_track_subscriptions").select("id,provider_mid")
+    .eq("connection_id", connection.id).eq("status", "active");
+  if (!data?.length) return;
+  const ids = data.map(value => value.id);
+  const mids = data.flatMap(value => value.provider_mid ? [value.provider_mid] : []);
+  try {
+    if (mids.length) await cloudflareRealtime.closeTracks(connection.provider_session_id, mids);
+    await db.from("live_track_subscriptions").update({
+      status: "closed", closed_at: new Date().toISOString(), cleanup_retry_at: null, last_cleanup_error: null,
+    }).in("id", ids);
+  } catch (error) {
+    await db.from("live_track_subscriptions").update({
+      status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
+      last_cleanup_error: error instanceof Error ? error.message.slice(0, 500) : "Provider close is unresolved",
+    }).in("id", ids);
+    throw error;
+  }
+}
+
 export async function GET(request: Request, context: RouteContext<"/api/live-classes/[classId]/media">) {
   const { classId } = await context.params;
   const db = await createClient();
@@ -80,7 +103,7 @@ export async function GET(request: Request, context: RouteContext<"/api/live-cla
 }
 
 export async function POST(request: Request, context: RouteContext<"/api/live-classes/[classId]/media">) {
-  if (!sameOrigin(request)) return jsonError("Invalid origin", 403);
+  if (!isSameOriginRequest(request)) return jsonError("Invalid origin", 403);
   const { classId } = await context.params;
   const db = await createClient();
   const { data: auth } = await db.auth.getUser();
@@ -111,6 +134,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
           .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
           .eq("connection_id", prior.id).eq("status", "active");
         await forceCloseTracks(db, (oldTracks || []) as unknown as Track[]).catch(() => undefined);
+        await closeSubscriptions(db, prior as Connection).catch(() => undefined);
         await db.from("live_media_connections").update({ status: "stale", closed_at: new Date().toISOString() }).eq("id", prior.id);
         await db.from("live_attendance_intervals").update({ ended_at: new Date().toISOString(), ended_reason: "replaced" }).eq("connection_id", prior.id).is("ended_at", null);
       }
@@ -240,6 +264,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
         .eq("connection_id", connection.id).eq("status", "active");
       await forceCloseTracks(db, (data || []) as unknown as Track[]).catch(() => undefined);
+      await closeSubscriptions(db, connection).catch(() => undefined);
       const at = new Date().toISOString();
       await Promise.all([
         db.from("live_media_connections").update({ status: "closed", closed_at: at }).eq("id", connection.id),

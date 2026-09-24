@@ -2,16 +2,24 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { closeProviderTracks, type ClosableTrack } from "./transport-cleanup";
 
-type CleanupRow = ClosableTrack & {
+type CleanupRow = Omit<ClosableTrack, "live_media_connections"> & {
   connection_id: string;
   status: "active" | "closing" | "failed";
   cleanup_attempts: number;
   cleanup_retry_at: string | null;
+  live_media_connections?:
+    | { provider_session_id: string; status: string }
+    | { provider_session_id: string; status: string }[];
 };
 
 function due(row: CleanupRow, forced: Set<string>, forceAll: boolean) {
   if (forceAll || forced.has(row.connection_id)) return true;
-  return row.status !== "active" && (!row.cleanup_retry_at || Date.parse(row.cleanup_retry_at) <= Date.now());
+  const connection = Array.isArray(row.live_media_connections)
+    ? row.live_media_connections[0]
+    : row.live_media_connections;
+  if (connection && !["active", "reconnecting"].includes(connection.status) && row.status === "active") return true;
+  if (row.status === "closing") return true;
+  return row.status === "failed" && Boolean(row.cleanup_retry_at) && Date.parse(row.cleanup_retry_at!) <= Date.now();
 }
 
 function retryAt(attempts: number) {
@@ -52,7 +60,7 @@ export async function reconcileClassTransport(
   const { data: candidates, error: candidateError } = await db.rpc("live_transport_cleanup_candidates", { target_session: classId });
   if (candidateError) throw candidateError;
   const forced = new Set<string>((candidates || []).map((candidate: { connection_id: string }) => candidate.connection_id));
-  const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,live_media_connections!inner(provider_session_id)";
+  const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,live_media_connections!inner(provider_session_id,status)";
   const [publicationQuery, subscriptionQuery] = await Promise.all([
     db.from("live_published_tracks").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]),
     db.from("live_track_subscriptions").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]).not("provider_mid", "is", null),

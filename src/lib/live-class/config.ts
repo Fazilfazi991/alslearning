@@ -9,6 +9,7 @@ export type LiveClassConfiguration = {
   realtimeConfigured: boolean;
   r2Configured: boolean;
   turnConfigured: boolean;
+  forceRelay: boolean;
   missingRealtime: string[];
   missingR2: string[];
   missingTurn: string[];
@@ -25,6 +26,7 @@ export function liveClassConfiguration(): LiveClassConfiguration {
     realtimeConfigured: missingRealtime.length === 0,
     r2Configured: missingR2.length === 0,
     turnConfigured: missingTurn.length === 0,
+    forceRelay: enabled("ALS_LIVE_POC_FORCE_RELAY"),
     missingRealtime,
     missingR2,
     missingTurn,
