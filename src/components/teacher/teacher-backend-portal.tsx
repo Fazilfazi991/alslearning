@@ -4,6 +4,8 @@ import { BookOpen, ClipboardCheck, FileQuestion, FileText, Users } from "lucide-
 import Link from "next/link";
 import { TeacherShell } from "./teacher-shell";
 import { getTeacherData, type TeacherStudent } from "@/lib/teacher-data";
+import { liveClassConfiguration } from "@/lib/live-class/config";
+import { formatAcademicDate } from "@/lib/live-class/date";
 
 const titles: Record<string, string> = {
   dashboard: "Teacher Dashboard", courses: "My Courses", students: "Students",
@@ -68,7 +70,7 @@ export async function TeacherBackendPortal({ section = "dashboard", page = 0, se
         <Link aria-disabled={(page + 1) * 25 >= data.studentCount} className={(page + 1) * 25 >= data.studentCount ? "pointer-events-none opacity-50" : "font-bold text-brand"} href={`/teacher/students?page=${page + 1}${search ? `&search=${encodeURIComponent(search)}` : ""}`}>Next</Link>
       </nav>
     </>}
-    {section === "live-classes" && <HonestState title="Live Classes not configured yet" body="Scheduling and classroom rooms are not operational in this workspace." />}
+    {section === "live-classes" && <TeacherLiveClasses sessions={data.sessions} configuration={liveClassConfiguration()} timeZone={process.env.ALS_ACADEMIC_TIME_ZONE || "Asia/Dubai"}/>}
     {section === "profile" && <section className="card max-w-2xl p-5"><h2 className="text-lg font-bold">{data.user.full_name || "ALS Teacher"}</h2>
       <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
         <div><dt className="font-bold">Email</dt><dd className="mt-1 text-muted">{data.user.email}</dd></div>
@@ -77,6 +79,17 @@ export async function TeacherBackendPortal({ section = "dashboard", page = 0, se
         <div><dt className="font-bold">Assigned subjects</dt><dd className="mt-1 text-muted">{subjects.map(s => s.name).join(", ") || "None"}</dd></div>
       </dl></section>}
   </TeacherShell>;
+}
+
+function TeacherLiveClasses({ sessions, configuration, timeZone }: { sessions: NonNullable<Awaited<ReturnType<typeof getTeacherData>>>["sessions"]; configuration: ReturnType<typeof liveClassConfiguration>; timeZone: string }) {
+  return <div><div className="mb-5 rounded-xl border border-line bg-white p-4 text-sm"><b>Classroom readiness</b><p className="mt-1 text-muted">Normal entry {configuration.classroomEnabled ? "enabled" : "disabled"} · Realtime {configuration.realtimeConfigured ? "configured" : `missing ${configuration.missingRealtime.join(", ")}`} · Recording {configuration.recordingEnabled && configuration.r2Configured ? "configured" : "not enabled"}</p></div>
+    {sessions.length ? <div className="grid gap-4 lg:grid-cols-2">{sessions.map(session => {
+      const subject = Array.isArray(session.subjects) ? session.subjects[0] : session.subjects;
+      const batch = Array.isArray(session.batches) ? session.batches[0] : session.batches;
+      const recordings = session.class_recordings || [];
+      return <article key={session.id} className="card flex min-w-0 flex-col p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wide text-brand">{subject?.name || "Live learning"}</p><h2 className="mt-2 text-lg font-bold">{session.title}</h2></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase">{session.status}</span></div><p className="mt-3 text-sm text-muted">{batch?.name || "Assigned cohort"} · {formatAcademicDate(session.starts_at, timeZone)}</p><p className="mt-2 text-xs text-muted">{recordings.length} recording record(s) · {session.recording_enabled ? "capture allowed" : "capture disabled"}</p><div className="mt-auto pt-5"><Link href={`/teacher/live-classes/${session.id}`} className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-bold text-white">Open classroom</Link></div></article>;
+    })}</div> : <HonestState title="No assigned live classes" body="An ALS administrator can schedule a class against your authenticated Teacher account and current academic assignment."/>}
+  </div>;
 }
 
 function Metric({ icon: Icon, value, label, href }: { icon: typeof BookOpen; value: number; label: string; href: string }) {

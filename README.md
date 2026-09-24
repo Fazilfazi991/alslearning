@@ -11,13 +11,13 @@ A premium, responsive laboratory-science learning platform built with Next.js, R
 - Public academy homepage and demo sign-in
 - Student dashboard and course catalogue
 - Clinical Biochemistry course overview and learning player
-- Live classes and simulated classroom interactions
+- Supabase-authorized live classes with a feature-gated Cloudflare Realtime SFU classroom and private R2 recording playback
 - Exams, question navigation, review, and results
 - Learning progress and topic-performance reporting
 - Certificates, notifications, and help centre
 - Responsive desktop, tablet, and mobile navigation
 
-All current content and interactions use typed local mock data. Backend integration is intentionally deferred.
+Academic, authentication, classroom, and recording state use Supabase. Native live media and R2 recording remain disabled by default until the staged acceptance gates in `docs/LIVE-CLASS-IMPLEMENTATION-AND-ACCEPTANCE.md` pass.
 
 ## Run locally
 
@@ -32,6 +32,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
 pnpm lint
+pnpm typecheck
+pnpm test
 pnpm build
 ```
 

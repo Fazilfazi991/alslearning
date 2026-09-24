@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, CircleHelp, ClipboardCheck, FileText, Home, Landmark, Menu, UserCircle, Users, X } from "lucide-react";
+import { BookOpen, CircleHelp, ClipboardCheck, FileText, Home, Landmark, Menu, Radio, UserCircle, Users, X } from "lucide-react";
 import { ALSLogo } from "@/components/shared/als-logo";
 import { LogoutButton } from "@/components/shared/logout-button";
 
@@ -10,6 +10,7 @@ const sections = [
   { href: "/teacher", label: "Dashboard", Icon: Home },
   { href: "/teacher/courses", label: "My Courses", Icon: BookOpen },
   { href: "/teacher/students", label: "Students", Icon: Users },
+  { href: "/teacher/live-classes", label: "Live Classes", Icon: Radio },
   { href: "/teacher/question-bank", label: "Question Bank", Icon: Landmark },
   { href: "/teacher/assessments", label: "Assessments", Icon: ClipboardCheck },
   { href: "/teacher/content", label: "Study Materials", Icon: FileText },

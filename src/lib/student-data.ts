@@ -24,10 +24,10 @@ export async function getStudentPortalData() {
       db
         .from("live_sessions")
         .select(
-          "id,title,starts_at,ends_at,status,provider,provider_room_id,program_id,batch_id,subjects(name),topics(name),profiles!live_sessions_faculty_id_fkey(full_name)",
+          "id,title,starts_at,ends_at,join_opens_at,join_closes_at,status,provider,provider_room_id,program_id,batch_id,subjects(name),topics(name),profiles!live_sessions_faculty_id_fkey(full_name),class_recordings(id,status,published_at,duration_seconds)",
         )
-        .in("status", ["scheduled", "live"])
-        .order("starts_at"),
+        .in("status", ["scheduled", "live", "completed"])
+        .order("starts_at", { ascending: false }),
       db.rpc("core_student_test_catalog"),
       db
         .from("video_progress")
@@ -44,11 +44,16 @@ export async function getStudentPortalData() {
     attempts,
   ].find((x) => x.error)?.error;
   if (error) throw new Error(error.message);
+  const eligibleEnrollments = (enrollments.data || []).filter(e=>e.programs && e.status==="active" && (!e.batch_id || e.batches) && (!e.access_starts_at || new Date(e.access_starts_at)<=new Date()) && (!e.access_expires_at || new Date(e.access_expires_at)>new Date()));
   return {
     user,
-    enrollments: (enrollments.data || []).filter(e=>e.programs && e.status==="active" && (!e.batch_id || e.batches) && (!e.access_starts_at || new Date(e.access_starts_at)<=new Date()) && (!e.access_expires_at || new Date(e.access_expires_at)>new Date())),
+    enrollments: eligibleEnrollments,
     content: content.data || [],
-    sessions: sessions.data || [],
+    sessions: (sessions.data || []).filter(session => eligibleEnrollments.some(enrollment =>
+      (!session.program_id || session.program_id === enrollment.program_id) && (!session.batch_id || session.batch_id === enrollment.batch_id))).map(session => ({
+        ...session,
+        join_available: (!session.join_opens_at || Date.parse(session.join_opens_at) <= Date.now()) && (!session.join_closes_at || Date.parse(session.join_closes_at) > Date.now()),
+      })),
     tests: (tests.data || []) as StudentTestSummary[],
     progress: progress.data || [],
     attempts: (attempts.data || []) as {id:string;test_id:string;started_at:string;submitted_at:string|null;score:number|null;status:string}[],
