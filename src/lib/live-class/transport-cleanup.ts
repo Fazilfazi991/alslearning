@@ -4,18 +4,22 @@ import { cloudflareRealtime, CloudflareRealtimeError } from "./provider";
 export type ClosableTrack = {
   id: string;
   provider_mid: string;
-  live_media_connections?: { provider_session_id: string } | { provider_session_id: string }[];
+  live_media_connections?:
+    | { provider_session_id: string | null; publisher_provider_session_id?: string | null }
+    | { provider_session_id: string | null; publisher_provider_session_id?: string | null }[];
 };
 
-function providerSession(track: ClosableTrack) {
+function providerSession(track: ClosableTrack, role: "publisher" | "subscriber") {
   const connection = Array.isArray(track.live_media_connections) ? track.live_media_connections[0] : track.live_media_connections;
-  return connection?.provider_session_id;
+  return role === "publisher"
+    ? connection?.publisher_provider_session_id || connection?.provider_session_id
+    : connection?.provider_session_id;
 }
 
-export async function closeProviderTracks(tracks: ClosableTrack[]) {
+export async function closeProviderTracks(tracks: ClosableTrack[], role: "publisher" | "subscriber" = "publisher") {
   const grouped = new Map<string, { mids: string[]; ids: string[] }>();
   for (const track of tracks) {
-    const sessionId = providerSession(track);
+    const sessionId = providerSession(track, role);
     if (!sessionId) continue;
     const group = grouped.get(sessionId) || { mids: [], ids: [] };
     group.mids.push(track.provider_mid);
@@ -26,7 +30,7 @@ export async function closeProviderTracks(tracks: ClosableTrack[]) {
   const expired: string[] = [];
   const failed: string[] = [];
   for (const track of tracks) {
-    if (!providerSession(track) || !track.provider_mid) failed.push(track.id);
+    if (!providerSession(track, role) || !track.provider_mid) failed.push(track.id);
   }
   for (const [sessionId, group] of grouped) {
     try {

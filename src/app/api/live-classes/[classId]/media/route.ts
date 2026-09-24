@@ -21,11 +21,16 @@ type Body = {
     packetsLost?: number; jitterMs?: number | null; rttMs?: number | null; candidateType?: string | null; reconnectCount?: number;
   };
 };
-type Connection = { id: string; user_id: string; session_id: string; provider_session_id: string; status: string };
+type Connection = {
+  id: string; user_id: string; session_id: string; provider_session_id: string | null;
+  publisher_provider_session_id: string | null; status: string;
+};
 type Track = {
   id: string; session_id: string; owner_id: string; connection_id: string; kind: PublishedTrackKind;
   provider_track_name: string; provider_mid: string; status: string;
-  live_media_connections?: { provider_session_id: string } | { provider_session_id: string }[];
+  live_media_connections?:
+    | { provider_session_id: string | null; publisher_provider_session_id?: string | null }
+    | { provider_session_id: string | null; publisher_provider_session_id?: string | null }[];
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -37,12 +42,12 @@ const validDescription = (value: unknown): value is SdpDescription => {
 const jsonError = (message: string, status: number, headers?: HeadersInit) => NextResponse.json({ error: message }, { status, headers });
 const providerSession = (track: Track) => {
   const value = Array.isArray(track.live_media_connections) ? track.live_media_connections[0] : track.live_media_connections;
-  return value?.provider_session_id;
+  return value?.publisher_provider_session_id || value?.provider_session_id;
 };
 
 async function ownedConnection(db: Awaited<ReturnType<typeof createClient>>, classId: string, userId: string, connectionId: string) {
   if (!uuid.test(connectionId)) throw new LiveAuthorizationError("Invalid connection", 400);
-  const { data } = await db.from("live_media_connections").select("id,user_id,session_id,provider_session_id,status")
+  const { data } = await db.from("live_media_connections").select("id,user_id,session_id,provider_session_id,publisher_provider_session_id,status")
     .eq("id", connectionId).eq("session_id", classId).eq("user_id", userId).maybeSingle();
   if (!data || !["active", "reconnecting"].includes(data.status)) throw new LiveAuthorizationError("Owned media connection is unavailable", 403);
   return data as Connection;
@@ -76,7 +81,7 @@ async function closeSubscriptions(
   const ids = data.map(value => value.id);
   const mids = data.flatMap(value => value.provider_mid ? [value.provider_mid] : []);
   try {
-    if (mids.length) await cloudflareRealtime.closeTracks(connection.provider_session_id, mids);
+    if (mids.length && connection.provider_session_id) await cloudflareRealtime.closeTracks(connection.provider_session_id, mids);
     await db.from("live_track_subscriptions").update({
       status: "closed", closed_at: new Date().toISOString(), cleanup_retry_at: null, last_cleanup_error: null,
     }).in("id", ids);
@@ -130,7 +135,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
 
     if (body.action === "create") {
       const { data: prior } = await db.from("live_media_connections")
-        .select("id,user_id,session_id,provider_session_id,status").eq("session_id", classId).eq("user_id", auth.user.id)
+        .select("id,user_id,session_id,provider_session_id,publisher_provider_session_id,status").eq("session_id", classId).eq("user_id", auth.user.id)
         .in("status", ["active", "reconnecting"]).maybeSingle();
       if (!prior && authorization.session.max_receivers) {
         const { count } = await db.from("live_media_connections").select("id", { count: "exact", head: true })
@@ -139,7 +144,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       }
       if (prior) {
         const { data: oldTracks } = await db.from("live_published_tracks")
-          .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
+          .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id,publisher_provider_session_id)")
           .eq("connection_id", prior.id).eq("status", "active");
         await forceCloseTracks(db, (oldTracks || []) as unknown as Track[]).catch(() => undefined);
         await closeSubscriptions(db, prior as Connection).catch(() => undefined);
@@ -147,8 +152,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         await db.from("live_attendance_intervals").update({ ended_at: new Date().toISOString(), ended_reason: "replaced" }).eq("connection_id", prior.id).is("ended_at", null);
       }
       const id = crypto.randomUUID();
-      const cloudflareSessionId = await cloudflareRealtime.createSession(`${classId}:${auth.user.id}:${id}`);
-      const { error } = await db.from("live_media_connections").insert({ id, session_id: classId, user_id: auth.user.id, provider_session_id: cloudflareSessionId });
+      const { error } = await db.from("live_media_connections").insert({ id, session_id: classId, user_id: auth.user.id });
       if (error) throw error;
       await db.from("live_attendance_intervals").insert({ session_id: classId, user_id: auth.user.id, connection_id: id });
       const { error: presenceError } = await db.rpc("set_live_presence", { target_session: classId, joined: true });
@@ -182,16 +186,23 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         return { id, kind: value.kind, mid: value.mid, trackName: `als-${id}` };
       });
       const { data: existing } = await db.from("live_published_tracks")
-        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
+        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id,publisher_provider_session_id)")
         .eq("connection_id", connection.id).in("kind", publications.map(value => value.kind)).eq("status", "active");
       if (existing?.length) await forceCloseTracks(db, existing as unknown as Track[]);
-      const response = await cloudflareRealtime.publishTracks(connection.provider_session_id, body.sessionDescription, publications.map(value => ({ mid: value.mid, trackName: value.trackName })));
+      let publicationSessionId = connection.publisher_provider_session_id;
+      if (!publicationSessionId) {
+        publicationSessionId = await cloudflareRealtime.createSession(`${classId}:${auth.user.id}:${connection.id}:publish`);
+        const { error: publisherSessionError } = await db.from("live_media_connections")
+          .update({ publisher_provider_session_id: publicationSessionId }).eq("id", connection.id).is("publisher_provider_session_id", null);
+        if (publisherSessionError) throw publisherSessionError;
+      }
+      const response = await cloudflareRealtime.publishTracks(publicationSessionId, body.sessionDescription, publications.map(value => ({ mid: value.mid, trackName: value.trackName })));
       const { error } = await db.from("live_published_tracks").insert(publications.map(value => ({
         id: value.id, session_id: classId, connection_id: connection.id, owner_id: auth.user.id, kind: value.kind,
         provider_track_name: value.trackName, provider_mid: value.mid,
       })));
       if (error) {
-        await cloudflareRealtime.closeTracks(connection.provider_session_id, publications.map(value => value.mid)).catch(() => undefined);
+        await cloudflareRealtime.closeTracks(publicationSessionId, publications.map(value => value.mid)).catch(() => undefined);
         throw error;
       }
       return NextResponse.json({ sessionDescription: response.sessionDescription, tracks: publications.map(value => ({ id: value.id, kind: value.kind, mid: value.mid })) });
@@ -201,11 +212,18 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const ids = [...new Set(body.trackIds || [])];
       if (!ids.length || ids.length > 64 || ids.some(id => !uuid.test(id))) return jsonError("Invalid track selection", 400);
       const { data } = await db.from("live_published_tracks")
-        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
+        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id,publisher_provider_session_id)")
         .eq("session_id", classId).eq("status", "active").in("id", ids);
       const tracks = (data || []) as unknown as Track[];
       if (tracks.length !== ids.length) throw new LiveAuthorizationError("A selected publication is unavailable");
-      const response = await cloudflareRealtime.subscribeTracks(connection.provider_session_id, tracks.map(track => ({
+      let receivingSessionId = connection.provider_session_id;
+      if (!receivingSessionId) {
+        receivingSessionId = await cloudflareRealtime.createSession(`${classId}:${auth.user.id}:${connection.id}:receive`);
+        const { error: receivingSessionError } = await db.from("live_media_connections")
+          .update({ provider_session_id: receivingSessionId }).eq("id", connection.id).is("provider_session_id", null);
+        if (receivingSessionError) throw receivingSessionError;
+      }
+      const response = await cloudflareRealtime.subscribeTracks(receivingSessionId, tracks.map(track => ({
         sessionId: providerSession(track)!, trackName: track.provider_track_name,
       })));
       const subscriptions = tracks.map((track, index) => ({
@@ -226,6 +244,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const { data } = await db.from("live_track_subscriptions").select("id,track_id,provider_mid,status")
         .eq("connection_id", connection.id).eq("session_id", classId).eq("status", "active").in("track_id", ids);
       if (!data || data.length !== ids.length || data.some(value => !value.provider_mid)) throw new LiveAuthorizationError("Owned subscriptions are unavailable");
+      if (!connection.provider_session_id) throw new LiveAuthorizationError("Receiving media session is unavailable", 409);
       await cloudflareRealtime.closeTracks(connection.provider_session_id, data.map(value => value.provider_mid!));
       await db.from("live_track_subscriptions").update({ status: "closed", closed_at: new Date().toISOString() }).in("id", data.map(value => value.id));
       return NextResponse.json({ unsubscribed: ids });
@@ -233,6 +252,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
 
     if (body.action === "renegotiate") {
       if (!validDescription(body.sessionDescription) || body.sessionDescription.type !== "answer") return jsonError("Invalid negotiation answer", 400);
+      if (!connection.provider_session_id) throw new LiveAuthorizationError("Receiving media session is unavailable", 409);
       await cloudflareRealtime.renegotiate(connection.provider_session_id, body.sessionDescription);
       return NextResponse.json({ accepted: true });
     }
@@ -241,7 +261,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const ids = [...new Set(body.trackIds || [])];
       if (!ids.length || ids.some(id => !uuid.test(id))) return jsonError("Invalid track closure", 400);
       const { data } = await db.from("live_published_tracks")
-        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
+        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id,publisher_provider_session_id)")
         .eq("session_id", classId).eq("owner_id", auth.user.id).eq("status", "active").in("id", ids);
       const tracks = (data || []) as unknown as Track[];
       if (tracks.length !== ids.length) throw new LiveAuthorizationError("Only owned publications may be closed");
@@ -278,7 +298,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
 
     if (body.action === "leave") {
       const { data } = await db.from("live_published_tracks")
-        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id)")
+        .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id,publisher_provider_session_id)")
         .eq("connection_id", connection.id).eq("status", "active");
       await forceCloseTracks(db, (data || []) as unknown as Track[]).catch(() => undefined);
       await closeSubscriptions(db, connection).catch(() => undefined);
