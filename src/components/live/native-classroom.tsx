@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { FixedPartAssembler, sha256Hex, type RecordingPart } from "@/lib/live-class/multipart-buffer";
+import { hashRecordingBlob } from "@/lib/live-class/recording-hash";
 import {
   acquireRecordingOwnership, deleteRecordingRecovery, downloadRecoveredSegment, listRecordingChunks, listRecordingRecoveries,
   saveRecordingChunk, saveRecordingRecovery, type StoredRecordingRecovery,
@@ -112,6 +113,8 @@ export function NativeClassroom({
   const [recordingStatus, setRecordingStatus] = useState("Not recording");
   const [recordedBytes, setRecordedBytes] = useState(0);
   const [recordingTelemetry, setRecordingTelemetry] = useState(emptyRecordingTelemetry);
+  const [storageHeadroomMiB, setStorageHeadroomMiB] = useState<number | null>(null);
+  const [hashProgress, setHashProgress] = useState<number | null>(null);
   const [recoveries, setRecoveries] = useState<StoredRecordingRecovery[]>([]);
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const publisherPeerRef = useRef<RTCPeerConnection | null>(null);
@@ -127,6 +130,7 @@ export function NativeClassroom({
   const operationRef = useRef(Promise.resolve());
   const reconnectsRef = useRef(0);
   const recordingStopRef = useRef<(() => void) | null>(null);
+  const hashAbortRef = useRef<AbortController | null>(null);
   const interruptedUploadPartsRef = useRef(new Set<string>());
   const recordingTelemetryRef = useRef<RecordingTelemetry>({ ...emptyRecordingTelemetry });
   const reconnectTimerRef = useRef<number | null>(null);
@@ -393,9 +397,18 @@ export function NativeClassroom({
 
   useEffect(() => () => {
     if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
+    hashAbortRef.current?.abort();
     localStreamRef.current?.getTracks().forEach(track => track.stop());
     screenStreamRef.current?.getTracks().forEach(track => track.stop());
   }, []);
+
+  async function checkRecordingStorage(requireWritablePart = false) {
+    const estimate = await navigator.storage?.estimate?.().catch(() => undefined);
+    if (typeof estimate?.quota !== "number" || typeof estimate.usage !== "number") return;
+    const freeBytes = Math.max(0, estimate.quota - estimate.usage);
+    setStorageHeadroomMiB(freeBytes / 1048576);
+    if (requireWritablePart && freeBytes < 8 * 1048576) throw new Error("Browser storage has less than one recording part available. Export existing recovery data before recording.");
+  }
 
   async function preflight() {
     setError("");
@@ -719,9 +732,19 @@ export function NativeClassroom({
         video.onerror = () => { window.clearTimeout(timeout); reject(new Error("Recorded media seek validation failed")); };
         video.currentTime = seekTarget;
       });
-      const fullSha256 = await sha256Hex(new Uint8Array(await blob.arrayBuffer()));
+      await checkRecordingStorage();
+      const controller = new AbortController();
+      hashAbortRef.current = controller;
+      setHashProgress(0);
+      setRecordingStatus("Checking full recording integrity…");
+      const fullSha256 = await hashRecordingBlob(blob, {
+        signal: controller.signal,
+        onProgress: bytes => setHashProgress(bytes / blob.size),
+      });
+      hashAbortRef.current = null;
+      setHashProgress(null);
       await api("recordings", { action: "validate", segmentId, durationSeconds: duration, seekable: video.seekable.length > 0, hasAudio: true, hasVideo: true, fullSha256 });
-    } finally { URL.revokeObjectURL(url); }
+    } finally { hashAbortRef.current = null; setHashProgress(null); URL.revokeObjectURL(url); }
   }
 
   async function startRecording() {
@@ -730,6 +753,8 @@ export function NativeClassroom({
     if (!mimeType) return setError("This browser does not expose a supported MediaRecorder container.");
     const audio = localStreamRef.current?.getAudioTracks()[0];
     if (!audio) return setError("Complete microphone preflight before recording.");
+    try { await checkRecordingStorage(true); }
+    catch (reason) { return setError(reason instanceof Error ? reason.message : "Browser recording storage is unavailable"); }
     const ownership = await acquireRecordingOwnership(session.id);
     if (!ownership.acquired) return setError("Another tab owns this class recording, or this browser does not support safe cross-tab recording locks.");
     let drawTimer: number | null = null;
@@ -792,6 +817,7 @@ export function NativeClassroom({
         setRecordingTelemetry({ ...recordingTelemetryRef.current });
         chain = chain.then(async () => {
           await saveRecordingChunk({ id: `${begun.segmentId}:${currentSequence.toString().padStart(8, "0")}`, segmentId: begun.segmentId, recordingId: begun.recordingId, sequence: currentSequence, mimeType, bytes: event.data, createdAt: new Date().toISOString() });
+          if (currentSequence % 6 === 0) await checkRecordingStorage(true);
           const bytes = new Uint8Array(await event.data.arrayBuffer());
           for (const part of assembler.push(bytes)) await uploadPart(begun.segmentId, part, true);
         }).catch(reason => { pipelineError = reason; if (media.state === "recording") media.stop(); }).finally(() => {
@@ -850,15 +876,24 @@ export function NativeClassroom({
       const present = new Set(reconciled.parts.filter(part => part.present).map(part => part.partNumber));
       const chunks = await listRecordingChunks(recovery.segmentId);
       const assembler = new FixedPartAssembler(recovery.partSize);
-      const parts: RecordingPart[] = [];
-      for (const chunk of chunks) parts.push(...assembler.push(new Uint8Array(await chunk.bytes.arrayBuffer())));
-      parts.push(...assembler.finish());
-      const capturedBytes = parts.reduce((sum, part) => sum + part.bytes.byteLength, 0);
-      const uploadedBytes = parts.filter(part => present.has(part.partNumber)).reduce((sum, part) => sum + part.bytes.byteLength, 0);
-      recordingTelemetryRef.current = { ...emptyRecordingTelemetry, capturedBytes, uploadedBytes };
+      const capturedBytes = chunks.reduce((sum, chunk) => sum + chunk.bytes.size, 0);
+      recordingTelemetryRef.current = { ...emptyRecordingTelemetry, capturedBytes };
       setRecordingTelemetry({ ...recordingTelemetryRef.current });
-      setRecordedBytes(uploadedBytes);
-      for (const part of parts) if (!present.has(part.partNumber)) await uploadPart(recovery.segmentId, part);
+      setRecordedBytes(0);
+      const processPart = async (part: RecordingPart) => {
+        if (present.has(part.partNumber)) {
+          recordingTelemetryRef.current.uploadedBytes += part.bytes.byteLength;
+          setRecordedBytes(value => value + part.bytes.byteLength);
+          setRecordingTelemetry({ ...recordingTelemetryRef.current });
+        } else await uploadPart(recovery.segmentId, part);
+      };
+      for (const chunk of chunks) {
+        for (let offset = 0; offset < chunk.bytes.size; offset += 2 * 1048576) {
+          const bytes = await chunk.bytes.slice(offset, offset + 2 * 1048576).arrayBuffer();
+          for (const part of assembler.push(new Uint8Array(bytes))) await processPart(part);
+        }
+      }
+      for (const part of assembler.finish()) await processPart(part);
       await api("recordings", { action: "stop", segmentId: recovery.segmentId });
       await api("recordings", { action: "complete", segmentId: recovery.segmentId });
       await validateLocalSegment(recovery.segmentId);
@@ -921,7 +956,8 @@ export function NativeClassroom({
           {user.role === "teacher" && user.id === session.faculty_id && <section className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">Teacher-only presentation recording</h2><p className="mt-1 text-sm text-muted">Canvas-composed teaching visual plus Teacher microphone only. Classroom audio and chat are excluded.</p></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold">{recordingStatus}</span></div>
             <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">Share the teaching application or tab—not the classroom tab or a display containing private information. Browser storage improves recovery but is not an absolute durability guarantee.</p>
             <canvas ref={canvasRef} className="hidden"/>
-            <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || classStatus !== "live" || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button><span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
+            <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || classStatus !== "live" || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button>{hashProgress !== null && <Button variant="secondary" onClick={() => hashAbortRef.current?.abort()}>Cancel integrity check</Button>}<span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
+            <p className="mt-2 text-xs tabular-nums text-muted">Browser storage headroom: {storageHeadroomMiB === null ? "not measured" : `${storageHeadroomMiB.toFixed(0)} MiB (browser estimate)`}{hashProgress !== null ? ` · integrity ${(hashProgress * 100).toFixed(0)}%` : ""}. Recovery data is retained if validation fails or is cancelled.</p>
             {mode === "poc" && <p className="mt-2 text-xs tabular-nums text-muted" aria-label="POC recording telemetry">Captured {(recordingTelemetry.capturedBytes / 1048576).toFixed(1)} MiB · backlog {((recordingTelemetry.capturedBytes - recordingTelemetry.uploadedBytes) / 1048576).toFixed(1)} MiB · queue {recordingTelemetry.queuedChunks} (max {recordingTelemetry.maxQueuedChunks}) · retries {recordingTelemetry.retryCount} · ack {recordingTelemetry.lastAcknowledgementMs === null ? "—" : `${Math.round(recordingTelemetry.lastAcknowledgementMs)} ms`} (max {Math.round(recordingTelemetry.maxAcknowledgementMs)} ms)</p>}
             {(!configuration.recordingEnabled || !configuration.r2Configured) && <p className="mt-3 text-sm text-muted">Recording unavailable: {configuration.recordingEnabled ? `missing ${configuration.missingR2.join(", ")}` : "ALS_LIVE_RECORDING_ENABLED is disabled"}.</p>}
             {!!recoveries.length && <div className="mt-4 space-y-2"><div><h3 className="text-sm font-bold">Recoverable local segments</h3><p className="mt-1 text-xs text-muted">The local recovery copy is retained until the remote recording is reviewed and published.</p></div>{recoveries.map(recovery => <div key={recovery.segmentId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-3 text-sm"><span>{recovery.title} · {recovery.status}</span><span className="flex gap-2">{recovery.status !== "validating" && <button className="min-h-11 px-3 font-bold text-brand" onClick={() => void resumeRecovery(recovery)}>Resume upload</button>}<button className="min-h-11 px-3 font-bold" onClick={() => void downloadRecoveredSegment(recovery.segmentId)}>Download</button></span></div>)}</div>}
