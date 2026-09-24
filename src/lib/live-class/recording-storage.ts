@@ -168,9 +168,14 @@ export const r2RecordingStorage: RecordingStorage = {
     const { environment, client } = createR2Client();
     const response = await client.send(new GetObjectCommand({ Bucket: environment.bucket, Key: objectKey }));
     if (!response.Body) throw new Error("R2 object body is unavailable");
-    const bytes = await response.Body.transformToByteArray();
-    if (!bytes.byteLength) throw new Error("R2 object is empty");
-    return { sha256: createHash("sha256").update(bytes).digest("hex"), byteLength: bytes.byteLength };
+    const hash = createHash("sha256");
+    let byteLength = 0;
+    for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
+      hash.update(chunk);
+      byteLength += chunk.byteLength;
+    }
+    if (!byteLength) throw new Error("R2 object is empty");
+    return { sha256: hash.digest("hex"), byteLength };
   },
 
   async playbackUrl(objectKey) {

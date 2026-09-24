@@ -14,11 +14,19 @@ import { closeProviderTracks } from "./transport-cleanup";
 const track = (id: string, mid: string, session = "provider-session") => ({
   id,
   provider_mid: mid,
-  live_media_connections: { provider_session_id: session },
+  live_media_connections: { provider_session_id: session, publisher_provider_session_id: `${session}-publisher` },
 });
 
 describe("closeProviderTracks", () => {
   beforeEach(() => vi.resetAllMocks());
+
+  it("routes publication and subscription cleanup to their separate provider sessions", async () => {
+    provider.closeTracks.mockResolvedValue({ tracks: [{ mid: "mid-a" }] });
+    await closeProviderTracks([track("a", "mid-a")]);
+    expect(provider.closeTracks).toHaveBeenLastCalledWith("provider-session-publisher", ["mid-a"]);
+    await closeProviderTracks([track("a", "mid-a")], "subscriber");
+    expect(provider.closeTracks).toHaveBeenLastCalledWith("provider-session", ["mid-a"]);
+  });
 
   it("matches partial results by mid instead of assuming response order", async () => {
     provider.closeTracks.mockResolvedValue({ tracks: [

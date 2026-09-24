@@ -105,7 +105,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       if (!body.granted) {
         const kind = body.grant === "microphone" ? "microphone" : "screen";
         const { data: tracks } = await db.from("live_published_tracks")
-          .select("id,provider_mid,live_media_connections!inner(provider_session_id)").eq("session_id", classId)
+          .select("id,provider_mid,live_media_connections!inner(provider_session_id,publisher_provider_session_id)").eq("session_id", classId)
           .eq("owner_id", body.targetUserId).eq("kind", kind).eq("status", "active");
         const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
         closed = result.closed.length + result.expired.length;
@@ -135,7 +135,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const revocationError = revocation.find(result => result.error)?.error;
       if (revocationError) throw revocationError;
       const { data: tracks } = await db.from("live_published_tracks")
-        .select("id,provider_mid,live_media_connections!inner(provider_session_id)").eq("session_id", classId)
+        .select("id,provider_mid,live_media_connections!inner(provider_session_id,publisher_provider_session_id)").eq("session_id", classId)
         .eq("owner_id", body.targetUserId).eq("status", "active");
       const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
       if (result.closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now }).in("id", result.closed);
@@ -149,9 +149,9 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         last_cleanup_error: "Participant removal close is unresolved",
       }).in("id", result.failed);
       const { data: subscriptions } = await db.from("live_track_subscriptions")
-        .select("id,provider_mid,live_media_connections!inner(provider_session_id,user_id)").eq("session_id", classId).eq("status", "active")
+        .select("id,provider_mid,live_media_connections!inner(provider_session_id,publisher_provider_session_id,user_id)").eq("session_id", classId).eq("status", "active")
         .eq("live_media_connections.user_id", body.targetUserId);
-      const subscriptionResult = await closeProviderTracks((subscriptions || []) as unknown as ClosableTrack[]);
+      const subscriptionResult = await closeProviderTracks((subscriptions || []) as unknown as ClosableTrack[], "subscriber");
       if (subscriptionResult.closed.length) await db.from("live_track_subscriptions").update({ status: "closed", closed_at: now }).in("id", subscriptionResult.closed);
       if (subscriptionResult.expired.length) await db.from("live_track_subscriptions").update({ status: "closed", closed_at: now, cleanup_retry_at: null,
         provider_reconciliation_outcome: "confirmed_absent_or_expired", provider_reconciled_at: now,

@@ -9,8 +9,8 @@ type CleanupRow = Omit<ClosableTrack, "live_media_connections"> & {
   cleanup_retry_at: string | null;
   provider_reconciliation_outcome: "confirmed_closed" | "confirmed_absent_or_expired" | "unresolved" | null;
   live_media_connections?:
-    | { provider_session_id: string; status: string }
-    | { provider_session_id: string; status: string }[];
+    | { provider_session_id: string | null; publisher_provider_session_id?: string | null; status: string }
+    | { provider_session_id: string | null; publisher_provider_session_id?: string | null; status: string }[];
 };
 
 function due(row: CleanupRow, forced: Set<string>, forceAll: boolean) {
@@ -24,6 +24,28 @@ function due(row: CleanupRow, forced: Set<string>, forceAll: boolean) {
   return row.status === "failed" && Boolean(row.cleanup_retry_at) && Date.parse(row.cleanup_retry_at!) <= Date.now();
 }
 
+function hasTerminalProviderEvidence(row: CleanupRow) {
+  return row.provider_reconciliation_outcome === "confirmed_closed"
+    || row.provider_reconciliation_outcome === "confirmed_absent_or_expired";
+}
+
+async function normalizeTerminalRows(
+  db: SupabaseClient,
+  table: "live_published_tracks" | "live_track_subscriptions",
+  rows: CleanupRow[],
+) {
+  const ids = rows.filter(hasTerminalProviderEvidence).map(row => row.id);
+  if (!ids.length) return 0;
+  const { error } = await db.from(table).update({
+    status: "closed",
+    closed_at: new Date().toISOString(),
+    cleanup_retry_at: null,
+    last_cleanup_error: null,
+  }).in("id", ids);
+  if (error) throw error;
+  return ids.length;
+}
+
 function retryAt(attempts: number) {
   const seconds = Math.min(300, 5 * 2 ** Math.min(attempts, 6));
   return new Date(Date.now() + seconds * 1_000).toISOString();
@@ -35,7 +57,7 @@ async function reconcileRows(db: SupabaseClient, table: "live_published_tracks" 
   const now = new Date().toISOString();
   const { error: closingError } = await db.from(table).update({ status: "closing", last_cleanup_error: null }).in("id", ids);
   if (closingError) throw closingError;
-  const result = await closeProviderTracks(rows);
+  const result = await closeProviderTracks(rows, table === "live_published_tracks" ? "publisher" : "subscriber");
   if (result.closed.length) {
     const { error } = await db.from(table).update({
       status: "closed", closed_at: now, cleanup_retry_at: null, last_cleanup_error: null,
@@ -85,7 +107,7 @@ export async function reconcileClassTransport(
   const { data: candidates, error: candidateError } = await db.rpc("live_transport_cleanup_candidates", { target_session: classId });
   if (candidateError) throw candidateError;
   const forced = new Set<string>((candidates || []).map((candidate: { connection_id: string }) => candidate.connection_id));
-  const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,provider_reconciliation_outcome,live_media_connections!inner(provider_session_id,status)";
+  const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,provider_reconciliation_outcome,live_media_connections!inner(provider_session_id,publisher_provider_session_id,status)";
   const [publicationQuery, subscriptionQuery] = await Promise.all([
     db.from("live_published_tracks").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]),
     db.from("live_track_subscriptions").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]).not("provider_mid", "is", null),
@@ -94,6 +116,10 @@ export async function reconcileClassTransport(
   if (subscriptionQuery.error) throw subscriptionQuery.error;
   const publications = (publicationQuery.data || []) as unknown as CleanupRow[];
   const subscriptions = (subscriptionQuery.data || []) as unknown as CleanupRow[];
+  const [normalizedPublications, normalizedSubscriptions] = await Promise.all([
+    normalizeTerminalRows(db, "live_published_tracks", publications),
+    normalizeTerminalRows(db, "live_track_subscriptions", subscriptions),
+  ]);
   const publicationResult = await reconcileRows(db, "live_published_tracks", publications.filter(row => due(row, forced, !!options.forceAll)));
   const subscriptionResult = await reconcileRows(db, "live_track_subscriptions", subscriptions.filter(row => due(row, forced, !!options.forceAll)));
   if (forced.size || options.forceAll) {
@@ -110,10 +136,10 @@ export async function reconcileClassTransport(
   }
   return {
     candidates: forced.size,
-    closedPublications: publicationResult.closed,
+    closedPublications: normalizedPublications + publicationResult.closed,
     expiredPublications: publicationResult.expired,
     failedPublications: publicationResult.failed,
-    closedSubscriptions: subscriptionResult.closed,
+    closedSubscriptions: normalizedSubscriptions + subscriptionResult.closed,
     expiredSubscriptions: subscriptionResult.expired,
     failedSubscriptions: subscriptionResult.failed,
   };

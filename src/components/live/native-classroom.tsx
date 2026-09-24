@@ -32,13 +32,42 @@ type Session = {
 type Configuration = {
   realtimeConfigured: boolean; r2Configured: boolean; turnConfigured: boolean; recordingEnabled: boolean; forceRelay: boolean;
   pocInterruptUploadPart: number | null;
+  pocUploadRecoveryDelayMs: number; pocMotionOverlay: boolean; pocMaxRecordingSeconds: number | null;
   missingRealtime: string[]; missingR2: string[]; missingTurn: string[];
+};
+type RecordingTelemetry = {
+  capturedBytes: number; uploadedBytes: number; queuedChunks: number; maxQueuedChunks: number;
+  retryCount: number; lastAcknowledgementMs: number | null; maxAcknowledgementMs: number;
 };
 type RecordingRow = { id: string; status: string; total_bytes: number; duration_seconds: number | null; published_at: string | null; error_message: string | null };
 type RemoteTrack = { id: string; kind: "microphone" | "camera" | "screen"; ownerId: string; stream: MediaStream };
 type Published = { id: string; kind: "microphone" | "camera" | "screen"; mid: string; track: MediaStreamTrack };
 
 const emptyStats: LiveStatsSample = emptyLiveStats();
+const emptyRecordingTelemetry: RecordingTelemetry = {
+  capturedBytes: 0, uploadedBytes: 0, queuedChunks: 0, maxQueuedChunks: 0,
+  retryCount: 0, lastAcknowledgementMs: null, maxAcknowledgementMs: 0,
+};
+const mergeStats = (samples: LiveStatsSample[]): LiveStatsSample => {
+  const merged = emptyLiveStats();
+  merged.sampledAt = Math.max(0, ...samples.map(sample => sample.sampledAt));
+  for (const sample of samples) {
+    for (const direction of ["sent", "received"] as const) {
+      for (const kind of ["microphone", "camera", "screen", "unclassified"] as const) {
+        merged.bytes[direction][kind] += sample.bytes[direction][kind];
+        merged.kbps[direction][kind] += sample.kbps[direction][kind];
+      }
+    }
+    merged.packetsLost += sample.packetsLost;
+    merged.jitterMs = Math.max(merged.jitterMs || 0, sample.jitterMs || 0) || null;
+    merged.rttMs = Math.max(merged.rttMs || 0, sample.rttMs || 0) || null;
+    merged.candidateType ||= sample.candidateType;
+    merged.width = Math.max(merged.width || 0, sample.width || 0) || null;
+    merged.height = Math.max(merged.height || 0, sample.height || 0) || null;
+    merged.framesPerSecond = Math.max(merged.framesPerSecond || 0, sample.framesPerSecond || 0) || null;
+  }
+  return merged;
+};
 const first = <T,>(value: T | T[] | null | undefined) => Array.isArray(value) ? value[0] : value;
 const waitForIce = (peer: RTCPeerConnection) => new Promise<void>(resolve => {
   if (peer.iceGatheringState === "complete") return resolve();
@@ -80,8 +109,10 @@ export function NativeClassroom({
   const [recording, setRecording] = useState(false);
   const [recordingStatus, setRecordingStatus] = useState("Not recording");
   const [recordedBytes, setRecordedBytes] = useState(0);
+  const [recordingTelemetry, setRecordingTelemetry] = useState(emptyRecordingTelemetry);
   const [recoveries, setRecoveries] = useState<StoredRecordingRecovery[]>([]);
   const peerRef = useRef<RTCPeerConnection | null>(null);
+  const publisherPeerRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -95,6 +126,7 @@ export function NativeClassroom({
   const reconnectsRef = useRef(0);
   const recordingStopRef = useRef<(() => void) | null>(null);
   const interruptedUploadPartsRef = useRef(new Set<string>());
+  const recordingTelemetryRef = useRef<RecordingTelemetry>({ ...emptyRecordingTelemetry });
   const reconnectTimerRef = useRef<number | null>(null);
   const joinInFlightRef = useRef(false);
   const trackRefreshPromiseRef = useRef<Promise<void> | null>(null);
@@ -126,7 +158,7 @@ export function NativeClassroom({
       .eq("session_id", session.id).eq("user_id", user.id).maybeSingle();
     setParticipant(data as Participant);
     if (data?.removed_at) {
-      peerRef.current?.close(); setConnectionState("ended"); setError("You were removed from this live class.");
+      peerRef.current?.close(); publisherPeerRef.current?.close(); setConnectionState("ended"); setError("You were removed from this live class.");
       return;
     }
     if (!data?.audio_publish_allowed) {
@@ -310,20 +342,22 @@ export function NativeClassroom({
   }, [api, manager, session.status]);
 
   useEffect(() => {
-    const peer = peerRef.current;
-    if (!peer || !connectionId) return;
-    const sampler = new PeerStatsSampler(peer, ({ direction, mid, trackIdentifier }) => {
+    const peers = [peerRef.current, publisherPeerRef.current].filter((peer): peer is RTCPeerConnection => Boolean(peer));
+    if (!peers.length || !connectionId) return;
+    const resolveIdentity = ({ direction, mid, trackIdentifier }: { direction: "sent" | "received"; mid: string | null; trackIdentifier: string | null }) => {
       if (mid) {
         const kind = direction === "received" ? midMapRef.current.get(mid)?.kind : publicationKindByMidRef.current.get(mid);
         if (kind) return kind;
       }
       return trackIdentifier ? trackKindByIdentifierRef.current.get(trackIdentifier) || null : null;
-    });
+    };
+    const samplers = peers.map(peer => new PeerStatsSampler(peer, resolveIdentity));
     let accumulated = new StatsIntervalAccumulator();
-    let samples = 0;
-    const interval = window.setInterval(() => void sampler.sample().then(sample => {
-      setStats(sample); samples += 1; accumulated.add(sample);
-      if (samples % 30 === 0) {
+    let sampleCount = 0;
+    const interval = window.setInterval(() => void Promise.all(samplers.map(sampler => sampler.sample())).then(samples => {
+      const sample = mergeStats(samples);
+      setStats(sample); sampleCount += 1; accumulated.add(sample);
+      if (sampleCount % 30 === 0) {
         const completed = accumulated;
         accumulated = new StatsIntervalAccumulator();
         void api("media", {
@@ -344,8 +378,10 @@ export function NativeClassroom({
 
   useEffect(() => {
     const peer = peerRef.current;
+    const publisherPeer = publisherPeerRef.current;
     return () => {
     peer?.close();
+    publisherPeer?.close();
     if (connectionId) void fetch(`${endpoint}/media`, {
       method: "POST", keepalive: true, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "leave", mode, connectionId }),
@@ -373,7 +409,7 @@ export function NativeClassroom({
       localStreamRef.current = stream;
       if (localVideoRef.current) localVideoRef.current.srcObject = stream;
       setPreflightReady(true);
-      if (manager && connectionId && peerRef.current) await queue(() => publishLocal(peerRef.current!, connectionId, stream.getTracks()));
+      if (manager && connectionId && publisherPeerRef.current) await queue(() => publishLocal(publisherPeerRef.current!, connectionId, stream.getTracks()));
       const context = new AudioContext();
       const analyser = context.createAnalyser();
       context.createMediaStreamSource(stream).connect(analyser);
@@ -393,37 +429,45 @@ export function NativeClassroom({
     try {
       if (recovery) {
         peerRef.current?.close();
+        publisherPeerRef.current?.close();
         remoteTracks.forEach(value => value.stream.getTracks().forEach(track => track.stop()));
         midMapRef.current.clear(); publicationKindByMidRef.current.clear(); trackKindByIdentifierRef.current.clear();
         subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
-      const peer = new RTCPeerConnection({
+      const peerOptions: RTCConfiguration = {
         iceServers: created.iceServers,
         bundlePolicy: "max-bundle",
         iceTransportPolicy: mode === "poc" && configuration.forceRelay ? "relay" : "all",
-      });
+      };
+      const peer = new RTCPeerConnection(peerOptions);
+      const publisherPeer = new RTCPeerConnection(peerOptions);
       peer.ontrack = event => {
         const identity = midMapRef.current.get(event.transceiver.mid || "");
         if (!identity) return;
         trackKindByIdentifierRef.current.set(event.track.id, identity.kind);
         setRemoteTracks(current => [...current.filter(value => value.id !== identity.id), { ...identity, stream: new MediaStream([event.track]) }]);
       };
-      peer.onconnectionstatechange = () => {
-        if (peer.connectionState === "connected") setConnectionState("connected");
-        else if (["disconnected", "failed"].includes(peer.connectionState) && peerRef.current === peer) {
+      const handleConnectionState = () => {
+        const states = [peer.connectionState, publisherPeer.connectionState];
+        if (states.some(state => ["disconnected", "failed"].includes(state)) && peerRef.current === peer) {
           setConnectionState("reconnecting"); reconnectsRef.current += 1;
           if (reconnectsRef.current <= 3 && reconnectTimerRef.current === null) {
             const delay = [1_000, 3_000, 8_000][reconnectsRef.current - 1];
             reconnectTimerRef.current = window.setTimeout(() => { reconnectTimerRef.current = null; void join(true); }, delay);
           } else if (reconnectsRef.current > 3) setConnectionState("failed");
         }
-        else if (peer.connectionState === "closed") setConnectionState("ended");
+        else if (states.includes("connected")) setConnectionState("connected");
+        else if (states.every(state => state === "closed")) setConnectionState("ended");
       };
-      peerRef.current = peer; setConnectionId(created.connectionId);
+      peer.onconnectionstatechange = handleConnectionState;
+      publisherPeer.onconnectionstatechange = handleConnectionState;
+      peerRef.current = peer; publisherPeerRef.current = publisherPeer; setConnectionId(created.connectionId);
       await queue(() => subscribeAvailable(peer, created.connectionId));
-      setConnectionState(peer.connectionState === "connected" ? "connected" : "joining");
-      if (localStreamRef.current?.active && (manager || participant?.audio_publish_allowed)) await publishLocal(peer, created.connectionId, localStreamRef.current.getTracks());
+      setConnectionState([peer.connectionState, publisherPeer.connectionState].includes("connected") ? "connected" : "joining");
+      if (localStreamRef.current?.active && (manager || participant?.audio_publish_allowed)) {
+        await queue(() => publishLocal(publisherPeer, created.connectionId, localStreamRef.current!.getTracks()));
+      }
       if (recovery) setNotice("Classroom media reconnected. Re-share the teaching screen if screen capture was active.");
     } catch (reason) { setConnectionState("failed"); setError(reason instanceof Error ? reason.message : "Could not join classroom"); }
     finally { joinInFlightRef.current = false; }
@@ -451,7 +495,7 @@ export function NativeClassroom({
   }
 
   async function enableGrantedMicrophone() {
-    if (!connectionId || !peerRef.current || (!manager && !participant?.audio_publish_allowed)) return;
+    if (!connectionId || !publisherPeerRef.current || (!manager && !participant?.audio_publish_allowed)) return;
     setError("");
     try {
       let track = localStreamRef.current?.getAudioTracks()[0];
@@ -459,35 +503,56 @@ export function NativeClassroom({
         const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
         track = stream.getAudioTracks()[0]; localStreamRef.current = stream;
       }
-      await queue(() => publishLocal(peerRef.current!, connectionId, [track!]));
+      await queue(() => publishLocal(publisherPeerRef.current!, connectionId, [track!]));
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Microphone publication failed"); }
   }
 
   async function shareScreen() {
-    if (!connectionId || !peerRef.current || (!manager && !(participant?.presenter && participant.screen_publish_allowed))) return;
+    if (!connectionId || !publisherPeerRef.current || (!manager && !(participant?.presenter && participant.screen_publish_allowed))) return;
     try {
       const display = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: mediaProfile === "lecture" ? { ideal: 8, max: 10 } : { ideal: 20, max: 30 } }, audio: false });
       screenStreamRef.current?.getTracks().forEach(track => track.stop()); screenStreamRef.current = display;
       if (screenPreviewRef.current) { screenPreviewRef.current.srcObject = display; await screenPreviewRef.current.play(); }
       const track = display.getVideoTracks()[0];
-      const transceiver = peerRef.current.addTransceiver(track, { direction: "sendonly", streams: [display], sendEncodings: [{ maxBitrate: mediaProfile === "lecture" ? 850_000 : 1_800_000, maxFramerate: mediaProfile === "lecture" ? 10 : 30 }] });
-      const offer = await peerRef.current.createOffer(); await peerRef.current.setLocalDescription(offer); await waitForIce(peerRef.current);
-      const response = await api<{ sessionDescription: RTCSessionDescriptionInit; tracks: { id: string; kind: Published["kind"]; mid: string }[] }>("media", {
-        action: "publish", connectionId, sessionDescription: peerRef.current.localDescription,
-        publications: [{ kind: "screen", mid: transceiver.mid! }],
+      const publicationId = await queue(async () => {
+        const peer = publisherPeerRef.current;
+        if (!peer || peer.signalingState === "closed") throw new Error("Classroom media connection is unavailable");
+        const transceiver = peer.addTransceiver(track, { direction: "sendonly", streams: [display], sendEncodings: [{ maxBitrate: mediaProfile === "lecture" ? 850_000 : 1_800_000, maxFramerate: mediaProfile === "lecture" ? 10 : 30 }] });
+        const offer = await peer.createOffer(); await peer.setLocalDescription(offer); await waitForIce(peer);
+        let response: { sessionDescription: RTCSessionDescriptionInit; tracks: { id: string; kind: Published["kind"]; mid: string }[] } | null = null;
+        try {
+          response = await api("media", {
+            action: "publish", connectionId, sessionDescription: peer.localDescription,
+            publications: [{ kind: "screen", mid: transceiver.mid! }],
+          });
+          await peer.setRemoteDescription(response.sessionDescription);
+        } catch (reason) {
+          transceiver.stop();
+          if (response?.tracks.length) {
+            await api("media", { action: "close", connectionId, trackIds: response.tracks.map(value => value.id) }).catch(() => undefined);
+          }
+          throw reason;
+        }
+        publicationKindByMidRef.current.set(response.tracks[0].mid, "screen");
+        trackKindByIdentifierRef.current.set(track.id, "screen");
+        setPublished(current => [...current.filter(value => value.kind !== "screen"), { ...response.tracks[0], track }]);
+        return response.tracks[0].id;
       });
-      await peerRef.current.setRemoteDescription(response.sessionDescription);
-      publicationKindByMidRef.current.set(response.tracks[0].mid, "screen");
-      trackKindByIdentifierRef.current.set(track.id, "screen");
-      setPublished(current => [...current.filter(value => value.kind !== "screen"), { ...response.tracks[0], track }]);
-      const publicationId = response.tracks[0].id;
       track.addEventListener("ended", () => {
         screenStreamRef.current = null;
         setPublished(current => current.filter(value => value.id !== publicationId));
-        void api("media", { action: "close", connectionId, trackIds: [publicationId] }).catch(() => undefined);
+        void queue(() => api("media", { action: "close", connectionId, trackIds: [publicationId] })).catch(() => undefined);
         setNotice("Screen sharing ended. The recording canvas will fall back to the Teacher camera or holding slate.");
       }, { once: true });
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Screen sharing failed"); }
+    } catch (reason) {
+      screenStreamRef.current?.getTracks().forEach(track => track.stop()); screenStreamRef.current = null;
+      const message = reason instanceof Error ? reason.message : "Screen sharing failed";
+      setError(message);
+      if (publisherPeerRef.current && publisherPeerRef.current.signalingState !== "stable") {
+        await join(true);
+        setError(`${message} The media connection was replaced safely; try sharing again.`);
+      }
+    }
   }
 
   async function changeGrant(targetUserId: string, grant: "microphone" | "presenter", granted: boolean) {
@@ -570,6 +635,9 @@ export function NativeClassroom({
   }
 
   async function uploadPart(segmentId: string, part: RecordingPart, allowPocInterruption = false) {
+    // Event-driven upload telemetry; this function is never invoked during render.
+    // eslint-disable-next-line react-hooks/purity
+    const startedAt = performance.now();
     const digest = await sha256Hex(part.bytes);
     let response: Response | null = null;
     for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -581,17 +649,29 @@ export function NativeClassroom({
         const controller = new AbortController();
         const timer = window.setTimeout(() => controller.abort("POC multipart interruption"), 10);
         try { await fetch(signed.url, { method: "PUT", body: part.bytes as BodyInit, signal: controller.signal }); }
+        catch { /* Expected once: the bounded POC harness retries below. */ }
         finally { window.clearTimeout(timer); }
-        throw new Error(`POC test interrupted multipart PUT for part ${part.partNumber} before acknowledgement`);
+        recordingTelemetryRef.current.retryCount += 1;
+        setRecordingTelemetry({ ...recordingTelemetryRef.current });
+        if (configuration.pocUploadRecoveryDelayMs) await new Promise(resolve => window.setTimeout(resolve, configuration.pocUploadRecoveryDelayMs));
+        continue;
       }
       response = await fetch(signed.url, { method: "PUT", body: part.bytes as BodyInit }).catch(() => null);
       if (response?.ok) break;
+      recordingTelemetryRef.current.retryCount += 1;
+      setRecordingTelemetry({ ...recordingTelemetryRef.current });
       await new Promise(resolve => window.setTimeout(resolve, 500 * 2 ** attempt));
     }
     if (!response?.ok) throw new Error("A recording part could not be uploaded after retries");
     const etag = response.headers.get("etag");
     if (!etag) throw new Error("R2 did not expose ETag. Check the bucket CORS ExposeHeaders setting.");
     await api("recordings", { action: "acknowledge", segmentId, partNumber: part.partNumber, byteLength: part.bytes.byteLength, sha256: digest, etag });
+    // eslint-disable-next-line react-hooks/purity
+    const acknowledgementMs = performance.now() - startedAt;
+    recordingTelemetryRef.current.uploadedBytes += part.bytes.byteLength;
+    recordingTelemetryRef.current.lastAcknowledgementMs = acknowledgementMs;
+    recordingTelemetryRef.current.maxAcknowledgementMs = Math.max(recordingTelemetryRef.current.maxAcknowledgementMs, acknowledgementMs);
+    setRecordingTelemetry({ ...recordingTelemetryRef.current });
     setRecordedBytes(value => value + part.bytes.byteLength);
   }
 
@@ -636,6 +716,7 @@ export function NativeClassroom({
     const ownership = await acquireRecordingOwnership(session.id);
     if (!ownership.acquired) return setError("Another tab owns this class recording, or this browser does not support safe cross-tab recording locks.");
     let drawTimer: number | null = null;
+    let stopTimer: number | null = null;
     let composite: MediaStream | null = null;
     let activeSegmentId: string | null = null;
     try {
@@ -657,7 +738,7 @@ export function NativeClassroom({
         if (screenStreamRef.current && localStreamRef.current?.getVideoTracks().length && localVideoRef.current) {
           context.drawImage(localVideoRef.current, canvas.width - 272, canvas.height - 174, 240, 135);
         }
-        if (mode === "poc" && configuration.pocInterruptUploadPart) {
+        if (mode === "poc" && configuration.pocMotionOverlay) {
           // Deterministic motion keeps the bounded recovery proof near the
           // configured encoder bitrate even when the shared lab slide is static.
           // It is enabled only with the explicit POC interruption harness.
@@ -679,6 +760,8 @@ export function NativeClassroom({
       let sequence = 0;
       let chain = Promise.resolve();
       let pipelineError: unknown = null;
+      recordingTelemetryRef.current = { ...emptyRecordingTelemetry };
+      setRecordingTelemetry({ ...emptyRecordingTelemetry });
       await saveRecordingRecovery({
         segmentId: begun.segmentId, recordingId: begun.recordingId, classId: session.id, title: session.title,
         mimeType, partSize: begun.partSize, status: "recording", updatedAt: new Date().toISOString(),
@@ -686,16 +769,26 @@ export function NativeClassroom({
       media.ondataavailable = event => {
         if (!event.data.size) return;
         const currentSequence = sequence++;
+        recordingTelemetryRef.current.capturedBytes += event.data.size;
+        recordingTelemetryRef.current.queuedChunks += 1;
+        recordingTelemetryRef.current.maxQueuedChunks = Math.max(recordingTelemetryRef.current.maxQueuedChunks, recordingTelemetryRef.current.queuedChunks);
+        setRecordingTelemetry({ ...recordingTelemetryRef.current });
         chain = chain.then(async () => {
           await saveRecordingChunk({ id: `${begun.segmentId}:${currentSequence.toString().padStart(8, "0")}`, segmentId: begun.segmentId, recordingId: begun.recordingId, sequence: currentSequence, mimeType, bytes: event.data, createdAt: new Date().toISOString() });
           const bytes = new Uint8Array(await event.data.arrayBuffer());
           for (const part of assembler.push(bytes)) await uploadPart(begun.segmentId, part, true);
-        }).catch(reason => { pipelineError = reason; if (media.state === "recording") media.stop(); });
+        }).catch(reason => { pipelineError = reason; if (media.state === "recording") media.stop(); }).finally(() => {
+          recordingTelemetryRef.current.queuedChunks = Math.max(0, recordingTelemetryRef.current.queuedChunks - 1);
+          setRecordingTelemetry({ ...recordingTelemetryRef.current });
+        });
       };
       media.onerror = event => { pipelineError = event.error || new Error("MediaRecorder stopped unexpectedly"); setRecordingStatus("Interrupted — recover locally"); if (media.state === "recording") media.stop(); };
       const stopped = new Promise<void>(resolve => { media.onstop = () => resolve(); });
-      recordingStopRef.current = () => media.stop();
+      recordingStopRef.current = () => { if (media.state === "recording") media.stop(); };
       media.start(5_000); setRecording(true); setRecordedBytes(0); setRecordingStatus(`Recording segment ${begun.segmentNumber}`);
+      if (mode === "poc" && configuration.pocMaxRecordingSeconds) {
+        stopTimer = window.setTimeout(() => recordingStopRef.current?.(), configuration.pocMaxRecordingSeconds * 1_000);
+      }
       await stopped; await chain;
       if (pipelineError) throw pipelineError;
       for (const part of assembler.finish()) await uploadPart(begun.segmentId, part);
@@ -716,6 +809,7 @@ export function NativeClassroom({
       setRecordingStatus("Interrupted — recovery available");
     } finally {
       if (drawTimer !== null) window.clearInterval(drawTimer);
+      if (stopTimer !== null) window.clearTimeout(stopTimer);
       composite?.getTracks().forEach(track => track.stop());
       setRecording(false); recordingStopRef.current = null; ownership.release();
     }
@@ -797,6 +891,7 @@ export function NativeClassroom({
             <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">Share the teaching application or tab—not the classroom tab or a display containing private information. Browser storage improves recovery but is not an absolute durability guarantee.</p>
             <canvas ref={canvasRef} className="hidden"/>
             <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button><span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
+            {mode === "poc" && <p className="mt-2 text-xs tabular-nums text-muted" aria-label="POC recording telemetry">Captured {(recordingTelemetry.capturedBytes / 1048576).toFixed(1)} MiB · backlog {((recordingTelemetry.capturedBytes - recordingTelemetry.uploadedBytes) / 1048576).toFixed(1)} MiB · queue {recordingTelemetry.queuedChunks} (max {recordingTelemetry.maxQueuedChunks}) · retries {recordingTelemetry.retryCount} · ack {recordingTelemetry.lastAcknowledgementMs === null ? "—" : `${Math.round(recordingTelemetry.lastAcknowledgementMs)} ms`} (max {Math.round(recordingTelemetry.maxAcknowledgementMs)} ms)</p>}
             {(!configuration.recordingEnabled || !configuration.r2Configured) && <p className="mt-3 text-sm text-muted">Recording unavailable: {configuration.recordingEnabled ? `missing ${configuration.missingR2.join(", ")}` : "ALS_LIVE_RECORDING_ENABLED is disabled"}.</p>}
             {!!recoveries.length && <div className="mt-4 space-y-2"><div><h3 className="text-sm font-bold">Recoverable local segments</h3><p className="mt-1 text-xs text-muted">The local recovery copy is retained until the remote recording is reviewed and published.</p></div>{recoveries.map(recovery => <div key={recovery.segmentId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-3 text-sm"><span>{recovery.title} · {recovery.status}</span><span className="flex gap-2">{recovery.status !== "validating" && <button className="min-h-11 px-3 font-bold text-brand" onClick={() => void resumeRecovery(recovery)}>Resume upload</button>}<button className="min-h-11 px-3 font-bold" onClick={() => void downloadRecoveredSegment(recovery.segmentId)}>Download</button></span></div>)}</div>}
             {!!recordings.length && <div className="mt-4 grid gap-2 sm:grid-cols-2">{recordings.map(value => <div className="rounded-lg bg-surface p-3 text-sm" key={value.id}><b className="capitalize">{value.status}</b><p className="mt-1 text-muted">{(value.total_bytes / 1048576).toFixed(1)} MiB {value.duration_seconds ? `· ${Math.round(value.duration_seconds)} seconds` : ""}</p>{value.error_message && <p className="mt-1 text-red-800">{value.error_message}</p>}</div>)}</div>}
