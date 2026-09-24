@@ -4,9 +4,10 @@ import { assertLiveFeature } from "@/lib/live-class/config";
 import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError } from "@/lib/live-class/authorization";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { closeProviderTracks, type ClosableTrack } from "@/lib/live-class/transport-cleanup";
+import { reconcileClassTransport } from "@/lib/live-class/transport-reconciliation";
 
 type Body = {
-  action?: "start" | "end" | "cancel" | "reschedule" | "grant" | "remove";
+  action?: "start" | "end" | "cancel" | "reschedule" | "grant" | "remove" | "reconcile";
   mode?: "poc" | "classroom";
   targetUserId?: string;
   grant?: "microphone" | "presenter";
@@ -64,17 +65,20 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
 
     if (body.action === "end") {
       if (authorization.session.status !== "live") return failure("Only a live class can be ended", 409);
-      const { data: tracks } = await db.from("live_published_tracks")
-        .select("id,provider_mid,live_media_connections!inner(provider_session_id)").eq("session_id", classId).eq("status", "active");
-      const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
-      if (result.closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now }).in("id", result.closed);
-      if (result.failed.length) await db.from("live_published_tracks").update({ status: "failed", closed_at: now }).in("id", result.failed);
-      await Promise.all([
+      const ended = await Promise.all([
         db.from("live_sessions").update({ status: "completed", ended_at: now, updated_at: now }).eq("id", classId),
         db.from("live_media_connections").update({ status: "closed", closed_at: now }).eq("session_id", classId).in("status", ["active", "reconnecting"]),
         db.from("live_attendance_intervals").update({ ended_at: now, ended_reason: "ended" }).eq("session_id", classId).is("ended_at", null),
       ]);
-      return NextResponse.json({ status: "completed", closedTracks: result.closed.length, cleanupFailures: result.failed.length });
+      const endError = ended.find(result => result.error)?.error;
+      if (endError) throw endError;
+      const cleanup = await reconcileClassTransport(db, classId, { forceAll: true });
+      return NextResponse.json({ status: "completed", ...cleanup });
+    }
+
+    if (body.action === "reconcile") {
+      if (!["live", "completed"].includes(authorization.session.status)) return NextResponse.json({ candidates: 0, closedPublications: 0, failedPublications: 0, closedSubscriptions: 0, failedSubscriptions: 0 });
+      return NextResponse.json(await reconcileClassTransport(db, classId));
     }
 
     if (!body.targetUserId || !uuid.test(body.targetUserId)) return failure("A valid participant is required", 400);
@@ -99,27 +103,42 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
         closed = result.closed.length;
         if (result.closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now }).in("id", result.closed);
-        if (result.failed.length) await db.from("live_published_tracks").update({ status: "failed", closed_at: now }).in("id", result.failed);
+        if (result.failed.length) await db.from("live_published_tracks").update({
+          status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
+          last_cleanup_error: "Grant revocation close is unresolved",
+        }).in("id", result.failed);
       }
       return NextResponse.json({ granted: body.granted, kind: body.grant, terminatedPublications: closed });
     }
 
     if (body.action === "remove") {
+      // Revoke ALS authorization before waiting on provider I/O so a hostile
+      // client cannot win a new publish/subscribe race during cleanup.
+      const revocation = await Promise.all([
+        db.from("live_media_connections").update({ status: "closed", closed_at: now }).eq("session_id", classId).eq("user_id", body.targetUserId),
+        db.from("live_attendance_intervals").update({ ended_at: now, ended_reason: "ended" }).eq("session_id", classId).eq("user_id", body.targetUserId).is("ended_at", null),
+        db.from("live_participants").update({ left_at: now, removed_at: now, removed_by: auth.user.id, audio_publish_allowed: false, presenter: false, screen_publish_allowed: false }).eq("session_id", classId).eq("user_id", body.targetUserId),
+      ]);
+      const revocationError = revocation.find(result => result.error)?.error;
+      if (revocationError) throw revocationError;
       const { data: tracks } = await db.from("live_published_tracks")
         .select("id,provider_mid,live_media_connections!inner(provider_session_id)").eq("session_id", classId)
         .eq("owner_id", body.targetUserId).eq("status", "active");
       const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
       if (result.closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now }).in("id", result.closed);
+      if (result.failed.length) await db.from("live_published_tracks").update({
+        status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
+        last_cleanup_error: "Participant removal close is unresolved",
+      }).in("id", result.failed);
       const { data: subscriptions } = await db.from("live_track_subscriptions")
         .select("id,provider_mid,live_media_connections!inner(provider_session_id,user_id)").eq("session_id", classId).eq("status", "active")
         .eq("live_media_connections.user_id", body.targetUserId);
       const subscriptionResult = await closeProviderTracks((subscriptions || []) as unknown as ClosableTrack[]);
       if (subscriptionResult.closed.length) await db.from("live_track_subscriptions").update({ status: "closed", closed_at: now }).in("id", subscriptionResult.closed);
-      await Promise.all([
-        db.from("live_media_connections").update({ status: "closed", closed_at: now }).eq("session_id", classId).eq("user_id", body.targetUserId),
-        db.from("live_attendance_intervals").update({ ended_at: now, ended_reason: "ended" }).eq("session_id", classId).eq("user_id", body.targetUserId).is("ended_at", null),
-        db.from("live_participants").update({ left_at: now, removed_at: now, removed_by: auth.user.id, audio_publish_allowed: false, presenter: false, screen_publish_allowed: false }).eq("session_id", classId).eq("user_id", body.targetUserId),
-      ]);
+      if (subscriptionResult.failed.length) await db.from("live_track_subscriptions").update({
+        status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
+        last_cleanup_error: "Participant removal close is unresolved",
+      }).in("id", subscriptionResult.failed);
       return NextResponse.json({ removed: true, terminatedPublications: result.closed.length, terminatedSubscriptions: subscriptionResult.closed.length });
     }
     return failure("Unsupported classroom control", 400);

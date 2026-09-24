@@ -16,7 +16,7 @@ export type StoredRecordingRecovery = {
   title: string;
   mimeType: string;
   partSize: number;
-  status: "recording" | "uploading" | "interrupted" | "ready" | "failed";
+  status: "recording" | "uploading" | "interrupted" | "validating" | "failed";
   updatedAt: string;
 };
 

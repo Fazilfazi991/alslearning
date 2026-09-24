@@ -16,7 +16,12 @@ export async function getClassroomData(classId: string, mode: "poc" | "classroom
     authorization.isClassManager
       ? db.rpc("live_participant_roster", { target_session: classId })
       : Promise.resolve({ data: [], error: null }),
-    db.rpc("live_message_payload", { target_session: classId }),
+    db.rpc("live_message_page", {
+      target_session: classId,
+      before_created_at: null,
+      before_id: null,
+      page_size: 50,
+    }),
     db.rpc("live_poll_payload", { target_session: classId }),
     authorization.isClassManager && authorization.session.subject_id
       ? db.from("questions").select("id,prompt").eq("subject_id", authorization.session.subject_id).eq("status", "active").limit(100)
