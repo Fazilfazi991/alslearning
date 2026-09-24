@@ -11,12 +11,14 @@ export default async function Page() {
     db.from("batches").select("id,name,program_id").in("status", ["upcoming", "active"]).order("name"),
     db.from("profiles").select("id,full_name,email").eq("role", "teacher").eq("is_active", true).order("full_name"),
     db.from("live_sessions").select("id,title,status,provider,starts_at,ends_at,recording_enabled,max_receivers,programs(name),subjects(name),batches(name),profiles!live_sessions_faculty_id_fkey(full_name),class_recordings(id,status,total_bytes,duration_seconds,client_validated_at,verified_at,published_at,error_message)").in("provider", ["cloudflare", "cloudflare-poc"]).order("starts_at", { ascending: false }).limit(100),
-    db.from("live_usage_summaries").select("audio_bytes,video_bytes,screen_bytes").limit(10000),
+    db.from("live_usage_summaries").select("classification_version,audio_bytes,video_bytes,screen_bytes,received_microphone_bytes,received_camera_bytes,received_screen_bytes,received_unclassified_bytes").limit(10000),
     db.from("live_attendance_intervals").select("session_id,user_id,started_at,ended_at").limit(10000),
   ]);
   const failure = [programs, subjects, batches, teachers, sessions, usage, attendance].find(result => result.error);
   if (failure?.error) throw new Error(failure.error.message);
-  const usageBytes = (usage.data || []).reduce((sum, row) => sum + Number(row.audio_bytes || 0) + Number(row.video_bytes || 0) + Number(row.screen_bytes || 0), 0);
+  const usageBytes = (usage.data || []).reduce((sum, row) => sum + (row.classification_version === 2
+    ? Number(row.received_microphone_bytes || 0) + Number(row.received_camera_bytes || 0) + Number(row.received_screen_bytes || 0) + Number(row.received_unclassified_bytes || 0)
+    : Number(row.audio_bytes || 0) + Number(row.video_bytes || 0) + Number(row.screen_bytes || 0)), 0);
   const attendanceBySession = new Map<string, { users: Set<string>; seconds: number }>();
   for (const interval of attendance.data || []) {
     const value = attendanceBySession.get(interval.session_id) || { users: new Set<string>(), seconds: 0 };

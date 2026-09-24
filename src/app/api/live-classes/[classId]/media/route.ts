@@ -15,7 +15,9 @@ type Body = {
   publications?: { kind?: PublishedTrackKind; mid?: string }[];
   trackIds?: string[];
   stats?: {
-    sampledFrom?: string; sampledTo?: string; audioBytes?: number; videoBytes?: number; screenBytes?: number;
+    sampledFrom?: string; sampledTo?: string;
+    sentMicrophoneBytes?: number; sentCameraBytes?: number; sentScreenBytes?: number; sentUnclassifiedBytes?: number;
+    receivedMicrophoneBytes?: number; receivedCameraBytes?: number; receivedScreenBytes?: number; receivedUnclassifiedBytes?: number;
     packetsLost?: number; jitterMs?: number | null; rttMs?: number | null; candidateType?: string | null; reconnectCount?: number;
   };
 };
@@ -51,6 +53,12 @@ async function forceCloseTracks(db: Awaited<ReturnType<typeof createClient>>, tr
   if (result.closed.length) await db.from("live_published_tracks").update({
     status: "closed", closed_at: new Date().toISOString(), cleanup_retry_at: null, last_cleanup_error: null,
   }).in("id", result.closed);
+  if (result.expired.length) await db.from("live_published_tracks").update({
+    status: "closed", closed_at: new Date().toISOString(), cleanup_retry_at: null, last_cleanup_error: null,
+    provider_reconciliation_outcome: "confirmed_absent_or_expired", provider_reconciled_at: new Date().toISOString(),
+    provider_reconciliation_http_status: 410, provider_reconciliation_error_code: "session_error",
+    provider_reconciliation_detail: "Cloudflare reports the provider session expired or closed",
+  }).in("id", result.expired);
   if (result.failed.length) await db.from("live_published_tracks").update({
     status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
     last_cleanup_error: "Provider close is unresolved",
@@ -246,12 +254,21 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const from = stats?.sampledFrom ? Date.parse(stats.sampledFrom) : NaN;
       const to = stats?.sampledTo ? Date.parse(stats.sampledTo) : NaN;
       if (!stats || !Number.isFinite(from) || !Number.isFinite(to) || to <= from || to - from > 5 * 60_000) return jsonError("Invalid statistics interval", 400);
-      const nonnegative = [stats.audioBytes, stats.videoBytes, stats.screenBytes, stats.reconnectCount];
+      const nonnegative = [
+        stats.sentMicrophoneBytes, stats.sentCameraBytes, stats.sentScreenBytes, stats.sentUnclassifiedBytes,
+        stats.receivedMicrophoneBytes, stats.receivedCameraBytes, stats.receivedScreenBytes, stats.receivedUnclassifiedBytes,
+        stats.reconnectCount,
+      ];
       if (nonnegative.some(value => !Number.isSafeInteger(value) || value! < 0)) return jsonError("Invalid statistics counters", 400);
       const { error } = await db.from("live_usage_summaries").insert({
         session_id: classId, user_id: auth.user.id, connection_id: connection.id,
-        sampled_from: stats.sampledFrom, sampled_to: stats.sampledTo, audio_bytes: stats.audioBytes,
-        video_bytes: stats.videoBytes, screen_bytes: stats.screenBytes, packets_lost: Math.trunc(stats.packetsLost || 0),
+        sampled_from: stats.sampledFrom, sampled_to: stats.sampledTo, classification_version: 2,
+        sent_microphone_bytes: stats.sentMicrophoneBytes, sent_camera_bytes: stats.sentCameraBytes,
+        sent_screen_bytes: stats.sentScreenBytes, sent_unclassified_bytes: stats.sentUnclassifiedBytes,
+        received_microphone_bytes: stats.receivedMicrophoneBytes, received_camera_bytes: stats.receivedCameraBytes,
+        received_screen_bytes: stats.receivedScreenBytes, received_unclassified_bytes: stats.receivedUnclassifiedBytes,
+        audio_bytes: stats.receivedMicrophoneBytes, video_bytes: stats.receivedCameraBytes, screen_bytes: stats.receivedScreenBytes,
+        packets_lost: Math.trunc(stats.packetsLost || 0),
         jitter_ms: stats.jitterMs ?? null, rtt_ms: stats.rttMs ?? null,
         candidate_type: stats.candidateType?.slice(0, 32) || null, reconnect_count: stats.reconnectCount,
       });

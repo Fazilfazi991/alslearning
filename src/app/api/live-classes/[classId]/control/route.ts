@@ -108,8 +108,14 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
           .select("id,provider_mid,live_media_connections!inner(provider_session_id)").eq("session_id", classId)
           .eq("owner_id", body.targetUserId).eq("kind", kind).eq("status", "active");
         const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
-        closed = result.closed.length;
+        closed = result.closed.length + result.expired.length;
         if (result.closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now }).in("id", result.closed);
+        if (result.expired.length) await db.from("live_published_tracks").update({
+          status: "closed", closed_at: now, cleanup_retry_at: null,
+          provider_reconciliation_outcome: "confirmed_absent_or_expired", provider_reconciled_at: now,
+          provider_reconciliation_http_status: 410, provider_reconciliation_error_code: "session_error",
+          provider_reconciliation_detail: "Cloudflare reports the provider session expired or closed",
+        }).in("id", result.expired);
         if (result.failed.length) await db.from("live_published_tracks").update({
           status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
           last_cleanup_error: "Grant revocation close is unresolved",
@@ -133,6 +139,11 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         .eq("owner_id", body.targetUserId).eq("status", "active");
       const result = await closeProviderTracks((tracks || []) as unknown as ClosableTrack[]);
       if (result.closed.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now }).in("id", result.closed);
+      if (result.expired.length) await db.from("live_published_tracks").update({ status: "closed", closed_at: now, cleanup_retry_at: null,
+        provider_reconciliation_outcome: "confirmed_absent_or_expired", provider_reconciled_at: now,
+        provider_reconciliation_http_status: 410, provider_reconciliation_error_code: "session_error",
+        provider_reconciliation_detail: "Cloudflare reports the provider session expired or closed",
+      }).in("id", result.expired);
       if (result.failed.length) await db.from("live_published_tracks").update({
         status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
         last_cleanup_error: "Participant removal close is unresolved",
@@ -142,11 +153,16 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
         .eq("live_media_connections.user_id", body.targetUserId);
       const subscriptionResult = await closeProviderTracks((subscriptions || []) as unknown as ClosableTrack[]);
       if (subscriptionResult.closed.length) await db.from("live_track_subscriptions").update({ status: "closed", closed_at: now }).in("id", subscriptionResult.closed);
+      if (subscriptionResult.expired.length) await db.from("live_track_subscriptions").update({ status: "closed", closed_at: now, cleanup_retry_at: null,
+        provider_reconciliation_outcome: "confirmed_absent_or_expired", provider_reconciled_at: now,
+        provider_reconciliation_http_status: 410, provider_reconciliation_error_code: "session_error",
+        provider_reconciliation_detail: "Cloudflare reports the provider session expired or closed",
+      }).in("id", subscriptionResult.expired);
       if (subscriptionResult.failed.length) await db.from("live_track_subscriptions").update({
         status: "failed", cleanup_attempts: 1, cleanup_retry_at: new Date(Date.now() + 10_000).toISOString(),
         last_cleanup_error: "Participant removal close is unresolved",
       }).in("id", subscriptionResult.failed);
-      return NextResponse.json({ removed: true, terminatedPublications: result.closed.length, terminatedSubscriptions: subscriptionResult.closed.length });
+      return NextResponse.json({ removed: true, terminatedPublications: result.closed.length + result.expired.length, terminatedSubscriptions: subscriptionResult.closed.length + subscriptionResult.expired.length });
     }
     return failure("Unsupported classroom control", 400);
   } catch (error) {

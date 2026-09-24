@@ -4,6 +4,8 @@ export type SdpDescription = { type: "offer" | "answer"; sdp: string };
 export type PublishedTrackKind = "microphone" | "camera" | "screen";
 export type CloudflareTrackResult = {
   mid?: string;
+  location?: "local" | "remote";
+  status?: string;
   trackName?: string;
   sessionId?: string;
   errorCode?: string;
@@ -25,6 +27,7 @@ export class CloudflareRealtimeError extends Error {
     message: string,
     readonly status: number,
     readonly retryable: boolean,
+    readonly code?: string,
   ) {
     super(message);
     this.name = "CloudflareRealtimeError";
@@ -72,6 +75,7 @@ async function request(
           body.errorDescription || body.errorCode || `Cloudflare Realtime request failed (${response.status})`,
           response.status,
           retryable,
+          body.errorCode,
         );
         if (!retryable || attempt === 2) throw error;
         lastError = error;

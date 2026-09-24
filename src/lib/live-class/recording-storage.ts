@@ -10,6 +10,7 @@ import {
   UploadPartCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { createHash } from "node:crypto";
 
 export const RECORDING_PART_SIZE = 8 * 1024 * 1024;
 export const RECORDING_UPLOAD_URL_TTL_SECONDS = 15 * 60;
@@ -31,6 +32,7 @@ export interface RecordingStorage {
   complete(upload: Pick<MultipartUpload, "uploadId" | "objectKey">, parts: { partNumber: number; etag: string }[]): Promise<{ objectKey: string; etag: string | null; byteLength: number }>;
   abort(upload: Pick<MultipartUpload, "uploadId" | "objectKey">): Promise<void>;
   verify(objectKey: string): Promise<{ etag: string | null; byteLength: number; contentType: string | null }>;
+  digest(objectKey: string): Promise<{ sha256: string; byteLength: number }>;
   playbackUrl(objectKey: string): Promise<{ url: string; expiresAt: string }>;
 }
 
@@ -160,6 +162,15 @@ export const r2RecordingStorage: RecordingStorage = {
     const response = await client.send(new HeadObjectCommand({ Bucket: environment.bucket, Key: objectKey }));
     if (typeof response.ContentLength !== "number" || response.ContentLength <= 0) throw new Error("R2 object is empty or unavailable");
     return { etag: response.ETag ?? null, byteLength: response.ContentLength, contentType: response.ContentType ?? null };
+  },
+
+  async digest(objectKey) {
+    const { environment, client } = createR2Client();
+    const response = await client.send(new GetObjectCommand({ Bucket: environment.bucket, Key: objectKey }));
+    if (!response.Body) throw new Error("R2 object body is unavailable");
+    const bytes = await response.Body.transformToByteArray();
+    if (!bytes.byteLength) throw new Error("R2 object is empty");
+    return { sha256: createHash("sha256").update(bytes).digest("hex"), byteLength: bytes.byteLength };
   },
 
   async playbackUrl(objectKey) {
