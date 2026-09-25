@@ -1,5 +1,13 @@
 # ALS staging and physical-device acceptance ledger
 
+## Hostinger staging update — 25 September 2026
+
+The newer owner-approved target is a **separate Hostinger managed Node.js app**, not the historically blocked Vercel Hobby path described below. Current execution is recorded in [HOSTINGER-STAGING-DEPLOYMENT.md](HOSTINGER-STAGING-DEPLOYMENT.md). The isolated Free Supabase project `als-live-staging` (`slghshcdaijbcjfoqerq`) is healthy with all 42 committed migrations and synthetic Admin/Teacher/Student fixtures. Real authenticated eligibility and assignment RPC checks passed. The synthetic live session is still **scheduled**, and all local staging live gates are **disabled**.
+
+Hostinger account inspection and deployment are **BLOCKED pending owner sign-in** in connected Chrome. No Hostinger URL, ZIP upload, hosted media, recording, playback, scheduled-cleanup invocation, or phone run exists yet. Android Chrome and iPhone Safari are separately **NOT RUN**. Controlled pilot readiness remains **NOT READY**. The Supabase organization remained Free with spend cap enabled after staging creation; no Hostinger purchase or production change was made.
+
+The following older local acceptance evidence is preserved as history, not promoted to hosted evidence.
+
 Status as of 25 September 2026 (the local test crossed midnight Asia/Dubai). This ledger is separate from the accepted [two-hour local rehearsal](LIVE-CLASS-FULL-LENGTH-ACCEPTANCE.md). Hosted and physical-device tests were conditionally authorized, but stopped before hosted writes because the actual Vercel team is Hobby and this is a client/commercial project.
 
 | Gate | Verdict | Evidence or outstanding condition |

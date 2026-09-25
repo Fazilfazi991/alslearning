@@ -6,6 +6,7 @@ import { cloudflareRealtime, CloudflareRealtimeError, getIceServers, type Publis
 import { isSameOriginRequest } from "@/lib/request-origin";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { closeProviderTracks } from "@/lib/live-class/transport-cleanup";
+import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
 
 type Body = {
   action?: "create" | "publish" | "subscribe" | "unsubscribe" | "renegotiate" | "close" | "heartbeat" | "leave" | "stats";
@@ -126,6 +127,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
   let body: Body;
   try { body = await request.json() as Body; } catch { return jsonError("Invalid JSON request", 400); }
   if (!body.action || !body.mode) return jsonError("Invalid media operation", 400);
+  if (["create", "publish", "subscribe"].includes(body.action) && !stagingTestWindowOpen()) return jsonError("Staging test window is closed", 403);
 
   try {
     const configuration = assertLiveFeature(body.mode);

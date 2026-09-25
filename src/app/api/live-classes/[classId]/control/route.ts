@@ -6,6 +6,7 @@ import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError } from 
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { closeProviderTracks, type ClosableTrack } from "@/lib/live-class/transport-cleanup";
 import { reconcileClassTransport } from "@/lib/live-class/transport-reconciliation";
+import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
 
 type Body = {
   action?: "start" | "end" | "cancel" | "reschedule" | "grant" | "remove" | "reconcile";
@@ -34,6 +35,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
   let body: Body;
   try { body = await request.json() as Body; } catch { return failure("Invalid JSON request", 400); }
   if (!body.action || !body.mode) return failure("Invalid classroom control", 400);
+  if (body.action === "start" && !stagingTestWindowOpen()) return failure("Staging test window is closed", 403);
   try {
     assertLiveFeature(body.mode);
     const authorization = await authorizeLiveClass(db, auth.user.id, classId, "manage");
