@@ -5,14 +5,16 @@ $output = Join-Path $root $OutputDirectory
 if (-not (Test-Path -LiteralPath $output)) { New-Item -ItemType Directory -Path $output | Out-Null }
 $zipPath = Join-Path $output 'als-hostinger-staging-source.zip'
 if (Test-Path -LiteralPath $zipPath) { throw 'Archive already exists; choose a fresh output directory rather than overwriting evidence.' }
-$topFiles = @('package.json','pnpm-lock.yaml','pnpm-workspace.yaml','tsconfig.json','next.config.ts','postcss.config.mjs')
+$topFiles = @('package.json','package-lock.json','tsconfig.json','next.config.ts','postcss.config.mjs')
 $files = @($topFiles | ForEach-Object { Get-Item -LiteralPath (Join-Path $root $_) })
 $files += @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -File)
 $files += @(Get-ChildItem -LiteralPath (Join-Path $root 'public') -Recurse -File)
+$buildTypecheckScripts = @('scripts/pathology-import-model.mjs','scripts/question-reference-cleanup-model.mjs','scripts/recorded-classes-client-content.mjs')
+$files += @($buildTypecheckScripts | ForEach-Object { Get-Item -LiteralPath (Join-Path $root $_) })
 $entries = @($files | ForEach-Object {
   [pscustomobject]@{ Source = $_.FullName; Entry = $_.FullName.Substring($root.Length + 1).Replace('\','/') }
 } | Sort-Object Entry)
-if ($entries.Count -lt 100 -or $entries.Entry -notcontains 'package.json' -or $entries.Entry -notcontains 'pnpm-lock.yaml' -or $entries.Entry -notcontains 'src/proxy.ts') {
+if ($entries.Count -lt 100 -or $entries.Entry -notcontains 'package.json' -or $entries.Entry -notcontains 'package-lock.json' -or $entries.Entry -notcontains 'src/proxy.ts' -or @($buildTypecheckScripts | Where-Object { $entries.Entry -notcontains $_ }).Count) {
   throw 'Allowlist is incomplete.'
 }
 $denied = '(?i)(^|/)(\.env[^/]*|\.git|node_modules|\.next|\.local-qa|out|build|stitch_als_learning_nexus|.*\.zip|.*\.pem)(/|$)'
