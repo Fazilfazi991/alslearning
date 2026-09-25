@@ -7,6 +7,7 @@ import { r2RecordingStorage } from "@/lib/live-class/recording-storage";
 import { reconcileMultipartState, validateMultipartCompletion, type AcknowledgedPart } from "@/lib/live-class/recording-parts";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { assertRecordingOwnerWindow, assertRecordingSegmentMutation } from "@/lib/live-class/recording-recovery-policy";
+import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
 
 type Body = {
   action?: "begin" | "stop" | "sign" | "acknowledge" | "reconcile" | "complete" | "validate" | "interrupt" | "abort" | "review" | "publish" | "unpublish";
@@ -85,6 +86,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
   let body: Body;
   try { body = await request.json() as Body; } catch { return failure("Invalid JSON request", 400); }
   if (!body.action || !body.mode) return failure("Invalid recording operation", 400);
+  if (body.action === "begin" && !stagingTestWindowOpen()) return failure("Staging test window is closed", 403);
   try {
     const configuration = assertLiveFeature("recording");
     assertLiveFeature(body.mode);
