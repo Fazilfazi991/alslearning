@@ -5,7 +5,8 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { s
 vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: mock.getAll, set: mock.set }) }));
 import { POST } from "./route";
 
-const request = (origin="https://alslearning.vercel.app") => new Request("https://alslearning.vercel.app/auth/logout",{method:"POST",headers:{origin}});
+const request = (origin="https://alslearning.vercel.app", requestUrl="https://alslearning.vercel.app/auth/logout") =>
+  new Request(requestUrl,{method:"POST",headers:{origin,host:"alslearning.vercel.app"}});
 
 describe("account switching sign-out", () => {
   beforeEach(() => {
@@ -30,5 +31,10 @@ describe("account switching sign-out", () => {
   it("rejects a cross-origin logout without touching the authenticated session",async()=>{
     expect((await POST(request("https://unrelated.example"))).status).toBe(403);
     expect(mock.signOut).not.toHaveBeenCalled();
+  });
+  it("accepts the public origin behind a proxy with an internal request URL",async()=>{
+    const response=await POST(request("https://alslearning.vercel.app", "https://internal.invalid/auth/logout"));
+    expect(response.status).toBe(200);
+    expect(mock.signOut).toHaveBeenCalledWith({scope:"local"});
   });
 });
