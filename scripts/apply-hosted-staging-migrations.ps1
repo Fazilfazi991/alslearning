@@ -24,7 +24,8 @@ if ($project.ref -ne $projectRef -or $project.organization_id -ne $organizationI
   throw 'Project identity does not match isolated ALS staging.'
 }
 if ($project.status -ne 'ACTIVE_HEALTHY') { throw "Staging project is not healthy: $($project.status)" }
-$history = @(Invoke-RestMethod -Uri "$base/database/migrations" -Headers $headers -Method Get | Where-Object { $_ })
+$historyResponse = Invoke-RestMethod -Uri "$base/database/migrations" -Headers $headers -Method Get
+$history = @($historyResponse)
 $appliedNames = @($history | ForEach-Object { $_.name })
 $remaining = @($files | Where-Object { $_.BaseName -notin $appliedNames })
 Write-Output "Verified $projectName ($projectRef), $($files.Count) committed migrations, $($history.Count) recorded, $($remaining.Count) remaining."
@@ -32,7 +33,8 @@ if (-not $Apply) { return }
 
 foreach ($file in $remaining) {
   # Inspect live history again on retries. Never replay an already-recorded migration.
-  $history = @(Invoke-RestMethod -Uri "$base/database/migrations" -Headers $headers -Method Get | Where-Object { $_ })
+  $historyResponse = Invoke-RestMethod -Uri "$base/database/migrations" -Headers $headers -Method Get
+  $history = @($historyResponse)
   if ($file.BaseName -in @($history | ForEach-Object { $_.name })) { continue }
   $project = Invoke-RestMethod -Uri $base -Headers $headers -Method Get
   if ($project.ref -ne $projectRef -or $project.organization_id -ne $organizationId -or $project.name -ne $projectName) {
@@ -43,7 +45,8 @@ foreach ($file in $remaining) {
   Write-Output "Applied $($file.BaseName)"
 }
 
-$history = @(Invoke-RestMethod -Uri "$base/database/migrations" -Headers $headers -Method Get | Where-Object { $_ })
+$historyResponse = Invoke-RestMethod -Uri "$base/database/migrations" -Headers $headers -Method Get
+$history = @($historyResponse)
 $missing = @($files | Where-Object { $_.BaseName -notin @($history | ForEach-Object { $_.name }) })
 if ($missing.Count) { throw "$($missing.Count) committed migrations are not recorded remotely." }
 Write-Output "Verified all $($files.Count) committed migrations in staging history."
