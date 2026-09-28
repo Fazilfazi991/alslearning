@@ -5,11 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
-    "build:worker": "node scripts/build-recording-hash-worker.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "vitest run && node --test scripts/microbiology-import.test.mjs scripts/recording-hash-worker-bundle.node.mjs",
+    "test": "vitest run && node --test scripts/microbiology-import.test.mjs",
     "test:teacher-scope-qa": "node scripts/teacher-question-scope-qa.mjs",
     "test:core-db": "node --env-file=.env.local scripts/core-pipeline-qa.mjs",
     "test:core-security": "node --env-file=.env.local scripts/core-security-qa.mjs",

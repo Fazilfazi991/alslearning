@@ -9,13 +9,7 @@ $topFiles = @('package.json','package-lock.json','tsconfig.json','next.config.ts
 $files = @($topFiles | ForEach-Object { Get-Item -LiteralPath (Join-Path $root $_) })
 $files += @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -File)
 $files += @(Get-ChildItem -LiteralPath (Join-Path $root 'public') -Recurse -File)
-$buildTypecheckScripts = @(
-  'scripts/pathology-import-model.mjs',
-  'scripts/question-reference-cleanup-model.mjs',
-  'scripts/recorded-classes-client-content.mjs',
-  'scripts/build-recording-hash-worker.mjs',
-  'scripts/recording-hash.worker.entry.mjs'
-)
+$buildTypecheckScripts = @('scripts/pathology-import-model.mjs','scripts/question-reference-cleanup-model.mjs','scripts/recorded-classes-client-content.mjs')
 $files += @($buildTypecheckScripts | ForEach-Object { Get-Item -LiteralPath (Join-Path $root $_) })
 $entries = @($files | ForEach-Object {
   [pscustomobject]@{ Source = $_.FullName; Entry = $_.FullName.Substring($root.Length + 1).Replace('\','/') }
