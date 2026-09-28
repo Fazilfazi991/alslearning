@@ -15,6 +15,7 @@ import NotificationsError from "./notifications/error";
 import CertificatesError from "./certificates/error";
 import HelpError from "./help/error";
 import CoursesError from "./courses/error";
+import LiveClassesError from "./live-classes/error";
 
 describe("student dashboard truth", () => {
   it("counts only future scheduled classes and available tests", async () => {
@@ -52,6 +53,7 @@ describe("student error recovery", () => {
   it.each([
     ["exams", ExamsError], ["progress", ProgressError],
     ["notifications", NotificationsError], ["certificates", CertificatesError], ["help", HelpError],
+    ["live classes", LiveClassesError],
   ])("passes Next retry into the %s error page", (_, ErrorPage) => {
     const retry = vi.fn();
     const view = ErrorPage({ retry });
