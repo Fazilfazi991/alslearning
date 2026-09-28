@@ -40,7 +40,6 @@ import type {
   AcademicWorkspace,
   QuestionSource,
   QuestionType,
-  RecordStatus,
 } from "@/types/academic";
 import { facultyCounts, loadFacultyDirectory, subjectNames, type FacultyDirectory } from "@/lib/faculty-directory";
 
@@ -172,14 +171,14 @@ function Structure({
   const archive = async (id: string) => {
     const item = workspace.entities.find((x) => x.id === id);
     if (!item) return;
-    await archiveAcademicEntity(item);
+    const status = await archiveAcademicEntity(item);
     update((x) => ({
       ...x,
       entities: x.entities.map((value) =>
         value.id === id
           ? {
               ...value,
-              status: value.status === "Archived" ? "Active" : "Archived",
+              status,
             }
           : value,
       ),
@@ -253,7 +252,7 @@ function Structure({
                 kind,
                 name: "",
                 slug: "",
-                status: "Draft",
+                status: kind === "batch" ? "Upcoming" : "Draft",
                 order:
                   workspace.entities.filter((x) => x.kind === kind).length + 1,
               })
@@ -263,6 +262,7 @@ function Structure({
             Add {kind}
           </button>
         </div>
+        {kind === "batch" && <p className="mt-3 text-xs text-muted">To preserve Student access, batches can be archived but not deleted here.</p>}
         {actionError&&<p role="alert" className="mt-4 rounded bg-red-50 p-3 text-sm text-red-800">{actionError}</p>}<div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
@@ -318,14 +318,16 @@ function Structure({
                   <td className="p-3">
                     <div className="flex justify-end">
                       <button
-                        title="Archive"
+                        title={item.status === "Archived" ? (item.kind === "batch" ? "Restore batch as upcoming" : "Restore") : "Archive"}
+                        aria-label={item.status === "Archived" ? (item.kind === "batch" ? `Restore ${item.name} as upcoming` : `Restore ${item.name}`) : `Archive ${item.name}`}
                         onClick={() => void runAction(()=>archive(item.id))}
-                        className="p-2"
+                        className="inline-flex min-h-10 items-center gap-1 rounded p-2 text-xs font-semibold"
                       >
                         <Archive size={17} />
+                        {item.status === "Archived" ? "Restore" : "Archive"}
                       </button>
                       <button
-                        title="Delete draft"
+                        title={item.kind === "batch" ? "Batch deletion unavailable; archive instead" : "Delete draft"}
                         disabled={item.status !== "Draft"}
                         onClick={() => void runAction(()=>remove(item.id))}
                         className="p-2 text-red-700 disabled:opacity-25"
@@ -453,14 +455,22 @@ function EntityDialog({
               className={input}
               value={draft.status}
               onChange={(e) =>
-                setDraft({ ...draft, status: e.target.value as RecordStatus })
+                setDraft({ ...draft, status: e.target.value as AcademicEntity["status"] })
               }
             >
-              <option>Draft</option>
-              <option>Active</option>
-              <option>Archived</option>
+              {draft.kind === "batch" ? <>
+                <option>Upcoming</option>
+                <option>Active</option>
+                <option>Completed</option>
+                <option>Archived</option>
+              </> : <>
+                <option>Draft</option>
+                <option>Active</option>
+                <option>Archived</option>
+              </>}
             </select>
           </Field>
+          {draft.kind === "batch" && <p className="text-xs text-muted sm:col-span-2">Restore returns an archived batch to Upcoming. Choose Active explicitly to enable eligible Student access.</p>}
           {draft.kind==='program'&&<>
             {(['duration_days','access_validity_days'] as const).map(key=><Field key={key} label={key==='duration_days'?'Duration (days)':'Default access validity (days)'}><input type="number" min="1" className={input} value={Number(draft.metadata?.[key])||''} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,[key]:Number(e.target.value)}})}/></Field>)}
             <fieldset className="sm:col-span-2"><legend className="font-bold">Program subjects</legend>{choices.filter(x=>x.kind==='subject').map(x=><label key={x.id} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={((draft.metadata?.subjectIds||[]) as string[]).includes(x.id)} onChange={e=>{const ids=(draft.metadata?.subjectIds||[]) as string[];setDraft({...draft,metadata:{...draft.metadata,subjectIds:e.target.checked?[...ids,x.id]:ids.filter(id=>id!==x.id)}})}}/>{x.name}</label>)}</fieldset>
@@ -986,10 +996,10 @@ function Field({
     </label>
   );
 }
-function Status({ value }: { value: RecordStatus }) {
+function Status({ value }: { value: AcademicEntity["status"] }) {
   return (
     <span
-      className={`rounded-full px-2.5 py-1 text-xs font-bold ${value === "Active" ? "bg-green-50 text-green-800" : value === "Draft" ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-700"}`}
+      className={`rounded-full px-2.5 py-1 text-xs font-bold ${value === "Active" ? "bg-green-50 text-green-800" : value === "Draft" || value === "Upcoming" ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-700"}`}
     >
       {value}
     </span>
