@@ -102,11 +102,18 @@ async function reconcileRows(db: SupabaseClient, table: "live_published_tracks" 
 export async function reconcileClassTransport(
   db: SupabaseClient,
   classId: string,
-  options: { forceAll?: boolean } = {},
+  options: { forceAll?: boolean; forcedConnectionIds?: string[]; skipCandidateRpc?: boolean } = {},
 ) {
-  const { data: candidates, error: candidateError } = await db.rpc("live_transport_cleanup_candidates", { target_session: classId });
-  if (candidateError) throw candidateError;
-  const forced = new Set<string>((candidates || []).map((candidate: { connection_id: string }) => candidate.connection_id));
+  const candidates = options.skipCandidateRpc
+    ? []
+    : await db.rpc("live_transport_cleanup_candidates", { target_session: classId }).then(result => {
+      if (result.error) throw result.error;
+      return result.data || [];
+    });
+  const forced = new Set<string>([
+    ...candidates.map((candidate: { connection_id: string }) => candidate.connection_id),
+    ...(options.forcedConnectionIds || []),
+  ]);
   const select = "id,connection_id,provider_mid,status,cleanup_attempts,cleanup_retry_at,provider_reconciliation_outcome,live_media_connections!inner(provider_session_id,publisher_provider_session_id,status)";
   const [publicationQuery, subscriptionQuery] = await Promise.all([
     db.from("live_published_tracks").select(select).eq("session_id", classId).in("status", ["active", "closing", "failed"]),
@@ -128,10 +135,12 @@ export async function reconcileClassTransport(
       : [...forced];
     if (connectionIds.length) {
       const now = new Date().toISOString();
-      await Promise.all([
+      const updates = await Promise.all([
         db.from("live_media_connections").update({ status: "closed", closed_at: now }).in("id", connectionIds),
         db.from("live_attendance_intervals").update({ ended_at: now, ended_reason: "stale" }).in("connection_id", connectionIds).is("ended_at", null),
       ]);
+      const updateError = updates.find(result => result.error)?.error;
+      if (updateError) throw updateError;
     }
   }
   return {

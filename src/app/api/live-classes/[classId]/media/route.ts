@@ -139,9 +139,11 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const { data: prior } = await db.from("live_media_connections")
         .select("id,user_id,session_id,provider_session_id,publisher_provider_session_id,status").eq("session_id", classId).eq("user_id", auth.user.id)
         .in("status", ["active", "reconnecting"]).maybeSingle();
-      if (!prior && authorization.session.max_receivers) {
-        const { count } = await db.from("live_media_connections").select("id", { count: "exact", head: true })
-          .eq("session_id", classId).in("status", ["active", "reconnecting"]);
+      if (!prior && authorization.role === "student" && authorization.session.max_receivers) {
+        const { count, error: countError } = await db.from("live_media_connections").select("id", { count: "exact", head: true })
+          .eq("session_id", classId).in("status", ["active", "reconnecting"])
+          .neq("user_id", authorization.session.faculty_id);
+        if (countError) throw countError;
         if ((count || 0) >= authorization.session.max_receivers) throw new LiveAuthorizationError("This class has reached its configured receiver limit", 409);
       }
       if (prior) {

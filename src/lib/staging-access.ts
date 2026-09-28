@@ -75,6 +75,9 @@ export async function stagingAccessResponse(request: NextRequest): Promise<NextR
   if (path === "/api/auth/qa-password" || path.startsWith("/live-poc/") || path === "/api/cloudflare/realtime") {
     return guarded(new NextResponse("Not found", { status: 404 }));
   }
+  // Supabase Cron has no browser cookie. This exact machine endpoint verifies
+  // its own staging-only bearer token before doing any work.
+  if (path === "/api/internal/live-cleanup") return null;
   if (path === "/_staging-access") {
     if (request.method === "GET") {
       return formPage(secret);

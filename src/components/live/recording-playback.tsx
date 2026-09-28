@@ -22,9 +22,13 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
   const [loading, setLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const resumeAtRef = useRef(0);
+  const resumePlayingRef = useRef(false);
 
   const renew = useCallback(async (preservePosition = true) => {
-    if (preservePosition && videoRef.current) resumeAtRef.current = videoRef.current.currentTime;
+    if (preservePosition && videoRef.current) {
+      resumeAtRef.current = Number.isFinite(videoRef.current.currentTime) ? videoRef.current.currentTime : 0;
+      resumePlayingRef.current = !videoRef.current.paused && !videoRef.current.ended;
+    }
     setLoading(true); setError("");
     try {
       const response = await fetch(`/api/live-classes/${classId}/recordings?recordingId=${recordingId}${review ? "&review=1" : ""}`, { cache: "no-store", referrerPolicy: "no-referrer" });
@@ -53,8 +57,14 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
   const preparePlayback = (video: HTMLVideoElement) => {
     const resumeAt = resumeAtRef.current;
     resumeAtRef.current = 0;
+    const resumePlaying = () => {
+      if (!resumePlayingRef.current) return;
+      resumePlayingRef.current = false;
+      void video.play().catch(() => undefined);
+    };
     if (Number.isFinite(video.duration)) {
       if (resumeAt > 0) video.currentTime = Math.min(resumeAt, Math.max(video.duration - 0.01, 0));
+      resumePlaying();
       return;
     }
     const finishProbe = () => {
@@ -62,6 +72,7 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
       video.currentTime = Number.isFinite(duration)
         ? Math.min(resumeAt, Math.max(duration - 0.01, 0))
         : resumeAt;
+      resumePlaying();
     };
     video.addEventListener("seeked", finishProbe, { once: true });
     video.currentTime = 24 * 60 * 60;
@@ -82,11 +93,11 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
           preload="metadata"
           className="h-full w-full object-contain"
           onLoadedMetadata={event => preparePlayback(event.currentTarget)}
-          onEnded={() => { if (active + 1 < segments.length) { setActive(active + 1); resumeAtRef.current = 0; } }}
+          onEnded={() => { if (active + 1 < segments.length) { setActive(active + 1); resumeAtRef.current = 0; resumePlayingRef.current = false; } }}
           onError={() => void renew()}
         /> : <div className="grid h-full place-items-center p-6 text-center text-sm text-white">{loading ? "Authorizing private playback…" : "Playback unavailable"}</div>}
       </div>
-      {segments.length > 1 && <div className="flex flex-wrap gap-2 p-4" aria-label="Recording segments">{segments.map((value, index) => <button key={value.id} onClick={() => { resumeAtRef.current = 0; setActive(index); }} className={`min-h-11 rounded-lg px-4 text-sm font-bold ${index === active ? "bg-brand text-white" : "border border-line bg-white"}`}>Part {value.segmentNumber}</button>)}</div>}
+      {segments.length > 1 && <div className="flex flex-wrap gap-2 p-4" aria-label="Recording segments">{segments.map((value, index) => <button key={value.id} onClick={() => { resumeAtRef.current = 0; resumePlayingRef.current = false; setActive(index); }} className={`min-h-11 rounded-lg px-4 text-sm font-bold ${index === active ? "bg-brand text-white" : "border border-line bg-white"}`}>Part {value.segmentNumber}</button>)}</div>}
     </section>
   </div>;
 }

@@ -11,6 +11,7 @@ import {
 } from "@/lib/live-class/recording-store";
 import { emptyLiveStats, PeerStatsSampler, StatsIntervalAccumulator, type LiveStatsSample } from "@/lib/live-class/stats";
 import { formatAcademicDate } from "@/lib/live-class/date";
+import { acceptReceiveOffer } from "@/lib/live-class/receive-negotiation";
 import { Hand, Maximize, Mic, MicOff, MonitorUp, PhoneOff, Radio, RefreshCw, Video, VideoOff } from "lucide-react";
 
 type User = { id: string; role: "student" | "teacher" | "admin"; full_name: string; email: string | null };
@@ -137,6 +138,7 @@ export function NativeClassroom({
   const joinInFlightRef = useRef(false);
   const trackRefreshPromiseRef = useRef<Promise<void> | null>(null);
   const trackRefreshPendingRef = useRef(false);
+  const recoverReceiveRef = useRef<() => void>(() => undefined);
   const latestMessageRef = useRef(initialMessages.at(-1) ? {
     createdAt: initialMessages.at(-1)!.created_at,
     id: initialMessages.at(-1)!.id,
@@ -241,12 +243,8 @@ export function NativeClassroom({
     const value = await api<{ sessionDescription: RTCSessionDescriptionInit; tracks: { id: string; kind: RemoteTrack["kind"]; ownerId: string; mid?: string }[] }>("media", {
       action: "subscribe", connectionId: id, trackIds: selected.map(track => track.id),
     });
-    value.tracks.forEach(track => { if (track.mid) midMapRef.current.set(track.mid, track); subscribedRef.current.add(track.id); });
-    await peer.setRemoteDescription(value.sessionDescription);
-    const answer = await peer.createAnswer();
-    await peer.setLocalDescription(answer);
-    await waitForIce(peer);
-    await api("media", { action: "renegotiate", connectionId: id, sessionDescription: peer.localDescription });
+    await acceptReceiveOffer(peer, value, midMapRef.current, subscribedRef.current, () => waitForIce(peer),
+      async sessionDescription => { await api("media", { action: "renegotiate", connectionId: id, sessionDescription }); });
   }, [api, endpoint, lowData, mode, user.id]);
 
   const requestTrackRefresh = useCallback(() => {
@@ -264,6 +262,7 @@ export function NativeClassroom({
       if (trackRefreshPromiseRef.current === operation) trackRefreshPromiseRef.current = null;
     }, () => {
       if (trackRefreshPromiseRef.current === operation) trackRefreshPromiseRef.current = null;
+      recoverReceiveRef.current();
     });
     return operation;
   }, [connectionId, queue, subscribeAvailable]);
@@ -441,6 +440,7 @@ export function NativeClassroom({
     if (!entryEnabled || !configuration.realtimeConfigured || joinInFlightRef.current) return;
     joinInFlightRef.current = true;
     setConnectionState("joining"); setError("");
+    let createdConnectionId: string | null = null;
     try {
       if (recovery) {
         peerRef.current?.close();
@@ -450,6 +450,7 @@ export function NativeClassroom({
         subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
+      createdConnectionId = created.connectionId;
       const peerOptions: RTCConfiguration = {
         iceServers: created.iceServers,
         bundlePolicy: "max-bundle",
@@ -484,9 +485,31 @@ export function NativeClassroom({
         await queue(() => publishLocal(publisherPeer, created.connectionId, localStreamRef.current!.getTracks()));
       }
       if (recovery) setNotice("Classroom media reconnected. Re-share the teaching screen if screen capture was active.");
-    } catch (reason) { setConnectionState("failed"); setError(reason instanceof Error ? reason.message : "Could not join classroom"); }
+    } catch (reason) {
+      peerRef.current?.close(); publisherPeerRef.current?.close();
+      peerRef.current = null; publisherPeerRef.current = null;
+      midMapRef.current.clear(); subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
+      if (createdConnectionId) void api("media", { action: "leave", connectionId: createdConnectionId }).catch(() => undefined);
+      setConnectionId(null); setConnectionState("failed");
+      setError(reason instanceof Error ? reason.message : "Could not join classroom");
+    }
     finally { joinInFlightRef.current = false; }
   }
+
+  useEffect(() => {
+    recoverReceiveRef.current = () => {
+      if (joinInFlightRef.current || reconnectTimerRef.current !== null) return;
+      reconnectsRef.current += 1;
+      if (reconnectsRef.current > 3) { setConnectionState("failed"); return; }
+      setConnectionState("reconnecting");
+      const delay = [1_000, 3_000, 8_000][reconnectsRef.current - 1];
+      reconnectTimerRef.current = window.setTimeout(() => {
+        reconnectTimerRef.current = null;
+        void join(true);
+      }, delay);
+    };
+    return () => { recoverReceiveRef.current = () => undefined; };
+  });
 
   async function publishLocal(peer: RTCPeerConnection, id: string, tracks: MediaStreamTrack[]) {
     const permitted = tracks.filter(track => track.kind === "audio" ? (manager || participant?.audio_publish_allowed) : manager);
