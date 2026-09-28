@@ -14,6 +14,7 @@ import ProgressError from "./progress/error";
 import NotificationsError from "./notifications/error";
 import CertificatesError from "./certificates/error";
 import HelpError from "./help/error";
+import CoursesError from "./courses/error";
 
 describe("student dashboard truth", () => {
   it("counts only future scheduled classes and available tests", async () => {
@@ -56,5 +57,15 @@ describe("student error recovery", () => {
     const view = ErrorPage({ retry });
     expect(view.type).toBe(ErrorState);
     expect(view.props.onRetry).toBe(retry);
+  });
+
+  it("refetches Courses data through Next retry", () => {
+    const retry = vi.fn();
+    const view = CoursesError({ retry });
+    const button = Children.toArray(view.props.children).find(child => isValidElement(child) && child.type === "button");
+    expect(button).toBeDefined();
+    if (!isValidElement(button)) throw new Error("Courses retry button missing");
+    (button.props as { onClick?: () => void }).onClick?.();
+    expect(retry).toHaveBeenCalledOnce();
   });
 });
