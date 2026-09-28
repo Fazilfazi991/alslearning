@@ -144,11 +144,25 @@ function Enrollments({ data, busy, run }: Props) {
     [start, setStart] = useState(""),
     [expiry, setExpiry] = useState(""),
     [noExpiry, setNoExpiry] = useState(true),
-    [validation, setValidation] = useState("");
+    [validation, setValidation] = useState(""),
+    [saveNotice, setSaveNotice] = useState("");
   const names = new Map(
     data.profiles.map((x) => [x.id, x.full_name || x.email]),
   );
   const programs = new Map(data.programs.map((x) => [x.id, x.name]));
+  const prepareNewEnrollment = (keepStudent: boolean) => {
+    setEditing("");
+    if (!keepStudent) setStudent("");
+    setProgram("");
+    setBatch("");
+    setStatus("active");
+    setEnrolledOn(new Date().toISOString().slice(0, 10));
+    setStart("");
+    setExpiry("");
+    setNoExpiry(true);
+    setValidation("");
+    setSaveNotice("");
+  };
   return (
     <div className="grid gap-5 xl:grid-cols-[420px_1fr]">
       <form
@@ -158,8 +172,8 @@ function Enrollments({ data, busy, run }: Props) {
           if(!noExpiry && !expiry){setValidation("Choose an access expiry or enable no-expiry.");return}
           if(!noExpiry && start && new Date(expiry)<=new Date(start)){setValidation("Access expiry must be after access start.");return}
           setValidation("");
-          void run(() =>
-            saveEnrollment({
+          void run(async () => {
+            await saveEnrollment({
               ...(editing?{id:editing}:{}),
               student_id: student,
               program_id: program,
@@ -168,14 +182,24 @@ function Enrollments({ data, busy, run }: Props) {
               enrolled_on: enrolledOn,
               access_starts_at: start ? new Date(start).toISOString() : new Date(enrolledOn).toISOString(),
               access_expires_at: noExpiry ? null : new Date(expiry).toISOString(),
-            }),
-          );
+            });
+            const wasEditing = Boolean(editing);
+            prepareNewEnrollment(true);
+            setSaveNotice(
+              wasEditing
+                ? "Enrollment updated. Select another program to add access for this Student."
+                : "Enrollment saved. Select another program to add access for this Student.",
+            );
+          });
         }}
       >
+        <p className="text-sm text-muted">Each enrollment gives one Student access to one Program. Save another enrollment to add a second Program.</p>
+        {editing && <p role="note" className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Editing this enrollment. Changing Program and saving will replace its current Program. Use Add another program to keep this enrollment.</p>}
+        {saveNotice && <p role="status" className="rounded bg-green-50 p-3 text-sm text-green-800">{saveNotice}</p>}
         <Select
           label="Student"
           value={student}
-          onChange={setStudent}
+          onChange={(value) => { setStudent(value); setSaveNotice(""); }}
           items={students}
         />
         <label className="text-xs font-bold uppercase text-muted">Enrollment date<input type="date" required className={`${input} mt-2`} value={enrolledOn} onChange={e=>setEnrolledOn(e.target.value)}/></label>
@@ -185,6 +209,7 @@ function Enrollments({ data, busy, run }: Props) {
           onChange={(v) => {
             setProgram(v);
             setBatch("");
+            setSaveNotice("");
             if(!editing){const days=data.programs.find(p=>p.id===v)?.access_validity_days;setStart(localDateTime(new Date().toISOString()));setNoExpiry(!days);setExpiry(days?localDateTime(new Date(Date.now()+days*86400000).toISOString()):"")}
           }}
           items={data.programs}
@@ -231,7 +256,7 @@ function Enrollments({ data, busy, run }: Props) {
         <button disabled={busy || !student || !program} className={button}>
           {editing?"Update enrollment":"Save enrollment"}
         </button>
-        {editing&&<button type="button" className="min-h-10 rounded border px-4 text-sm font-bold" onClick={()=>{setEditing("");setStudent("");setProgram("");setBatch("");setStatus("active");setEnrolledOn(new Date().toISOString().slice(0,10));setStart("");setExpiry("");setNoExpiry(true)}}>Cancel edit</button>}
+        {editing&&<div className="flex flex-wrap gap-2"><button type="button" disabled={busy} className="min-h-10 rounded border border-brand px-4 text-sm font-bold text-brand disabled:opacity-50" onClick={() => prepareNewEnrollment(true)}>Add another program</button><button type="button" disabled={busy} className="min-h-10 rounded border px-4 text-sm font-bold disabled:opacity-50" onClick={() => prepareNewEnrollment(false)}>Cancel edit</button></div>}
       </form>
       <Rows
         empty="No enrollments yet."
@@ -240,7 +265,7 @@ function Enrollments({ data, busy, run }: Props) {
           primary: names.get(x.student_id) || "Student",
           secondary: programs.get(x.program_id) || "Program",
           meta: `${x.status} · ${x.access_expires_at ? new Date(x.access_expires_at).toLocaleDateString() : "No expiry"}`,
-          action: <div className="flex flex-wrap gap-2"><button className="min-h-10 rounded border px-3 text-sm font-bold" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?localDateTime(x.access_starts_at):"");setExpiry(x.access_expires_at?localDateTime(x.access_expires_at):"");setNoExpiry(!x.access_expires_at)}}>Edit</button><button className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
+          action: <div className="flex flex-wrap gap-2"><button disabled={busy} className="min-h-10 rounded border px-3 text-sm font-bold disabled:opacity-50" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?localDateTime(x.access_starts_at):"");setExpiry(x.access_expires_at?localDateTime(x.access_expires_at):"");setNoExpiry(!x.access_expires_at);setValidation("");setSaveNotice("")}}>Edit</button><button disabled={busy} className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
         }))}
       />
     </div>
