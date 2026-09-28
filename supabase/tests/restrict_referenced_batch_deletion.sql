@@ -1,11 +1,17 @@
--- Run with psql -X -v ON_ERROR_STOP=1 -f against a disposable, fully migrated
--- local database named als_batch_guard_<digits>. All synthetic rows roll back.
+-- Run with psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p <dedicated-port>
+-- -d als_batch_guard_<digits> -U postgres -v guard_marker=<lowercase-GUID>
+-- -f this-file.
+-- Provision COMMENT ON DATABASE als_batch_guard_<digits> IS
+-- 'als-batch-guard:<lowercase-GUID>' first. Inspect Docker container identity and port
+-- mapping out of band. All synthetic rows roll back.
 -- One setup path: replay migrations in a dedicated disposable local Supabase
 -- stack, quiesce its connections, then clone its migrated postgres database
 -- from a maintenance connection with CREATE DATABASE als_batch_guard_123
 -- TEMPLATE postgres. Connect only to that clone. Never use a linked database.
 -- Privileged integrity test only: Admin/Teacher/Student RLS and application
 -- journeys require separate local Supabase accounts and are not asserted here.
+-- An absent psql guard_marker variable is a SQL error before any fixture write.
+select set_config('als_batch_guard.expected_marker', :'guard_marker', false);
 select set_config(
   'als_batch_guard.fixture_label',
   'batch-guard-' || replace(gen_random_uuid()::text, '-', ''),
@@ -14,9 +20,18 @@ select set_config(
 begin;
 
 do $$
+declare
+  marker text := current_setting('als_batch_guard.expected_marker', true);
 begin
   if current_database() !~ '^als_batch_guard_[0-9]+$' then
     raise exception 'Refusing batch guard test outside an isolated local database';
+  end if;
+  if marker is null or marker !~* '^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'
+     or shobj_description(
+       (select oid from pg_database where datname = current_database()),
+       'pg_database'
+     ) is distinct from 'als-batch-guard:' || lower(marker) then
+    raise exception 'Disposable database comment marker missing or mismatched';
   end if;
 end $$;
 
