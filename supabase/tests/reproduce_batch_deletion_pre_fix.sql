@@ -1,14 +1,18 @@
 -- Privileged integrity reproduction for the schema BEFORE the restrictive FK
 -- migration. Run with psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1
--- -p <dedicated-port> -d als_batch_guard_<digits> -U postgres
--- -v guard_marker=<lowercase-GUID> -f this-file. Provision COMMENT ON DATABASE
--- als_batch_guard_<digits> IS 'als-batch-guard:<lowercase-GUID>' first; inspect Docker
--- container identity and port mapping out of band. The disposable local DB
+-- -p <dedicated-port> -d postgres -U postgres
+-- -v guard_project=als_batch_guard_<digits> -v guard_marker=<lowercase-GUID>
+-- -f this-file. Provision COMMENT ON DATABASE postgres IS
+-- 'als-batch-guard:<lowercase-GUID>:als_batch_guard_<digits>' first; inspect
+-- the disposable Docker container identity and port mapping out of band.
+-- A named DB equal to guard_project is also accepted with the same comment.
+-- The disposable local DB
 -- must exclude 20260928075559_restrict_referenced_batch_deletion.sql.
 -- This checks referential outcomes, not Admin/Teacher/Student RLS or an
 -- authenticated application journey. All synthetic rows roll back.
--- An absent psql guard_marker variable is a SQL error before any fixture write.
+-- An absent psql guard variable is a SQL error before any fixture write.
 select set_config('als_batch_guard.expected_marker', :'guard_marker', false);
+select set_config('als_batch_guard.expected_project', :'guard_project', false);
 select set_config(
   'als_batch_guard.pre_fix_label',
   'batch-pre-fix-' || replace(gen_random_uuid()::text, '-', ''),
@@ -19,15 +23,17 @@ begin;
 do $$
 declare
   marker text := current_setting('als_batch_guard.expected_marker', true);
+  project_id text := current_setting('als_batch_guard.expected_project', true);
 begin
-  if current_database() !~ '^als_batch_guard_[0-9]+$' then
-    raise exception 'Refusing pre-fix probe outside an isolated local database';
+  if project_id is null or project_id !~ '^als_batch_guard_[0-9]+$'
+     or current_database() not in ('postgres', project_id) then
+    raise exception 'Refusing pre-fix probe outside its isolated project database';
   end if;
   if marker is null or marker !~* '^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'
      or shobj_description(
        (select oid from pg_database where datname = current_database()),
        'pg_database'
-     ) is distinct from 'als-batch-guard:' || lower(marker) then
+     ) is distinct from 'als-batch-guard:' || lower(marker) || ':' || project_id then
     raise exception 'Disposable database comment marker missing or mismatched';
   end if;
 end $$;

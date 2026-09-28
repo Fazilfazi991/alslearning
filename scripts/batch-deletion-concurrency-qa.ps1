@@ -1,39 +1,73 @@
 <#
-Run only against a disposable, fully migrated local PostgreSQL database.
+Run only against a disposable, fully migrated local Supabase CLI stack.
 Preseed one unreferenced synthetic batch (slug batch-guard-concurrency-*) and
 one synthetic Teacher (@example.invalid). Both must belong to this database.
-Set the database comment to als-batch-guard:<Marker GUID> during provisioning.
+Set the postgres database comment to
+als-batch-guard:<lowercase Marker GUID>:<ProjectId> during provisioning.
+Supply the owned database container's full ID and exact name. Docker metadata,
+the dedicated host port, and the database identity are checked before writes.
 The script commits one synthetic child link, verifies FK rejection, then removes
 that exact link. All other writes roll back. Never run against a shared stack.
 This checks FK concurrency, not application authorization or RLS.
 #>
 param(
-  [Parameter(Mandatory = $true)][string]$PsqlPath,
-  [Parameter(Mandatory = $true)][ValidateSet('localhost', '127.0.0.1')][string]$HostName,
+  [Parameter(Mandatory = $true)][ValidatePattern('^als_batch_guard_[0-9]+$')][string]$ProjectId,
+  [Parameter(Mandatory = $true)][ValidatePattern('^supabase_db_als_batch_guard_[0-9]+$')][string]$ContainerName,
+  [Parameter(Mandatory = $true)][ValidatePattern('^[0-9a-f]{64}$')][string]$ContainerId,
   [Parameter(Mandatory = $true)][ValidateRange(1024, 65535)][int]$Port,
-  [Parameter(Mandatory = $true)][ValidatePattern('^als_batch_guard_[0-9]+$')][string]$Database,
   [Parameter(Mandatory = $true)][guid]$Marker,
   [Parameter(Mandatory = $true)][guid]$BatchId,
-  [Parameter(Mandatory = $true)][guid]$FacultyId,
-  [string]$Username = 'postgres'
+  [Parameter(Mandatory = $true)][guid]$FacultyId
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-if (-not [System.IO.Path]::IsPathFullyQualified($PsqlPath) -or
-    -not (Test-Path -LiteralPath $PsqlPath -PathType Leaf)) {
-  throw 'PsqlPath must be an existing absolute path to psql.'
+$dockerExecutable = (Get-Command docker.exe -CommandType Application -ErrorAction Stop).Source
+$expectedContainerName = "supabase_db_$ProjectId"
+if ($ContainerName -cne $expectedContainerName) {
+  throw "ContainerName must be $expectedContainerName."
 }
-$psqlExecutable = (Resolve-Path -LiteralPath $PsqlPath).Path
 $batch = $BatchId.ToString()
 $faculty = $FacultyId.ToString()
-$expectedMarker = 'als-batch-guard:' + $Marker.ToString()
+$expectedMarker = 'als-batch-guard:' + $Marker.ToString().ToLowerInvariant() + ':' + $ProjectId
+
+function Get-DockerInspectValue([string]$template) {
+  $result = & $dockerExecutable inspect --format $template $ContainerId 2>&1
+  if ($LASTEXITCODE -ne 0) { throw "Docker inspection failed for $ContainerId." }
+  return [string]$result
+}
+
+function Assert-DockerTarget {
+  if ((Get-DockerInspectValue '{{.Id}}').Trim() -cne $ContainerId -or
+      (Get-DockerInspectValue '{{.Name}}').Trim() -cne "/$ContainerName" -or
+      (Get-DockerInspectValue '{{index .Config.Labels "com.docker.compose.project"}}').Trim() -cne $ProjectId -or
+      (Get-DockerInspectValue '{{.State.Running}}').Trim() -cne 'true' -or
+      (Get-DockerInspectValue '{{.State.Health.Status}}').Trim() -cne 'healthy') {
+    throw 'Docker container ID, name, Compose project, or health did not match the disposable target.'
+  }
+  $ports = (Get-DockerInspectValue '{{json .NetworkSettings.Ports}}') | ConvertFrom-Json
+  if ($null -eq $ports -or $null -eq $ports.'5432/tcp') {
+    throw 'Disposable database has no external 5432/tcp mapping.'
+  }
+  $mappings = @($ports.'5432/tcp')
+  if ($mappings.Count -eq 0 -or
+      @($mappings | Where-Object { $_.HostPort -cne [string]$Port }).Count -gt 0) {
+    throw 'Database container port mapping does not match the dedicated external port.'
+  }
+  $client = [System.Net.Sockets.TcpClient]::new()
+  try {
+    $connect = $client.ConnectAsync([System.Net.IPAddress]::Parse('127.0.0.1'), $Port)
+    [void]$connect.WaitAsync([TimeSpan]::FromSeconds(3)).GetAwaiter().GetResult()
+  }
+  finally { $client.Dispose() }
+}
 
 function Start-PsqlSession {
   $info = [System.Diagnostics.ProcessStartInfo]::new()
-  $info.FileName = $psqlExecutable
-  foreach ($arg in @('-X', '-w', '-qAt', '-v', 'ON_ERROR_STOP=1', '-P', 'pager=off',
-      '-h', $HostName, '-p', [string]$Port, '-d', $Database, '-U', $Username)) {
+  $info.FileName = $dockerExecutable
+  foreach ($arg in @('exec', '-u', 'postgres', '-i', $ContainerId, 'psql',
+      '-X', '-w', '-qAt', '-v', 'ON_ERROR_STOP=1', '-P', 'pager=off',
+      '-h', '127.0.0.1', '-p', '5432', '-d', 'postgres', '-U', 'postgres')) {
     [void]$info.ArgumentList.Add($arg)
   }
   $info.UseShellExecute = $false
@@ -85,7 +119,7 @@ function Assert-FixtureState($observer) {
 }
 
 function Assert-LocalTarget($session) {
-  $identity = Invoke-SessionQuery $session "select case when current_database() = '$Database' and shobj_description((select oid from pg_database where datname = current_database()), 'pg_database') = '$expectedMarker' then 'safe' else 'unsafe' end;"
+  $identity = Invoke-SessionQuery $session "select case when current_database() = 'postgres' and shobj_description((select oid from pg_database where datname = current_database()), 'pg_database') = '$expectedMarker' then 'safe' else 'unsafe' end;"
   Assert-Equals $identity 'safe' 'Disposable database identity'
 }
 
@@ -104,6 +138,7 @@ $sessionB = $null
 $observer = $null
 $committedChildNeedsCleanup = $false
 try {
+  Assert-DockerTarget
   $sessionA = Start-PsqlSession
   $sessionB = Start-PsqlSession
   $observer = Start-PsqlSession
@@ -121,32 +156,39 @@ try {
   Assert-Equals (Invoke-SessionQuery $sessionA "begin; insert into public.batch_faculty(batch_id, faculty_id) values ('$batch'::uuid, '$faculty'::uuid); select 'insert-held';") 'insert-held' 'First insert'
   Send-Sql $sessionB "begin; set local statement_timeout = '15s'; delete from public.batches where id = '$batch'::uuid; select 'delete-finished';"
   Wait-ForLock $observer $sessionB.BackendPid
+  Write-Output 'Race 1: batch delete waited on the uncommitted faculty link.'
   Assert-Equals (Invoke-SessionQuery $sessionA "rollback; select 'insert-rolled-back';") 'insert-rolled-back' 'First rollback'
   Assert-Equals (Read-Result $sessionB) 'delete-finished' 'Delete after insert rollback'
   Assert-Equals (Invoke-SessionQuery $sessionB "rollback; select 'delete-rolled-back';") 'delete-rolled-back' 'Second rollback'
   Assert-FixtureState $sessionA
+  Write-Output 'Race 1: faculty insert rolled back; delete completed then rolled back; final batch:link rows = 1:0.'
 
   # A concurrent child insert must wait while a delete holds the parent key.
   Assert-Equals (Invoke-SessionQuery $sessionB "begin; delete from public.batches where id = '$batch'::uuid; select 'delete-held';") 'delete-held' 'Second delete'
   Send-Sql $sessionA "begin; set local statement_timeout = '15s'; insert into public.batch_faculty(batch_id, faculty_id) values ('$batch'::uuid, '$faculty'::uuid); select 'insert-finished';"
   Wait-ForLock $observer $sessionA.BackendPid
+  Write-Output 'Race 2: faculty insert waited on the uncommitted batch delete.'
   Assert-Equals (Invoke-SessionQuery $sessionB "rollback; select 'delete-rolled-back';") 'delete-rolled-back' 'Third rollback'
   Assert-Equals (Read-Result $sessionA) 'insert-finished' 'Insert after delete rollback'
   Assert-Equals (Invoke-SessionQuery $sessionA "rollback; select 'insert-rolled-back';") 'insert-rolled-back' 'Fourth rollback'
   Assert-FixtureState $sessionA
+  Write-Output 'Race 2: batch delete rolled back; insert completed then rolled back; final batch:link rows = 1:0.'
 
   # A committed child must make the waiting parent delete fail, leaving both rows.
   Assert-Equals (Invoke-SessionQuery $sessionA "begin; insert into public.batch_faculty(batch_id, faculty_id) values ('$batch'::uuid, '$faculty'::uuid); select 'insert-held';") 'insert-held' 'Committed insert setup'
   Send-Sql $sessionB "begin; set local statement_timeout = '15s'; do `$`$ declare observed_fk text; begin delete from public.batches where id = '$batch'::uuid; raise exception 'unexpected-delete-success'; exception when foreign_key_violation then get stacked diagnostics observed_fk = constraint_name; if observed_fk is distinct from 'batch_faculty_batch_id_fkey' then raise exception 'wrong-fk: %', observed_fk; end if; end `$`$; select 'fk-rejected';"
   Wait-ForLock $observer $sessionB.BackendPid
+  Write-Output 'Race 3: batch delete waited on the uncommitted faculty link.'
   $committedChildNeedsCleanup = $true
   Assert-Equals (Invoke-SessionQuery $sessionA "commit; select 'insert-committed';") 'insert-committed' 'Committed child insert'
   Assert-Equals (Read-Result $sessionB) 'fk-rejected' 'Delete after child commit'
   Assert-Equals (Invoke-SessionQuery $sessionB "rollback; select 'delete-rolled-back';") 'delete-rolled-back' 'Rejected delete rollback'
   Assert-Equals (Invoke-SessionQuery $sessionA "select (select count(*) from public.batches where id = '$batch'::uuid)::text || ':' || (select count(*) from public.batch_faculty where batch_id = '$batch'::uuid and faculty_id = '$faculty'::uuid)::text;") '1:1' 'Committed child and parent state'
+  Write-Output 'Race 3: faculty link committed; delete rejected by batch_faculty_batch_id_fkey; batch:link rows = 1:1.'
   Assert-Equals (Invoke-SessionQuery $sessionA "begin; delete from public.batch_faculty where batch_id = '$batch'::uuid and faculty_id = '$faculty'::uuid; commit; select 'cleaned';") 'cleaned' 'Synthetic link cleanup'
   $committedChildNeedsCleanup = $false
   Assert-FixtureState $sessionA
+  Write-Output 'Cleanup: exact synthetic faculty link removed; final batch:link rows = 1:0; five restrictive constraints remain.'
   Write-Output 'Batch deletion concurrency checks passed (two rollback races and committed child rejection).'
 }
 finally {
@@ -157,6 +199,7 @@ finally {
   if ($committedChildNeedsCleanup) {
     try {
       # The link was absent at preflight and is owned by this script.
+      Assert-DockerTarget
       $cleanupSession = Start-PsqlSession
       try {
         Assert-LocalTarget $cleanupSession
