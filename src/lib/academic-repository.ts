@@ -3,6 +3,7 @@ import type {
   AcademicEntity,
   AcademicQuestion,
   AcademicWorkspace,
+  BatchStatus,
   QuestionSource,
   QuestionType,
   RecordStatus,
@@ -24,9 +25,11 @@ function tableFor(kind: AcademicEntity["kind"]) {
     throw new Error(`Unsupported academic entity: ${kind}`);
   return tableByKind[kind as keyof typeof tableByKind];
 }
-const dbStatus = (s: RecordStatus) => s.toLowerCase();
+const dbStatus = (s: AcademicEntity["status"]) => s.toLowerCase();
 const uiStatus = (s: unknown): RecordStatus =>
   s === "active" ? "Active" : s === "archived" ? "Archived" : "Draft";
+const batchStatus = (s: unknown): BatchStatus =>
+  s === "active" ? "Active" : s === "completed" ? "Completed" : s === "archived" ? "Archived" : "Upcoming";
 const questionTypeToDb: Record<QuestionType, string> = {
   "Single-answer MCQ": "single_mcq",
   "Multiple-answer MCQ": "multiple_mcq",
@@ -59,7 +62,7 @@ function entity(
     slug: String(row.slug),
     parentId,
     metadata: {duration_days:Number(row.duration_days||0),access_validity_days:Number(row.access_validity_days||0),subjectIds:((row.program_subjects||[]) as {subject_id:string}[]).map(x=>x.subject_id),starts_on:String(row.starts_on||''),ends_on:String(row.ends_on||''),access_starts_at:String(row.access_starts_at||''),access_expires_at:String(row.access_expires_at||''),class_timing:Array.isArray(row.schedule)?String((row.schedule[0] as {label?:string})?.label||''):''},
-    status: uiStatus(row.status),
+    status: kind === "batch" ? batchStatus(row.status) : uiStatus(row.status),
     order: Number(row.display_order || 0),
     description: row.description ? String(row.description) : undefined,
   };
@@ -184,6 +187,8 @@ export async function saveAcademicEntity(
   item: AcademicEntity,
   all: AcademicEntity[],
 ) {
+  if (item.kind !== "batch" && (item.status === "Upcoming" || item.status === "Completed"))
+    throw new Error("This status is only available for batches.");
   const db = createClient(),
     parent = all.find((x) => x.id === item.parentId);
   let payload: Row = {
@@ -226,12 +231,7 @@ export async function saveAcademicEntity(
       starts_on:item.metadata?.starts_on||null,ends_on:item.metadata?.ends_on||null,
       access_starts_at:item.metadata?.access_starts_at||null,access_expires_at:item.metadata?.access_expires_at||null,
       schedule:item.metadata?.class_timing?[{label:item.metadata.class_timing}]:[],
-      status:
-        item.status === "Archived"
-          ? "archived"
-          : item.status === "Active"
-            ? "active"
-            : "upcoming",
+      status: item.status === "Completed" ? "completed" : item.status === "Archived" ? "archived" : item.status === "Active" ? "active" : "upcoming",
     };
   }
   if (item.kind === "video" || item.kind === "material") {
@@ -254,14 +254,21 @@ export async function saveAcademicEntity(
   assert(error);
   if(item.kind==='program'){const r=await db.rpc('core_program_subjects',{target_program:item.id,subject_ids:item.metadata?.subjectIds||[]});assert(r.error)}
 }
+export function nextAcademicStatus(item: Pick<AcademicEntity, "kind" | "status">): AcademicEntity["status"] {
+  return item.status === "Archived" ? (item.kind === "batch" ? "Upcoming" : "Active") : "Archived";
+}
 export async function archiveAcademicEntity(item: AcademicEntity) {
+  const status = nextAcademicStatus(item);
   const { error } = await createClient()
     .from(tableFor(item.kind))
-    .update({ status: item.status === "Archived" ? "active" : "archived" })
+    .update({ status: dbStatus(status) })
     .eq("id", item.id);
   assert(error);
+  return status;
 }
 export async function deleteAcademicEntity(item: AcademicEntity) {
+  if (item.kind === "batch")
+    throw new Error("Batch deletion could change Student access. Archive the batch instead.");
   const { error } = await createClient()
     .from(tableFor(item.kind))
     .delete()
