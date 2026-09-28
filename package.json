@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/build-recording-hash-worker.mjs && next build --webpack",
+    "build": "next build --webpack",
+    "build:worker": "node scripts/build-recording-hash-worker.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
