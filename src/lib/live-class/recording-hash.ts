@@ -10,7 +10,7 @@ export function hashRecordingBlob(
   blob: Blob,
   options: { signal?: AbortSignal; onProgress?: (bytes: number) => void; createWorker?: () => Worker } = {},
 ) {
-  const worker = options.createWorker?.() || new Worker(new URL("./recording-hash.worker.ts", import.meta.url), { type: "module" });
+  const worker = options.createWorker?.() || new Worker("/recording-hash.worker.js");
   let nextId = 0;
   let pending: { id: number; resolve: (response: Response) => void; reject: (error: Error) => void } | null = null;
   const aborted = () => new DOMException("Recording hash cancelled", "AbortError");
