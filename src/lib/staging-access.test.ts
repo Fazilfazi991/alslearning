@@ -28,6 +28,11 @@ describe("staging access gate", () => {
     expect(api?.headers.get("x-robots-tag")).toContain("noindex");
   });
 
+  it("leaves only the machine cleanup route to its own bearer-token guard", async () => {
+    expect(await stagingAccessResponse(new NextRequest(`${origin}/api/internal/live-cleanup`, { method: "POST" }))).toBeNull();
+    expect((await stagingAccessResponse(new NextRequest(`${origin}/api/internal/live-cleanup/other`, { method: "POST" })))?.status).toBe(401);
+  });
+
   it("requires its signed form token, including when Origin is absent, before issuing the access cookie", async () => {
     const page = await stagingAccessResponse(new NextRequest(`${origin}/_staging-access`));
     expect(page?.status).toBe(200);
