@@ -1,5 +1,32 @@
 # ALS staging Cloudflare containment — 1 October 2026
 
+## Replacement checkpoint — later approval supersedes the restriction below
+
+The owner subsequently approved replacing exactly the two exposed staging resources and deleting the old resources after all replacement checks pass. No Production/shared dependency, new subscription, billing change, R2 change or Supabase change is authorized.
+
+| Resource | Historical name / ID | Replacement name / ID |
+| --- | --- | --- |
+| SFU | `als-live-poc-sfu` / `40e420640816dc9b001da1c95406c235` | `als-staging-sfu-containment-20261001` / `6306f9d5f836a1aa08b0d6bbde22f10b` |
+| TURN | `als-live-poc-turn` / `4ac123acad18fec90a7c6013054dbc8d` | `als-staging-turn-containment-20261001` / `19951d8aa17f40210ffc756ba8c1ba3a` |
+
+- SFU replacement created at **2026-10-01T11:00:48.334Z**; TURN replacement at **2026-10-01T11:01:48.391Z**, in the same verified configured Cloudflare account. Creation presented no payment, plan change or account permission grant. No resource-secret expiry control was exposed.
+- Provider verification at **2026-10-01T11:03:28.225Z**: replacement SFU session creation HTTP 201, exact session GET HTTP 200 with zero tracks; replacement TURN credential generation HTTP 201 with a 60-second TTL. Generated credentials were not emitted or retained.
+- Inert SFU verification session: `8d819ff706e7d96887a195bc0f9d6590e17bdcf451fcb597c70e2c57478f0851`. At **2026-10-01T11:14:17.044Z**, the provider explicitly returned HTTP 410 / `session_error`; replacement TURN generation remained HTTP 201. No WebRTC publication was established by these checks.
+- Both approved staging consumers now contain the replacement IDs and credentials: ignored `als-hostinger-staging/.env.hostinger.live.local` and the existing Hostinger staging environment. Only the four `CF_REALTIME_APP_ID`, `CF_REALTIME_APP_SECRET`, `CF_TURN_KEY_ID`, `CF_TURN_KEY_API_TOKEN` labels changed. All other hosted values matched the saved baseline, including R2, Supabase, guard and disabled media flags.
+- Configuration-only Hostinger deployment **`01a0f728-aa16-71a3-bf3c-1f80f55d6708`** completed using the previous accepted source files. All 25 hosted values were privately read back and matched. Temporary credential capture was removed after installation; no old-secret rollback file was created.
+- Anonymous staging gate remains HTTP 307. All 22 fixture/authorization checks pass; five original primary enrollment IDs, separate Program rows, status and start are preserved. Exact expiry remains **2026-10-08T07:40:22.181Z**.
+- At **2026-10-01T11:15:18.155Z**, the protected hosted cleanup route accepted its existing separate Vault token with zero candidate categories, HTTP 200, zero provider calls and zero row changes. This is a containment regression check, not scheduled Step 2 acceptance.
+- Historical non-secret connection/session/publication/reconciliation identifiers were exported before deletion into ignored `.local-qa/credential-step2/historical-provider.json`. Existing database audit rows remain intact. Source workflows contain neither historical resource ID as a hardcoded dependency.
+- Genuine hosted Teacher, Admin and Student sign-ins passed after the replacement deploy. Teacher Question Bank loaded with Add question enabled; the Student private synthetic image decoded successfully. No question, attempt or playback mutation occurred.
+- Focused cleanup/retry tests: **3 files / 11 tests passed** at 15:19 Dubai. These include controlled transient read recovery, a three-attempt bound, provider closure/expiry handling, and terminal reconciliation normalization; no deployed credential was tampered with.
+- Fresh guarded database observation at **2026-10-01T11:29:03.307765Z**: zero live classes, open/reconnecting/failed connections, active/closing publications/subscriptions, open attendance and recording/upload/interrupted segments; job 1 paused, 46 migrations preserved.
+- **Old resources are still retained at this checkpoint.** Both exact old-resource deletion dialogs are prepared and show permanent, nonrecoverable deletion. The computer-use policy requires user confirmation at action time even with earlier preapproval. One bundled confirmation for those two exact IDs was requested after all replacement checks passed; no deletion has been submitted. No provider subscription, R2 resource or unrelated resource is selected.
+- Step 2 is prepared but **not executed while that required confirmation is pending**: no fresh class, real publication, abandonment or scheduled acceptance run exists. The Admin schedule form contains permitted synthetic scope and recording unchecked but has not been submitted. Existing last cron run/request ID is 44; the next acceptance must start with a fresh quiet-state check and bounded window after deletion/rejection verification. No manual cleanup action is part of the planned acceptance.
+- The previous blocked report below is retained as historical evidence, not the current replacement verdict. Resource replacement verification is complete; containment remains incomplete until old-resource deletion and rejection checks pass.
+
+Safe deployment evidence: [replacement completed](evidence/als-provider-replacement-20261001/hostinger-replacement-completed.png).
+Safe pending-action evidence: [exact old SFU dialog](evidence/als-provider-replacement-20261001/old-sfu-delete-confirmation.png), [exact old TURN dialog](evidence/als-provider-replacement-20261001/old-turn-delete-confirmation.png), [Student regression](evidence/als-provider-replacement-20261001/student-regression.png).
+
 ## Result
 
 **Containment is blocked by the existing-resource restriction.** The owner approved replacement of `CF_REALTIME_APP_SECRET` and `CF_TURN_KEY_API_TOKEN` on the existing staging resources and explicitly excluded deleting/recreating those resources. No supported in-place credential replacement/revocation operation was found in the current dashboard or official SFU/TURN management API. No credential, resource, deployment or feature setting was changed.

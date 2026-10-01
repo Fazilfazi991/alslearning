@@ -1,5 +1,17 @@
 # ALS Step 2 — unattended shutdown preflight, 1 October 2026
 
+## Current replacement checkpoint — 11:29 UTC
+
+The later owner approval explicitly permits one replacement staging SFU app and TURN key, verified consumer installation, then deletion of the two exact old resources. Both replacements are created and provider-verified; the accepted Hostinger source completed configuration deployment `01a0f728-aa16-71a3-bf3c-1f80f55d6708`. All academic checks and genuine role sign-ins passed; R2, Supabase and exact Student expiry are unchanged.
+
+Old-resource deletion is prepared but pending the browser policy's required **action-time confirmation for permanent deletion**. This confirmation was requested only after replacement checks passed. Containment is therefore incomplete, and Step 2 has not opened media or resumed cron. See the [current provider checkpoint](ALS-CLOUDFLARE-CONTAINMENT-2026-10-01.md).
+
+Prepared acceptance tools privately inspect the exact replacement provider session, database state, existing job/run/request IDs and unchanged unrelated scheduled fixture. The unsubmitted synthetic Admin schedule uses the existing permitted Teacher/Program/Subject/Batch, one expected receiver and recording unchecked. No new class exists yet. Last scheduled run/request baseline: **44**; none is claimed as a new acceptance run.
+
+Cleanup/retry evidence refreshed: **11 tests in 3 files passed** at 15:19 Dubai, including a test-controlled transient read recovery with a three-attempt bound. No credential tampering or live failure injection. Native browser destruction will be used rather than navigating away: normal React unmount can send a keepalive leave request, whereas abrupt tab destruction does not explicitly run the normal Leave/End controls. Database/provider evidence must still establish that scheduled cleanup processed a genuine stale connection; browser closure alone will not be counted as success.
+
+At **2026-10-01T11:29:03.307765Z**, all active database media categories are zero, cron job 1 paused, all three media flags false, 46 migrations retained. No fresh media, abandonment, scheduled closure or provider isolation result is claimed. The earlier blocked preflight below remains historical.
+
 ## Later containment checkpoint
 
 The owner subsequently approved in-place staging SFU/TURN containment. The [provider containment report](ALS-CLOUDFLARE-CONTAINMENT-2026-10-01.md) records verified consumers, current dashboard/API findings, fresh academic checks and the resulting resource-replacement approval boundary. No supported in-place secret replacement was found; no credentials/resources changed and Step 2 remains unproven. The original preflight observations below are retained as history.
