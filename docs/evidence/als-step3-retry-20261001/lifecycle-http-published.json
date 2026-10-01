@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-01T18:20:33.423Z",
+  "phase": "published",
+  "captureDenied": 403,
+  "captureError": "Staging test window is closed",
+  "expiredDirectPlaybackDenied": 403,
+  "expiredReason": "Current enrollment does not permit this classroom",
+  "eligiblePlayback": 200,
+  "replay": {
+    "status": "published",
+    "segments": 1,
+    "duration": 184.958,
+    "bytes": 4451838,
+    "authorized": true,
+    "renewed": true
+  }
+}
