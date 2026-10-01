@@ -1,5 +1,9 @@
 # ALS manual-test staging release — 1 October 2026
 
+## Later credential-only checkpoint
+
+The separately approved [1 October Step 1 credential report](ALS-STAGING-CREDENTIALS-STEP1-2026-10-01.md) records the R2 replacement and configuration-only redeploy `01a0f6d2-acbf-7354-8560-771584bb859a`, using this same application source/ZIP. Academic expiry and data were preserved; live/replay remain blocked. The release observations below are the earlier academic handoff history.
+
 ## Deployment
 
 - Protected site: https://darkgreen-camel-484366.hostingersite.com/
