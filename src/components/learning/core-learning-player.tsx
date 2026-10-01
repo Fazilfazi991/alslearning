@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useEngagedPlayback } from "@/components/learning/use-engaged-playback";
+import { LogoutButton } from "@/components/shared/logout-button";
 import { createClient } from "@/lib/supabase/client";
 export function CoreLearningPlayer({
   data,
@@ -21,6 +23,8 @@ export function CoreLearningPlayer({
   };
 }) {
   const [error, setError] = useState("");
+  const video = useRef<HTMLVideoElement>(null);
+  useEngagedPlayback(video, "lesson", data.content.id);
   const c = data.content,
     url = data.sourceUrl;
   const youtube = () => {
@@ -55,12 +59,15 @@ export function CoreLearningPlayer({
   }
   return (
     <div className="mx-auto max-w-5xl p-4 sm:p-6">
+      <header className="flex flex-wrap items-center justify-between gap-3">
       <Link
         className="inline-flex min-h-11 items-center font-bold text-brand"
         href={`/student/courses/${c.programs?.slug || ""}`}
       >
         ← Back to program
       </Link>
+      <LogoutButton className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold" />
+      </header>
       <h1 className="my-4 text-2xl font-bold">{c.title}</h1>
       {error && (
         <p role="alert" className="rounded bg-red-50 p-3 text-red-800">
@@ -79,6 +86,7 @@ export function CoreLearningPlayer({
               />
             ) : (
               <video
+                ref={video}
                 aria-label={c.title}
                 src={url}
                 controls

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { currentUser } from "@/lib/auth";
 import { assertClassroomMode, authorizeLiveClass } from "./authorization";
 import { liveClassConfiguration } from "./config";
+import { stagingTestWindowOpen } from "./staging-window";
 
 export async function getClassroomData(classId: string, mode: "poc" | "classroom") {
   const user = await currentUser();
@@ -31,6 +32,12 @@ export async function getClassroomData(classId: string, mode: "poc" | "classroom
   const failed = [session, participant, participants, messages, polls, questions, recordings].find(result => result.error);
   if (failed?.error || !session.data) throw new Error(failed?.error?.message || "Classroom is unavailable");
   const configuration = liveClassConfiguration();
+  const windowStart = Date.parse(process.env.ALS_STAGING_TEST_START_UTC || "");
+  const windowEnd = Date.parse(process.env.ALS_STAGING_TEST_CUTOFF_UTC || "");
+  const testingWindow = {
+    opensAt: Number.isFinite(windowStart) ? new Date(windowStart).toISOString() : null,
+    closesAt: Number.isFinite(windowEnd) ? new Date(windowEnd).toISOString() : null,
+  };
   const publicSession = session.data as unknown as {
     id: string; title: string; faculty_id: string; status: string; starts_at: string | null; ends_at: string | null;
     program_id: string | null; batch_id: string | null; subject_id: string | null; recording_enabled: boolean; provider: string;
@@ -55,6 +62,7 @@ export async function getClassroomData(classId: string, mode: "poc" | "classroom
     mode,
     timeZone: process.env.ALS_ACADEMIC_TIME_ZONE || "Asia/Dubai",
     configuration,
-    entryEnabled: mode === "poc" ? configuration.pocEnabled : configuration.classroomEnabled,
+    testingWindow,
+    entryEnabled: (mode === "poc" ? configuration.pocEnabled : configuration.classroomEnabled) && stagingTestWindowOpen(),
   };
 }

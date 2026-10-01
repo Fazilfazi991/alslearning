@@ -4,14 +4,16 @@ import { PageHeader } from "@/components/student/page-header";
 import { getStudentPortalData } from "@/lib/student-data";
 import { liveClassConfiguration } from "@/lib/live-class/config";
 import { formatAcademicDate } from "@/lib/live-class/date";
+import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
 
 export default async function Page() {
   const data = await getStudentPortalData();
   const sessions = data?.sessions || [];
-  const configuration = liveClassConfiguration();
+  const liveConfiguration = liveClassConfiguration();
+  const configuration = { ...liveConfiguration, classroomEnabled: liveConfiguration.classroomEnabled && stagingTestWindowOpen() };
   const timeZone = process.env.ALS_ACADEMIC_TIME_ZONE || "Asia/Dubai";
   return <div className="mx-auto max-w-[1220px]"><PageHeader title="Live Classes" description="Eligible live sessions and published lesson replays for your active cohort."/>
-    {!configuration.classroomEnabled && <p className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-950">Normal classroom entry is disabled while acceptance testing continues. Scheduled classes remain visible.</p>}
+    {!configuration.classroomEnabled && <p className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-950">Live media is currently unavailable. Your academic access continues, and you can view scheduled class details. The release owner will confirm when a new testing window is available.</p>}
     {sessions.length ? <div className="grid gap-4 lg:grid-cols-2">{sessions.map(session => {
       const recordings = (session.class_recordings || []).filter(recording => recording.status === "published" && recording.published_at);
       const teacher = Array.isArray(session.profiles) ? session.profiles[0] : session.profiles;

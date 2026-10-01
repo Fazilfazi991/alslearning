@@ -13,6 +13,7 @@ export function ClassroomScreen({ data }: { data: NonNullable<Awaited<ReturnType
     recordings={data.recordings}
     configuration={data.configuration}
     entryEnabled={data.entryEnabled}
+    testingWindow={data.testingWindow}
     mode={data.mode}
     timeZone={data.timeZone}
   />;

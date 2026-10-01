@@ -1,5 +1,5 @@
 import {beforeEach,describe,expect,it,vi} from "vitest";
-const mock=vi.hoisted(()=>({requests:[] as {table:string;calls:[string,...unknown[]][]}[],error:null as null|{message:string},count:2472,role:"admin",active:true,rows:[{id:"q",prompt:"Stem"}],assignments:[{subject_id:"assigned",program_id:null,can_manage_questions:true}],detail:vi.fn(),metadata:vi.fn()}));
+const mock=vi.hoisted(()=>({requests:[] as {table:string;calls:[string,...unknown[]][]}[],error:null as null|{message:string},count:2472,role:"admin",active:true,rows:[{id:"q",prompt:"Stem"}],assignments:[{subject_id:"assigned",program_id:null,can_manage_questions:true}] as {subject_id:string|null;program_id:string|null;can_manage_questions:boolean}[],detail:vi.fn(),metadata:vi.fn()}));
 vi.mock("./test-repository",()=>({loadQuestionPreview:mock.detail,loadAcademicMetadata:mock.metadata}));
 vi.mock("./supabase/client",()=>({createClient:()=>({auth:{getUser:async()=>({data:{user:{id:"admin"}},error:null})},from:(table:string)=>{
  const r={table,calls:[] as [string,...unknown[]][]};mock.requests.push(r);
@@ -11,7 +11,7 @@ import {loadQuestionPage,countQuestions,loadQuestionDetail,questionBankIdentity,
 import {emptyQuestionFilters} from "./question-bank";
 const actor={id:"admin",role:"admin"},hierarchy={subjects:[],chapters:[]};
 describe("bounded authenticated question-bank queries",()=>{
- beforeEach(()=>{mock.requests=[];mock.error=null;mock.count=2472;mock.role="admin";mock.active=true;mock.detail.mockReset();mock.metadata.mockReset();});
+ beforeEach(()=>{mock.requests=[];mock.error=null;mock.count=2472;mock.role="admin";mock.active=true;mock.assignments=[{subject_id:"assigned",program_id:null,can_manage_questions:true}];mock.detail.mockReset();mock.metadata.mockReset();});
  it.each([0,1,399])("fetches exactly one bounded page %i without any full-bank loop",async(page)=>{await loadQuestionPage(actor,{...emptyQuestionFilters,page},hierarchy);expect(mock.requests).toHaveLength(1);expect(mock.requests[0].calls).toContainEqual(["range",page*25,page*25+24]);expect(mock.requests[0].calls).toContainEqual(["select",QUESTION_LIST_COLUMNS,{}]);expect(QUESTION_LIST_COLUMNS).not.toMatch(/\*|rich|options|answer|explanation|media/);expect(mock.detail).not.toHaveBeenCalled();});
  it("counts with HEAD and returns exact count without downloading rows",async()=>{expect(await countQuestions(actor,emptyQuestionFilters,hierarchy)).toBe(2472);expect(mock.requests[0].calls).toContainEqual(["select","id",{head:true,count:"exact"}]);expect(mock.requests[0].calls.some(c=>c[0]==="range")).toBe(false);});
  it("applies identical subject,section,Draft,source,review and search to list and count",async()=>{const f={...emptyQuestionFilters,subject:"s",section:"c",status:"draft",source:"standard",review:true,search:"DNA"};await loadQuestionPage(actor,f,hierarchy);await countQuestions(actor,f,hierarchy);const filters=(i:number)=>mock.requests[i].calls.filter(c=>["eq","ilike","or"].includes(c[0]));expect(filters(0)).toEqual(filters(1));expect(filters(0)).toContainEqual(["eq","status","draft"]);expect(filters(0)).toContainEqual(["eq","subject_id","s"]);expect(filters(0)).toContainEqual(["eq","chapter_id","c"]);});
@@ -28,7 +28,19 @@ describe("bounded authenticated question-bank queries",()=>{
   const data=await loadQuestionBankMetadata({id:"teacher",role:"teacher"});
   expect(data.subjects.map(row=>row.id)).toEqual(["assigned"]);expect(data.chapters.map(row=>row.id)).toEqual(["a"]);expect(data.topics.map(row=>row.id)).toEqual(["at"]);
   expect(data.assignments).toEqual(mock.assignments);
+  expect(data.authoringState).toBe("ready");
   expect(mock.requests[0].calls).toContainEqual(["select","exam_id,program_id,subject_id,can_manage_content,can_manage_questions,can_manage_tests"]);
   expect(mock.requests.map(request=>request.table)).toEqual(["faculty_assignments"]);expect(mock.requests[0].calls).toContainEqual(["eq","faculty_id","teacher"]);
+ });
+ it("distinguishes no assignment, missing permission and unmapped Subject without widening authoring scope",async()=>{
+  mock.metadata.mockResolvedValue({exams:[],programs:[],batches:[],subjects:[{id:"assigned",name:"Assigned"}],chapters:[],topics:[],mappings:[]});
+  mock.assignments=[];
+  expect((await loadQuestionBankMetadata({id:"teacher",role:"teacher"})).authoringState).toBe("no_assignment");
+  mock.assignments=[{subject_id:"assigned",program_id:null,can_manage_questions:false}];
+  const denied=await loadQuestionBankMetadata({id:"teacher",role:"teacher"});
+  expect(denied.authoringState).toBe("no_permission");expect(denied.assignments).toEqual([]);expect(denied.subjects).toEqual([]);
+  mock.assignments=[{subject_id:null,program_id:"unmapped",can_manage_questions:true}];
+  const unmapped=await loadQuestionBankMetadata({id:"teacher",role:"teacher"});
+  expect(unmapped.authoringState).toBe("no_subject");expect(unmapped.subjects).toEqual([]);
  });
 });

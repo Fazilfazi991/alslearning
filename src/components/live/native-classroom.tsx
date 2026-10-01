@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/shared/logout-button";
 import { FixedPartAssembler, sha256Hex, type RecordingPart } from "@/lib/live-class/multipart-buffer";
 import { hashRecordingBlob } from "@/lib/live-class/recording-hash";
 import {
@@ -72,6 +73,13 @@ const mergeStats = (samples: LiveStatsSample[]): LiveStatsSample => {
   return merged;
 };
 const first = <T,>(value: T | T[] | null | undefined) => Array.isArray(value) ? value[0] : value;
+function captureMessage(device: "microphone" | "camera" | "screen", reason: unknown) {
+  // Retain the browser's exact exception locally for permission troubleshooting.
+  console.error(`${device} capture failed`, reason);
+  if (device === "screen") return "Screen sharing didn’t start. Choose a tab or window, then click Share. If browser or system access is blocked, allow screen recording and try again.";
+  const name = device === "camera" ? "Camera" : "Microphone";
+  return `${name} didn’t start. Check browser and system permissions, then try again.`;
+}
 const waitForIce = (peer: RTCPeerConnection) => new Promise<void>(resolve => {
   if (peer.iceGatheringState === "complete") return resolve();
   const timeout = window.setTimeout(done, 8_000);
@@ -82,11 +90,11 @@ const waitForIce = (peer: RTCPeerConnection) => new Promise<void>(resolve => {
 
 export function NativeClassroom({
   session, user, participant: initialParticipant, participants: initialParticipants, initialMessages, initialPolls,
-  availableQuestions, recordings, configuration, entryEnabled, mode, timeZone,
+  availableQuestions, recordings, configuration, entryEnabled, testingWindow, mode, timeZone,
 }: {
   session: Session; user: User; participant: Participant; participants: ManagedParticipant[]; initialMessages: Message[]; initialPolls: Poll[];
   availableQuestions: { id: string; prompt: string }[]; recordings: RecordingRow[]; configuration: Configuration;
-  entryEnabled: boolean; mode: "poc" | "classroom"; timeZone: string;
+  entryEnabled: boolean; testingWindow: { opensAt: string | null; closesAt: string | null }; mode: "poc" | "classroom"; timeZone: string;
 }) {
   const manager = user.role === "admin" || user.id === session.faculty_id;
   const [participant, setParticipant] = useState(initialParticipant);
@@ -100,12 +108,16 @@ export function NativeClassroom({
   const [connectionId, setConnectionId] = useState<string | null>(null);
   const [classStatus, setClassStatus] = useState(session.status);
   const [connectionState, setConnectionState] = useState<"idle" | "joining" | "connected" | "reconnecting" | "failed" | "ended">("idle");
+  const [entryOpen, setEntryOpen] = useState(entryEnabled);
   const [remoteTracks, setRemoteTracks] = useState<RemoteTrack[]>([]);
   const [published, setPublished] = useState<Published[]>([]);
   const [lowData, setLowData] = useState(false);
   const [preflightReady, setPreflightReady] = useState(false);
-  const [cameraRequested, setCameraRequested] = useState(false);
-  const [mediaProfile, setMediaProfile] = useState<"lecture" | "demonstration">("lecture");
+  const [microphoneMuted, setMicrophoneMuted] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const [cameraOn, setCameraOn] = useState(false);
+  const [screenError, setScreenError] = useState("");
+  const [screenBusy, setScreenBusy] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [stats, setStats] = useState(emptyStats);
   const [error, setError] = useState("");
@@ -121,6 +133,9 @@ export function NativeClassroom({
   const publisherPeerRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
+  const screenOperationRef = useRef(false);
+  const publicationPendingRef = useRef(new Set<Published["kind"]>());
+  const publishedKindsRef = useRef(new Set<Published["kind"]>());
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const screenPreviewRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -174,6 +189,7 @@ export function NativeClassroom({
       if (microphones.length) {
         await api("media", { action: "close", connectionId, trackIds: microphones.map(value => value.id) }).catch(() => undefined);
         microphones.forEach(value => value.track.stop());
+        publishedKindsRef.current.delete("microphone");
         setPublished(current => current.filter(value => value.kind !== "microphone"));
       }
     }
@@ -182,6 +198,7 @@ export function NativeClassroom({
       if (screens.length) {
         await api("media", { action: "close", connectionId, trackIds: screens.map(value => value.id) }).catch(() => undefined);
         screens.forEach(value => value.track.stop());
+        publishedKindsRef.current.delete("screen");
         setPublished(current => current.filter(value => value.kind !== "screen"));
       }
     }
@@ -401,6 +418,22 @@ export function NativeClassroom({
     screenStreamRef.current?.getTracks().forEach(track => track.stop());
   }, []);
 
+  useEffect(() => {
+    if (!entryOpen || !testingWindow.closesAt) return;
+    const remaining = Date.parse(testingWindow.closesAt) - Date.now();
+    const closeWindow = () => {
+      setEntryOpen(false);
+      recordingStopRef.current?.();
+      peerRef.current?.close(); publisherPeerRef.current?.close();
+      localStreamRef.current?.getTracks().forEach(track => track.stop());
+      screenStreamRef.current?.getTracks().forEach(track => track.stop());
+      setConnectionId(null); setConnectionState("ended");
+    };
+    if (remaining <= 0) { closeWindow(); return; }
+    const timer = window.setTimeout(closeWindow, Math.min(remaining, 2_147_483_647));
+    return () => window.clearTimeout(timer);
+  }, [entryOpen, testingWindow.closesAt]);
+
   async function checkRecordingStorage(requireWritablePart = false) {
     const estimate = await navigator.storage?.estimate?.().catch(() => undefined);
     if (typeof estimate?.quota !== "number" || typeof estimate.usage !== "number") return;
@@ -411,19 +444,16 @@ export function NativeClassroom({
 
   async function preflight() {
     setError("");
+    let captured: MediaStream | null = null;
     try {
-      localStreamRef.current?.getTracks().forEach(track => track.stop());
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: cameraRequested ? mediaProfile === "lecture"
-          ? { width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 12, max: 15 } }
-          : { width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 24, max: 30 } }
-          : false,
-      });
-      localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      if (localStreamRef.current?.getAudioTracks().some(track => track.readyState === "live")) return;
+      captured = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+      const stream = captured;
+      const audioTrack = stream.getAudioTracks()[0];
+      if (!audioTrack) throw new Error("No microphone track was returned");
+      localStreamRef.current = new MediaStream([audioTrack, ...(localStreamRef.current?.getVideoTracks() || [])]);
       setPreflightReady(true);
-      if (manager && connectionId && publisherPeerRef.current) await queue(() => publishLocal(publisherPeerRef.current!, connectionId, stream.getTracks()));
+      if (connectionId && publisherPeerRef.current && !published.some(value => value.kind === "microphone")) await queue(() => publishLocal(publisherPeerRef.current!, connectionId, [audioTrack]));
       const context = new AudioContext();
       const analyser = context.createAnalyser();
       context.createMediaStreamSource(stream).connect(analyser);
@@ -433,11 +463,38 @@ export function NativeClassroom({
         analyser.getByteFrequencyData(samples);
         setMicLevel(Math.min(100, Math.round(samples.reduce((sum, value) => sum + value, 0) / samples.length * 1.8)));
       }, 120);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Device preflight failed"); }
+    } catch (reason) {
+      captured?.getTracks().forEach(track => track.stop());
+      if (captured) localStreamRef.current?.getAudioTracks().forEach(track => localStreamRef.current?.removeTrack(track));
+      setPreflightReady(false);
+      setError(captureMessage("microphone", reason));
+    }
+  }
+
+  async function enableCamera() {
+    setCameraError("");
+    if (!manager) return;
+    let camera: MediaStream | null = null;
+    try {
+      camera = await navigator.mediaDevices.getUserMedia({ audio: false, video: { width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 12, max: 15 } } });
+      const track = camera.getVideoTracks()[0];
+      if (!track) throw new Error("No camera track was returned");
+      const current = localStreamRef.current || new MediaStream();
+      current.getVideoTracks().forEach(old => { current.removeTrack(old); old.stop(); });
+      current.addTrack(track); localStreamRef.current = current;
+      if (localVideoRef.current) localVideoRef.current.srcObject = current;
+      if (connectionId && publisherPeerRef.current) await queue(() => publishLocal(publisherPeerRef.current!, connectionId, [track]));
+      setCameraOn(true);
+    } catch (reason) {
+      camera?.getTracks().forEach(track => track.stop());
+      localStreamRef.current?.getVideoTracks().forEach(track => localStreamRef.current?.removeTrack(track));
+      setCameraOn(false);
+      setCameraError(captureMessage("camera", reason));
+    }
   }
 
   async function join(recovery = false) {
-    if (!entryEnabled || !configuration.realtimeConfigured || joinInFlightRef.current) return;
+    if (!entryOpen || !configuration.realtimeConfigured || joinInFlightRef.current) return;
     joinInFlightRef.current = true;
     setConnectionState("joining"); setError("");
     let createdConnectionId: string | null = null;
@@ -448,6 +505,7 @@ export function NativeClassroom({
         remoteTracks.forEach(value => value.stream.getTracks().forEach(track => track.stop()));
         midMapRef.current.clear(); publicationKindByMidRef.current.clear(); trackKindByIdentifierRef.current.clear();
         subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
+        publishedKindsRef.current.clear();
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
       createdConnectionId = created.connectionId;
@@ -489,9 +547,13 @@ export function NativeClassroom({
       peerRef.current?.close(); publisherPeerRef.current?.close();
       peerRef.current = null; publisherPeerRef.current = null;
       midMapRef.current.clear(); subscribedRef.current.clear(); setRemoteTracks([]); setPublished([]);
+      publishedKindsRef.current.clear();
+      localStreamRef.current?.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null; setPreflightReady(false); setCameraOn(false);
       if (createdConnectionId) void api("media", { action: "leave", connectionId: createdConnectionId }).catch(() => undefined);
       setConnectionId(null); setConnectionState("failed");
-      setError(reason instanceof Error ? reason.message : "Could not join classroom");
+      const message = reason instanceof Error ? reason.message : "Could not join classroom";
+      setError(message.includes("Staging test window is closed") ? "The classroom testing window has ended. Return to classes and check for the next scheduled window." : message);
     }
     finally { joinInFlightRef.current = false; }
   }
@@ -512,50 +574,103 @@ export function NativeClassroom({
   });
 
   async function publishLocal(peer: RTCPeerConnection, id: string, tracks: MediaStreamTrack[]) {
-    const permitted = tracks.filter(track => track.kind === "audio" ? (manager || participant?.audio_publish_allowed) : manager);
+    const permitted = tracks.filter(track => {
+      const kind = track.kind === "audio" ? "microphone" : "camera";
+      return (track.kind === "audio" ? (manager || participant?.audio_publish_allowed) : manager)
+        && track.readyState === "live" && !publicationPendingRef.current.has(kind)
+        && !publishedKindsRef.current.has(kind);
+    });
     if (!permitted.length) return;
+    permitted.forEach(track => publicationPendingRef.current.add(track.kind === "audio" ? "microphone" : "camera"));
     const entries = permitted.map(track => {
       const kind: Published["kind"] = track.kind === "audio" ? "microphone" : "camera";
-      const transceiver = peer.addTransceiver(track, { direction: "sendonly", streams: [new MediaStream([track])], sendEncodings: [{ maxBitrate: track.kind === "audio" ? 64_000 : mediaProfile === "lecture" ? 450_000 : 1_200_000, maxFramerate: track.kind === "video" ? (mediaProfile === "lecture" ? 15 : 30) : undefined }] });
+      const transceiver = peer.addTransceiver(track, { direction: "sendonly", streams: [new MediaStream([track])], sendEncodings: [{ maxBitrate: track.kind === "audio" ? 64_000 : 450_000, maxFramerate: track.kind === "video" ? 15 : undefined }] });
       return { track, kind, transceiver };
     });
-    const offer = await peer.createOffer(); await peer.setLocalDescription(offer); await waitForIce(peer);
-    const publications = entries.map(value => ({ kind: value.kind, mid: value.transceiver.mid! }));
-    const response = await api<{ sessionDescription: RTCSessionDescriptionInit; tracks: { id: string; kind: Published["kind"]; mid: string }[] }>("media", {
-      action: "publish", connectionId: id, sessionDescription: peer.localDescription, publications,
-    });
-    await peer.setRemoteDescription(response.sessionDescription);
-    response.tracks.forEach((value, index) => {
-      publicationKindByMidRef.current.set(value.mid, value.kind);
-      trackKindByIdentifierRef.current.set(entries[index].track.id, value.kind);
-    });
-    setPublished(current => [...current.filter(value => !entries.some(entry => entry.kind === value.kind)), ...response.tracks.map((value, index) => ({ ...value, track: entries[index].track }))]);
+    let response: { sessionDescription: RTCSessionDescriptionInit; tracks: { id: string; kind: Published["kind"]; mid: string }[] } | null = null;
+    try {
+      const offer = await peer.createOffer(); await peer.setLocalDescription(offer); await waitForIce(peer);
+      const publications = entries.map(value => ({ kind: value.kind, mid: value.transceiver.mid! }));
+      response = await api("media", { action: "publish", connectionId: id, sessionDescription: peer.localDescription, publications });
+      await peer.setRemoteDescription(response.sessionDescription);
+      response.tracks.forEach((value, index) => {
+        publicationKindByMidRef.current.set(value.mid, value.kind);
+        trackKindByIdentifierRef.current.set(entries[index].track.id, value.kind);
+        publishedKindsRef.current.add(value.kind);
+      });
+      setPublished(current => [...current.filter(value => !entries.some(entry => entry.kind === value.kind)), ...response!.tracks.map((value, index) => ({ ...value, track: entries[index].track }))]);
+    } catch (reason) {
+      entries.forEach(value => value.transceiver.stop());
+      if (response?.tracks.length) await api("media", { action: "close", connectionId: id, trackIds: response.tracks.map(value => value.id) }).catch(() => undefined);
+      throw reason;
+    } finally { entries.forEach(value => publicationPendingRef.current.delete(value.kind)); }
   }
 
   async function enableGrantedMicrophone() {
     if (!connectionId || !publisherPeerRef.current || (!manager && !participant?.audio_publish_allowed)) return;
     setError("");
+    let captured: MediaStream | null = null;
     try {
       let track = localStreamRef.current?.getAudioTracks()[0];
       if (!track || track.readyState === "ended") {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
-        track = stream.getAudioTracks()[0]; localStreamRef.current = stream;
+        captured = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+        track = captured.getAudioTracks()[0];
+        localStreamRef.current = new MediaStream([track, ...(localStreamRef.current?.getVideoTracks() || [])]);
       }
       await queue(() => publishLocal(publisherPeerRef.current!, connectionId, [track!]));
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Microphone publication failed"); }
+      setPreflightReady(true); setMicrophoneMuted(false);
+    } catch (reason) {
+      captured?.getTracks().forEach(track => track.stop());
+      if (captured) localStreamRef.current?.getAudioTracks().forEach(track => localStreamRef.current?.removeTrack(track));
+      setError(captureMessage("microphone", reason));
+    }
+  }
+
+  async function toggleCamera() {
+    const track = localStreamRef.current?.getVideoTracks()[0];
+    if (!track || track.readyState !== "live") { await enableCamera(); return; }
+    const publication = published.find(value => value.kind === "camera");
+    track.stop(); localStreamRef.current?.removeTrack(track);
+    publishedKindsRef.current.delete("camera");
+    setCameraOn(false);
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    setPublished(current => current.filter(value => value.kind !== "camera"));
+    if (publication && connectionId) await queue(() => api("media", { action: "close", connectionId, trackIds: [publication.id] })).catch(() => setCameraError("Camera stopped locally. Rejoin before turning it on again."));
+  }
+
+  async function stopSharing() {
+    const stream = screenStreamRef.current;
+    if (!stream) return;
+    screenStreamRef.current = null;
+    stream.getTracks().forEach(track => track.stop());
+    if (screenPreviewRef.current) screenPreviewRef.current.srcObject = null;
+    if (recordingStopRef.current) recordingStopRef.current();
+    const publication = published.find(value => value.kind === "screen");
+    setPublished(current => current.filter(value => value.kind !== "screen"));
+    publishedKindsRef.current.delete("screen");
+    if (publication && connectionId) await queue(() => api("media", { action: "close", connectionId, trackIds: [publication.id] })).catch(reason => {
+      console.error("Screen publication cleanup failed", reason);
+      setError("Screen sharing stopped locally, but the classroom could not confirm cleanup. Rejoin before sharing again.");
+    });
+    setNotice("Screen sharing stopped. Recording is stopping too.");
   }
 
   async function shareScreen() {
-    if (!connectionId || !publisherPeerRef.current || (!manager && !(participant?.presenter && participant.screen_publish_allowed))) return;
+    if (screenStreamRef.current) { await stopSharing(); return; }
+    if (screenOperationRef.current || !connectionId || !publisherPeerRef.current || (!manager && !(participant?.presenter && participant.screen_publish_allowed))) return;
+    screenOperationRef.current = true; setScreenBusy(true); setScreenError("");
+    let display: MediaStream | null = null;
     try {
-      const display = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: mediaProfile === "lecture" ? { ideal: 8, max: 10 } : { ideal: 20, max: 30 } }, audio: false });
-      screenStreamRef.current?.getTracks().forEach(track => track.stop()); screenStreamRef.current = display;
-      if (screenPreviewRef.current) { screenPreviewRef.current.srcObject = display; await screenPreviewRef.current.play(); }
+      // Keep the native chooser as the first awaited operation in the click handler.
+      display = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 8, max: 10 } }, audio: false });
       const track = display.getVideoTracks()[0];
+      if (!track || track.readyState !== "live") throw new Error("No live screen track was returned");
+      screenStreamRef.current = display;
+      if (screenPreviewRef.current) { screenPreviewRef.current.srcObject = display; await screenPreviewRef.current.play(); }
       const publicationId = await queue(async () => {
         const peer = publisherPeerRef.current;
         if (!peer || peer.signalingState === "closed") throw new Error("Classroom media connection is unavailable");
-        const transceiver = peer.addTransceiver(track, { direction: "sendonly", streams: [display], sendEncodings: [{ maxBitrate: mediaProfile === "lecture" ? 850_000 : 1_800_000, maxFramerate: mediaProfile === "lecture" ? 10 : 30 }] });
+        const transceiver = peer.addTransceiver(track, { direction: "sendonly", streams: [display!], sendEncodings: [{ maxBitrate: 850_000, maxFramerate: 10 }] });
         const offer = await peer.createOffer(); await peer.setLocalDescription(offer); await waitForIce(peer);
         let response: { sessionDescription: RTCSessionDescriptionInit; tracks: { id: string; kind: Published["kind"]; mid: string }[] } | null = null;
         try {
@@ -573,24 +688,35 @@ export function NativeClassroom({
         }
         publicationKindByMidRef.current.set(response.tracks[0].mid, "screen");
         trackKindByIdentifierRef.current.set(track.id, "screen");
+        publishedKindsRef.current.add("screen");
         setPublished(current => [...current.filter(value => value.kind !== "screen"), { ...response.tracks[0], track }]);
         return response.tracks[0].id;
       });
       track.addEventListener("ended", () => {
+        if (screenStreamRef.current !== display) return;
         screenStreamRef.current = null;
+        publishedKindsRef.current.delete("screen");
+        if (screenPreviewRef.current) screenPreviewRef.current.srcObject = null;
+        recordingStopRef.current?.();
         setPublished(current => current.filter(value => value.id !== publicationId));
         void queue(() => api("media", { action: "close", connectionId, trackIds: [publicationId] })).catch(() => undefined);
-        setNotice("Screen sharing ended. The recording canvas will fall back to the Teacher camera or holding slate.");
+        setNotice("Screen sharing ended in your browser. Recording is stopping too. Choose Share screen to try again.");
       }, { once: true });
+      if (screenStreamRef.current?.getVideoTracks()[0]?.readyState !== "live") {
+        screenStreamRef.current = null; publishedKindsRef.current.delete("screen");
+        setPublished(current => current.filter(value => value.id !== publicationId));
+        await queue(() => api("media", { action: "close", connectionId, trackIds: [publicationId] })).catch(() => undefined);
+        throw new Error("The selected screen stopped before sharing began");
+      }
     } catch (reason) {
-      screenStreamRef.current?.getTracks().forEach(track => track.stop()); screenStreamRef.current = null;
-      const message = reason instanceof Error ? reason.message : "Screen sharing failed";
-      setError(message);
+      display?.getTracks().forEach(track => track.stop());
+      if (screenStreamRef.current === display) screenStreamRef.current = null;
+      if (screenPreviewRef.current) screenPreviewRef.current.srcObject = null;
+      setScreenError(captureMessage("screen", reason));
       if (publisherPeerRef.current && publisherPeerRef.current.signalingState !== "stable") {
         await join(true);
-        setError(`${message} The media connection was replaced safely; try sharing again.`);
       }
-    }
+    } finally { screenOperationRef.current = false; setScreenBusy(false); }
   }
 
   async function changeGrant(targetUserId: string, grant: "microphone" | "presenter", granted: boolean) {
@@ -623,10 +749,22 @@ export function NativeClassroom({
         screenStreamRef.current?.getTracks().forEach(track => track.stop());
         remoteTracks.forEach(value => value.stream.getTracks().forEach(track => track.stop()));
         setConnectionId(null); setPublished([]); setRemoteTracks([]);
+        publishedKindsRef.current.clear();
         setConnectionState("ended");
       }
     }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Class status change failed"); }
+  }
+
+  async function leaveClass() {
+    recordingStopRef.current?.();
+    if (connectionId) await api("media", { action: "leave", connectionId }).catch(reason => console.error("Classroom leave failed", reason));
+    peerRef.current?.close(); publisherPeerRef.current?.close();
+    localStreamRef.current?.getTracks().forEach(track => track.stop());
+    screenStreamRef.current?.getTracks().forEach(track => track.stop());
+    setConnectionId(null); setPublished([]); setRemoteTracks([]); setConnectionState("ended");
+    publishedKindsRef.current.clear();
+    window.location.assign(user.role === "student" ? "/student/live-classes" : "/teacher/live-classes");
   }
 
   async function sendMessage() {
@@ -775,7 +913,9 @@ export function NativeClassroom({
     const mimeType = recordingMimeType();
     if (!mimeType) return setError("This browser does not expose a supported MediaRecorder container.");
     const audio = localStreamRef.current?.getAudioTracks()[0];
-    if (!audio) return setError("Complete microphone preflight before recording.");
+    if (!audio || audio.readyState !== "live" || !audio.enabled) return setError("Turn on the Teacher microphone before recording.");
+    const screen = screenStreamRef.current?.getVideoTracks()[0];
+    if (!screen || screen.readyState !== "live" || !screenPreviewRef.current || screenPreviewRef.current.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return setError("Share a tab or window and wait for its preview before recording.");
     try { await checkRecordingStorage(true); }
     catch (reason) { return setError(reason instanceof Error ? reason.message : "Browser recording storage is unavailable"); }
     const ownership = await acquireRecordingOwnership(session.id);
@@ -790,34 +930,18 @@ export function NativeClassroom({
       activeSegmentId = begun.segmentId;
       const canvas = canvasRef.current!; canvas.width = 1280; canvas.height = 720;
       const context = canvas.getContext("2d")!;
-      let pocFrame = 0;
-      const draw = () => {
-        context.fillStyle = "#101a38"; context.fillRect(0, 0, canvas.width, canvas.height);
-        const primaryVideo = screenStreamRef.current ? screenPreviewRef.current : localVideoRef.current;
-        if (primaryVideo && primaryVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-          context.drawImage(primaryVideo, 0, 0, canvas.width, canvas.height);
-        } else {
-          context.fillStyle = "white"; context.font = "600 38px sans-serif"; context.textAlign = "center";
-          context.fillText(session.title, canvas.width / 2, canvas.height / 2);
-        }
-        if (screenStreamRef.current && localStreamRef.current?.getVideoTracks().length && localVideoRef.current) {
-          context.drawImage(localVideoRef.current, canvas.width - 272, canvas.height - 174, 240, 135);
-        }
-        if (mode === "poc" && configuration.pocMotionOverlay) {
-          // Deterministic motion keeps the bounded recovery proof near the
-          // configured encoder bitrate even when the shared lab slide is static.
-          // It is enabled only with the explicit POC interruption harness.
-          let seed = ++pocFrame;
-          for (let y = 0; y < 120; y += 6) for (let x = 0; x < 240; x += 6) {
-            seed = (seed * 1664525 + 1013904223) >>> 0;
-            context.fillStyle = `rgba(${seed & 255},${seed >>> 8 & 255},${seed >>> 16 & 255},.42)`;
-            context.fillRect(20 + x, 20 + y, 6, 6);
-          }
-          context.fillStyle = "rgba(16,26,56,.84)"; context.fillRect(20, 140, 240, 28);
-          context.fillStyle = "white"; context.font = "600 14px sans-serif"; context.textAlign = "left";
-          context.fillText(`POC recovery frame ${pocFrame}`, 30, 159);
-        }
-      };
+       const draw = () => {
+         context.fillStyle = "#101a38"; context.fillRect(0, 0, canvas.width, canvas.height);
+         if (screen.readyState !== "live" || !screenPreviewRef.current || screenPreviewRef.current.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+           recordingStopRef.current?.();
+           setRecordingStatus("Screen sharing ended — stopping recording");
+           return;
+         }
+         context.drawImage(screenPreviewRef.current, 0, 0, canvas.width, canvas.height);
+         if (screenStreamRef.current && localStreamRef.current?.getVideoTracks().length && localVideoRef.current) {
+           context.drawImage(localVideoRef.current, canvas.width - 272, canvas.height - 174, 240, 135);
+         }
+       };
       drawTimer = window.setInterval(draw, 100); draw();
       composite = canvas.captureStream(10); composite.addTrack(audio.clone());
       const media = new MediaRecorder(composite, { mimeType, videoBitsPerSecond: 900_000, audioBitsPerSecond: 64_000 });
@@ -851,6 +975,7 @@ export function NativeClassroom({
       media.onerror = event => { pipelineError = event.error || new Error("MediaRecorder stopped unexpectedly"); setRecordingStatus("Interrupted — recover locally"); if (media.state === "recording") media.stop(); };
       const stopped = new Promise<void>(resolve => { media.onstop = () => resolve(); });
       recordingStopRef.current = () => { if (media.state === "recording") media.stop(); };
+      audio.addEventListener("ended", () => recordingStopRef.current?.(), { once: true });
       media.start(5_000); setRecording(true); setRecordedBytes(0); setRecordingStatus(`Recording segment ${begun.segmentNumber}`);
       if (mode === "poc" && configuration.pocMaxRecordingSeconds) {
         stopTimer = window.setTimeout(() => recordingStopRef.current?.(), configuration.pocMaxRecordingSeconds * 1_000);
@@ -942,47 +1067,62 @@ export function NativeClassroom({
   }
 
   const visual = remoteTracks.find(track => track.kind === "screen") || remoteTracks.find(track => track.kind === "camera");
+  const classList = user.role === "student" ? "/student/live-classes" : "/teacher/live-classes";
+  const publishedReplay = user.role === "student" ? recordings.find(value => value.status === "published" && value.published_at) : null;
+  if (classStatus === "completed" || classStatus === "cancelled" || !entryOpen || !configuration.realtimeConfigured || classStatus === "scheduled") {
+    const completed = classStatus === "completed" || classStatus === "cancelled";
+    const unavailable = !entryOpen || !configuration.realtimeConfigured;
+    return <div className="mx-auto max-w-3xl p-4 sm:p-8"><header className="mb-6 flex flex-wrap items-start justify-between gap-4"><div><p className="eyebrow">{first(session.subjects)?.name || "ALS live classroom"}</p><h1 className="mt-2 text-2xl font-bold">{session.title}</h1></div>{user.role === "teacher" && <LogoutButton className="min-h-11 rounded-xl border border-line bg-white px-4 text-sm font-bold"/>}</header>
+      <section className="card p-6 sm:p-8" role="status"><h2 className="text-xl font-bold">{completed ? "This class has ended." : unavailable ? "Classroom temporarily unavailable" : "Class scheduled"}</h2>
+        <p className="mt-3 text-sm leading-6 text-muted">{completed ? "You can return to your classes and watch a replay once it has been reviewed and published." : unavailable ? "Live classroom access is outside the current testing window or temporarily unavailable. Check back near the scheduled class time." : "The classroom opens when the Teacher starts this class."}</p>
+        {session.starts_at && !completed && <p className="mt-3 text-sm font-semibold">Scheduled for {formatAcademicDate(session.starts_at, timeZone)}</p>}
+        {unavailable && !completed && <p className="mt-2 text-sm text-muted">{testingWindow.opensAt && testingWindow.closesAt ? `Testing access: ${formatAcademicDate(testingWindow.opensAt, timeZone)} to ${formatAcademicDate(testingWindow.closesAt, timeZone)}.` : "No classroom testing window is currently scheduled."}</p>}
+        <div className="mt-6 flex flex-wrap gap-3"><Button href={classList} variant="secondary">Back to classes</Button>{!completed && !unavailable && manager && <Button onClick={() => void lifecycle("start")}>Start class</Button>}{publishedReplay && <Button href={`/student/live-classes/${session.id}?recording=${publishedReplay.id}`}>Watch published replay</Button>}</div>
+      </section></div>;
+  }
   return <div className="min-h-screen bg-surface p-0 sm:p-1">
     <div className="mx-auto max-w-[1440px]">
       <header className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0"><p className="eyebrow">{first(session.subjects)?.name || "ALS live classroom"}</p><h1 className="mt-2 text-2xl font-bold text-balance sm:text-3xl">{session.title}</h1>
           <p className="mt-2 text-sm text-muted">{first(session.profiles)?.full_name || "Assigned Teacher"} · {formatAcademicDate(session.starts_at, timeZone)} · {first(session.batches)?.name || "Eligible cohort"}</p></div>
-        <div className="flex flex-wrap gap-2"><span className="inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold ring-1 ring-line"><Radio size={15} className={classStatus === "live" ? "text-brand" : "text-muted"}/>{classStatus}</span>{manager && classStatus === "scheduled" && <Button onClick={() => void lifecycle("start")}>Start class</Button>}{manager && classStatus === "live" && <Button onClick={() => void lifecycle("end")} className="bg-red-700!">End class</Button>}</div>
+        <div className="flex flex-wrap items-center gap-2"><span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold ring-1 ring-line"><Radio size={15} className="text-brand"/>Live</span>{user.role === "teacher" && <LogoutButton className="min-h-11 rounded-xl border border-line bg-white px-4 text-sm font-bold"/>}</div>
       </header>
-      {(!entryEnabled || !configuration.realtimeConfigured) && <p className="mb-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-950" role="status">Live entry is disabled. {!entryEnabled ? `${mode === "poc" ? "ALS_LIVE_POC_ENABLED" : "ALS_LIVE_CLASS_ENABLED"} is not enabled.` : `Missing ${configuration.missingRealtime.join(", ")}.`} The academic portal remains available; no successful media state is simulated.</p>}
-      {!configuration.turnConfigured && <p className="mb-4 rounded-xl border border-line bg-white p-3 text-sm text-muted">TURN fallback is not configured. Missing {configuration.missingTurn.join(", ")}; SFU app credentials are not reused as TURN credentials.</p>}
       {error && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-900">{error}</p>}
+      {screenError && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-900">{screenError} <button className="ml-2 min-h-11 font-bold underline" onClick={() => void shareScreen()}>Try again</button></p>}
+      {cameraError && <p role="alert" className="mb-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-950">{cameraError} Microphone and screen sharing remain available.</p>}
       {notice && <p role="status" className="mb-4 rounded-xl bg-blue-50 p-4 text-sm text-blue-950">{notice}</p>}
       <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="min-w-0 space-y-4">
-          <div id="als-live-stage" className="relative aspect-video min-h-[200px] overflow-hidden rounded-2xl bg-[#101a38] shadow-[0_0_0_1px_rgba(255,255,255,.08)] sm:min-h-[220px]">
-            {visual && !lowData ? <RemoteVideo key={visual.id} stream={visual.stream} label={`${visual.kind} teaching stream`}/> : manager ? <video ref={localVideoRef} autoPlay muted playsInline className="h-full w-full object-contain" aria-label="Muted Teacher preview"/> : <div className="grid h-full place-items-center p-6 text-center text-white"><div><VideoOff className="mx-auto text-white/60" size={38}/><h2 className="mt-4 text-xl font-bold">{lowData ? "Audio-only mode" : connectionState === "connected" ? "Waiting for teaching visuals" : "Ready to join"}</h2><p className="mt-2 text-sm text-blue-100">{lowData ? "Visual teaching content is not currently shown." : "Students join receive-only and are not asked for camera or microphone access."}</p></div></div>}
-            <video ref={screenPreviewRef} muted playsInline className="hidden" aria-hidden="true"/>
+           <div id="als-live-stage" className="relative aspect-video max-h-[58vh] min-h-[190px] overflow-hidden rounded-2xl bg-[#101a38] shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+             <video ref={screenPreviewRef} autoPlay muted playsInline className={manager && published.some(value => value.kind === "screen") ? "h-full w-full object-contain" : "pointer-events-none absolute h-px w-px opacity-0"} aria-label="Your local shared-screen preview"/>
+             {manager && published.some(value => value.kind === "screen") ? <span className="absolute left-3 top-3 rounded-lg bg-black/70 px-3 py-2 text-xs font-bold text-white">Your preview · student reception is separate</span> : visual && !lowData ? <RemoteVideo key={visual.id} stream={visual.stream} label={`${visual.kind} teaching stream`}/> : <div className="grid h-full place-items-center p-6 text-center text-white"><div><VideoOff className="mx-auto text-white/60" size={38}/><h2 className="mt-4 text-xl font-bold">{lowData ? "Audio-only mode" : connectionState === "connected" ? "Waiting for teaching visuals" : "Ready to join"}</h2><p className="mt-2 text-sm text-blue-100">{lowData ? "Visual teaching content is not currently shown." : manager ? "Share a tab or window to show your lesson. Camera is optional." : "Join to listen and watch when the Teacher shares. Your devices stay off unless you choose to use a granted microphone."}</p></div></div>}
+             <video ref={localVideoRef} autoPlay muted playsInline className="pointer-events-none absolute h-px w-px opacity-0" aria-hidden="true"/>
             {remoteTracks.filter(track => track.kind === "microphone").map(track => <RemoteAudio key={track.id} stream={track.stream}/>)}
             <button onClick={() => void document.getElementById("als-live-stage")?.requestFullscreen?.()} className="absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-xl bg-black/55 text-white" aria-label="View teaching stage fullscreen"><Maximize size={19}/></button>
           </div>
-          <div className="card flex flex-wrap items-center gap-2 p-3">
-            {!connectionId ? <Button disabled={!entryEnabled || !configuration.realtimeConfigured || classStatus !== "live" || connectionState === "joining"} onClick={() => void join()}>{connectionState === "joining" ? <RefreshCw size={17}/> : <Radio size={17}/>}Join classroom</Button> : <span className="inline-flex min-h-11 items-center rounded-lg bg-green-50 px-4 text-sm font-bold text-green-800">{connectionState}</span>}
-            {manager && <Button variant="secondary" onClick={() => void preflight()}>{preflightReady ? <Mic size={17}/> : <Video size={17}/>}Device preflight</Button>}
-            {manager && <label className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm font-semibold"><input type="checkbox" checked={cameraRequested} onChange={event => setCameraRequested(event.target.checked)}/>Camera preview</label>}
-            {manager && <label className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm font-semibold"><span className="sr-only">Media profile</span><select value={mediaProfile} onChange={event => setMediaProfile(event.target.value as "lecture" | "demonstration")} className="bg-transparent"><option value="lecture">Lecture / slides</option><option value="demonstration">Demonstration / motion</option></select></label>}
-            {preflightReady && <span className="min-w-24 text-xs font-semibold text-muted">Mic <span className="ml-1 inline-block h-2 rounded bg-brand align-middle" style={{ width: `${Math.max(4, micLevel)}px` }}/></span>}
-            {connectionId && (manager || participant?.audio_publish_allowed) && !published.some(value => value.kind === "microphone") && <Button variant="secondary" onClick={() => void enableGrantedMicrophone()}><Mic size={17}/>Enable microphone</Button>}
-            {published.some(value => value.kind === "microphone") && <span className="inline-flex min-h-11 items-center gap-2 px-3 text-sm font-bold text-green-800"><Mic size={17}/>Microphone live</span>}
-            {connectionId && (manager || (participant?.presenter && participant.screen_publish_allowed)) && <Button variant="secondary" onClick={() => void shareScreen()}><MonitorUp size={17}/>Share teaching screen</Button>}
-            {!manager && <Button variant={participant?.raised_hand ? "primary" : "secondary"} onClick={() => void toggleHand()}><Hand size={17}/>{participant?.raised_hand ? "Lower hand" : "Raise hand"}</Button>}
-            {!manager && connectionId && <Button variant="ghost" onClick={() => void toggleLowData()}>{lowData ? <Video size={17}/> : <VideoOff size={17}/>} {lowData ? "Restore visuals" : "Audio only"}</Button>}
-          </div>
-          <section className="card grid gap-3 p-4 sm:grid-cols-3 xl:grid-cols-7" aria-label="Connection measurements">
-            <Metric label="Microphone" value={`RX ${stats.kbps.received.microphone.toFixed(0)} · TX ${stats.kbps.sent.microphone.toFixed(0)} kbps`}/><Metric label="Camera" value={`RX ${stats.kbps.received.camera.toFixed(0)} · TX ${stats.kbps.sent.camera.toFixed(0)} kbps`}/><Metric label="Screen" value={`RX ${stats.kbps.received.screen.toFixed(0)} · TX ${stats.kbps.sent.screen.toFixed(0)} kbps`}/><Metric label="Unclassified" value={`RX ${stats.kbps.received.unclassified.toFixed(0)} · TX ${stats.kbps.sent.unclassified.toFixed(0)} kbps`}/><Metric label="Loss" value={`${stats.packetsLost}`}/><Metric label="RTT" value={stats.rttMs === null ? "—" : `${stats.rttMs.toFixed(0)} ms`}/><Metric label="Path" value={stats.candidateType || "—"}/>
-          </section>
-          {user.role === "teacher" && user.id === session.faculty_id && <section className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">Teacher-only presentation recording</h2><p className="mt-1 text-sm text-muted">Canvas-composed teaching visual plus Teacher microphone only. Classroom audio and chat are excluded.</p></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold">{recordingStatus}</span></div>
-            <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">Share the teaching application or tab—not the classroom tab or a display containing private information. Browser storage improves recovery but is not an absolute durability guarantee.</p>
-            <canvas ref={canvasRef} className="hidden"/>
-            <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || classStatus !== "live" || !preflightReady || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop capture</Button>{hashProgress !== null && <Button variant="secondary" onClick={() => hashAbortRef.current?.abort()}>Cancel integrity check</Button>}<span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
-            <p className="mt-2 text-xs tabular-nums text-muted">Browser storage headroom: {storageHeadroomMiB === null ? "not measured" : `${storageHeadroomMiB.toFixed(0)} MiB (browser estimate)`}{hashProgress !== null ? ` · integrity ${(hashProgress * 100).toFixed(0)}%` : ""}. Recovery data is retained if validation fails or is cancelled.</p>
-            {mode === "poc" && <p className="mt-2 text-xs tabular-nums text-muted" aria-label="POC recording telemetry">Captured {(recordingTelemetry.capturedBytes / 1048576).toFixed(1)} MiB · backlog {((recordingTelemetry.capturedBytes - recordingTelemetry.uploadedBytes) / 1048576).toFixed(1)} MiB · queue {recordingTelemetry.queuedChunks} (max {recordingTelemetry.maxQueuedChunks}) · retries {recordingTelemetry.retryCount} · ack {recordingTelemetry.lastAcknowledgementMs === null ? "—" : `${Math.round(recordingTelemetry.lastAcknowledgementMs)} ms`} (max {Math.round(recordingTelemetry.maxAcknowledgementMs)} ms)</p>}
-            {(!configuration.recordingEnabled || !configuration.r2Configured) && <p className="mt-3 text-sm text-muted">Recording unavailable: {configuration.recordingEnabled ? `missing ${configuration.missingR2.join(", ")}` : "ALS_LIVE_RECORDING_ENABLED is disabled"}.</p>}
+           <div className="card flex flex-wrap items-center gap-2 p-3">
+             {!connectionId ? <Button disabled={connectionState === "joining"} onClick={() => void join()}>{connectionState === "joining" ? <RefreshCw size={17}/> : <Radio size={17}/>}Join classroom</Button> : <span className="inline-flex min-h-11 items-center rounded-lg bg-green-50 px-4 text-sm font-bold text-green-800">{connectionState === "connected" ? "Connected" : connectionState === "reconnecting" ? "Reconnecting…" : "Connecting…"}</span>}
+             {manager && !preflightReady && <Button variant="secondary" onClick={() => void preflight()}><Mic size={17}/>Turn on microphone</Button>}
+             {manager && <Button variant="secondary" onClick={() => void toggleCamera()}>{cameraOn ? <VideoOff size={17}/> : <Video size={17}/>} {cameraOn ? "Turn off camera" : "Camera optional"}</Button>}
+             {preflightReady && <span className="min-w-24 text-xs font-semibold text-muted">Mic <span className="ml-1 inline-block h-2 rounded bg-brand align-middle" style={{ width: `${Math.max(4, micLevel)}px` }}/></span>}
+             {connectionId && (manager || participant?.audio_publish_allowed) && !published.some(value => value.kind === "microphone") && <Button variant="secondary" onClick={() => void enableGrantedMicrophone()}><Mic size={17}/>Turn on microphone</Button>}
+             {published.some(value => value.kind === "microphone") && <Button variant="secondary" onClick={() => { const track = localStreamRef.current?.getAudioTracks()[0]; if (track) { if (!microphoneMuted) recordingStopRef.current?.(); track.enabled = microphoneMuted; setMicrophoneMuted(!microphoneMuted); } }}>{microphoneMuted ? <MicOff size={17}/> : <Mic size={17}/>} {microphoneMuted ? "Muted" : "Microphone on"}</Button>}
+             {connectionId && (manager || (participant?.presenter && participant.screen_publish_allowed)) && <Button variant="secondary" disabled={screenBusy} onClick={() => void shareScreen()}><MonitorUp size={17}/>{screenBusy ? "Starting share…" : published.some(value => value.kind === "screen") ? "Stop sharing" : "Share screen"}</Button>}
+             {!manager && <Button variant={participant?.raised_hand ? "primary" : "secondary"} onClick={() => void toggleHand()}><Hand size={17}/>{participant?.raised_hand ? "Lower hand" : "Raise hand"}</Button>}
+             {!manager && connectionId && <Button variant="ghost" onClick={() => void toggleLowData()}>{lowData ? <Video size={17}/> : <VideoOff size={17}/>} {lowData ? "Restore visuals" : "Audio only"}</Button>}
+             {connectionId && <Button variant="secondary" onClick={() => void leaveClass()}><PhoneOff size={17}/>Leave class</Button>}
+             {manager && <Button onClick={() => void lifecycle("end")} className="bg-red-700!">End class for everyone</Button>}
+           </div>
+           <details className="card p-4 text-sm"><summary className="min-h-11 cursor-pointer font-bold">Technical details</summary><section className="mt-3 grid gap-3 sm:grid-cols-3 xl:grid-cols-4" aria-label="Connection measurements">
+             <Metric label="Microphone" value={`RX ${stats.kbps.received.microphone.toFixed(0)} · TX ${stats.kbps.sent.microphone.toFixed(0)} kbps`}/><Metric label="Camera" value={`RX ${stats.kbps.received.camera.toFixed(0)} · TX ${stats.kbps.sent.camera.toFixed(0)} kbps`}/><Metric label="Screen" value={`RX ${stats.kbps.received.screen.toFixed(0)} · TX ${stats.kbps.sent.screen.toFixed(0)} kbps`}/><Metric label="Unclassified" value={`RX ${stats.kbps.received.unclassified.toFixed(0)} · TX ${stats.kbps.sent.unclassified.toFixed(0)} kbps`}/><Metric label="Loss" value={`${stats.packetsLost}`}/><Metric label="RTT" value={stats.rttMs === null ? "—" : `${stats.rttMs.toFixed(0)} ms`}/><Metric label="Path" value={stats.candidateType || "—"}/>
+           </section><p className="mt-3 text-xs text-muted">{configuration.turnConfigured ? "TURN fallback available." : `TURN fallback unavailable: ${configuration.missingTurn.join(", ")}.`}</p>{mode === "poc" && <p className="mt-2 text-xs text-muted">POC mode · relay {configuration.forceRelay ? "required" : "optional"}</p>}</details>
+           {user.role === "teacher" && user.id === session.faculty_id && <section className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">Lesson recording</h2><p className="mt-1 text-sm text-muted">Your shared screen and microphone are recorded. Student audio, video, and chat are excluded.</p></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-bold">{recordingStatus}</span></div>
+             <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">Share the teaching tab or window. Do not capture private classroom panels or unrelated information. Keep your microphone on while recording.</p>
+             <canvas ref={canvasRef} className="hidden"/>
+             <div className="mt-4 flex flex-wrap gap-2"><Button disabled={recording || !published.some(value => value.kind === "screen") || !published.some(value => value.kind === "microphone") || !preflightReady || microphoneMuted || !session.recording_enabled || !configuration.recordingEnabled || !configuration.r2Configured} onClick={() => void startRecording()}><Radio size={17}/>Start recording</Button><Button disabled={!recording} variant="secondary" onClick={() => recordingStopRef.current?.()}><PhoneOff size={17}/>Stop recording</Button>{hashProgress !== null && <Button variant="secondary" onClick={() => hashAbortRef.current?.abort()}>Cancel integrity check</Button>}<span className="inline-flex min-h-11 items-center text-sm tabular-nums text-muted">{(recordedBytes / 1048576).toFixed(1)} MiB uploaded</span></div>
+             {!published.some(value => value.kind === "screen") && <p className="mt-2 text-sm text-muted">Share a screen to enable recording.</p>}
+             {(!configuration.recordingEnabled || !configuration.r2Configured) && <p className="mt-3 text-sm text-muted">Recording is unavailable during this class.</p>}
+             <details className="mt-3 text-xs text-muted"><summary className="min-h-11 cursor-pointer font-bold">Recording technical details</summary><p className="mt-2 tabular-nums">Browser storage headroom: {storageHeadroomMiB === null ? "not measured" : `${storageHeadroomMiB.toFixed(0)} MiB (browser estimate)`}{hashProgress !== null ? ` · integrity ${(hashProgress * 100).toFixed(0)}%` : ""}. Recovery data is retained if validation fails or is cancelled.</p>{mode === "poc" && <p className="mt-2 tabular-nums" aria-label="POC recording telemetry">Captured {(recordingTelemetry.capturedBytes / 1048576).toFixed(1)} MiB · backlog {((recordingTelemetry.capturedBytes - recordingTelemetry.uploadedBytes) / 1048576).toFixed(1)} MiB · queue {recordingTelemetry.queuedChunks} (max {recordingTelemetry.maxQueuedChunks}) · retries {recordingTelemetry.retryCount} · ack {recordingTelemetry.lastAcknowledgementMs === null ? "—" : `${Math.round(recordingTelemetry.lastAcknowledgementMs)} ms`} (max {Math.round(recordingTelemetry.maxAcknowledgementMs)} ms)</p>}</details>
             {!!recoveries.length && <div className="mt-4 space-y-2"><div><h3 className="text-sm font-bold">Recoverable local segments</h3><p className="mt-1 text-xs text-muted">The local recovery copy is retained until the remote recording is reviewed and published.</p></div>{recoveries.map(recovery => <div key={recovery.segmentId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line p-3 text-sm"><span>{recovery.title} · {recovery.status}</span><span className="flex gap-2">{recovery.status !== "validating" && <button className="min-h-11 px-3 font-bold text-brand" onClick={() => void resumeRecovery(recovery)}>Resume upload</button>}<button className="min-h-11 px-3 font-bold" onClick={() => void downloadRecoveredSegment(recovery.segmentId)}>Download</button></span></div>)}</div>}
             {!!recordings.length && <div className="mt-4 grid gap-2 sm:grid-cols-2">{recordings.map(value => <div className="rounded-lg bg-surface p-3 text-sm" key={value.id}><b className="capitalize">{value.status}</b><p className="mt-1 text-muted">{(value.total_bytes / 1048576).toFixed(1)} MiB {value.duration_seconds ? `· ${Math.round(value.duration_seconds)} seconds` : ""}</p>{value.error_message && <p className="mt-1 text-red-800">{value.error_message}</p>}</div>)}</div>}
           </section>}
@@ -1001,13 +1141,38 @@ export function NativeClassroom({
 
 function RemoteVideo({ stream, label }: { stream: MediaStream; label: string }) {
   const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { if (ref.current) { ref.current.srcObject = stream; void ref.current.play().catch(() => undefined); } }, [stream]);
-  return <video ref={ref} autoPlay playsInline className="h-full w-full object-contain" aria-label={label}/>;
+  const [decoded, setDecoded] = useState(false);
+  const [playBlocked, setPlayBlocked] = useState(false);
+  useEffect(() => {
+    const video = ref.current;
+    const track = stream.getVideoTracks()[0];
+    if (!video || !track) return;
+    video.srcObject = stream;
+    const lost = () => setDecoded(false);
+    track.addEventListener("mute", lost); track.addEventListener("ended", lost);
+    void video.play().catch(() => setPlayBlocked(true));
+    return () => { track.removeEventListener("mute", lost); track.removeEventListener("ended", lost); video.srcObject = null; };
+  }, [stream]);
+  return <div className="relative h-full w-full"><video ref={ref} autoPlay playsInline onPlaying={() => {
+    const video = ref.current;
+    if (video && "requestVideoFrameCallback" in video) video.requestVideoFrameCallback(() => setDecoded(true));
+    else setDecoded(true);
+  }} onWaiting={() => setDecoded(false)} className="h-full w-full object-contain" aria-label={label}/>
+    {!decoded && <div className="absolute inset-0 grid place-items-center bg-[#101a38] p-5 text-center text-sm text-white" role="status">Waiting for a received teaching frame…</div>}
+    {playBlocked && <button className="absolute bottom-3 left-3 min-h-11 rounded-xl bg-white px-4 text-sm font-bold text-deep-blue" onClick={() => { void ref.current?.play().then(() => setPlayBlocked(false)); }}>Play teaching video</button>}
+  </div>;
 }
 function RemoteAudio({ stream }: { stream: MediaStream }) {
   const ref = useRef<HTMLAudioElement>(null);
-  useEffect(() => { if (ref.current) { ref.current.srcObject = stream; void ref.current.play().catch(() => undefined); } }, [stream]);
-  return <audio ref={ref} autoPlay/>;
+  const [playBlocked, setPlayBlocked] = useState(false);
+  useEffect(() => {
+    const audio = ref.current;
+    if (!audio) return;
+    audio.srcObject = stream;
+    void audio.play().catch(() => setPlayBlocked(true));
+    return () => { audio.srcObject = null; };
+  }, [stream]);
+  return <><audio ref={ref} autoPlay/>{playBlocked && <button className="absolute bottom-3 left-3 min-h-11 rounded-xl bg-white px-4 text-sm font-bold text-deep-blue" onClick={() => { void ref.current?.play().then(() => setPlayBlocked(false)); }}>Play class audio</button>}</>;
 }
 function Metric({ label, value }: { label: string; value: string }) {
   return <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-wide text-muted">{label}</p><b className="mt-1 block truncate text-sm tabular-nums">{value}</b></div>;
