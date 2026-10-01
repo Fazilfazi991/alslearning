@@ -2,9 +2,11 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { LiveClassesManager } from "@/components/admin/live-classes-manager";
 import { createClient } from "@/lib/supabase/server";
 import { liveClassConfiguration } from "@/lib/live-class/config";
+import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
 
 export default async function Page() {
   const db = await createClient();
+  const configuration = liveClassConfiguration();
   const [programs, subjects, batches, teachers, sessions, usage, attendance] = await Promise.all([
     db.from("programs").select("id,name").eq("status", "active").order("name"),
     db.from("subjects").select("id,name").eq("status", "active").order("name"),
@@ -37,7 +39,7 @@ export default async function Page() {
     teachers={(teachers.data || []).map(value => ({ id: value.id, name: value.full_name || value.email || "Teacher", email: value.email }))}
     sessions={hydratedSessions as never}
     usageBytes={usageBytes}
-    configuration={liveClassConfiguration()}
+    configuration={{ ...configuration, classroomEnabled: configuration.classroomEnabled && stagingTestWindowOpen() }}
     timeZone={process.env.ALS_ACADEMIC_TIME_ZONE || "Asia/Dubai"}
   /></AdminShell>;
 }

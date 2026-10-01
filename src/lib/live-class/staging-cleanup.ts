@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { reconcileClassTransport } from "./transport-reconciliation";
+import { readStagingCleanup } from "./staging-cleanup-read";
 
 const STAGING_REF = "slghshcdaijbcjfoqerq";
 const STAGING_URL = `https://${STAGING_REF}.supabase.co`;
@@ -23,16 +24,16 @@ export async function runStagingCleanup(now = new Date()) {
   const nowIso = now.toISOString();
   const cutoff = Date.parse(process.env.ALS_STAGING_TEST_CUTOFF_UTC || "");
   const [live, connections, publications, subscriptions, attendance] = await Promise.all([
-    db.from("live_sessions").select("id,ends_at,status")
-      .in("provider", ["cloudflare", "cloudflare-poc"]).eq("status", "live").limit(MAX_ROWS),
-    db.from("live_media_connections").select("id,session_id,status,last_seen_at")
-      .in("status", ["active", "reconnecting", "failed"]).limit(MAX_ROWS),
-    db.from("live_published_tracks").select("session_id")
-      .in("status", ["active", "closing", "failed"]).limit(MAX_ROWS),
-    db.from("live_track_subscriptions").select("session_id")
-      .in("status", ["active", "closing", "failed"]).limit(MAX_ROWS),
-    db.from("live_attendance_intervals").select("id,session_id,connection_id")
-      .is("ended_at", null).limit(MAX_ROWS),
+    readStagingCleanup("live_sessions", () => db.from("live_sessions").select("id,ends_at,status")
+      .in("provider", ["cloudflare", "cloudflare-poc"]).eq("status", "live").limit(MAX_ROWS)),
+    readStagingCleanup("live_media_connections", () => db.from("live_media_connections").select("id,session_id,status,last_seen_at")
+      .in("status", ["active", "reconnecting", "failed"]).limit(MAX_ROWS)),
+    readStagingCleanup("live_published_tracks", () => db.from("live_published_tracks").select("session_id")
+      .in("status", ["active", "closing", "failed"]).limit(MAX_ROWS)),
+    readStagingCleanup("live_track_subscriptions", () => db.from("live_track_subscriptions").select("session_id")
+      .in("status", ["active", "closing", "failed"]).limit(MAX_ROWS)),
+    readStagingCleanup("live_attendance_intervals", () => db.from("live_attendance_intervals").select("id,session_id,connection_id")
+      .is("ended_at", null).limit(MAX_ROWS)),
   ]);
   for (const query of [live, connections, publications, subscriptions, attendance]) {
     if (query.error) throw query.error;
@@ -58,8 +59,8 @@ export async function runStagingCleanup(now = new Date()) {
     ...(attendance.data || []).map(row => row.session_id),
   ]);
   if (classIds.size) {
-    const { data: sessions, error } = await db.from("live_sessions")
-      .select("id,status").in("id", [...classIds]);
+    const { data: sessions, error } = await readStagingCleanup("candidate_live_sessions", () => db.from("live_sessions")
+      .select("id,status").in("id", [...classIds]));
     if (error) throw error;
     for (const session of sessions || []) {
       if (["completed", "cancelled"].includes(session.status)) endedIds.add(session.id);

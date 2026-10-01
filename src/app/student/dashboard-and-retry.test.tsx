@@ -4,9 +4,8 @@ import { Children, isValidElement } from "react";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/states";
 
-const mock = vi.hoisted(() => ({ studentData: vi.fn(), recordingCount: vi.fn() }));
+const mock = vi.hoisted(() => ({ studentData: vi.fn() }));
 vi.mock("@/lib/student-data", () => ({ getStudentPortalData: mock.studentData }));
-vi.mock("@/lib/student-courses-server", () => ({ studentRecordingCount: mock.recordingCount }));
 
 import Dashboard from "./page";
 import ExamsError from "./exams/error";
@@ -18,23 +17,33 @@ import CoursesError from "./courses/error";
 import LiveClassesError from "./live-classes/error";
 
 describe("student dashboard truth", () => {
-  it("counts only future scheduled classes and available tests", async () => {
+  it("uses distinct programs, future classes, eligible test states, and persisted watch intervals", async () => {
     const now = Date.now();
-    mock.recordingCount.mockResolvedValue(4);
     mock.studentData.mockResolvedValue({
-      user: { full_name: "Student" }, enrollments: [{}], content: [], progress: [],
-      sessions: [
-        { status: "scheduled", starts_at: new Date(now + 60_000).toISOString() },
-        { status: "scheduled", starts_at: new Date(now - 60_000).toISOString() },
-        { status: "live", starts_at: new Date(now - 60_000).toISOString() },
-        { status: "completed", starts_at: new Date(now - 120_000).toISOString() },
+      user: { full_name: "Student Example" }, fetchedAt: now,
+      enrollments: [
+        { programs: { id: "program-1", name: "Science", slug: "science" } },
+        { programs: { id: "program-1", name: "Science", slug: "science" } },
       ],
-      tests: ["available", "in_progress", "upcoming", "completed", "closed"].map(state => ({ state })),
+      content: [], progress: [], subjectMappings: [],
+      sessions: [
+        { id: "future", title: "Future class", status: "scheduled", starts_at: new Date(now + 60_000).toISOString() },
+        { id: "past", title: "Past class", status: "scheduled", starts_at: new Date(now - 60_000).toISOString() },
+        { id: "live", title: "Live class", status: "live", starts_at: new Date(now - 60_000).toISOString() },
+        { id: "complete", title: "Completed class", status: "completed", starts_at: new Date(now - 120_000).toISOString() },
+      ],
+      tests: ["available", "in_progress", "upcoming", "completed", "closed"].map((state, index) => ({ id: String(index), slug: `test-${index}`, title: `Test ${index}`, state })),
+      attempts: [],
+      watchEvents: [{ elapsed_seconds: 90, ended_at: new Date(now - 60_000).toISOString(), content_kind: "lesson" }],
     });
     const html = renderToStaticMarkup(await Dashboard());
+    expect(html).toMatch(/<strong[^>]*>1<\/strong><p[^>]*>Active programs<\/p>/);
     expect(html).toMatch(/<strong[^>]*>1<\/strong><p[^>]*>Upcoming classes<\/p>/);
-    expect(html).toMatch(/<strong[^>]*>1<\/strong><p[^>]*>Available tests<\/p>/);
-    expect(html).toMatch(/<strong[^>]*>4<\/strong><p[^>]*>Recorded classes<\/p>/);
+    expect(html).toMatch(/<strong[^>]*>1 min<\/strong><p[^>]*>Time watched<\/p>/);
+    expect(html).toMatch(/<strong[^>]*>1<\/strong><p[^>]*>Tests to take<\/p>/);
+    expect(html).toContain("1 to resume");
+    expect(html).not.toContain("Past class");
+    expect(html).not.toContain("Completed class");
   });
 });
 

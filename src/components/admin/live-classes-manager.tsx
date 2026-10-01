@@ -113,7 +113,7 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
   const providerReady = configuration.classroomEnabled && configuration.realtimeConfigured;
   return <div>
     <header className="flex flex-wrap items-start justify-between gap-4"><div><p className="eyebrow">Academic operations</p><h1 className="mt-2 text-3xl font-bold">Native live classes</h1><p className="mt-2 max-w-3xl text-sm text-muted">Schedule only against authenticated Teacher accounts and current ALS academic scope. Provider secrets remain server-side.</p></div><span className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold ${providerReady ? "bg-green-50 text-green-800" : "bg-amber-50 text-amber-950"}`}><ShieldCheck size={18}/>{providerReady ? "Classroom ready" : "Configuration required"}</span></header>
-    {!providerReady && <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-950" role="status">Normal live entry is unavailable. {!configuration.classroomEnabled ? "ALS_LIVE_CLASS_ENABLED is disabled. " : ""}{configuration.missingRealtime.length ? `Missing ${configuration.missingRealtime.join(", ")}.` : ""} No provider-ready state is simulated.</p>}
+    {!providerReady && <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-950" role="status">Live media is currently unavailable. Scheduling and academic pages remain accessible. The release owner must confirm a valid testing window and provider readiness before a class can start.</p>}
     {message && <p className="mt-5 rounded-xl border border-line bg-white p-4 text-sm" role="status">{message}</p>}
 
     <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
