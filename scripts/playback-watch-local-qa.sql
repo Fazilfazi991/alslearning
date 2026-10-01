@@ -21,4 +21,3 @@ do $$ declare n numeric; begin
  exception when insufficient_privilege then null; end;
 end $$;
 select 'PASS bounded/retry/overlap/Teacher denial; rollback required' as result;
-
