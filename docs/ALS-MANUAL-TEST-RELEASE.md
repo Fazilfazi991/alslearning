@@ -2,7 +2,7 @@
 
 ## Later credential-only checkpoint
 
-The separately approved [1 October Step 1 credential report](ALS-STAGING-CREDENTIALS-STEP1-2026-10-01.md) records the R2 replacement and configuration-only redeploy `[REDACTED_PRIVATE_ID]`, using this same application source/ZIP. Academic expiry and data were preserved; live/replay remain blocked. The release observations below are the earlier academic handoff history.
+The separately approved [1 October Step 1 credential report](ALS-STAGING-CREDENTIALS-STEP1-2026-10-01.md) records the R2 replacement, subsequent staging Supabase key replacement/revocation, and current configuration-only redeploy `[REDACTED_PRIVATE_ID]` (Completed / Current, 14:16 Dubai), using this same application source/ZIP. The exposed Supabase key now returns HTTP 401; its replacement and protected hosted cleanup read pass. Academic expiry and data were preserved; live/replay remain blocked. The release observations below are the earlier academic handoff history.
 
 ## Deployment
 
