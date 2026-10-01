@@ -44,7 +44,7 @@ if(mode==='snapshot') {
 if(mode==='migrate') {
  const history=await sql('select version,name from supabase_migrations.schema_migrations');
  assert.ok(history.some(x=>x.version==='20260928075559'),'Accepted batch restriction migration missing; stop');
- for(const name of ['20261001060000_engaged_playback_watch_intervals','20261001063000_student_catalog_visible_scores']) {
+ for(const name of ['20261001060000_engaged_playback_watch_intervals','20261001063000_student_catalog_visible_scores','20261001070000_teacher_roster_effective_access']) {
  if(history.some(x=>x.name===name || x.version===name.slice(0,14)))console.log(`SKIP already recorded ${name}`);
  else {
   await guard(); const query=await readFile(resolve('supabase/migrations',`${name}.sql`),'utf8');
