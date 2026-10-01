@@ -1,5 +1,6 @@
 "use client";
 import {localDateTime} from "@/lib/core-time";
+import {formatAcademicDate} from "@/lib/live-class/date";
 import { useEffect, useMemo, useState } from "react";
 import {
   loadAdminData,
@@ -145,7 +146,8 @@ function Enrollments({ data, busy, run }: Props) {
     [expiry, setExpiry] = useState(""),
     [noExpiry, setNoExpiry] = useState(true),
     [validation, setValidation] = useState(""),
-    [saveNotice, setSaveNotice] = useState("");
+    [saveNotice, setSaveNotice] = useState(""),
+    [accessObservedAt] = useState(() => Date.now());
   const names = new Map(
     data.profiles.map((x) => [x.id, x.full_name || x.email]),
   );
@@ -264,7 +266,7 @@ function Enrollments({ data, busy, run }: Props) {
           id: x.id,
           primary: names.get(x.student_id) || "Student",
           secondary: programs.get(x.program_id) || "Program",
-          meta: `${x.status} · ${x.access_expires_at ? new Date(x.access_expires_at).toLocaleDateString() : "No expiry"}`,
+          meta: `Enrollment: ${x.status} · ${x.access_expires_at ? `${Date.parse(x.access_expires_at) <= accessObservedAt ? "Access expired" : "Access until"} ${formatAcademicDate(x.access_expires_at)} (Asia/Dubai)` : "No expiry"}`,
           action: <div className="flex flex-wrap gap-2"><button disabled={busy} className="min-h-10 rounded border px-3 text-sm font-bold disabled:opacity-50" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?localDateTime(x.access_starts_at):"");setExpiry(x.access_expires_at?localDateTime(x.access_expires_at):"");setNoExpiry(!x.access_expires_at);setValidation("");setSaveNotice("")}}>Edit</button><button disabled={busy} className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
         }))}
       />
