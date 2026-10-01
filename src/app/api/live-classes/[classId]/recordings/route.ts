@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isSameOriginRequest } from "@/lib/request-origin";
 import { createClient } from "@/lib/supabase/server";
-import { assertLiveFeature } from "@/lib/live-class/config";
+import { assertLiveFeature, liveClassConfiguration } from "@/lib/live-class/config";
 import { assertClassroomMode, authorizeLiveClass, LiveAuthorizationError } from "@/lib/live-class/authorization";
 import { r2RecordingStorage } from "@/lib/live-class/recording-storage";
 import { reconcileMultipartState, validateMultipartCompletion, type AcknowledgedPart } from "@/lib/live-class/recording-parts";
@@ -88,8 +88,13 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
   if (!body.action || !body.mode) return failure("Invalid recording operation", 400);
   if (body.action === "begin" && !stagingTestWindowOpen()) return failure("Staging test window is closed", 403);
   try {
-    const configuration = assertLiveFeature("recording");
-    assertLiveFeature(body.mode);
+    // Entry flags control new capture. Existing recordings still need their
+    // authorized review, publication and bounded owner recovery after shutdown.
+    const configuration = liveClassConfiguration();
+    if (body.action === "begin") {
+      assertLiveFeature("recording");
+      assertLiveFeature(body.mode);
+    }
     if (!configuration.r2Configured) return failure(`R2 is not configured (${configuration.missingR2.join(", ")})`, 503);
     const managerAction = body.action === "review" || body.action === "publish" || body.action === "unpublish";
     const authorization = await authorizeLiveClass(db, auth.user.id, classId, managerAction ? "manage" : "record");
