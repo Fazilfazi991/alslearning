@@ -2,6 +2,8 @@
 
 ## Later credential-only checkpoint
 
+The subsequent [Cloudflare replacement checkpoint](ALS-CLOUDFLARE-CONTAINMENT-2026-10-01.md) supersedes the deployment ID below: current accepted source is running configuration-only Hostinger deployment `[REDACTED_PRIVATE_ID]`, with verified replacement staging SFU/TURN references. All 25 saved hosted values match; R2/Supabase/expiry are unchanged and all media flags remain false. Academic checks and three genuine role sign-ins pass. Exact old-resource deletion awaits the browser policy's action-time confirmation; Step 2 is prepared but not yet executed. The resources remain intact until that confirmation.
+
 The separately approved [1 October Step 1 credential report](ALS-STAGING-CREDENTIALS-STEP1-2026-10-01.md) records the R2 replacement, subsequent staging Supabase key replacement/revocation, and current configuration-only redeploy `[REDACTED_PRIVATE_ID]` (Completed / Current, 14:16 Dubai), using this same application source/ZIP. The exposed Supabase key now returns HTTP 401; its replacement and protected hosted cleanup read pass. Academic expiry and data were preserved; live/replay remain blocked. The release observations below are the earlier academic handoff history.
 
 ## Deployment
