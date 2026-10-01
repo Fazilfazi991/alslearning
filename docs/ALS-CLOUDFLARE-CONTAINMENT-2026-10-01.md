@@ -1,6 +1,43 @@
 # ALS staging Cloudflare containment — 1 October 2026
 
-## Replacement checkpoint — later approval supersedes the restriction below
+## Final result — containment and Step 2 completed
+
+| Requested verdict | Result |
+| --- | --- |
+| CLOUDFLARE SFU REPLACEMENT | **VERIFIED** |
+| OLD SFU RESOURCE | **DELETED** — exact old resource absent; old authority returns HTTP 404 |
+| CLOUDFLARE TURN REPLACEMENT | **VERIFIED** |
+| OLD TURN RESOURCE | **DELETED** — exact old resource absent; old authority returns HTTP 404 |
+| ACADEMIC REGRESSION | **PASS** |
+| STEP 2 SCHEDULED DB CLEANUP | **PASS** — existing job 1, run/request 45 |
+| STEP 2 ACTUAL PROVIDER CLEANUP | **PASS** — exact provider session explicitly expired, HTTP 410 / `session_error`; scheduled reconciliation confirmed absence |
+| HEALTHY-RESOURCE ISOLATION | **PASS** — unrelated scheduled fixture unchanged |
+| FINAL STAGING STATE | **SAFE** |
+| LIVE ENTRY / RECORDING | **DISABLED**; POC disabled; cron paused |
+| PRODUCTION | **UNCHANGED** |
+
+### Deletion and continued authentication
+
+- The owner confirmed the bundled action-time permanent-deletion request. On resumption, the old SFU resource was already absent from its verified account overview. Its actual deletion time/actor is unknown; no timestamp is fabricated. No second deletion or replacement creation was attempted.
+- The exact old TURN key deletion was submitted at **2026-10-01T12:12:56.766Z**. At **12:13:29.360Z**, both overview tables contained their one expected replacement and neither old ID.
+- At **2026-10-01T12:13:44.049Z**, a harmless GET of a historical old SFU session with the old authority returned **404**, and attempted 60-second TURN credential generation with the old authority returned **404**. No provider response body or secret was emitted or retained. Old credentials were passed privately in process input, not written into an old-secret rollback file.
+- Replacement access remained valid at **12:14:00.635Z**: the known inert SFU session explicitly expired with HTTP 410 / `session_error`, and replacement TURN generation succeeded with HTTP 201, TTL 60 seconds. Real browser publication later returned HTTP 200 on the exact replacement app, proving active SFU use.
+- No payment, subscription deletion/creation, plan upgrade, permission expansion, new R2 bucket, credential rotation in Supabase/R2, unrelated resource deletion or Production operation occurred. Historical non-secret IDs/database audit rows were preserved before deletion.
+
+### Step 2 and final state
+
+- One fresh synthetic class: **`92cd68dd-549a-4e71-9dad-5f85d2197245`**. Real Teacher microphone only, no Student receiver, camera/screen/recording off. See [full shutdown acceptance](ALS-STAGING-STEP2-SHUTDOWN-2026-10-01.md) for setup corrections and exact provider/database evidence.
+- Teacher browser destroyed at **12:33:34.137Z**, without Leave or End. Database connection/publication/attendance remained active/open afterwards; no classroom page remained open.
+- Existing cron resumed **12:34:22.180Z**. Run/request **45**, **12:35 UTC**, returned HTTP 200 and closed the stale connection/attendance plus terminal publication. Run/request **46**, **12:36 UTC**, returned HTTP 200 and completed the expired class. Cron paused **12:36:46.189Z**. No manual cleanup POST or manual provider close was used during Step 2.
+- Provider outcome is **`confirmed_absent_or_expired`**, HTTP **410 / `session_error`**, no retry pending. The provider had already expired the session after browser abandonment and before cron resumed. This proves actual resource absence plus scheduled reconciliation; it is not evidence of a forced close of a still-active provider session.
+- Healthy unrelated fixture **`f92fdb1d-1c18-505c-a09d-a7b14ebe0daf`** matched its pretest row exactly before and after cleanup. This checks scheduled-fixture isolation, not a simultaneous second live publisher.
+- Final configuration-only Hostinger deployment **`01a0f778-4b3f-71fb-8713-f555234cb137`**, Completed. Private readback at **12:41:31.094Z** matched all 25 expected values: all three media flags false, replacement provider references retained, R2/Supabase unchanged. Accepted application source/ZIP unchanged.
+- Guarded database check **12:40:37.245331Z**: zero live classes, open/reconnecting/failed connections, active/closing publications/subscriptions, open attendance and recording/upload/interrupted segments; job 1 paused, 46 migrations. Exact new provider session again returned HTTP 410 at the final observation **12:42:46.634998Z**; the inert verification session was also explicitly expired.
+- All 22 academic checks pass after acceptance; genuine hosted Student access restored. Teacher live entry is unavailable; Student class view shows ended with no Join control. Five original enrollment IDs, separate Program rows, active status/start, exact expiry **2026-10-08T07:40:22.181Z**, results and **44.013 seconds** watch history preserved. No new attempt, playback, reseed, reset, migration or source edit.
+
+Evidence: [SFU replacement remains](evidence/als-provider-replacement-20261001/sfu-after-deletion.png), [TURN replacement remains](evidence/als-provider-replacement-20261001/turn-after-deletion.png), [final completed deployment](evidence/als-shutdown-20261001/hostinger-final-disabled.png), [Student class ended](evidence/als-shutdown-20261001/student-class-ended.png).
+
+## Historical replacement checkpoint — before action-time confirmation
 
 The owner subsequently approved replacing exactly the two exposed staging resources and deleting the old resources after all replacement checks pass. No Production/shared dependency, new subscription, billing change, R2 change or Supabase change is authorized.
 
@@ -27,7 +64,7 @@ The owner subsequently approved replacing exactly the two exposed staging resour
 Safe deployment evidence: [replacement completed](evidence/als-provider-replacement-20261001/hostinger-replacement-completed.png).
 Safe pending-action evidence: [exact old SFU dialog](evidence/als-provider-replacement-20261001/old-sfu-delete-confirmation.png), [exact old TURN dialog](evidence/als-provider-replacement-20261001/old-turn-delete-confirmation.png), [Student regression](evidence/als-provider-replacement-20261001/student-regression.png).
 
-## Result
+## Historical result before resource-replacement approval
 
 **Containment is blocked by the existing-resource restriction.** The owner approved replacement of `CF_REALTIME_APP_SECRET` and `CF_TURN_KEY_API_TOKEN` on the existing staging resources and explicitly excluded deleting/recreating those resources. No supported in-place credential replacement/revocation operation was found in the current dashboard or official SFU/TURN management API. No credential, resource, deployment or feature setting was changed.
 
@@ -78,7 +115,7 @@ Safe dashboard evidence: [SFU action menu](evidence/als-provider-containment-202
 - Final guarded database check at **2026-10-01T10:51:58.790849Z**, or **1 October, 14:51:58.790849 Dubai**: zero live classes, open/reconnecting/failed connections, active/closing publications and subscriptions, open attendance, and recording/uploading/interrupted segments. Cron job 1 paused; 46 migrations retained.
 - No class was created, no scheduler resumed, no credential/resource/configuration change, no migration/reset/reseed, no application-source edit, no Git push, billing change or Production action.
 
-## Concrete separate approval needed
+## Historical separate approval boundary — subsequently granted
 
 Approve creating **one replacement staging SFU app and one replacement staging TURN key**, followed by deleting **only** the exposed old `als-live-poc-sfu` and `als-live-poc-turn` resources after replacement checks and verified consumer installation. This changes staging resource identity and is outside the current approval.
 
