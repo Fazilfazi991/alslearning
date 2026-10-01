@@ -1,5 +1,9 @@
 # ALS Step 2 — unattended shutdown preflight, 1 October 2026
 
+## Later containment checkpoint
+
+The owner subsequently approved in-place staging SFU/TURN containment. The [provider containment report](ALS-CLOUDFLARE-CONTAINMENT-2026-10-01.md) records verified consumers, current dashboard/API findings, fresh academic checks and the resulting resource-replacement approval boundary. No supported in-place secret replacement was found; no credentials/resources changed and Step 2 remains unproven. The original preflight observations below are retained as history.
+
 ## Focused result
 
 **Stopped at provider credential preflight. No fresh class or media resource was created.** The owner's Step 2 instruction requires stopping when historical evidence establishes provider-secret exposure, rather than using the affected secret for a new media session.
