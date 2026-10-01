@@ -16,5 +16,3 @@ do $$ declare ex uuid; su uuid; q uuid; t uuid; a public.test_attempts; catalog 
  if (select x->'score' from jsonb_array_elements(public.core_attempt_history(t)) x limit 1)<>'null'::jsonb then raise exception 'Hidden score leaked through history'; end if;
 end $$;
 select 'PASS canonical hidden-result submission remains hidden in catalogue and history; rollback required' as result;
-
-

@@ -52,4 +52,3 @@ begin
 end $$;
 revoke all on function public.record_playback_watch_interval(uuid,text,uuid,timestamptz,timestamptz,numeric) from public,anon,service_role;
 grant execute on function public.record_playback_watch_interval(uuid,text,uuid,timestamptz,timestamptz,numeric) to authenticated;
-
