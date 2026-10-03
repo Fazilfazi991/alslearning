@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-03T09:56:53.233Z",
+  "oldKeyId": "87d6c502-407c-4071-835d-5bed4e1fb811",
+  "newKeyId": "912b2fdd-e98b-46ed-afe3-e2c1c22a60db",
+  "oldKeyAbsent": true,
+  "oldKeyAuthStatus": 401,
+  "replacementAuthStatus": 200,
+  "onlyOldManagedKeyRevoked": true,
+  "noSigningKeyRotation": true,
+  "localInstallPending": true
+}

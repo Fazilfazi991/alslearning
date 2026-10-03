@@ -4,7 +4,13 @@
 
 **Fix implemented, locally verified and deployed to disabled staging. Hosted acceptance is BLOCKED, not passed.**
 
-**Later checkpoint:** the owner separately approved the scoped staging credential containment described below. Replacement credentials have been prepared and provider checks passed, but the running Hostinger app still holds the exposed values. Corrected owner credential entry is pending. Hosted acceptance remains blocked until containment is complete; see [the containment chronology](ALS-STAGING-CONTAINMENT-2026-10-03.md). The original 06:37 final-state evidence below remains historical evidence, not a claim that later replacement resources were never created.
+**Latest checkpoint:** the separately approved staging credential containment is verified. Replacement credentials are deployed; old Cloudflare SFU/TURN/R2 access and the old individually managed Supabase key are retired/rejected; Vault and verified local consumers are updated. All three normal hosted role logins and 21 academic checks passed. See [the containment chronology](ALS-STAGING-CONTAINMENT-2026-10-03.md).
+
+One fresh acceptance class, `09b74889-c4e0-42b3-8743-afd0059ca5d8`, was prepared with existing synthetic scope and recording off. Teacher Chrome and eligible Student 1 in-app-browser pages are signed in. The class remains scheduled; no microphone publication or End action has occurred. Chrome control is blocked during timed-window preparation after the Hostinger tab was replaced; owner dismissal of any native chooser/modal is pending. At 10:10:15.558427 UTC, global media counts were zero and cron stayed paused at run ID 72. Do not create another class when resuming.
+
+## Original exposure checkpoint
+
+The original 06:37 UTC evidence below is historical. Later containment/class preparation does not revise those timestamps or turn the unrun hosted acceptance into a PASS.
 
 The agent accidentally included staging secret values in a browser tool result while recovering the Hostinger environment-page state. No live window was opened after this exposure. The request explicitly prohibits credential changes, so containment requires separate authorization. No new class was created. No recording, screen share, camera or microphone test was started.
 
@@ -23,7 +29,7 @@ The agent accidentally included staging secret values in a browser tool result w
 | PHYSICAL IPHONE | NOT RUN |
 | PRODUCTION | UNCHANGED |
 
-There is no Step 5 class ID, End click timestamp or server-completion-to-Student-UI latency. These require the blocked real-media acceptance. Local results do not establish a hosted pass.
+At the original checkpoint there was no Step 5 class ID. A fresh class is now prepared as recorded above, but End click timestamp and server-completion-to-Student-UI latency remain unmeasured. These require the blocked real-media acceptance. Local results do not establish a hosted pass.
 
 ## Source trace and narrow change
 

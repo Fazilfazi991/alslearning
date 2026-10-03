@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-03T10:03:09.392Z",
+  "changed": [
+    {
+      "file": ".env.staging.local",
+      "labels": [
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ],
+      "otherValuesUnchanged": true
+    },
+    {
+      "file": ".env.hostinger.staging.local",
+      "labels": [
+        "ALS_STAGING_ACCESS_PHRASE",
+        "ALS_STAGING_COOKIE_SECRET"
+      ],
+      "otherValuesUnchanged": true
+    },
+    {
+      "file": ".env.hostinger.live.local",
+      "labels": [
+        "CF_REALTIME_APP_ID",
+        "CF_REALTIME_APP_SECRET",
+        "CF_TURN_KEY_ID",
+        "CF_TURN_KEY_API_TOKEN",
+        "R2_ACCESS_KEY_ID",
+        "R2_SECRET_ACCESS_KEY",
+        "ALS_STAGING_ACCESS_PHRASE",
+        "ALS_STAGING_COOKIE_SECRET"
+      ],
+      "otherValuesUnchanged": true
+    }
+  ],
+  "onlyVerifiedMatchingConsumersUpdated": true,
+  "mediaFlagsAndExpiryUnchanged": true,
+  "pendingFilesRemovalRequired": true
+}

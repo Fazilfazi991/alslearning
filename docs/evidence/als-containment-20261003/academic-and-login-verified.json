@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T09:55:09.889Z",
+  "academicChecks": 21,
+  "hostedRoles": [
+    "student",
+    "teacher",
+    "admin"
+  ],
+  "preservation": true,
+  "globalZero": true,
+  "cronPaused": true,
+  "cronMaxRunId": 72,
+  "recordingAndEnrollmentUnchanged": true
+}

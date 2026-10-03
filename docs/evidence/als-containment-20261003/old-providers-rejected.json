@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T10:03:01.741Z",
+  "oldSfuStatus": 404,
+  "replacementSfuStatus": 410,
+  "replacementVerificationSessionTerminal": true,
+  "oldTurnStatus": 404,
+  "newTurnStatus": 201,
+  "turnTtlSeconds": 60,
+  "oldR2Status": 401,
+  "newR2Status": 404,
+  "replacementR2AuthenticatedOnOwnedDeletedObject": true,
+  "unrelatedObjectsReadOrAltered": false,
+  "oldResourcesUnusable": true
+}

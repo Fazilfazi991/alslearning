@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-03T09:44:33.978Z",
+  "settings": 25,
+  "duplicateLabels": [],
+  "all25Expected": true,
+  "replacementLabelsVerified": [
+    "CF_REALTIME_APP_ID",
+    "CF_REALTIME_APP_SECRET",
+    "CF_TURN_KEY_ID",
+    "CF_TURN_KEY_API_TOKEN",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "ALS_STAGING_ACCESS_PHRASE",
+    "ALS_STAGING_COOKIE_SECRET",
+    "ALS_STAGING_CLEANUP_TOKEN"
+  ],
+  "flagsDisabled": true,
+  "submitted": false
+}

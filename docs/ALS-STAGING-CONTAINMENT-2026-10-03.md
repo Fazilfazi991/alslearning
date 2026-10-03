@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Containment is incomplete. Replacement credentials are prepared and verified directly with their providers. Hostinger deployment has not yet received them. Old resources remain retained. Hosted Step 5 acceptance is blocked.**
+**Credential containment passed. Deployment, provider authentication, old-access rejection, Vault/local consumers and academic checks are verified. Exactly the three confirmed old Cloudflare resources and old individually managed Supabase key were retired. Hosted Step 5 acceptance is prepared but has not run; Chrome control is currently blocked during live-window preparation.**
 
 The owner separately approved containment of the staging credentials exposed during Step 5. This approval covers only the verified staging SFU/TURN, bucket-scoped R2 credentials, individually managed Supabase server key, staging gate phrase/cookie secret and cleanup token. It does not authorize Production, shared consumers, new subscriptions, billing changes, another bucket or a signing-key rotation.
 
@@ -19,13 +19,13 @@ The owner separately approved containment of the staging credentials exposed dur
 
 ## Replacement inventory
 
-| Resource | Old identity, retained | Replacement identity | Provider verification |
+| Resource | Old identity, retired | Replacement identity | Provider verification |
 | --- | --- | --- | --- |
 | SFU | `als-staging-sfu-containment-20261001`, `6306f9d5f836a1aa08b0d6bbde22f10b` | `als-staging-sfu-containment-20261003`, `9a19a0fbdcf8759c89dd6deba41c5f1f` | Empty session creation HTTP 201; exact new app session inspection HTTP 200, zero tracks, at 07:47:50.954 UTC. The session was subsequently terminal: HTTP 410 `session_error` at 08:53:31.799 UTC. |
 | TURN | `als-staging-turn-containment-20261001`, `19951d8aa17f40210ffc756ba8c1ba3a` | `als-staging-turn-containment-20261003`, `4a9c6350cb91389b4fb912a16b316b3e` | Short-lived credential generation HTTP 201, TTL 60 seconds, at 07:47:50.954 UTC. Generated credentials were not output or retained. |
 | R2 user token | `ALS Isolated Staging R2 Replacement 2026-10-01` | `ALS Isolated Staging R2 Containment 2026-10-03` | Object Read & Write on the same single bucket; displayed active until 8 October. An owned 1,024-byte object passed Put/Head/Get/Delete and post-delete HTTP 404 at 08:13:20.991 UTC. No unrelated objects were read or altered. |
 | Supabase server key | `als_hostinger_staging_containment_2026_10_01`, `87d6c502-407c-4071-835d-5bed4e1fb811` | `als_hostinger_staging_containment_2026_10_03`, `912b2fdd-e98b-46ed-afe3-e2c1c22a60db` | Read-only lookup of the existing synthetic Teacher through Auth Admin returned HTTP 200 at 07:13:01.531 UTC. No signing key or account password was rotated. |
-| Gate and cleanup | Existing exposed staging settings | Fresh random staging-only values prepared | Awaiting Hostinger installation and rejection checks for old phrase/cookie/token. Vault remains unchanged at this checkpoint. |
+| Gate and cleanup | Existing exposed staging settings, rejected | Fresh random staging-only values installed | Hosted new phrase/cookie/token accepted; old phrase/cookie/token rejected; exact existing Vault entry updated and verified. |
 
 Only one replacement of each provider resource was created. The SFU verification session ID is `722a6610403d7577f4fe14bf9bcd41dd891ec6649fee8d77b6a449645415cea1`; it has no active media and is expired. API tokens, object-access IDs/secrets, temporary TURN credentials and account passwords are not included in this report.
 
@@ -47,7 +47,35 @@ The import failure's cause is unproven. Changing the file to the conventional `.
 
 ![Fifteen preserved settings in the unsaved import form](evidence/als-containment-20261003/unsaved-import-form-15-preserved.png)
 
-No old provider resource or server key has been revoked. The Vault entry and verified current local consumer files are unchanged. New credentials exist only in designated ignored local staging configuration pending installation.
+The revised import succeeded: the unsaved form contained exactly 25 settings, no duplicate labels, all ten expected replacements, and the fifteen preserved values. All three media flags remained false. The owner then submitted deployment `01a10128-0437-733e-be6f-aa48ae9c8892`, started at **09:46:02 UTC** (Hostinger display 13:46:02 Dubai). This is an import/submission milestone; completion and running-app verification are still required before revocation.
+
+![Imported non-secret replacement SFU identifier](evidence/als-containment-20261003/imported-replacement-public-id.png)
+
+Deployment `01a10128-0437-733e-be6f-aa48ae9c8892` was observed **Current/Completed at 09:49:27.212 UTC**. Private saved readback at **09:49:46.873 UTC** matched all 25 intended settings, with media flags false and no mismatches.
+
+Hosted verification at **09:50:07.836 UTC** proved: no gate cookie redirects (307); old gate cookie redirects (307); old phrase is rejected (401); new phrase is accepted (303) and login loads (200); new Supabase server key authenticates (200); old cleanup token is rejected (404); new cleanup token succeeds (200) with zero candidates, zero provider calls and zero media-row changes. Only the existing Vault entry `88731886-8d08-4999-ad18-6609fdca9721` was updated and its exact replacement was privately verified. Cron stayed paused at run ID 72.
+
+Genuine normal-UI Student, Teacher and Admin logins passed. The fresh read-only academic run passed all 21 checks, including expired/ineligible access denial. At **09:55:08.599417 UTC**, academic/enrollment/recording preservation matched the pre-submission observation exactly, with zero active media resources.
+
+Under the separate containment approval, exactly old Supabase key `87d6c502-407c-4071-835d-5bed4e1fb811` was revoked at **09:56:53.233 UTC**. Key inventory showed it absent; old authentication returned 401; replacement key `912b2fdd-e98b-46ed-afe3-e2c1c22a60db` still returned 200. No signing key or password was rotated.
+
+The owner gave the computer-use policy's action-time confirmation for exactly the three named old Cloudflare resources. UI absence was observed for old TURN at **09:58:51.932 UTC**, old SFU at **09:59:42.722 UTC**, and old R2 token at **10:02:16.824 UTC**. Replacement rows remained present; unrelated Production/QA R2 tokens and the older expired staging token were retained. No bucket, subscription or billing plan was changed.
+
+Post-revocation checks at **10:03:01.741 UTC** proved old SFU HTTP 404, old TURN HTTP 404 and old R2 HTTP 401. Replacement SFU authenticated and returned 410 `session_error` for the exact expired empty verification session; replacement TURN generated a 60-second credential (201), never output or retained; replacement R2 authenticated on the owned deleted verification object (404). No unrelated object was read or altered.
+
+At **10:03:09.392 UTC**, only the previously verified matching labels were installed in the three designated ignored staging consumer files. Every other value, including flags and expiry, was privately compared unchanged. Pending import copies remain temporarily ignored for completing the acceptance configuration/readback and will be removed after final restoration.
+
+![Old SFU retired, replacement retained](evidence/als-containment-20261003/old-sfu-deleted.png)
+
+![Old TURN retired, replacement retained](evidence/als-containment-20261003/old-turn-deleted.png)
+
+![Old R2 token retired, unrelated tokens retained](evidence/als-containment-20261003/old-r2-deleted.png)
+
+## Step 5 acceptance preparation
+
+Exactly one fresh class was scheduled through the genuine Admin UI: `09b74889-c4e0-42b3-8743-afd0059ca5d8`, **Synthetic ALS Student Auto-End — 3 Oct 2026**. It uses the existing assigned Teacher and known-valid synthetic Program/Subject/Batch, one receiver, recording disabled. Separate Teacher Chrome and Student 1 in-app-browser pages were signed in and prepared while media remained disabled. No class was started and no microphone publication was created.
+
+At **10:10:15.558427 UTC**, all global media/database counts were zero, cron remained paused at run ID 72, the fresh class remained scheduled, and retained recording/enrollment preservation was unchanged. The original Hostinger tab disappeared during attempted future-window preparation; the reopened tab then blocked browser focus/DOM access. The owner was asked to dismiss any native file chooser/modal and leave settings open. The timed-window submission did not occur; hosted acceptance remains unrun. No extra class will be created when resuming.
 
 ## Safe media state at this checkpoint
 
