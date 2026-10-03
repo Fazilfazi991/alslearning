@@ -13,6 +13,7 @@ import {
 import { emptyLiveStats, PeerStatsSampler, StatsIntervalAccumulator, type LiveStatsSample } from "@/lib/live-class/stats";
 import { formatAcademicDate } from "@/lib/live-class/date";
 import { acceptReceiveOffer } from "@/lib/live-class/receive-negotiation";
+import { observeSessionStatus, terminalSessionStatus } from "@/lib/live-class/session-status";
 import { Hand, Maximize, Mic, MicOff, MonitorUp, PhoneOff, Radio, RefreshCw, Video, VideoOff } from "lucide-react";
 
 type User = { id: string; role: "student" | "teacher" | "admin"; full_name: string; email: string | null };
@@ -107,6 +108,8 @@ export function NativeClassroom({
   const [pollQuestion, setPollQuestion] = useState("");
   const [connectionId, setConnectionId] = useState<string | null>(null);
   const [classStatus, setClassStatus] = useState(session.status);
+  const classStatusRef = useRef(session.status);
+  const refreshSessionRef = useRef<() => Promise<void>>(async () => undefined);
   const [connectionState, setConnectionState] = useState<"idle" | "joining" | "connected" | "reconnecting" | "failed" | "ended">("idle");
   const [entryOpen, setEntryOpen] = useState(entryEnabled);
   const [remoteTracks, setRemoteTracks] = useState<RemoteTrack[]>([]);
@@ -160,12 +163,61 @@ export function NativeClassroom({
   } : null);
 
   const endpoint = `/api/live-classes/${session.id}`;
+  const applySessionStatus = useCallback((status: string) => {
+    if (terminalSessionStatus(classStatusRef.current)) return;
+    classStatusRef.current = status;
+    setClassStatus(status);
+    // Teacher End retains its existing recording stop and provider closure flow.
+    if (!terminalSessionStatus(status) || manager) return;
+    if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
+    reconnectTimerRef.current = null;
+    reconnectsRef.current = 0;
+    trackRefreshPendingRef.current = false;
+    recoverReceiveRef.current = () => undefined;
+    for (const peer of [peerRef.current, publisherPeerRef.current]) {
+      if (!peer) continue;
+      peer.ontrack = null; peer.onconnectionstatechange = null;
+      peer.getReceivers().forEach(receiver => receiver.track?.stop());
+      peer.close();
+    }
+    peerRef.current = null; publisherPeerRef.current = null;
+    localStreamRef.current?.getTracks().forEach(track => track.stop());
+    screenStreamRef.current?.getTracks().forEach(track => track.stop());
+    localStreamRef.current = null; screenStreamRef.current = null;
+    midMapRef.current.clear(); subscribedRef.current.clear();
+    publicationKindByMidRef.current.clear(); trackKindByIdentifierRef.current.clear();
+    publishedKindsRef.current.clear(); publicationPendingRef.current.clear();
+    setConnectionId(null); setRemoteTracks([]); setPublished([]);
+    setPreflightReady(false); setCameraOn(false); setScreenBusy(false);
+    setConnectionState("ended"); setStats(emptyStats); setError(""); setNotice("");
+  }, [manager]);
+
+  useEffect(() => {
+    const observer = observeSessionStatus(createClient(), session.id, classStatusRef.current, applySessionStatus);
+    refreshSessionRef.current = observer.refresh;
+    const refresh = () => { void observer.refresh(); };
+    const visible = () => { if (document.visibilityState === "visible") refresh(); };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("online", refresh);
+    document.addEventListener("visibilitychange", visible);
+    return () => {
+      refreshSessionRef.current = async () => undefined;
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", refresh);
+      document.removeEventListener("visibilitychange", visible);
+      observer.dispose();
+    };
+  }, [applySessionStatus, session.id]);
+
   const api = useCallback(async <T,>(path: string, body: Record<string, unknown>) => {
     const response = await fetch(`${endpoint}/${path}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, mode }), cache: "no-store",
     });
     const value = await response.json().catch(() => ({})) as T & { error?: string };
-    if (!response.ok) throw new Error(value.error || `Classroom request failed (${response.status})`);
+    if (!response.ok) {
+      if (response.status === 409 && value.error === "The class is not live") await refreshSessionRef.current();
+      throw new Error(value.error || `Classroom request failed (${response.status})`);
+    }
     return value;
   }, [endpoint, mode]);
 
@@ -247,7 +299,11 @@ export function NativeClassroom({
   const subscribeAvailable = useCallback(async (peer: RTCPeerConnection, id: string) => {
     const response = await fetch(`${endpoint}/media?mode=${mode}`, { cache: "no-store" });
     const discovery = await response.json() as { tracks?: { id: string; owner_id: string; kind: RemoteTrack["kind"] }[]; error?: string };
-    if (!response.ok) throw new Error(discovery.error || "Track discovery failed");
+    if (!response.ok) {
+      if (response.status === 409 && discovery.error === "The class is not live") await refreshSessionRef.current();
+      throw new Error(discovery.error || "Track discovery failed");
+    }
+    if (terminalSessionStatus(classStatusRef.current)) return;
     const activeIds = new Set((discovery.tracks || []).map(track => track.id));
     setRemoteTracks(current => current.filter(track => {
       if (activeIds.has(track.id)) return true;
@@ -265,7 +321,7 @@ export function NativeClassroom({
   }, [api, endpoint, lowData, mode, user.id]);
 
   const requestTrackRefresh = useCallback(() => {
-    if (!peerRef.current || !connectionId) return Promise.resolve();
+    if (terminalSessionStatus(classStatusRef.current) || !peerRef.current || !connectionId) return Promise.resolve();
     trackRefreshPendingRef.current = true;
     if (trackRefreshPromiseRef.current) return trackRefreshPromiseRef.current;
     const operation = queue(async () => {
@@ -351,7 +407,9 @@ export function NativeClassroom({
 
   useEffect(() => {
     if (!connectionId) return;
-    const heartbeat = window.setInterval(() => void api("media", { action: "heartbeat", connectionId }).catch(() => setConnectionState("reconnecting")), 15_000);
+    const heartbeat = window.setInterval(() => void api("media", { action: "heartbeat", connectionId }).catch(() => {
+      if (!terminalSessionStatus(classStatusRef.current)) setConnectionState("reconnecting");
+    }), 15_000);
     return () => window.clearInterval(heartbeat);
   }, [api, connectionId]);
 
@@ -494,7 +552,8 @@ export function NativeClassroom({
   }
 
   async function join(recovery = false) {
-    if (!entryOpen || !configuration.realtimeConfigured || joinInFlightRef.current) return;
+    if (recovery) await refreshSessionRef.current();
+    if (terminalSessionStatus(classStatusRef.current) || !entryOpen || !configuration.realtimeConfigured || joinInFlightRef.current) return;
     joinInFlightRef.current = true;
     setConnectionState("joining"); setError("");
     let createdConnectionId: string | null = null;
@@ -509,6 +568,7 @@ export function NativeClassroom({
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
       createdConnectionId = created.connectionId;
+      if (terminalSessionStatus(classStatusRef.current)) throw new Error("The class is not live");
       const peerOptions: RTCConfiguration = {
         iceServers: created.iceServers,
         bundlePolicy: "max-bundle",
@@ -517,12 +577,14 @@ export function NativeClassroom({
       const peer = new RTCPeerConnection(peerOptions);
       const publisherPeer = new RTCPeerConnection(peerOptions);
       peer.ontrack = event => {
+        if (terminalSessionStatus(classStatusRef.current)) { event.track.stop(); return; }
         const identity = midMapRef.current.get(event.transceiver.mid || "");
         if (!identity) return;
         trackKindByIdentifierRef.current.set(event.track.id, identity.kind);
         setRemoteTracks(current => [...current.filter(value => value.id !== identity.id), { ...identity, stream: new MediaStream([event.track]) }]);
       };
       const handleConnectionState = () => {
+        if (terminalSessionStatus(classStatusRef.current)) return;
         const states = [peer.connectionState, publisherPeer.connectionState];
         if (states.some(state => ["disconnected", "failed"].includes(state)) && peerRef.current === peer) {
           setConnectionState("reconnecting"); reconnectsRef.current += 1;
@@ -538,6 +600,7 @@ export function NativeClassroom({
       publisherPeer.onconnectionstatechange = handleConnectionState;
       peerRef.current = peer; publisherPeerRef.current = publisherPeer; setConnectionId(created.connectionId);
       await queue(() => subscribeAvailable(peer, created.connectionId));
+      if (terminalSessionStatus(classStatusRef.current)) throw new Error("The class is not live");
       setConnectionState([peer.connectionState, publisherPeer.connectionState].includes("connected") ? "connected" : "joining");
       if (localStreamRef.current?.active && (manager || participant?.audio_publish_allowed)) {
         await queue(() => publishLocal(publisherPeer, created.connectionId, localStreamRef.current!.getTracks()));
@@ -551,7 +614,9 @@ export function NativeClassroom({
       localStreamRef.current?.getTracks().forEach(track => track.stop());
       localStreamRef.current = null; setPreflightReady(false); setCameraOn(false);
       if (createdConnectionId) void api("media", { action: "leave", connectionId: createdConnectionId }).catch(() => undefined);
-      setConnectionId(null); setConnectionState("failed");
+      setConnectionId(null);
+      if (terminalSessionStatus(classStatusRef.current)) { setConnectionState("ended"); return; }
+      setConnectionState("failed");
       const message = reason instanceof Error ? reason.message : "Could not join classroom";
       setError(message.includes("Staging test window is closed") ? "The classroom testing window has ended. Return to classes and check for the next scheduled window." : message);
     }
@@ -560,6 +625,7 @@ export function NativeClassroom({
 
   useEffect(() => {
     recoverReceiveRef.current = () => {
+      if (terminalSessionStatus(classStatusRef.current)) return;
       if (joinInFlightRef.current || reconnectTimerRef.current !== null) return;
       reconnectsRef.current += 1;
       if (reconnectsRef.current > 3) { setConnectionState("failed"); return; }
@@ -740,7 +806,7 @@ export function NativeClassroom({
       if (action === "end") recordingStopRef.current?.();
       const result = await api<{ status: string }>("control", { action });
       setNotice(`Class is now ${result.status}.`);
-      if (result.status === "live" || result.status === "completed" || result.status === "cancelled") setClassStatus(result.status);
+      if (result.status === "live" || result.status === "completed" || result.status === "cancelled") applySessionStatus(result.status);
       if (action === "end") {
         if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
         reconnectTimerRef.current = null;
