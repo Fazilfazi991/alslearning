@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-03T10:06:34.565Z",
+  "appId": "9a19a0fbdcf8759c89dd6deba41c5f1f",
+  "turnKeyId": "4a9c6350cb91389b4fb912a16b316b3e",
+  "sessions": [
+    {
+      "id": "722a6610403d7577f4fe14bf9bcd41dd891ec6649fee8d77b6a449645415cea1",
+      "status": 410,
+      "errorCode": "session_error",
+      "tracks": null
+    }
+  ],
+  "turnStatus": 201,
+  "turnTtl": 60
+}

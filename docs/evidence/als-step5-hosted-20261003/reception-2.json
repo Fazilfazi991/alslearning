@@ -1,0 +1,199 @@
+{
+  "cron": {
+    "id": 1,
+    "name": "als-live-staging-cleanup",
+    "active": false
+  },
+  "class": {
+    "id": "09b74889-c4e0-42b3-8743-afd0059ca5d8",
+    "title": "Synthetic ALS Student Auto-End — 3 Oct 2026",
+    "status": "live",
+    "ends_at": "2026-10-03T10:34:00+00:00",
+    "batch_id": "fe5b1e6c-0ade-4fdc-a914-5c8d3fa1e8e3",
+    "ended_at": null,
+    "provider": "cloudflare",
+    "topic_id": null,
+    "starts_at": "2026-10-03T10:03:00+00:00",
+    "created_at": "2026-10-03T10:05:14.741262+00:00",
+    "faculty_id": "0e6466ff-3aeb-4db0-b792-b568ec3edc47",
+    "program_id": "66106212-52d7-4c4b-9e62-db3534bfe011",
+    "subject_id": "5579ddb6-6cba-4d95-bc15-e2be3d617f6d",
+    "updated_at": "2026-10-03T10:22:06.415+00:00",
+    "cancelled_at": null,
+    "chat_enabled": true,
+    "join_opens_at": "2026-10-03T09:48:00+00:00",
+    "max_receivers": 1,
+    "join_closes_at": "2026-10-03T10:34:00+00:00",
+    "provider_room_id": null,
+    "recording_enabled": false,
+    "student_audio_enabled": false,
+    "student_video_enabled": false
+  },
+  "usage": [
+    {
+      "role": "student",
+      "camera_rx": 0,
+      "camera_tx": 0,
+      "screen_rx": 0,
+      "screen_tx": 0,
+      "microphone_rx": 797819,
+      "microphone_tx": 0
+    },
+    {
+      "role": "teacher",
+      "camera_rx": 0,
+      "camera_tx": 0,
+      "screen_rx": 0,
+      "screen_tx": 0,
+      "microphone_rx": 0,
+      "microphone_tx": 851553
+    }
+  ],
+  "attendance": [
+    {
+      "id": "bb8bb0fb-9b75-46cc-be3c-fb3f91e17192",
+      "ended_at": null,
+      "started_at": "2026-10-03T10:23:31.401106+00:00",
+      "ended_reason": null,
+      "connection_id": "998528a1-dd1e-486e-807f-193f65834a56"
+    },
+    {
+      "id": "9c4db7cf-f0a4-4c8f-8a9b-e5fc553a3633",
+      "ended_at": null,
+      "started_at": "2026-10-03T10:23:31.724214+00:00",
+      "ended_reason": null,
+      "connection_id": "0f470c7a-9eae-439f-b83b-d8a77d0c7ed3"
+    }
+  ],
+  "connections": [
+    {
+      "id": "998528a1-dd1e-486e-807f-193f65834a56",
+      "status": "active",
+      "user_id": "0e6466ff-3aeb-4db0-b792-b568ec3edc47",
+      "closed_at": null,
+      "last_seen_at": "2026-10-03T10:25:47.758295+00:00",
+      "provider_session_id": null,
+      "publisher_provider_session_id": "1480e5ab98505c77637cbf7b7e277618e49c487e1493ad97057bce329ff3b378"
+    },
+    {
+      "id": "0f470c7a-9eae-439f-b83b-d8a77d0c7ed3",
+      "status": "active",
+      "user_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+      "closed_at": null,
+      "last_seen_at": "2026-10-03T10:25:47.994575+00:00",
+      "provider_session_id": "45798d1fa6a7f6d18f99f000583d5be0f985f7eea7405e621bc42d912e900a39",
+      "publisher_provider_session_id": null
+    }
+  ],
+  "observed_at": "2026-10-03T10:25:56.310604+00:00",
+  "cron_history": {
+    "max_end": "2026-10-01T14:39:00.040493+00:00",
+    "running": 0,
+    "max_start": "2026-10-01T14:39:00.025104+00:00",
+    "max_run_id": 72
+  },
+  "preservation": {
+    "migrations": 47,
+    "enrollments": [
+      {
+        "id": "0ae90cfb-4034-4e33-8a12-ba0750334f3d",
+        "status": "active",
+        "batch_id": "fe5b1e6c-0ade-4fdc-a914-5c8d3fa1e8e3",
+        "program_id": "66106212-52d7-4c4b-9e62-db3534bfe011",
+        "student_id": "f36b385e-cc3e-4a80-882d-bc99802341f0",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "31396be1-78bf-5644-a140-9bddbe2500a3",
+        "status": "active",
+        "batch_id": "68b7b05e-cfc3-5ffa-a077-e67a42b20902",
+        "program_id": "8561edf8-6f4d-59a3-a496-e21b228900c4",
+        "student_id": "f36b385e-cc3e-4a80-882d-bc99802341f0",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "8d5805db-228c-41ba-851a-be2ef58a27ba",
+        "status": "active",
+        "batch_id": null,
+        "program_id": "c574bbe1-f862-4160-a5d2-53abee8a2eb9",
+        "student_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "97f6219d-7a98-5901-a397-de9aa1e420b0",
+        "status": "active",
+        "batch_id": "68b7b05e-cfc3-5ffa-a077-e67a42b20902",
+        "program_id": "8561edf8-6f4d-59a3-a496-e21b228900c4",
+        "student_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "dcaa8c36-70ab-4efe-a215-cc0b619c4b1a",
+        "status": "active",
+        "batch_id": "fe5b1e6c-0ade-4fdc-a914-5c8d3fa1e8e3",
+        "program_id": "66106212-52d7-4c4b-9e62-db3534bfe011",
+        "student_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      }
+    ],
+    "segment_count": 2,
+    "watch_seconds": 44.013,
+    "recording_count": 2,
+    "retained_segment": {
+      "id": "5d65817a-2a15-4013-9504-f81f8ece728c",
+      "sha256": "f414acbbf9b5ebf876ce4707ff153aba5814743e977c256ead1ef56c27d40bc3",
+      "status": "ready",
+      "owner_id": "0e6466ff-3aeb-4db0-b792-b568ec3edc47",
+      "session_id": "7385751c-3640-4db3-9a45-5348e682cffe",
+      "total_bytes": 4451838,
+      "recording_id": "ea83d954-a4ef-45b6-b34c-8b80722f3b04"
+    },
+    "retained_recording": {
+      "id": "ea83d954-a4ef-45b6-b34c-8b80722f3b04",
+      "status": "published",
+      "owner_id": "0e6466ff-3aeb-4db0-b792-b568ec3edc47",
+      "session_id": "7385751c-3640-4db3-9a45-5348e682cffe",
+      "total_bytes": 4451838,
+      "verified_at": "2026-10-01T18:13:36.449+00:00",
+      "published_at": "2026-10-01T18:14:54.137+00:00",
+      "duration_seconds": 184.958
+    }
+  },
+  "publications": [
+    {
+      "id": "25ed506e-2cb3-479a-87b2-7bebc2c578c1",
+      "mid": "0",
+      "kind": "microphone",
+      "status": "active",
+      "closed_at": null,
+      "created_at": "2026-10-03T10:23:44.355761+00:00",
+      "connection_id": "998528a1-dd1e-486e-807f-193f65834a56",
+      "reconciliation": null
+    }
+  ],
+  "global_counts": {
+    "attendance": 2,
+    "live_classes": 1,
+    "publications": 1,
+    "subscriptions": 1,
+    "open_connections": 2,
+    "pending_segments": 0,
+    "unresolved_connections": 0
+  },
+  "subscriptions": [
+    {
+      "id": "c4726637-7c29-41f7-9351-c2faa906a396",
+      "mid": "0",
+      "status": "active",
+      "closed_at": null,
+      "created_at": "2026-10-03T10:23:47.074294+00:00",
+      "connection_id": "0f470c7a-9eae-439f-b83b-d8a77d0c7ed3",
+      "publication_id": "25ed506e-2cb3-479a-87b2-7bebc2c578c1"
+    }
+  ]
+}

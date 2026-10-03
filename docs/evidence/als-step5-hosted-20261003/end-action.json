@@ -1,0 +1,14 @@
+{
+  "classId": "09b74889-c4e0-42b3-8743-afd0059ca5d8",
+  "normalVisibleControl": "End class for everyone",
+  "endActionIssuedAt": "2026-10-03T10:26:18.516Z",
+  "endDispatchReturnedAt": "2026-10-03T10:26:19.042Z",
+  "studentWatchStartedAt": "2026-10-03T10:26:18.516Z",
+  "studentObservation": {
+    "ended": true,
+    "observedAt": "2026-10-03T10:26:21.259Z"
+  },
+  "studentReloadAfterJoin": false,
+  "manualCleanupInvoked": false,
+  "cronResumed": false
+}

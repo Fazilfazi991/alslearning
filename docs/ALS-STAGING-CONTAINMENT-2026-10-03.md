@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Credential containment passed. Deployment, provider authentication, old-access rejection, Vault/local consumers and academic checks are verified. Exactly the three confirmed old Cloudflare resources and old individually managed Supabase key were retired. Hosted Step 5 acceptance is prepared but has not run; Chrome control is currently blocked during live-window preparation.**
+**Credential containment and hosted Step 5 acceptance passed. Deployment, provider authentication, old-access rejection, Vault/local consumers and academic checks are verified. Exactly the three confirmed old Cloudflare resources and old individually managed Supabase key were retired. Student automatic ending without refresh, normal DB/provider closure and final disabled/zero-resource state are verified.**
 
 The owner separately approved containment of the staging credentials exposed during Step 5. This approval covers only the verified staging SFU/TURN, bucket-scoped R2 credentials, individually managed Supabase server key, staging gate phrase/cookie secret and cleanup token. It does not authorize Production, shared consumers, new subscriptions, billing changes, another bucket or a signing-key rotation.
 
@@ -63,7 +63,7 @@ The owner gave the computer-use policy's action-time confirmation for exactly th
 
 Post-revocation checks at **10:03:01.741 UTC** proved old SFU HTTP 404, old TURN HTTP 404 and old R2 HTTP 401. Replacement SFU authenticated and returned 410 `session_error` for the exact expired empty verification session; replacement TURN generated a 60-second credential (201), never output or retained; replacement R2 authenticated on the owned deleted verification object (404). No unrelated object was read or altered.
 
-At **10:03:09.392 UTC**, only the previously verified matching labels were installed in the three designated ignored staging consumer files. Every other value, including flags and expiry, was privately compared unchanged. Pending import copies remain temporarily ignored for completing the acceptance configuration/readback and will be removed after final restoration.
+At **10:03:09.392 UTC**, only the previously verified matching labels were installed in the three designated ignored staging consumer files. Every other value, including flags and expiry, was privately compared unchanged. After successful hosted acceptance, final restoration and evidence publication, the three temporary pending/import copies were removed at **10:37:30.1777135 UTC**. Canonical verified consumer files were preserved.
 
 ![Old SFU retired, replacement retained](evidence/als-containment-20261003/old-sfu-deleted.png)
 
@@ -75,9 +75,19 @@ At **10:03:09.392 UTC**, only the previously verified matching labels were insta
 
 Exactly one fresh class was scheduled through the genuine Admin UI: `09b74889-c4e0-42b3-8743-afd0059ca5d8`, **Synthetic ALS Student Auto-End — 3 Oct 2026**. It uses the existing assigned Teacher and known-valid synthetic Program/Subject/Batch, one receiver, recording disabled. Separate Teacher Chrome and Student 1 in-app-browser pages were signed in and prepared while media remained disabled. No class was started and no microphone publication was created.
 
-At **10:10:15.558427 UTC**, all global media/database counts were zero, cron remained paused at run ID 72, the fresh class remained scheduled, and retained recording/enrollment preservation was unchanged. The original Hostinger tab disappeared during attempted future-window preparation; the reopened tab then blocked browser focus/DOM access. The owner was asked to dismiss any native file chooser/modal and leave settings open. The timed-window submission did not occur; hosted acceptance remains unrun. No extra class will be created when resuming.
+At **10:10:15.558427 UTC**, all global media/database counts were zero, cron remained paused at run ID 72, the fresh class remained scheduled, and retained recording/enrollment preservation was unchanged. The original Hostinger tab disappeared during attempted future-window preparation; the reopened tab then blocked browser focus/DOM access. No timed-window submission was performed at that checkpoint. The owner cleared the blocker, and the same class was subsequently used; no extra class was created.
 
-## Safe media state at this checkpoint
+## Hosted acceptance and final state
+
+The Teacher established one real microphone publication; eligible Student 1 joined receive-only. Student microphone RX increased to **797,819 bytes**, zero TX, with zero screen/camera traffic. Teacher normal End input was issued **10:26:18.516 UTC**. The class completed **10:26:19.502 UTC**; Student ended state was observed **10:26:21.259 UTC**, about **1.76 seconds** later, with no refresh. Live/Join/reconnect controls and audio/video elements disappeared. Connections, publication, subscription and attendance closed normally.
+
+Exact new publisher `1480e5ab98505c77637cbf7b7e277618e49c487e1493ad97057bce329ff3b378` and receiver `45798d1fa6a7f6d18f99f000583d5be0f985f7eea7405e621bc42d912e900a39` both returned **410 `session_error`**. Cron remained paused at run ID **72**; no manual cleanup or cron was used for the class.
+
+Final Hostinger deployment **`01a1014e-6b47-7206-8e9e-cae6604dc346`** is Current/Completed. Private final readback at **10:32:15.787 UTC** matched all 25 post-containment baseline values, with live, recording and POC false, operational bounds restored, and replacement credentials unchanged. Final DB observation **10:33:53.044559 UTC** showed all media/attendance/pending-work counts zero. All 21 academic checks passed after End; retained recording, enrollment expiry and watch state matched the pre-window observation. Production remained unchanged.
+
+Full verdicts, exact closure times, source/ZIP/deployment identities and non-secret evidence are in [the completed Step 5 report](ALS-STAGING-STEP5-STUDENT-AUTO-END-2026-10-03.md). Physical Android/iPhone tests were not run. Historical Step 3 verdicts remain unchanged.
+
+## Historical safe media state before installation
 
 Database observation **2026-10-03T08:53:33.755290Z**:
 
@@ -88,15 +98,15 @@ Database observation **2026-10-03T08:53:33.755290Z**:
 - Live, recording and POC entry remain disabled. No fresh Step 5 class has been created.
 - Production, Git remotes, academic fixtures, account passwords and the accepted recording/replay workflow remain unchanged.
 
-This is a safe **media** state. Credential containment remains incomplete; no credential-safety or hosted acceptance PASS is claimed.
+At this historical checkpoint only media safety was established; containment and hosted acceptance were still incomplete. They were subsequently completed as documented above.
 
-## Remaining sequence
+## Completed sequence
 
-1. Owner imports into the prepared form; verify all 25 expected settings privately before owner submission. Then verify Current/Completed and private exact saved readback.
-2. Prove new gate/server/cleanup authentication, reject old gate phrase/cookie and cleanup token, then update and verify only the existing Vault cleanup entry while cron stays paused. Use a zero-candidate cleanup check only after proving the database is quiet; it is not End-class acceptance evidence.
-3. Verify genuine Student/Teacher/Admin login and 21 academic authorization/preservation checks.
-4. Obtain action-time confirmation required by computer-use policy for permanent deletion of exactly the identified old SFU/TURN/R2 resources. Revoke the old individually managed Supabase key under the separate approval after replacement consumers pass.
-5. Prove old credentials/resources are rejected or unaddressable and replacements still authenticate; update only the matching ignored local consumers and remove pending import files after installation.
-6. Resume the original Step 5 acceptance with one fresh synthetic microphone-only Teacher/Student class, normal End, no Student reload, measured completion-to-UI latency, cron paused and exact DB/provider closure. Restore all media flags false and zero resources afterward. No recording, camera or screen sharing.
+1. Owner imported/submitted replacement credentials; all 25 settings and Current/Completed were privately verified.
+2. New gate/server/cleanup authentication passed; old gate/cleanup access was rejected; only the existing Vault entry was updated. The zero-candidate containment cleanup check was not used as End acceptance evidence.
+3. Genuine Student/Teacher/Admin login and 21 academic checks passed.
+4. Required action-time deletion confirmation was obtained. Exactly the three old Cloudflare resources and separately approved old managed Supabase key were retired after replacement validation.
+5. Old access rejection and replacement authentication passed; only matching ignored local consumers were updated; temporary import copies were removed after final restoration.
+6. The original Step 5 microphone-only acceptance passed with the same prepared class, normal End, no Student refresh, measured latency and exact DB/provider closure. All media flags are false, media resources zero, and cron paused. No recording, camera or screen sharing was used.
 
 The narrow source fix and its already accepted local verification are documented in [the Step 5 report](ALS-STAGING-STEP5-STUDENT-AUTO-END-2026-10-03.md). Current non-secret containment evidence is in `docs/evidence/als-containment-20261003/`. Private helpers/configuration remain ignored.

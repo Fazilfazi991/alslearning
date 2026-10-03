@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-03T10:21:27.257Z",
+  "deploymentId": "01a10143-ea6b-7112-af80-f22f2ce72482",
+  "currentCompleted": true,
+  "completedObservedAt": "2026-10-03T10:20:49.484Z",
+  "all25Expected": true,
+  "start": "2026-10-03T10:21:27.134Z",
+  "cutoff": "2026-10-03T10:31:27.134Z",
+  "recordingDisabled": true,
+  "pocDisabled": true,
+  "credentialsUnchanged": true
+}
