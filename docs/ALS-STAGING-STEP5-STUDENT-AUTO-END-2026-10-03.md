@@ -4,6 +4,8 @@
 
 **Fix implemented, locally verified and deployed to disabled staging. Hosted acceptance is BLOCKED, not passed.**
 
+**Later checkpoint:** the owner separately approved the scoped staging credential containment described below. Replacement credentials have been prepared and provider checks passed, but the running Hostinger app still holds the exposed values. Corrected owner credential entry is pending. Hosted acceptance remains blocked until containment is complete; see [the containment chronology](ALS-STAGING-CONTAINMENT-2026-10-03.md). The original 06:37 final-state evidence below remains historical evidence, not a claim that later replacement resources were never created.
+
 The agent accidentally included staging secret values in a browser tool result while recovering the Hostinger environment-page state. No live window was opened after this exposure. The request explicitly prohibits credential changes, so containment requires separate authorization. No new class was created. No recording, screen share, camera or microphone test was started.
 
 | Requested verdict | Result |
