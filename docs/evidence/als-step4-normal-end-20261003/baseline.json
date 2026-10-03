@@ -1,0 +1,101 @@
+{
+  "cron": {
+    "id": 1,
+    "name": "als-live-staging-cleanup",
+    "active": false
+  },
+  "class": null,
+  "usage": [],
+  "attendance": [],
+  "connections": [],
+  "observed_at": "2026-10-03T03:46:08.021255+00:00",
+  "cron_history": {
+    "max_end": "2026-10-01T14:39:00.040493+00:00",
+    "running": 0,
+    "max_start": "2026-10-01T14:39:00.025104+00:00",
+    "max_run_id": 72
+  },
+  "preservation": {
+    "migrations": 46,
+    "enrollments": [
+      {
+        "id": "0ae90cfb-4034-4e33-8a12-ba0750334f3d",
+        "status": "active",
+        "batch_id": "fe5b1e6c-0ade-4fdc-a914-5c8d3fa1e8e3",
+        "program_id": "66106212-52d7-4c4b-9e62-db3534bfe011",
+        "student_id": "f36b385e-cc3e-4a80-882d-bc99802341f0",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "31396be1-78bf-5644-a140-9bddbe2500a3",
+        "status": "active",
+        "batch_id": "68b7b05e-cfc3-5ffa-a077-e67a42b20902",
+        "program_id": "8561edf8-6f4d-59a3-a496-e21b228900c4",
+        "student_id": "f36b385e-cc3e-4a80-882d-bc99802341f0",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "8d5805db-228c-41ba-851a-be2ef58a27ba",
+        "status": "active",
+        "batch_id": null,
+        "program_id": "c574bbe1-f862-4160-a5d2-53abee8a2eb9",
+        "student_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "97f6219d-7a98-5901-a397-de9aa1e420b0",
+        "status": "active",
+        "batch_id": "68b7b05e-cfc3-5ffa-a077-e67a42b20902",
+        "program_id": "8561edf8-6f4d-59a3-a496-e21b228900c4",
+        "student_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      },
+      {
+        "id": "dcaa8c36-70ab-4efe-a215-cc0b619c4b1a",
+        "status": "active",
+        "batch_id": "fe5b1e6c-0ade-4fdc-a914-5c8d3fa1e8e3",
+        "program_id": "66106212-52d7-4c4b-9e62-db3534bfe011",
+        "student_id": "7098162f-9337-4db6-8bef-e3eaeedd7045",
+        "access_starts_at": "2026-10-01T07:40:22.181+00:00",
+        "access_expires_at": "2026-10-08T07:40:22.181+00:00"
+      }
+    ],
+    "segment_count": 2,
+    "watch_seconds": 44.013,
+    "recording_count": 2,
+    "retained_segment": {
+      "id": "5d65817a-2a15-4013-9504-f81f8ece728c",
+      "sha256": "f414acbbf9b5ebf876ce4707ff153aba5814743e977c256ead1ef56c27d40bc3",
+      "status": "ready",
+      "owner_id": "0e6466ff-3aeb-4db0-b792-b568ec3edc47",
+      "session_id": "7385751c-3640-4db3-9a45-5348e682cffe",
+      "total_bytes": 4451838,
+      "recording_id": "ea83d954-a4ef-45b6-b34c-8b80722f3b04"
+    },
+    "retained_recording": {
+      "id": "ea83d954-a4ef-45b6-b34c-8b80722f3b04",
+      "status": "published",
+      "owner_id": "0e6466ff-3aeb-4db0-b792-b568ec3edc47",
+      "session_id": "7385751c-3640-4db3-9a45-5348e682cffe",
+      "total_bytes": 4451838,
+      "verified_at": "2026-10-01T18:13:36.449+00:00",
+      "published_at": "2026-10-01T18:14:54.137+00:00",
+      "duration_seconds": 184.958
+    }
+  },
+  "publications": [],
+  "global_counts": {
+    "attendance": 0,
+    "live_classes": 0,
+    "publications": 0,
+    "subscriptions": 0,
+    "open_connections": 0,
+    "pending_segments": 0,
+    "unresolved_connections": 0
+  },
+  "subscriptions": []
+}

@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T03:55:20.451Z",
+  "deploymentId": "01a0ffe3-4dff-73d2-bd70-2cfd3b063647",
+  "currentCompletedObservedAt": "2026-10-03T03:54:31.924Z",
+  "sourceSha": "71be353bec8ceca79e1120b614a83869c199fb97",
+  "sourceZipSha256": "e4e19cc77e6d0e0fca862bd02d5c0099d6283dafe3ad5526d6c689b409537828",
+  "all25ConfigurationValuesExpected": true,
+  "changedKeys": [
+    "ALS_LIVE_CLASS_ENABLED",
+    "ALS_STAGING_TEST_START_UTC",
+    "ALS_STAGING_TEST_CUTOFF_UTC"
+  ],
+  "live": true,
+  "recording": false,
+  "poc": false,
+  "start": "2026-10-03T03:57:00.000Z",
+  "cutoff": "2026-10-03T04:07:00.000Z",
+  "credentialsUnchanged": true
+}

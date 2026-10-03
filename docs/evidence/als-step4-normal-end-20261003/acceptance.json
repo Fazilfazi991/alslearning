@@ -1,0 +1,85 @@
+{
+  "verifiedAt": "2026-10-03T04:07:30.215Z",
+  "classId": "f7f352cb-7af7-4c69-843f-881edd6459c2",
+  "verdicts": {
+    "normalTeacherEnd": "PASS",
+    "studentEndedState": "FAIL",
+    "normalDbClosure": "PASS",
+    "normalProviderClosure": "PASS",
+    "cronCausedClosure": "NO",
+    "finalMediaState": "SAFE",
+    "academicRegression": "PASS",
+    "physicalAndroid": "NOT RUN",
+    "physicalIphone": "NOT RUN",
+    "production": "UNCHANGED"
+  },
+  "endClickInvokedAt": "2026-10-03T04:00:46.526Z",
+  "classCompletedAt": "2026-10-03T04:00:47.489+00:00",
+  "connectionClosure": [
+    {
+      "id": "3f47257d-ffbb-4e42-8cf3-ebb0805f332c",
+      "closedAt": "2026-10-03T04:00:49.188+00:00"
+    },
+    {
+      "id": "c227af6f-cf80-4191-878c-f585282a0be5",
+      "closedAt": "2026-10-03T04:00:49.188+00:00"
+    }
+  ],
+  "publicationClosure": [
+    {
+      "id": "32edd7a0-0c05-454a-8507-6ee96d5849c6",
+      "closedAt": "2026-10-03T04:00:48.006+00:00"
+    }
+  ],
+  "subscriptionClosure": [
+    {
+      "id": "d6632fea-5a4e-4386-8ee2-a53bd3ac335e",
+      "closedAt": "2026-10-03T04:00:48.682+00:00"
+    }
+  ],
+  "attendanceClosure": [
+    {
+      "id": "a840b9fd-357a-40b2-a3af-ce1bebf87070",
+      "endedAt": "2026-10-03T04:00:47.489+00:00",
+      "reason": "ended"
+    },
+    {
+      "id": "f3a909d8-8375-4e65-8e5b-6ed5870e3f89",
+      "endedAt": "2026-10-03T04:00:47.489+00:00",
+      "reason": "ended"
+    }
+  ],
+  "providerTerminal": {
+    "at": "2026-10-03T04:01:01.257Z",
+    "appId": "6306f9d5f836a1aa08b0d6bbde22f10b",
+    "turnKeyId": "19951d8aa17f40210ffc756ba8c1ba3a",
+    "sessions": [
+      {
+        "id": "c7577bad4f3d0b8be3f67115c2d2f101a8fe0f6937564c0193404107cff23188",
+        "status": 410,
+        "errorCode": "session_error",
+        "tracks": null
+      },
+      {
+        "id": "c590b85f93a4147023ef391510768de309185eb45d9c56d4f72abad7c3f149c3",
+        "status": 410,
+        "errorCode": "session_error",
+        "tracks": null
+      }
+    ]
+  },
+  "studentReceptionBytes": [
+    337145,
+    754792
+  ],
+  "cronMaxRunId": 72,
+  "academicReadOnlyChecks": 21,
+  "preservationExact": true,
+  "retainedRecordingPublished": true,
+  "newRecordings": 0,
+  "newSegments": 0,
+  "secondsBeforeCutoff": 373.474,
+  "secondsFromFirstPersistedReceptionToEnd": 54.519,
+  "classLiveSeconds": 200.442,
+  "publicationLiveSeconds": 139.252
+}

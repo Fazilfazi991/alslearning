@@ -1,0 +1,10 @@
+{
+  "classId": "f7f352cb-7af7-4c69-843f-881edd6459c2",
+  "startClickInvokedAt": "2026-10-03T03:57:24.883Z",
+  "teacherJoinInvokedAt": "2026-10-03T03:58:16.231Z",
+  "studentJoinInvokedAt": "2026-10-03T03:58:17.327Z",
+  "endClickInvokedAt": "2026-10-03T04:00:46.526Z",
+  "endClickReturnedAt": "2026-10-03T04:00:47.867Z",
+  "normalVisibleControl": "End class for everyone",
+  "cutoff": "2026-10-03T04:07:00.000Z"
+}

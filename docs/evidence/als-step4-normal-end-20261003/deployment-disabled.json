@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-03T04:06:36.698Z",
+  "deploymentId": "01a0ffed-bf02-7239-b3e7-77b899ef3039",
+  "submittedAt": "2026-10-03T04:02:43.369Z",
+  "currentCompletedObservedAt": "2026-10-03T04:05:59.556Z",
+  "sourceSha": "71be353bec8ceca79e1120b614a83869c199fb97",
+  "all25BaselineValuesExact": true,
+  "live": false,
+  "recording": false,
+  "poc": false,
+  "originalExpiredBoundsRestored": true,
+  "credentialsUnchanged": true
+}
