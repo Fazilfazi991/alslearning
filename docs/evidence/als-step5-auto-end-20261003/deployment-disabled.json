@@ -1,0 +1,12 @@
+{
+  "deploymentId": "01a1006e-eb80-7211-978c-dc8ae2bbbb22",
+  "submittedAt": "2026-10-03T06:23:42.961Z",
+  "completedObservedAt": "2026-10-03T06:27:45.531Z",
+  "sourceSha": "3032ed0527ce801a1a675fd331be37bc2a35f002",
+  "zipSha256": "454997b2a6ab9aa723cdbc11347d04da60de47f158ad32eddf0dcb73c2dd0bf2",
+  "status": "Current/Completed",
+  "all25BaselineValuesUnchanged": true,
+  "live": false,
+  "recording": false,
+  "poc": false
+}

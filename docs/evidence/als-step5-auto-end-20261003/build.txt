@@ -1,0 +1,66 @@
+▲ Next.js 16.3.8 (webpack)
+✓ Running next.config.ts took 40ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 10.3s
+  Running TypeScript ...
+  Finished TypeScript in 4.6s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/29) ...
+  Generating static pages using 7 workers (7/29)
+  Generating static pages using 7 workers (14/29)
+  Generating static pages using 7 workers (21/29)
+✓ Generating static pages using 7 workers (29/29) in 1544ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin/[[...slug]]
+├ ƒ /admin/live-classes
+├ ƒ /admin/live-classes/[classId]
+├ ƒ /admin/recorded-classes
+├ ƒ /api/admin/recorded-classes/[id]/upload
+├ ƒ /api/auth/password
+├ ƒ /api/auth/qa-password
+├ ƒ /api/cloudflare/realtime
+├ ƒ /api/internal/live-cleanup
+├ ƒ /api/live-classes
+├ ƒ /api/live-classes/[classId]/control
+├ ƒ /api/live-classes/[classId]/media
+├ ƒ /api/live-classes/[classId]/recordings
+├ ƒ /api/recorded-classes/[id]/playback
+├ ƒ /auth/callback
+├ ƒ /auth/logout
+├ ○ /icon.png
+├ ƒ /live-poc/[sessionId]
+├ ƒ /login
+├ ƒ /student
+├ ƒ /student/certificates
+├ ƒ /student/certificates/[certificateId]
+├ ƒ /student/courses
+├ ƒ /student/courses/[courseId]
+├ ƒ /student/exams
+├ ƒ /student/exams/[testSlug]
+├ ƒ /student/exams/clinical-biochemistry-final
+├ ƒ /student/exams/clinical-biochemistry-final/result
+├ ƒ /student/exams/clinical-biochemistry-final/review
+├ ƒ /student/exams/clinical-biochemistry-final/take
+├ ƒ /student/help
+├ ƒ /student/learn/[lessonId]
+├ ƒ /student/live-classes
+├ ƒ /student/live-classes/[classId]
+├ ƒ /student/notifications
+├ ƒ /student/profile
+├ ƒ /student/progress
+├ ƒ /student/recorded-classes
+├ ƒ /student/recorded-classes/[id]
+├ ƒ /teacher/[[...slug]]
+└ ƒ /teacher/live-classes/[classId]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
