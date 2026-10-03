@@ -2,11 +2,74 @@
 
 ## Result
 
-**Fix implemented, locally verified and deployed to disabled staging. Hosted acceptance is BLOCKED, not passed.**
+**PASS — the reviewed fix is deployed, and real hosted microphone acceptance proved automatic Student ending without refresh. Final staging media state is SAFE, with live/recording/POC disabled and cron paused.**
 
 **Latest checkpoint:** the separately approved staging credential containment is verified. Replacement credentials are deployed; old Cloudflare SFU/TURN/R2 access and the old individually managed Supabase key are retired/rejected; Vault and verified local consumers are updated. All three normal hosted role logins and 21 academic checks passed. See [the containment chronology](ALS-STAGING-CONTAINMENT-2026-10-03.md).
 
-One fresh acceptance class, `[REDACTED_PRIVATE_ID]`, was prepared with existing synthetic scope and recording off. Teacher Chrome and eligible Student 1 in-app-browser pages are signed in. The class remains scheduled; no microphone publication or End action has occurred. Chrome control is blocked during timed-window preparation after the Hostinger tab was replaced; owner dismissal of any native chooser/modal is pending. At 10:10:15.558427 UTC, global media counts were zero and cron stayed paused at run ID 72. Do not create another class when resuming.
+## Completed hosted acceptance
+
+| Requested verdict | Result |
+| --- | --- |
+| STUDENT AUTO-END STATE | PASS |
+| JOIN REMOVED WITHOUT REFRESH | PASS |
+| MEDIA STOPPED | PASS |
+| TEACHER NORMAL END REGRESSION | PASS |
+| DB CLOSURE | PASS |
+| PROVIDER CLOSURE | PASS |
+| CRON USED | NO |
+| ACADEMIC REGRESSION | PASS — 21 read-only hosted checks after End |
+| FINAL MEDIA STATE | SAFE |
+| PHYSICAL ANDROID | NOT RUN |
+| PHYSICAL IPHONE | NOT RUN |
+| PRODUCTION | UNCHANGED |
+
+Exactly one fresh synthetic class was used: **`[REDACTED_PRIVATE_ID]`**, **Synthetic ALS Student Auto-End — 3 Oct 2026**. The existing assigned Teacher, eligible Student 1 and canonical synthetic Program/Subject/Batch were preserved. Recording was disabled on the class and in configuration; no camera, screen sharing or recording was used. Preparation resumed after the owner cleared the Chrome blocker; no extra class was created.
+
+The Teacher used normal Start, microphone preflight and Join controls in Chrome. Student 1 joined receive-only in a separate in-app browser. One Teacher microphone publication and one Student subscription were active. Exact replacement-app publisher and receiver sessions both returned HTTP 200 with active local/remote tracks for publication `[REDACTED_PRIVATE_ID]`. Student diagnostics showed 65–66 kbps microphone RX, zero microphone TX, unmuted playback advancing, and zero camera/screen traffic. Persisted Student microphone RX increased from no prior summary (0) to **797,819 bytes**; Teacher TX was **851,553 bytes**.
+
+The Student page was reloaded before Join to enter the newly started class. **No Student reload, navigation, manual status refetch or rejoin action occurred after Join or during the End observation.** An ended-heading observer was armed before the normal visible **End class for everyone** keyboard activation. No cleanup endpoint or cron was used for this class.
+
+### Normal End chronology — 3 October 2026
+
+| Event | UTC | Asia/Dubai |
+| --- | --- | --- |
+| End input dispatch initiated | 10:26:18.516 | 14:26:18.516 |
+| End input dispatch returned | 10:26:19.042 | 14:26:19.042 |
+| Server class completed / both attendance intervals ended | 10:26:19.502 | 14:26:19.502 |
+| Microphone publication closed, `confirmed_closed` | 10:26:19.836 | 14:26:19.836 |
+| Student subscription closed | 10:26:20.488 | 14:26:20.488 |
+| Teacher and Student connections closed | 10:26:21.037 | 14:26:21.037 |
+| Student ended heading observed without refresh | 10:26:21.259 | 14:26:21.259 |
+
+The observed server-completion-to-Student-heading interval is **1,757 ms (about 1.76 seconds)**. This compares the server's `ended_at` with the automation's first successful visible-heading observation; it includes observation delay and does not claim an exact browser paint/event timestamp. The input dispatch timestamps bracket automation activation, rather than claiming an independently captured HTTP request timestamp.
+
+Both Teacher and Student showed **This class has ended.** Student Live and Join controls were absent, reconnect controls were absent, and all audio/video elements were removed. Normal Student UI offered no rejoin affordance; focused local tests independently verify terminal-state and retained Join callback guards.
+
+![Student automatically ended without refresh](evidence/als-step5-hosted-20261003/student-auto-ended.png)
+
+### Exact provider closure
+
+Replacement SFU app: **`[REDACTED_PRIVATE_ID]`**, `als-staging-sfu-containment-20261003`.
+
+- Teacher publisher: `[REDACTED_PRIVATE_ID]`.
+- Student receiver: `[REDACTED_PRIVATE_ID]`.
+- Exact authenticated inspection begun **10:27:06.992 UTC** returned **410 `session_error` for both sessions**, explicitly absent/expired. The database's publication reconciliation independently recorded `confirmed_closed`. No active provider media remained for the class.
+
+Cron job 1 remained paused throughout. Its latest run ID remained **72**, last start **2026-10-01T14:39:00.025104Z**. Normal closure occurred almost five minutes before the operational cutoff **10:31:27.134 UTC**. Scheduled cleanup did not cause any acceptance transition.
+
+### Deployment and final preservation
+
+- Reviewed application source remains **`[REDACTED_PRIVATE_ID]`**; ZIP SHA-256 remains **`[REDACTED_PRIVATE_ID]`**. No further application source change was made during containment/acceptance.
+- Verified live-only window deployment: **`[REDACTED_PRIVATE_ID]`**, Current/Completed; bounded window **10:21:27.134–10:31:27.134 UTC** (14:21–14:31 Dubai). Recording and POC remained false, all credential settings unchanged.
+- Final disabled deployment: **`[REDACTED_PRIVATE_ID]`**, Current/Completed. Private saved readback **10:32:15.787 UTC** matched all 25 post-containment values exactly, including all three false flags and restored operational bounds.
+- Final database observation **10:33:53.044559 UTC**: zero live classes, open/reconnecting/failed connections, active/closing publications/subscriptions, open attendance, and pending recording/upload/interrupted work.
+- Academic preservation matched the pre-window observation exactly: unchanged 47 migrations; five retained synthetic enrollment rows, including expiry **`2026-10-08T07:40:22.181Z`**; published Step 3 recording `[REDACTED_PRIVATE_ID]`; its ready segment/hash; two recording rows and two segments; watch total **44.013 seconds**.
+- All 21 academic/authorization checks passed again after End. No academic fixtures, credentials, accepted recording/replay workflow, Production or Git remotes were changed during this media test.
+- Three temporary ignored containment/import copies were removed at **10:37:30.1777135 UTC**, after consumer and final-state verification. Canonical verified local staging consumers remain.
+
+Non-secret hosted evidence is in `docs/evidence/als-step5-hosted-20261003/`. Evidence publication scans include active staging credential values, R2 access ID, account passwords, management token and Vault cleanup token; no secret value was found. The historical Step 3 **NORMAL TEACHER END FAIL/UNVERIFIED** verdict remains unchanged; this successful later acceptance does not rewrite that earlier attempt.
+
+![Final disabled staging deployment](evidence/als-step5-hosted-20261003/final-disabled-completed.png)
 
 ## Original exposure checkpoint
 
@@ -80,7 +143,7 @@ Affected secret categories: Cloudflare SFU app secret, TURN API token, R2 object
 
 Media acceptance was stopped before class creation or window activation. Environment values were hidden again. Subsequent observations redact known private values before output, and only non-secret flags/comparison results were saved. The Hostinger management tab was closed after final readback.
 
-**Separate containment authorization is required before hosted acceptance:** verify staging-only dependencies, replace the exposed staging SFU/TURN, R2, Supabase and staging gate/cleanup credentials in their existing scopes, update verified Hostinger/ignored local staging consumers, validate replacements with all media disabled, then revoke the exposed credentials/resources only after validation. Stop if a Production/shared dependency appears. No new subscription, billing change, R2 bucket or Production change is proposed. This plan has not been executed. The Step 5 prohibition on credential changes remains respected.
+At the original checkpoint, separate containment authorization was required for the staged plan above. The owner subsequently granted that separate approval, and containment was completed as documented in the linked chronology. The original Step 5 source fix did not change credentials; the later containment was a separately authorized operation.
 
 ## Final preservation and media state
 
