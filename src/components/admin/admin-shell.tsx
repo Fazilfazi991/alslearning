@@ -16,6 +16,7 @@ const items = [
   { href: "/admin/tests", label: "Tests", Icon: ClipboardCheck },
   { href: "/admin/recorded-classes", label: "Recorded Classes", Icon: Video },
   { href: "/admin/courses", label: "Videos & Materials", Icon: BookOpen },
+  { href: "/admin/profile", label: "Profile & Password", Icon: UserRound },
 ] as const;
 const isActive = (path: string, href: string) => href === "/admin" ? path === href : path.startsWith(href);
 
