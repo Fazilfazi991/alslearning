@@ -24,7 +24,7 @@ export function ScheduleClass({ scopes, batches, teacherId, timeZone }: {
       const response = await fetch("/api/live-classes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
         title: form.get("title"), programId: scope.programId, subjectId: scope.subjectId, batchId: form.get("batchId"), teacherId,
         startsAt: academicLocalToUtc(String(form.get("startsAt")), timeZone), endsAt: academicLocalToUtc(String(form.get("endsAt")), timeZone),
-        recordingEnabled: false,
+        recordingEnabled: form.get("recordingEnabled") === "on",
       }) });
       const result = await response.json();
       if (!response.ok || !result.id) throw new Error(result.error || "Class could not be scheduled");
@@ -40,6 +40,7 @@ export function ScheduleClass({ scopes, batches, teacherId, timeZone }: {
     <label className="block font-semibold">Batch<select aria-label="Batch" key={scope.programId} name="batchId" required className={control}><option value="">Select batch</option>{batches.filter(item => item.program_id === scope.programId).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
     <label className="block font-semibold">Starts at<input type="datetime-local" name="startsAt" required className={control} /></label>
     <label className="block font-semibold">Ends at<input type="datetime-local" name="endsAt" required className={control} /></label>
+    <label className="flex items-start gap-3 text-sm"><input type="checkbox" name="recordingEnabled" className="mt-1 h-4 w-4"/><span><span className="block font-semibold">Enable lesson recording</span><span className="mt-1 block text-muted">Record your shared screen and microphone. An administrator must review and publish the replay before Students can watch it.</span></span></label>
     {error && <p role="alert" className="text-red-700">{error}</p>}
     <button disabled={busy} className="min-h-11 rounded-xl bg-brand px-5 font-bold text-white disabled:opacity-50">{busy ? "Scheduling…" : "Schedule class"}</button>
   </form>;
