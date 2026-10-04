@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { nextUnansweredInteraction, type RecordedClassInteraction } from "@/lib/recorded-classes";
+import { useEngagedPlayback } from "@/components/learning/use-engaged-playback";
 
 type ResponseRow = { interaction_id: string; selected_option: number; is_correct: boolean; attempt_number: number };
 type Payload = {
@@ -12,6 +13,7 @@ type Payload = {
 
 export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId: string; title: string }) {
   const video = useRef<HTMLVideoElement>(null);
+  useEngagedPlayback(video, "recorded_class", recordingId);
   const previousTime = useRef(0); const lastSaved = useRef(0);
   const seeking = useRef(false);
   const [payload, setPayload] = useState<Payload | null>(null);

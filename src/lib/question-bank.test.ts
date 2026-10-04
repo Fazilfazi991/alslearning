@@ -1,5 +1,5 @@
 import {afterEach,describe,expect,it,vi} from "vitest";
-import {emptyQuestionFilters,changeQuestionFilter,readQuestionFilters,questionFilterParams,questionSearch,questionExcerpt,scheduleQuestionSearch} from "./question-bank";
+import {emptyQuestionFilters,changeQuestionFilter,readQuestionFilters,questionFilterParams,questionSearch,questionExcerpt,scheduleQuestionSearch,hasQuestionFilters} from "./question-bank";
 describe("question bank filters",()=>{
   afterEach(()=>vi.useRealTimers());
   it("round trips filters and page through the URL",()=>{const f={...emptyQuestionFilters,subject:"s",section:"c",status:"draft",source:"standard",review:true,search:"Na+ / DNA",page:4};expect(readQuestionFilters(questionFilterParams(f))).toEqual(f);});
@@ -7,6 +7,7 @@ describe("question bank filters",()=>{
   it("resets page and dependent section on subject change",()=>expect(changeQuestionFilter({...emptyQuestionFilters,page:4,section:"old"},"subject","new")).toMatchObject({subject:"new",section:"",page:0}));
   it.each(["status","section","source","search"] as const)("resets pagination for %s",key=>expect(changeQuestionFilter({...emptyQuestionFilters,page:3},key,"value").page).toBe(0));
   it("preserves scope for next page",()=>expect(changeQuestionFilter({...emptyQuestionFilters,subject:"s",section:"c"},"page",2)).toMatchObject({subject:"s",section:"c",page:2}));
+  it("starts without restrictive filters and detects filters that can hide a saved question",()=>{expect(hasQuestionFilters(emptyQuestionFilters)).toBe(false);expect(hasQuestionFilters({...emptyQuestionFilters,status:"active",source:"previous_exam",review:true})).toBe(true);expect(hasQuestionFilters({...emptyQuestionFilters,page:2})).toBe(true);});
   it("searches existing text and database-driven taxonomy names",()=>{const search=questionSearch("BIO",[{id:"s",name:"Biochemistry"}],[{id:"c",name:"BIO 4"}]);expect(search).toContain('prompt.ilike.');expect(search).toContain('source_reference.ilike.');expect(search).toContain('source_label.ilike.');expect(search).toContain('subject_id.in.(s)');expect(search).toContain('chapter_id.in.(c)');});
   it("searches year and image-only fallback",()=>{expect(questionSearch("2025",[],[])).toContain("exam_year.eq.2025");expect(questionSearch("Image-only question",[],[])).toContain('prompt.eq.""');});
   it("quotes PostgREST punctuation and literal wildcards",()=>{const result=questionSearch('a%,x.eq.y_("',[],[]);expect(result).toContain(JSON.stringify('%a\\%,x.eq.y\\_("%'));});

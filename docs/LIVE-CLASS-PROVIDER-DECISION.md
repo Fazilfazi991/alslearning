@@ -1,12 +1,12 @@
 # ALS live-class architecture decision
 
-Date: 5 September 2026
+Date: 24 September 2026 (implementation update; original decision 5 September 2026)
 
 ## Decision
 
 ALS will validate a low-cost native classroom built from **Next.js + Supabase + Cloudflare Realtime SFU + Cloudflare R2**. The previous LiveKit Cloud recommendation is withdrawn. No alternate conferencing SDK is part of this direction.
 
-The production Join Class action remains disabled until the POC has passed media, permission, recording, failure-recovery and bandwidth acceptance tests.
+The native code path is implemented behind server-enforced gates. Production Join Class remains disabled until the POC has passed media, permission, recording, failure-recovery and bandwidth acceptance tests.
 
 ## Responsibilities
 
@@ -31,7 +31,7 @@ Cloudflare Realtime deliberately supplies no room, participant, role or presence
 
 ## Media and permission model
 
-- Teacher: microphone, 720p camera and screen share.
+- Teacher: microphone, optional economical camera and screen share. Lecture/slides and demonstration/motion profiles set distinct capture frame-rate and sender bitrate ceilings.
 - Normal student: receive only; camera is disabled and microphone publishing starts disabled.
 - Audio grant: teacher sets `audio_publish_allowed`; the student may then request and publish microphone audio. Revocation closes the audio track, not merely the UI control.
 - Presenter grant: teacher sets `presenter` and `screen_publish_allowed`; the student may publish a screen track. Revocation closes it.
@@ -50,7 +50,7 @@ Important operational constraints currently documented by Cloudflare include 50 
 
 ## Recording direction and risk
 
-The initial experiment uses teacher-side `MediaRecorder` with five-second chunks. A production version must compose the desired screen/camera/audio output, upload chunks using authenticated R2 multipart operations, persist each part, retry failed uploads, finalize only after integrity checks and retain recoverable partial chunks. Closing the teacher tab, device changes, lost screen capture and long sessions are material risks. Browser recording is not accepted for production until long-duration interruption tests prove recovery. Cloudflare's WebSocket video egress is currently low-frame-rate and is not a substitute for classroom recording.
+Teacher-side `MediaRecorder` now records one stable canvas-composed visual track plus the Teacher microphone. Five-second events remain an ordered byte stream in IndexedDB; an assembler creates fixed 8 MiB R2 parts. A restarted capture becomes a new manifest segment. Upload acknowledgement, retry, reconciliation, validation, recovery/download, and cross-tab ownership are implemented. Closing the Teacher tab, OS sleep, device changes, lost screen capture, and long sessions remain material risks. Browser recording is not accepted for production until the two-hour interruption and cross-device playback gate passes.
 
 ## POC acceptance gate
 

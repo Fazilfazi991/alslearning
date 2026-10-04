@@ -51,5 +51,8 @@ next-env.d.ts
 /.local-qa/
 /core-qa-results.json
 
+# Disposable isolated Supabase stacks used by focused local acceptance
+/.local/
+
 # Local Python preflight cache
 /scripts/__pycache__/
