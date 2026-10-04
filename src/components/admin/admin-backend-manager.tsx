@@ -1,6 +1,7 @@
 "use client";
 import {localDateTime} from "@/lib/core-time";
 import { useEffect, useMemo, useState } from "react";
+import { AccountManager } from "./account-manager";
 import {
   loadAdminData,
   deleteContent,
@@ -46,6 +47,7 @@ function Select({
     <label className="text-xs font-bold uppercase text-muted">
       {label}
       <select
+        aria-label={label}
         className={`${input} mt-2`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -53,7 +55,7 @@ function Select({
         <option value="">{blank}</option>
         {items.map((x) => (
           <option key={String(x.id)} value={String(x.id)}>
-            {String(x.name ?? x.title ?? x.prompt ?? x.full_name ?? x.email)}
+            {String(x.name || x.title || x.prompt || x.full_name || x.email || "Unnamed record")}
           </option>
         ))}
       </select>
@@ -117,9 +119,9 @@ export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
         </p>
       )}
       {mode === "enrollments" && (
-        <Enrollments data={data} busy={busy} run={run} />
+        <><AccountManager role="student" onChanged={() => void refresh()} /><Enrollments data={data} busy={busy} run={run} /></>
       )}{" "}
-      {mode === "faculty" && <Faculty data={data} busy={busy} run={run} />}{" "}
+      {mode === "faculty" && <><AccountManager role="teacher" onChanged={() => void refresh()} /><Faculty data={data} busy={busy} run={run} /></>}{" "}
       {mode === "content" && <Content data={data} busy={busy} run={run} />}{" "}
       {mode === "tests" && <Tests data={data} busy={busy} run={run} />}{" "}
       {mode === "checkpoints" && (

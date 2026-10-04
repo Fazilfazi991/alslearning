@@ -1,15 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { records } from "./fixtures/microbiology-import-records.mjs";
 import {
   classify,
   identity,
   questionPayload,
   chapterNames,
 } from "./microbiology-import-model.mjs";
-const input = JSON.parse(
-  readFileSync(".local-qa/microbiology-preflight-records.json", "utf8"),
-);
+const sourcePath = ".local-qa/microbiology-preflight-records.json";
+const hasOriginalExtract = existsSync(sourcePath);
+const input = hasOriginalExtract ? JSON.parse(readFileSync(sourcePath, "utf8")) : records;
 const taxonomy = {
   subject: { id: "subject" },
   exam: { id: "exam" },
@@ -20,9 +21,9 @@ test("Exact classification and distinct source occurrence identities", () => {
     ["active", "draft", "quarantine"].map(
       (s) => input.filter((q) => classify(q) === s).length,
     ),
-    [791, 2, 4],
+    hasOriginalExtract ? [791, 2, 4] : [3, 1, 1],
   );
-  assert.equal(new Set(input.map((q) => identity(q.source_key))).size, 797);
+  assert.equal(new Set(input.map((q) => identity(q.source_key))).size, hasOriginalExtract ? 797 : 5);
   assert.throws(() => classify({ classification: "TECHNICAL BLOCKER" }));
 });
 test("All original and display relationships retain hashes and source order", () => {
@@ -47,7 +48,7 @@ test("All original and display relationships retain hashes and source order", ()
       }
     }
   }
-  assert.equal(count, 11);
+  assert.equal(count, hasOriginalExtract ? 11 : 1);
 });
 test("Q71 retains empty prompt and source alt text; review records retain original keys", () => {
   const q = input.find((q) => q.micro === 4 && q.source_sequence === 71),

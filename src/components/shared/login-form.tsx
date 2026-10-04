@@ -56,5 +56,6 @@ export function LoginForm({ initialError = "" }: { initialError?: string }) {
     {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
     <Button disabled={busy || !ready} type="submit" className="w-full">{busy ? "Signing in…" : "Sign in"}</Button>
     <p className="text-center text-sm text-muted">New to ALS? <Link href="/#courses" className="font-bold text-brand">Contact admissions</Link></p>
+    <p className="text-center text-sm text-muted">Forgot your password? Ask your ALS administrator to reset it.</p>
   </form>;
 }

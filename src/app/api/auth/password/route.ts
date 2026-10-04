@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSameOriginRequest } from "@/lib/request-origin";
 
 const invalid = () => NextResponse.json({ error: "Incorrect email or password." }, { status: 401 });
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
+  if (!isSameOriginRequest(request)) {
     return NextResponse.json({ error: "Invalid request." }, { status: 403 });
   }
   let body: unknown;

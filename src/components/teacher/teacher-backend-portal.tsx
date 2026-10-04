@@ -4,6 +4,7 @@ import { BookOpen, ClipboardCheck, FileQuestion, FileText, Users } from "lucide-
 import Link from "next/link";
 import { TeacherShell } from "./teacher-shell";
 import { getTeacherData, type TeacherStudent } from "@/lib/teacher-data";
+import { ChangePassword } from "@/components/shared/change-password";
 
 const titles: Record<string, string> = {
   dashboard: "Teacher Dashboard", courses: "My Courses", students: "Students",
@@ -18,7 +19,7 @@ export async function TeacherBackendPortal({ section = "dashboard", page = 0, se
   if (section === "content") return <TeacherShell title={title}><CoreManager mode="content" /></TeacherShell>;
   if (section === "assessments") return <TeacherShell title={title}><CoreManager mode="tests" /></TeacherShell>;
   if (section === "question-bank") return <TeacherShell title={title}><QuestionBank /></TeacherShell>;
-  if (section === "settings") return <TeacherShell title={title}><HonestState title="No configurable settings currently available" body="Your account and assignments are managed by ALS administration." /></TeacherShell>;
+  if (section === "settings") return <TeacherShell title={title}><ChangePassword /></TeacherShell>;
   if (section === "help") return <TeacherShell title={title}><HonestState title="Help & Support" body="Support messaging is not configured in this workspace yet. No request is sent from this page." /></TeacherShell>;
   let data: Awaited<ReturnType<typeof getTeacherData>>;
   try { data = await getTeacherData(section, page, search); }
@@ -76,6 +77,7 @@ export async function TeacherBackendPortal({ section = "dashboard", page = 0, se
         <div><dt className="font-bold">Assigned program</dt><dd className="mt-1 text-muted">{programs.map(p => p.name).join(", ") || "None"}</dd></div>
         <div><dt className="font-bold">Assigned subjects</dt><dd className="mt-1 text-muted">{subjects.map(s => s.name).join(", ") || "None"}</dd></div>
       </dl></section>}
+    {section === "profile" && <ChangePassword />}
   </TeacherShell>;
 }
 

@@ -5,6 +5,7 @@ import { FileText, PlayCircle } from "lucide-react";
 import type { getStudentCourse } from "@/lib/student-courses-server";
 import { courseHasContent, recordingHref, selectedCourseSubject } from "@/lib/student-courses";
 import { RecordingThumbnail } from "@/components/recorded-classes/recording-thumbnail";
+import { academicDate } from "@/lib/academic-date";
 
 export function CourseLearningHub({ data, basePath }: { data: NonNullable<Awaited<ReturnType<typeof getStudentCourse>>>; basePath: string }) {
   const params = useSearchParams();
@@ -15,7 +16,7 @@ export function CourseLearningHub({ data, basePath }: { data: NonNullable<Awaite
     <header className="rounded-xl bg-deep-blue p-4 text-white sm:p-5" aria-label="Enrolled program">
       <p className="text-xs font-semibold uppercase text-blue-100">Enrolled program</p>
       <h2 className="mt-1 text-xl font-bold sm:text-2xl">{data.program.name}</h2>
-      <p className="mt-2 text-xs text-blue-100">{data.enrollment.access_expires_at ? `Access until ${new Date(data.enrollment.access_expires_at).toLocaleDateString("en-GB")}` : "Access with no expiry"}</p>
+      <p className="mt-2 text-xs text-blue-100">{data.enrollment.access_expires_at ? `Access until ${academicDate(data.enrollment.access_expires_at)}` : "Access with no expiry"}</p>
     </header>
     <section aria-labelledby="course-subjects">
       <h2 id="course-subjects" className="text-lg font-bold">Subjects</h2>

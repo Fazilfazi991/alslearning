@@ -5,7 +5,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { s
 vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: mock.getAll, set: mock.set }) }));
 import { POST } from "./route";
 
-const request = (origin="https://alslearning.vercel.app") => new Request("https://alslearning.vercel.app/auth/logout",{method:"POST",headers:{origin}});
+const request = (origin="https://alslearning.vercel.app") => new Request("https://alslearning.vercel.app/auth/logout",{method:"POST",headers:{origin,host:"alslearning.vercel.app"}});
 
 describe("account switching sign-out", () => {
   beforeEach(() => {

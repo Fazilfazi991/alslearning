@@ -12,7 +12,7 @@ vi.mock("@/lib/supabase/server", () => ({
 import { POST } from "./route";
 
 const request = (body: unknown, origin = "https://alslearning.vercel.app") => new Request("https://alslearning.vercel.app/api/auth/password", {
-  method: "POST", headers: { "content-type": "application/json", origin }, body: JSON.stringify(body),
+  method: "POST", headers: { "content-type": "application/json", origin, host: "alslearning.vercel.app" }, body: JSON.stringify(body),
 });
 const credentials = { email: "person@example.test", password: "test-password-only" };
 

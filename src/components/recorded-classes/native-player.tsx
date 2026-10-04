@@ -21,6 +21,8 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
   const [feedback, setFeedback] = useState<{ is_correct: boolean; explanation?: string | null } | null>(null);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
+  const savingProgress = useRef(false);
+  const [progressError, setProgressError] = useState("");
   const interactions = useMemo(() => payload?.interactions ?? [], [payload]);
 
   const load = useCallback(async () => {
@@ -49,9 +51,16 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
   async function saveProgress(force = false) {
     const element = video.current; if (!element || !Number.isFinite(element.duration) || element.duration <= 0) return;
     if (!force && Math.abs(element.currentTime - lastSaved.current) < 15) return;
-    lastSaved.current = element.currentTime; setSaving(true);
-    await createClient().rpc("save_recorded_class_progress", { target: recordingId, position_seconds: element.currentTime, duration_seconds: element.duration });
-    setSaving(false);
+    if (savingProgress.current) return;
+    savingProgress.current = true; setSaving(true);
+    const position = element.currentTime;
+    try {
+      const result = await createClient().rpc("save_recorded_class_progress", { target: recordingId, position_seconds: position, duration_seconds: element.duration });
+      if (result.error || !result.data) throw new Error();
+      lastSaved.current = position; setProgressError("");
+      setPayload(current => current ? { ...current, progress: result.data } : current);
+    } catch { setProgressError("Your playback progress could not be saved. Please retry."); }
+    finally { savingProgress.current = false; setSaving(false); }
   }
   function checkCrossing(current: number, requiredOnly = false) {
     const item = nextUnansweredInteraction(interactions, answered, previousTime.current, current, requiredOnly);
@@ -86,6 +95,7 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
         </div>
       </div>}
     </div>
-    <div className="mt-2 flex justify-between gap-3 text-xs text-muted"><span>Private ALS playback · secure link refreshes automatically</span><span aria-live="polite">{saving ? "Saving progress…" : payload?.progress?.completed_at ? "Complete" : "Progress saved periodically"}</span></div>
+    <div className="mt-2 flex justify-between gap-3 text-xs text-muted"><span>Private ALS playback · secure link refreshes automatically</span><span aria-live="polite">{saving ? "Saving progress…" : progressError ? "Progress not saved" : payload?.progress?.completed_at ? "Complete" : "Progress saved periodically"}</span></div>
+    {progressError && <p role="alert" className="mt-3 text-sm text-red-800">{progressError} <button disabled={saving} className="min-h-11 px-2 font-semibold underline" onClick={()=>void saveProgress(true)}>Retry saving</button></p>}
   </section>;
 }

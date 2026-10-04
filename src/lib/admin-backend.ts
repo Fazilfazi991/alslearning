@@ -95,7 +95,8 @@ export async function loadAdminData(mode: AdminModule) {
   };
 }
 export type AdminData = Awaited<ReturnType<typeof loadAdminData>>;
-function fail(error: { message: string } | null) {
+function fail(error: { message: string; code?: string } | null) {
+  if (error?.code === "23505") throw new Error("This record already exists. Edit the existing enrollment or assignment.");
   if (error) throw new Error(error.message);
 }
 export async function saveEnrollment(value: Record<string, unknown>) {
