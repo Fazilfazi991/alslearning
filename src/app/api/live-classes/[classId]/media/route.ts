@@ -186,7 +186,13 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
     }
 
     if (!body.connectionId) return jsonError("Connection is required", 400);
-    const connection = await ownedConnection(db, classId, auth.user.id, body.connectionId, teardown && ended);
+    const connection = await ownedConnection(db, classId, auth.user.id, body.connectionId, teardown);
+    if (["heartbeat", "leave"].includes(body.action) && !["active", "reconnecting"].includes(connection.status)) {
+      // Refresh or rejoin can replace this owned connection while an earlier
+      // heartbeat/leave is still in flight. Acknowledge it without touching
+      // attendance, the replacement connection, or provider publications.
+      return NextResponse.json({ alive: false, left: true, status: authorization.session.status });
+    }
 
     if (body.action === "heartbeat") {
       const { error } = await db.rpc("heartbeat_live_connection", { target_connection: connection.id });

@@ -136,6 +136,46 @@ describe("requests arriving after Teacher End", () => {
     expect((await late("leave")).status).toBe(403);
   });
 
+  it.each(["stale", "closed"])("acknowledges an owned %s connection heartbeat while the class remains live", async status => {
+    const { db, insert } = database(0);
+    const scoped = { eq: vi.fn(), maybeSingle: vi.fn(async () => ({ data: { id: connectionId, status } })) };
+    scoped.eq.mockReturnValue(scoped);
+    db.from.mockReturnValue({ select: () => scoped, insert } as never);
+    mocks.createClient.mockResolvedValue(db);
+    mocks.authorize.mockResolvedValue({ role: "student", session: { status: "live" } });
+    const response = await late("heartbeat");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ alive: false, status: "live" });
+    expect(scoped.eq).toHaveBeenCalledWith("user_id", studentId);
+    expect(scoped.eq).toHaveBeenCalledWith("session_id", classId);
+    expect(db.rpc).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("acknowledges a repeated owned leave without changing presence for a replacement connection", async () => {
+    const { db } = database(0);
+    const scoped = { eq: vi.fn(), maybeSingle: vi.fn(async () => ({ data: { id: connectionId, status: "closed" } })) };
+    scoped.eq.mockReturnValue(scoped);
+    db.from.mockReturnValue({ select: () => scoped } as never);
+    mocks.createClient.mockResolvedValue(db);
+    mocks.authorize.mockResolvedValue({ role: "student", session: { status: "live" } });
+    expect((await late("leave")).status).toBe(200);
+    expect(db.rpc).not.toHaveBeenCalled();
+  });
+
+  it.each(["heartbeat", "publish"])("does not permit %s against an unowned or closed publication connection", async action => {
+    const { db } = database(0);
+    if (action === "publish") {
+      const scoped = { eq: vi.fn(), maybeSingle: vi.fn(async () => ({ data: { id: connectionId, status: "stale" } })) };
+      scoped.eq.mockReturnValue(scoped);
+      db.from.mockReturnValue({ select: () => scoped } as never);
+    }
+    mocks.createClient.mockResolvedValue(db);
+    mocks.authorize.mockResolvedValue({ role: "student", session: { status: "live" } });
+    expect((await late(action)).status).toBe(403);
+    expect(db.rpc).not.toHaveBeenCalled();
+  });
+
   it("still requires connect authorization for a new connection after End", async () => {
     const { db, insert } = database(0);
     mocks.createClient.mockResolvedValue(db);
