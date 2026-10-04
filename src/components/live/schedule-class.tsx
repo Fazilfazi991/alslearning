@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { academicLocalToUtc } from "@/lib/live-class/date";
 
 type Scope = { programId: string; programName: string; subjectId: string; subjectName: string };
+const control = "mt-2 block min-h-11 w-full rounded-lg border border-line bg-white px-3 py-2 text-base font-normal";
 export function ScheduleClass({ scopes, batches, teacherId, timeZone }: {
   scopes: Scope[]; batches: { id: string; name: string; program_id: string }[]; teacherId: string; timeZone: string;
 }) {
@@ -34,11 +35,11 @@ export function ScheduleClass({ scopes, batches, teacherId, timeZone }: {
   if (!scope) return <p role="status">An administrator must assign a program and subject before you can schedule a class.</p>;
   return <form onSubmit={submit} className="card max-w-2xl space-y-5 p-5">
     <p className="text-sm text-muted">Times use {timeZone}. Students with current access to the selected batch can see and join the class.</p>
-    <label className="block font-semibold">Class title<input name="title" required maxLength={180} className="control mt-2" /></label>
-    <label className="block font-semibold">Program and subject<select value={scopeIndex} onChange={event => setScopeIndex(Number(event.target.value))} className="control mt-2">{scopes.map((item, index) => <option key={`${item.programId}:${item.subjectId}`} value={index}>{item.programName} · {item.subjectName}</option>)}</select></label>
-    <label className="block font-semibold">Batch<select key={scope.programId} name="batchId" required className="control mt-2"><option value="">Select batch</option>{batches.filter(item => item.program_id === scope.programId).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-    <label className="block font-semibold">Starts at<input type="datetime-local" name="startsAt" required className="control mt-2" /></label>
-    <label className="block font-semibold">Ends at<input type="datetime-local" name="endsAt" required className="control mt-2" /></label>
+    <label className="block font-semibold">Class title<input name="title" required maxLength={180} className={control} /></label>
+    <label className="block font-semibold">Program and subject<select aria-label="Program and subject" value={scopeIndex} onChange={event => setScopeIndex(Number(event.target.value))} className={control}>{scopes.map((item, index) => <option key={`${item.programId}:${item.subjectId}`} value={index}>{item.programName} · {item.subjectName}</option>)}</select></label>
+    <label className="block font-semibold">Batch<select aria-label="Batch" key={scope.programId} name="batchId" required className={control}><option value="">Select batch</option>{batches.filter(item => item.program_id === scope.programId).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+    <label className="block font-semibold">Starts at<input type="datetime-local" name="startsAt" required className={control} /></label>
+    <label className="block font-semibold">Ends at<input type="datetime-local" name="endsAt" required className={control} /></label>
     {error && <p role="alert" className="text-red-700">{error}</p>}
     <button disabled={busy} className="min-h-11 rounded-xl bg-brand px-5 font-bold text-white disabled:opacity-50">{busy ? "Scheduling…" : "Schedule class"}</button>
   </form>;

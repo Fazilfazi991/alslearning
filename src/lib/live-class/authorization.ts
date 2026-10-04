@@ -62,11 +62,9 @@ export async function authorizeLiveClass(
   const isAdmin = profile.role === "admin";
   let isAssignedTeacher = profile.role === "teacher" && session.faculty_id === userId;
   if (isAssignedTeacher) {
-    const assignment = await db.rpc("teacher_has_assignment", {
-      target_exam: null,
+    const assignment = await db.rpc("teacher_has_live_assignment", {
       target_program: session.program_id,
       target_subject: session.subject_id,
-      permission: null,
     });
     isAssignedTeacher = assignment.data === true;
   }

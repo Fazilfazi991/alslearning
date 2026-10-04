@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { reconcileClassTransport } from "./transport-reconciliation";
 import { readStagingCleanup } from "./staging-cleanup-read";
 
@@ -21,8 +21,12 @@ function stagingDatabase() {
 
 export async function runStagingCleanup(now = new Date()) {
   const db = stagingDatabase();
-  const nowIso = now.toISOString();
   const cutoff = Date.parse(process.env.ALS_STAGING_TEST_CUTOFF_UTC || "");
+  return runClassroomCleanup(db, now, cutoff);
+}
+
+export async function runClassroomCleanup(db: SupabaseClient, now = new Date(), cutoff = NaN) {
+  const nowIso = now.toISOString();
   const [live, connections, publications, subscriptions, attendance] = await Promise.all([
     readStagingCleanup("live_sessions", () => db.from("live_sessions").select("id,ends_at,status")
       .in("provider", ["cloudflare", "cloudflare-poc"]).eq("status", "live").limit(MAX_ROWS)),
