@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (profile.role === "teacher") {
     if (body.teacherId && body.teacherId !== auth.user.id) return error("Teachers may only schedule their own classes", 403);
     body.teacherId = auth.user.id;
-    const permission = await db.rpc("teacher_has_assignment", { target_exam: null, target_program: body.programId, target_subject: body.subjectId, permission: null });
+    const permission = await db.rpc("teacher_has_live_assignment", { target_program: body.programId, target_subject: body.subjectId });
     if (permission.error || permission.data !== true) return error("Assigned academic scope is required", 403);
   }
   if (!body.title?.trim() || body.title.trim().length > 180 || !body.programId || !body.subjectId || !body.batchId || !body.teacherId ||
