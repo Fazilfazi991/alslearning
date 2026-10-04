@@ -7,6 +7,7 @@ import { isSameOriginRequest } from "@/lib/request-origin";
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { closeProviderTracks } from "@/lib/live-class/transport-cleanup";
 import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
+import { terminalSessionStatus } from "@/lib/live-class/session-status";
 
 type Body = {
   action?: "create" | "publish" | "subscribe" | "unsubscribe" | "renegotiate" | "close" | "heartbeat" | "leave" | "stats";
@@ -46,11 +47,11 @@ const providerSession = (track: Track) => {
   return value?.publisher_provider_session_id || value?.provider_session_id;
 };
 
-async function ownedConnection(db: Awaited<ReturnType<typeof createClient>>, classId: string, userId: string, connectionId: string) {
+async function ownedConnection(db: Awaited<ReturnType<typeof createClient>>, classId: string, userId: string, connectionId: string, allowClosed = false) {
   if (!uuid.test(connectionId)) throw new LiveAuthorizationError("Invalid connection", 400);
   const { data } = await db.from("live_media_connections").select("id,user_id,session_id,provider_session_id,publisher_provider_session_id,status")
     .eq("id", connectionId).eq("session_id", classId).eq("user_id", userId).maybeSingle();
-  if (!data || !["active", "reconnecting"].includes(data.status)) throw new LiveAuthorizationError("Owned media connection is unavailable", 403);
+  if (!data || (!allowClosed && !["active", "reconnecting"].includes(data.status))) throw new LiveAuthorizationError("Owned media connection is unavailable", 403);
   return data as Connection;
 }
 
@@ -104,8 +105,14 @@ export async function GET(request: Request, context: RouteContext<"/api/live-cla
     const mode = new URL(request.url).searchParams.get("mode");
     if (mode !== "poc" && mode !== "classroom") return jsonError("Classroom mode is required", 400);
     assertLiveFeature(mode);
-    const authorization = await authorizeLiveClass(db, auth.user.id, classId, "connect");
+    const authorization = await authorizeLiveClass(db, auth.user.id, classId, "view");
     assertClassroomMode(authorization.session, mode);
+    // A publication event may trigger discovery while Teacher End is in flight.
+    // Eligible members receive authoritative terminal state, never new media.
+    if (terminalSessionStatus(authorization.session.status)) {
+      return NextResponse.json({ tracks: [], status: authorization.session.status }, { headers: { "Cache-Control": "no-store" } });
+    }
+    await authorizeLiveClass(db, auth.user.id, classId, "connect");
     const { data, error } = await db.from("live_published_tracks")
       .select("id,owner_id,kind,created_at").eq("session_id", classId).eq("status", "active").order("created_at");
     if (error) throw error;
@@ -132,8 +139,20 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
   try {
     const configuration = assertLiveFeature(body.mode);
     if (!configuration.realtimeConfigured) return jsonError(`Cloudflare Realtime is not configured (${configuration.missingRealtime.join(", ")})`, 503);
-    const authorization = await authorizeLiveClass(db, auth.user.id, classId, "connect");
+    const teardown = ["heartbeat", "leave", "stats"].includes(body.action);
+    const authorization = await authorizeLiveClass(db, auth.user.id, classId, teardown ? "view" : "connect");
     assertClassroomMode(authorization.session, body.mode);
+    const ended = terminalSessionStatus(authorization.session.status);
+    if (teardown && !ended) await authorizeLiveClass(db, auth.user.id, classId, "connect");
+    if (teardown && ended) {
+      if (!body.connectionId) return jsonError("Connection is required", 400);
+      await ownedConnection(db, classId, auth.user.id, body.connectionId, true);
+      if (body.action !== "stats") {
+        // End/cleanup owns provider closure. A late heartbeat must never revive
+        // the closed connection; repeated leave is an acknowledged no-op.
+        return NextResponse.json({ alive: false, left: true, status: authorization.session.status });
+      }
+    }
 
     if (body.action === "create") {
       const { data: prior } = await db.from("live_media_connections")
@@ -167,7 +186,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
     }
 
     if (!body.connectionId) return jsonError("Connection is required", 400);
-    const connection = await ownedConnection(db, classId, auth.user.id, body.connectionId);
+    const connection = await ownedConnection(db, classId, auth.user.id, body.connectionId, teardown && ended);
 
     if (body.action === "heartbeat") {
       const { error } = await db.rpc("heartbeat_live_connection", { target_connection: connection.id });

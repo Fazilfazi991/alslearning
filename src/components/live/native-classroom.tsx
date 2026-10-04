@@ -298,11 +298,12 @@ export function NativeClassroom({
 
   const subscribeAvailable = useCallback(async (peer: RTCPeerConnection, id: string) => {
     const response = await fetch(`${endpoint}/media?mode=${mode}`, { cache: "no-store" });
-    const discovery = await response.json() as { tracks?: { id: string; owner_id: string; kind: RemoteTrack["kind"] }[]; error?: string };
+    const discovery = await response.json() as { tracks?: { id: string; owner_id: string; kind: RemoteTrack["kind"] }[]; error?: string; status?: string };
     if (!response.ok) {
       if (response.status === 409 && discovery.error === "The class is not live") await refreshSessionRef.current();
       throw new Error(discovery.error || "Track discovery failed");
     }
+    if (discovery.status && terminalSessionStatus(discovery.status)) applySessionStatus(discovery.status);
     if (terminalSessionStatus(classStatusRef.current)) return;
     const activeIds = new Set((discovery.tracks || []).map(track => track.id));
     setRemoteTracks(current => current.filter(track => {
@@ -318,7 +319,7 @@ export function NativeClassroom({
     });
     await acceptReceiveOffer(peer, value, midMapRef.current, subscribedRef.current, () => waitForIce(peer),
       async sessionDescription => { await api("media", { action: "renegotiate", connectionId: id, sessionDescription }); });
-  }, [api, endpoint, lowData, mode, user.id]);
+  }, [api, applySessionStatus, endpoint, lowData, mode, user.id]);
 
   const requestTrackRefresh = useCallback(() => {
     if (terminalSessionStatus(classStatusRef.current) || !peerRef.current || !connectionId) return Promise.resolve();
@@ -407,11 +408,16 @@ export function NativeClassroom({
 
   useEffect(() => {
     if (!connectionId) return;
-    const heartbeat = window.setInterval(() => void api("media", { action: "heartbeat", connectionId }).catch(() => {
+    const heartbeat = window.setInterval(() => {
+      if (terminalSessionStatus(classStatusRef.current)) return;
+      void api<{ status?: string }>("media", { action: "heartbeat", connectionId }).then(value => {
+        if (value.status && terminalSessionStatus(value.status)) applySessionStatus(value.status);
+      }).catch(() => {
       if (!terminalSessionStatus(classStatusRef.current)) setConnectionState("reconnecting");
-    }), 15_000);
+      });
+    }, 15_000);
     return () => window.clearInterval(heartbeat);
-  }, [api, connectionId]);
+  }, [api, applySessionStatus, connectionId]);
 
   useEffect(() => {
     if (!manager || !["live", "completed"].includes(classStatus)) return;
@@ -462,7 +468,7 @@ export function NativeClassroom({
     return () => {
     peer?.close();
     publisherPeer?.close();
-    if (connectionId) void fetch(`${endpoint}/media`, {
+    if (connectionId && !terminalSessionStatus(classStatusRef.current)) void fetch(`${endpoint}/media`, {
       method: "POST", keepalive: true, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "leave", mode, connectionId }),
     });
