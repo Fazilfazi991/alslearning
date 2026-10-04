@@ -13,6 +13,7 @@ import {
 import { emptyLiveStats, PeerStatsSampler, StatsIntervalAccumulator, type LiveStatsSample } from "@/lib/live-class/stats";
 import { formatAcademicDate } from "@/lib/live-class/date";
 import { acceptReceiveOffer } from "@/lib/live-class/receive-negotiation";
+import { waitForPublicationMedia } from "@/lib/live-class/publication-readiness";
 import { observeSessionStatus, terminalSessionStatus } from "@/lib/live-class/session-status";
 import { Hand, Maximize, Mic, MicOff, MonitorUp, PhoneOff, Radio, RefreshCw, Video, VideoOff } from "lucide-react";
 
@@ -665,6 +666,8 @@ export function NativeClassroom({
       const publications = entries.map(value => ({ kind: value.kind, mid: value.transceiver.mid! }));
       response = await api("media", { action: "publish", connectionId: id, sessionDescription: peer.localDescription, publications });
       await peer.setRemoteDescription(response.sessionDescription);
+      await waitForPublicationMedia(peer, response.tracks.map(value => value.mid));
+      await api("media", { action: "ready", connectionId: id, trackIds: response.tracks.map(value => value.id) });
       response.tracks.forEach((value, index) => {
         publicationKindByMidRef.current.set(value.mid, value.kind);
         trackKindByIdentifierRef.current.set(entries[index].track.id, value.kind);
@@ -751,6 +754,8 @@ export function NativeClassroom({
             publications: [{ kind: "screen", mid: transceiver.mid! }],
           });
           await peer.setRemoteDescription(response.sessionDescription);
+          await waitForPublicationMedia(peer, response.tracks.map(value => value.mid));
+          await api("media", { action: "ready", connectionId, trackIds: response.tracks.map(value => value.id) });
         } catch (reason) {
           transceiver.stop();
           if (response?.tracks.length) {

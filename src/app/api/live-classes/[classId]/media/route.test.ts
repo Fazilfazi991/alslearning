@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  createClient: vi.fn(), authorize: vi.fn(), getIceServers: vi.fn(() => []),
+  createClient: vi.fn(), authorize: vi.fn(), getIceServers: vi.fn(() => []), mayPublish: vi.fn(() => true),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: mocks.createClient }));
 vi.mock("@/lib/live-class/config", () => ({ assertLiveFeature: () => ({ realtimeConfigured: true, turnConfigured: false }) }));
 vi.mock("@/lib/live-class/authorization", () => ({
-  authorizeLiveClass: mocks.authorize, assertClassroomMode: () => undefined,
+  authorizeLiveClass: mocks.authorize, assertClassroomMode: () => undefined, mayPublish: mocks.mayPublish,
   LiveAuthorizationError: class LiveAuthorizationError extends Error {
     constructor(message: string, readonly status = 403) { super(message); }
   },
@@ -91,6 +91,62 @@ describe("live media receiver limit", () => {
     const response = await create();
     expect(response.status).toBe(200);
     expect(countQuery.neq).not.toHaveBeenCalled();
+  });
+});
+
+describe("publication readiness ownership", () => {
+  const connectionId = "70000000-0000-0000-0000-000000000001";
+  const trackId = "80000000-0000-0000-0000-000000000001";
+  beforeEach(() => {
+    mocks.authorize.mockResolvedValue({ role: "student", session: { status: "live" } });
+    mocks.mayPublish.mockReturnValue(true);
+  });
+  function setup(tracks: object[]) {
+    const scope = {
+      eq: vi.fn(), in: vi.fn(), order: vi.fn(),
+      maybeSingle: vi.fn(async () => ({ data: { id: connectionId, status: "active" } })),
+      then: (resolve: (value: unknown) => unknown) => resolve({ data: tracks, error: null }),
+    };
+    scope.eq.mockReturnValue(scope); scope.in.mockReturnValue(scope); scope.order.mockReturnValue(scope);
+    const update = vi.fn(() => scope);
+    mocks.createClient.mockResolvedValue({
+      auth: { getUser: async () => ({ data: { user: { id: studentId } } }) },
+      from: () => ({ select: () => scope, update }),
+    });
+    return { scope, update };
+  }
+  const ready = () => POST(new Request(`https://production.example/api/live-classes/${classId}/media`, {
+    method: "POST", body: JSON.stringify({ action: "ready", mode: "classroom", connectionId, trackIds: [trackId] }),
+  }), { params: Promise.resolve({ classId }) } as never);
+
+  it("only announces active publications belonging to the authenticated connection and class", async () => {
+    const { scope, update } = setup([{ id: trackId, kind: "microphone" }]);
+    expect((await ready()).status).toBe(200);
+    expect(scope.eq).toHaveBeenCalledWith("session_id", classId);
+    expect(scope.eq).toHaveBeenCalledWith("connection_id", connectionId);
+    expect(scope.eq).toHaveBeenCalledWith("owner_id", studentId);
+    expect(scope.eq).toHaveBeenCalledWith("status", "active");
+    expect(update).toHaveBeenCalledWith({ discovery_ready: true });
+  });
+
+  it("does not announce someone else's or a closed publication", async () => {
+    const { update } = setup([]);
+    expect((await ready()).status).toBe(403);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("rechecks a Student's current microphone grant", async () => {
+    const { update } = setup([{ id: trackId, kind: "microphone" }]);
+    mocks.mayPublish.mockReturnValue(false);
+    expect((await ready()).status).toBe(403);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("excludes negotiating publications from discovery", async () => {
+    const { scope } = setup([]);
+    const response = await GET(new Request(`https://production.example/api/live-classes/${classId}/media?mode=classroom`), { params: Promise.resolve({ classId }) } as never);
+    expect(response.status).toBe(200);
+    expect(scope.eq).toHaveBeenCalledWith("discovery_ready", true);
   });
 });
 
