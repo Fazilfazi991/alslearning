@@ -3,6 +3,9 @@ export const SEARCH_DEBOUNCE_MS = 300;
 export function scheduleQuestionSearch(run:()=>void){const timer=setTimeout(run,SEARCH_DEBOUNCE_MS);return()=>clearTimeout(timer);}
 export type QuestionFilters = {subject:string;section:string;status:string;source:string;review:boolean;search:string;page:number};
 export const emptyQuestionFilters:QuestionFilters = {subject:"",section:"",status:"",source:"",review:false,search:"",page:0};
+export function hasQuestionFilters(filters:QuestionFilters) {
+  return !!(filters.subject||filters.section||filters.status||filters.source||filters.review||filters.search.trim()||filters.page);
+}
 export function readQuestionFilters(params:URLSearchParams):QuestionFilters {
   const page=Number(params.get("page")||1);
   return {subject:params.get("subject")||"",section:params.get("section")||"",status:params.get("status")||"",source:params.get("source")||"",review:params.get("review")==="1",search:params.get("search")||"",page:Number.isSafeInteger(page)&&page>0?Math.min(page-1,1_000_000):0};

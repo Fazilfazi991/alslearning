@@ -12,6 +12,13 @@ export type TeacherStudent = {
   status: string;
   expires_at: string | null;
 };
+export type TeacherBatch = {
+  id: string;
+  name: string;
+  program_id: string;
+  status: string;
+  access_expires_at: string | null;
+};
 type StudentPage = { total: number; rows: TeacherStudent[] };
 function one<T>(value: T | T[] | null): T | null {
   return Array.isArray(value) ? value[0] || null : value;
@@ -24,10 +31,14 @@ export async function getTeacherData(section = "dashboard", page = 0, search = "
   const signal = AbortSignal.timeout(10000);
   const skip = () => Promise.resolve({ data: null, error: null, count: 0 });
   const assignmentsNeeded = ["dashboard", "courses", "profile"].includes(section);
+  const batchesNeeded = ["dashboard", "courses"].includes(section);
   const rosterNeeded = ["dashboard", "students"].includes(section);
-  const [assignments, roster, questions, tests, content, sessions] = await Promise.all([
+  const [assignments, batchLinks, roster, questions, tests, content, sessions] = await Promise.all([
     assignmentsNeeded
       ? db.from("faculty_assignments").select("id,program_id,subject_id,can_manage_content,can_manage_questions,can_manage_tests,programs(id,name),subjects(id,name),entrance_exams(id,name)").eq("faculty_id", user.id).abortSignal(signal)
+      : skip(),
+    batchesNeeded
+      ? db.from("batch_faculty").select("batch_id,batches(id,name,program_id,status,access_expires_at)").eq("faculty_id", user.id).abortSignal(signal)
       : skip(),
     rosterNeeded
       ? db.rpc("core_teacher_students", { page_number: section === "students" ? page : 0, page_size: section === "students" ? 25 : 1, search_text: section === "students" ? search : "" }).abortSignal(signal)
@@ -35,9 +46,9 @@ export async function getTeacherData(section = "dashboard", page = 0, search = "
     section === "dashboard" ? db.from("questions").select("id", { head: true, count: "exact" }).abortSignal(signal) : skip(),
     section === "dashboard" ? db.from("tests").select("id", { head: true, count: "exact" }).abortSignal(signal) : skip(),
     section === "dashboard" ? db.from("learning_content").select("id", { head: true, count: "exact" }).abortSignal(signal) : skip(),
-    section === "live-classes" ? db.from("live_sessions").select("id,title,starts_at,status,provider_room_id").eq("faculty_id", user.id).order("starts_at").abortSignal(signal) : skip(),
+    section === "live-classes" ? db.from("live_sessions").select("id,title,starts_at,ends_at,status,provider,recording_enabled,programs(name),subjects(name),batches(name),class_recordings(id,status,published_at,total_bytes)").eq("faculty_id", user.id).order("starts_at", { ascending: false }).abortSignal(signal) : skip(),
   ]);
-  const error = [assignments, roster, questions, tests, content, sessions].find((item) => item.error)?.error;
+  const error = [assignments, batchLinks, roster, questions, tests, content, sessions].find((item) => item.error)?.error;
   if (error) throw new Error(error.message);
   const studentPage = (roster.data || { total: 0, rows: [] }) as StudentPage;
   return {
@@ -46,6 +57,9 @@ export async function getTeacherData(section = "dashboard", page = 0, search = "
       ...item,
       programs: one(item.programs), subjects: one(item.subjects), entrance_exams: one(item.entrance_exams),
     })),
+    batches: ((batchLinks.data || []) as NonNullable<typeof batchLinks.data>)
+      .map((item) => one(item.batches))
+      .filter((item): item is TeacherBatch => item !== null),
     students: studentPage.rows,
     studentCount: studentPage.total,
     studentPage: page,

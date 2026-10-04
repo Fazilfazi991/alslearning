@@ -1,16 +1,18 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { currentUser } from "@/lib/auth";
+import { eligibleStudentEnrollment, type StudentAttempt, type WatchEvent } from "@/lib/student-dashboard";
 export async function getStudentPortalData() {
   const user = await currentUser();
   if (!user) return null;
+  const fetchedAt = Date.now();
   const db = await createClient();
-  const [enrollments, content, sessions, tests, progress, attempts] =
+  const [enrollments, content, sessions, tests, progress, attempts, watch] =
     await Promise.all([
       db
         .from("enrollments")
         .select(
-          "*,programs(id,name,slug,description,duration_days),batches(id,name,starts_on,ends_on)",
+          "*,programs(id,name,slug,description,duration_days,status),batches(id,program_id,name,starts_on,ends_on,status,access_starts_at,access_expires_at,access_valid_until)",
         )
         .eq("student_id", user.id)
         .order("created_at", { ascending: false }),
@@ -24,16 +26,22 @@ export async function getStudentPortalData() {
       db
         .from("live_sessions")
         .select(
-          "id,title,starts_at,ends_at,status,provider,provider_room_id,program_id,batch_id,subjects(name),topics(name),profiles!live_sessions_faculty_id_fkey(full_name)",
+          "id,title,starts_at,ends_at,join_opens_at,join_closes_at,status,provider,provider_room_id,program_id,batch_id,subjects(name),topics(name),profiles!live_sessions_faculty_id_fkey(full_name),class_recordings(id,status,published_at,duration_seconds)",
         )
-        .in("status", ["scheduled", "live"])
-        .order("starts_at"),
+        .in("status", ["scheduled", "live", "completed"])
+        .order("starts_at", { ascending: false }),
       db.rpc("core_student_test_catalog"),
       db
         .from("video_progress")
         .select("content_id,position_seconds,completed,updated_at")
         .eq("student_id", user.id),
       db.rpc("core_attempt_history"),
+      db.from("playback_watch_events")
+        .select("event_id,elapsed_seconds,ended_at,content_kind")
+        .eq("student_id", user.id)
+        .order("ended_at", { ascending: false })
+        .order("event_id", { ascending: false })
+        .range(0, 999),
     ]);
   const error = [
     enrollments,
@@ -44,14 +52,42 @@ export async function getStudentPortalData() {
     attempts,
   ].find((x) => x.error)?.error;
   if (error) throw new Error(error.message);
+  const eligibleEnrollments = (enrollments.data || []).filter(e => eligibleStudentEnrollment(e, fetchedAt));
+  const programIds = [...new Set(eligibleEnrollments.map(enrollment => enrollment.program_id))];
+  const subjectMappings = programIds.length
+    ? await db.from("program_subjects").select("program_id,subjects(id,name)").in("program_id", programIds)
+    : { data: [], error: null };
+  if (subjectMappings.error) throw new Error(subjectMappings.error.message);
+  let watchEvents: WatchEvent[] | null = watch.error ? null : (watch.data || []) as WatchEvent[];
+  if (watchEvents) {
+    let pageSize = watch.data?.length || 0;
+    for (let offset = 1000; pageSize === 1000; offset += 1000) {
+      const page = await db.from("playback_watch_events")
+        .select("event_id,elapsed_seconds,ended_at,content_kind")
+        .eq("student_id", user.id)
+        .order("ended_at", { ascending: false })
+        .order("event_id", { ascending: false })
+        .range(offset, offset + 999);
+      if (page.error) { watchEvents = null; break; }
+      pageSize = page.data?.length || 0;
+      watchEvents.push(...(page.data || []) as WatchEvent[]);
+    }
+  }
   return {
     user,
-    enrollments: (enrollments.data || []).filter(e=>e.programs && e.status==="active" && (!e.batch_id || e.batches) && (!e.access_starts_at || new Date(e.access_starts_at)<=new Date()) && (!e.access_expires_at || new Date(e.access_expires_at)>new Date())),
+    fetchedAt,
+    enrollments: eligibleEnrollments,
     content: content.data || [],
-    sessions: sessions.data || [],
+    sessions: (sessions.data || []).filter(session => eligibleEnrollments.some(enrollment =>
+      (!session.program_id || session.program_id === enrollment.program_id) && (!session.batch_id || session.batch_id === enrollment.batch_id))).map(session => ({
+        ...session,
+        join_available: (!session.join_opens_at || Date.parse(session.join_opens_at) <= fetchedAt) && (!session.join_closes_at || Date.parse(session.join_closes_at) > fetchedAt),
+      })),
     tests: (tests.data || []) as StudentTestSummary[],
     progress: progress.data || [],
-    attempts: (attempts.data || []) as {id:string;test_id:string;started_at:string;submitted_at:string|null;score:number|null;status:string}[],
+    attempts: (attempts.data || []) as StudentAttempt[],
+    subjectMappings: subjectMappings.data || [],
+    watchEvents,
   };
 }
 

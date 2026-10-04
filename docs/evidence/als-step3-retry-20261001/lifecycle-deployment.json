@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-01T18:21:40.764Z",
+  "id": "01a0f8a7-6338-7357-b6db-cbb8ad5d1ac1",
+  "status": "Current/Completed",
+  "sourceSha": "71be353bec8ceca79e1120b614a83869c199fb97",
+  "zipSha256": "e4e19cc77e6d0e0fca862bd02d5c0099d6283dafe3ad5526d6c689b409537828",
+  "baselineKeys": 25,
+  "baselineExact": true,
+  "live": false,
+  "recording": false,
+  "poc": false
+}

@@ -1,0 +1,12 @@
+✔ Exact classification and distinct source occurrence identities (9.4419ms)
+✔ All original and display relationships retain hashes and source order (16.9206ms)
+✔ Q71 retains empty prompt and source alt text; review records retain original keys (0.7791ms)
+✔ Repeated payload generation is identical and all native tables retained (20.5097ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 179.4972

@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-03T08:13:20.991Z",
+  "bucket": "als-live-poc-recordings",
+  "object": "credential-verification/2026-10-03/74fa2249-bafb-4a2a-81e4-995ef022a73f.bin",
+  "bytes": 1024,
+  "writeStatus": 200,
+  "headStatus": 200,
+  "readbackMatches": true,
+  "deleteStatus": 204,
+  "postDeleteAbsent": true,
+  "unrelatedObjectsReadOrAltered": false,
+  "conservativeGuardUtc": "2026-10-08T00:00:00Z",
+  "oldTokenRetained": true,
+  "consumersChanged": false
+}

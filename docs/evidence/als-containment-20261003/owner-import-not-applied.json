@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-03T08:51:44.716Z",
+  "deploymentId": "01a100f1-6997-71b9-915d-5878ae3035b6",
+  "status": "Current/Completed",
+  "savedSettings25": true,
+  "replacementSettingsNotApplied": [
+    "ALS_STAGING_ACCESS_PHRASE",
+    "ALS_STAGING_CLEANUP_TOKEN",
+    "ALS_STAGING_COOKIE_SECRET",
+    "CF_REALTIME_APP_ID",
+    "CF_REALTIME_APP_SECRET",
+    "CF_TURN_KEY_API_TOKEN",
+    "CF_TURN_KEY_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY"
+  ],
+  "mediaDisabled": true,
+  "oldResourcesRetained": true,
+  "vaultUnchanged": true
+}

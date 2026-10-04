@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-03T07:13:01.531Z",
+  "project": "slghshcdaijbcjfoqerq",
+  "oldKey": {
+    "id": "87d6c502-407c-4071-835d-5bed4e1fb811",
+    "name": "als_hostinger_staging_containment_2026_10_01",
+    "type": "secret"
+  },
+  "newKey": {
+    "id": "912b2fdd-e98b-46ed-afe3-e2c1c22a60db",
+    "name": "als_hostinger_staging_containment_2026_10_03",
+    "type": "secret"
+  },
+  "replacementAuthAdminReadStatus": 200,
+  "oldKeyRetained": true,
+  "newGateAndCleanupPrepared": true,
+  "liveEnabled": false
+}

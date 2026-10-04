@@ -1,0 +1,17 @@
+{
+  "sourceSha": "3032ed0527ce801a1a675fd331be37bc2a35f002",
+  "zipSha256": "454997b2a6ab9aa723cdbc11347d04da60de47f158ad32eddf0dcb73c2dd0bf2",
+  "zipBytes": 1314474,
+  "sourceBaseline": "71be353bec8ceca79e1120b614a83869c199fb97",
+  "changedExistingFiles": [
+    "package.json",
+    "package-lock.json",
+    "src/components/live/native-classroom.tsx"
+  ],
+  "addedFiles": [
+    "src/components/live/native-classroom.test.tsx",
+    "src/lib/live-class/session-status.ts"
+  ],
+  "migration": "20261003053129_live_session_status_realtime",
+  "credentialsIncluded": false
+}

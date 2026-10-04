@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T10:27:06.992Z",
+  "appId": "9a19a0fbdcf8759c89dd6deba41c5f1f",
+  "turnKeyId": "4a9c6350cb91389b4fb912a16b316b3e",
+  "sessions": [
+    {
+      "id": "45798d1fa6a7f6d18f99f000583d5be0f985f7eea7405e621bc42d912e900a39",
+      "status": 410,
+      "errorCode": "session_error",
+      "tracks": null
+    },
+    {
+      "id": "1480e5ab98505c77637cbf7b7e277618e49c487e1493ad97057bce329ff3b378",
+      "status": 410,
+      "errorCode": "session_error",
+      "tracks": null
+    }
+  ]
+}

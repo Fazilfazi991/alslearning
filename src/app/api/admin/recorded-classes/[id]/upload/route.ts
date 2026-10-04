@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSameOriginRequest } from "@/lib/request-origin";
 import { createClient } from "@/lib/supabase/server";
 import { abortRecordedClassUpload, beginRecordedClassUpload, completeRecordedClassUpload, signRecordedClassUploadPart } from "@/lib/recorded-classes-r2";
 
@@ -6,7 +7,7 @@ type Body = { action?: "begin" | "sign" | "complete" | "abort"; fileName?: strin
 const invalid = () => NextResponse.json({ error: "Invalid upload request" }, { status: 400 });
 
 export async function POST(request: Request, context: RouteContext<"/api/admin/recorded-classes/[id]/upload">) {
-  if (request.headers.get("origin") && request.headers.get("origin") !== new URL(request.url).origin) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
   const { id } = await context.params;
   const db = await createClient();
   const { data: auth } = await db.auth.getUser();

@@ -1,0 +1,8 @@
+
+ RUN  v5.0.0 C:/Users/USER/Desktop/Projects/ALS Learning Platform/als-staging-integration
+
+
+ Test Files  2 passed (2)
+      Tests  32 passed (32)
+   Start at  09:38:48
+   Duration  692ms (transform 42%, import 34%, tests 23%, worker 1%)

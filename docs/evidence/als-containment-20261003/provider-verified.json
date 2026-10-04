@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-03T07:47:50.954Z",
+  "sfuAppId": "9a19a0fbdcf8759c89dd6deba41c5f1f",
+  "sfuCreateStatus": 201,
+  "sfuInspectStatus": 200,
+  "verificationSessionId": "722a6610403d7577f4fe14bf9bcd41dd891ec6649fee8d77b6a449645415cea1",
+  "verificationTracks": 0,
+  "turnKeyId": "4a9c6350cb91389b4fb912a16b316b3e",
+  "turnGenerationStatus": 201,
+  "turnTtlSeconds": 60,
+  "oldResourcesRetained": true,
+  "applicationConsumersChanged": false
+}

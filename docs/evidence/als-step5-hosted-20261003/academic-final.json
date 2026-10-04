@@ -1,0 +1,66 @@
+{
+  "project": "slghshcdaijbcjfoqerq",
+  "checked_at": "2026-10-03T10:28:57.103Z",
+  "results": [
+    "Student1 has independently eligible demo program rows",
+    "Student1 original enrollment ID preserved",
+    "Student1 sees five published materials, no draft",
+    "Student1 raw question rows hidden",
+    "Student1 answer keys hidden",
+    "Student2 has independently eligible demo program rows",
+    "Student2 original enrollment ID preserved",
+    "Student2 sees five published materials, no draft",
+    "Student2 raw question rows hidden",
+    "Student2 answer keys hidden",
+    "Three canonical demo subject mappings",
+    "Teacher sees eighteen scoped questions including drafts",
+    "Teacher sees six materials including one draft",
+    "Teacher sees five canonical assessments",
+    "Synthetic demo result submitted and server graded",
+    "Student catalogue respects current dates, draft visibility and submitted history",
+    "Expired cannot join demo class",
+    "Expired cannot read demo materials",
+    "Unenrolled cannot join demo class",
+    "Unenrolled cannot read demo materials",
+    "Unassigned Teacher sees no demo question rows"
+  ],
+  "counts": {
+    "programs": 2,
+    "subjects": 3,
+    "materials": 6,
+    "published_materials": 5,
+    "questions": 18,
+    "active_questions": 15,
+    "draft_questions": 3,
+    "tests": 5,
+    "new_classes": 3,
+    "watch_seconds": 44.013000000000005
+  },
+  "demo_result": {
+    "attempt_id": "36339b58-64e7-40cc-8f12-8ebc76bf6ba1",
+    "score": 6,
+    "total_marks": 6
+  },
+  "catalog": [
+    {
+      "id": "f0a05b5b-757a-56db-a1b1-16c33861b3dc",
+      "title": "Synthetic Demo Practice",
+      "state": "available"
+    },
+    {
+      "id": "7ffcdf99-a3c4-5eaf-ae9c-6af46fe4516d",
+      "title": "Synthetic Demo Graded Result",
+      "state": "available"
+    },
+    {
+      "id": "1468c2bf-abb4-5b8c-a3f0-dceb8d522b7d",
+      "title": "Synthetic Upcoming Assessment",
+      "state": "available"
+    },
+    {
+      "id": "20d67a5c-e8fd-5155-afaf-2e00912c98c5",
+      "title": "Synthetic Closed Assessment",
+      "state": "closed"
+    }
+  ]
+}

@@ -1,16 +1,16 @@
 # ALS live-class bandwidth POC
 
-Date: 5 September 2026
+Date: 24 September 2026
 
 ## R2 recording upload boundary
 
-The server-only contract in `src/lib/live-class/recording-storage.ts` models multipart start, short-lived signed part URLs, per-part ETags/checksums, completion, and abort. Clients retry individual chunks and persist only upload id, object key, part number, ETag, byte length, and checksum; R2 credentials never cross the server boundary.
+The server-only adapter in `src/lib/live-class/recording-storage.ts` implements multipart start, short-lived signed part URLs, provider reconciliation, exact ETag/size validation, completion, object `HEAD`, abort, and signed playback. The browser assembles fixed 8 MiB non-final parts from irregular MediaRecorder events and stores ordered source chunks in IndexedDB. R2 credentials and upload IDs never become browser-selected authority.
 
-Objects use `recordings/YYYY/MM/{sessionId}/{recordingId}/teacher-composite.webm` and remain private. Playback/download must use an authorized short-lived signed URL. Required server variables are `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET`. No upload success can be tested or claimed until all are supplied.
+Objects use `recordings/YYYY/MM/{sessionId}/{recordingId}/{segmentId}/teacher-composite.{webm|mp4}` and remain private. Playback uses a 15-minute signed bearer URL after a fresh ALS eligibility/publication check. The URL is not DRM and remains usable until expiry. Required server variables are `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET`. Provider success is not claimed until a real upload and seek test passes.
 
 ## Measurement status
 
-No Cloudflare Realtime App credentials or R2 credentials are configured, so no SFU traffic has been generated and there are **no measured bitrate values yet**. Zeroes shown in the contained POC are explicitly not measurements. Monthly totals are therefore intentionally not fabricated.
+The code samples WebRTC RTP payload byte counters every two seconds and persists a low-frequency summary approximately every 30 seconds. No real Teacher-plus-five-receiver Cloudflare run was performed in this implementation session, so there are **no measured provider bitrate, TURN, or invoice values yet**. An empty usage table is “provider usage unavailable,” not evidence of zero usage.
 
 ## Required measurement method
 
@@ -30,6 +30,8 @@ Let `R` be measured average downstream megabits/second received by one student f
 | B: 30 students, 40 hours/month | `R × 540` | Pending POC |
 | C: 50 students, 40 hours/month | `R × 900` | Pending POC |
 
+The current ALS planning reference adds 20% headroom: `0.45 × 1 Mbps × 50 × 40 × 1.20 = 1,080 GB`. With the dated, configurable assumptions of a shared 1,000 GB allowance and `$0.05/GB`, estimated SFU overage is `$4.00`. A 240-hour, 1 Mbps recording library is `108 GB`; after an entered 10 GB R2 allowance at `$0.015/GB-month`, the storage estimate is `$1.47`. Combined: `$5.47/month` for only these two modeled meters. This is neither a subscription quote nor an invoice.
+
 The multipliers above convert Mbps into GB using the stated formula. Teacher ingress is not included because Cloudflare currently bills SFU traffic originating at the edge toward clients. Any return student-audio egress must be added using its measured duration and receiver count. Compare the final total with Cloudflare's current 1,000 GB monthly free tier and $0.05/GB overage; recheck pricing before a production decision.
 
-Source: [Cloudflare Realtime pricing](https://developers.cloudflare.com/realtime/sfu/pricing/).
+Sources checked 24 September 2026: [Cloudflare Realtime pricing](https://developers.cloudflare.com/realtime/sfu/platform/pricing/) and [R2 pricing](https://developers.cloudflare.com/r2/pricing/). Recheck both before enablement.

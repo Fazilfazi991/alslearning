@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-03T10:02:42.937Z",
+  "accountId": "c595e85a425e3e575b97d71c994f2e69",
+  "ownerActionTimeConfirmation": true,
+  "oldSfuDeleted": true,
+  "oldSfuId": "6306f9d5f836a1aa08b0d6bbde22f10b",
+  "oldSfuAbsentObservedAt": "2026-10-03T09:59:42.722Z",
+  "oldTurnDeleted": true,
+  "oldTurnId": "19951d8aa17f40210ffc756ba8c1ba3a",
+  "oldTurnAbsentObservedAt": "2026-10-03T09:58:51.932Z",
+  "oldR2TokenDeleted": true,
+  "oldR2TokenName": "ALS Isolated Staging R2 Replacement 2026-10-01",
+  "oldR2AbsentObservedAt": "2026-10-03T10:02:16.824Z",
+  "replacementsPresent": true,
+  "unrelatedR2TokensRetained": true
+}

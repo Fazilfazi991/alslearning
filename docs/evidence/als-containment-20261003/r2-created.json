@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-03T08:10:35.270Z",
+  "name": "ALS Isolated Staging R2 Containment 2026-10-03",
+  "accountId": "c595e85a425e3e575b97d71c994f2e69",
+  "bucket": "als-live-poc-recordings",
+  "permission": "Object Read & Write",
+  "startDate": "2026-10-03",
+  "endDate": "2026-10-08",
+  "credentialStoredPrivately": true
+}

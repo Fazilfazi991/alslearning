@@ -1,0 +1,40 @@
+[
+  {
+    "catalog": {
+      "tables": [
+        "live_sessions",
+        "live_participants",
+        "live_questions",
+        "live_question_responses",
+        "live_messages",
+        "live_published_tracks"
+      ],
+      "policies": [
+        {
+          "cmd": "DELETE",
+          "name": "live_sessions_authorized_delete",
+          "qual": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)))",
+          "check": null
+        },
+        {
+          "cmd": "INSERT",
+          "name": "live_sessions_authorized_insert",
+          "qual": null,
+          "check": "(is_admin() OR ((faculty_id = ( SELECT auth.uid() AS uid)) AND teacher_has_assignment(NULL::uuid, program_id, subject_id, NULL::text)))"
+        },
+        {
+          "cmd": "UPDATE",
+          "name": "live_sessions_authorized_update",
+          "qual": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)))",
+          "check": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)))"
+        },
+        {
+          "cmd": "SELECT",
+          "name": "live_sessions_scoped_read",
+          "qual": "(is_admin() OR (faculty_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1\n   FROM enrollments e\n  WHERE ((e.batch_id = live_sessions.batch_id) AND (e.student_id = ( SELECT auth.uid() AS uid)) AND (e.status = 'active'::enrollment_status)))))",
+          "check": null
+        }
+      ]
+    }
+  }
+]

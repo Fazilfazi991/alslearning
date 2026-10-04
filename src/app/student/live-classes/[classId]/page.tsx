@@ -1,12 +1,19 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getStudentPortalData } from "@/lib/student-data";
-import { PageHeader } from "@/components/student/page-header";
+import { getClassroomData } from "@/lib/live-class/classroom-data";
+import { ClassroomScreen } from "@/components/live/classroom-screen";
+import { RecordingPlayback } from "@/components/live/recording-playback";
 
-export default async function Page({ params }: { params: Promise<{ classId: string }> }) {
+export default async function Page({ params, searchParams }: { params: Promise<{ classId: string }>; searchParams?: Promise<{ recording?: string }> }) {
   const { classId } = await params;
-  const data = await getStudentPortalData();
-  const session = data?.sessions.find(item => item.id === classId);
-  if (!session) notFound();
-  return <div className="mx-auto max-w-3xl"><PageHeader title={session.title} description={session.starts_at ? new Date(session.starts_at).toLocaleString() : "Schedule pending"}/><section className="card p-6"><p className="text-sm text-muted">Your class details will appear here when the classroom is available.</p><Link href="/student/live-classes" className="mt-5 inline-flex min-h-11 items-center rounded border px-4 text-sm font-bold">Back to live classes</Link></section></div>;
+  const { recording } = searchParams ? await searchParams : {};
+  const data = recording
+    ? await getClassroomData(classId, "classroom").catch(() => getClassroomData(classId, "poc").catch(() => null))
+    : await getClassroomData(classId, "classroom").catch(() => null);
+  if (!data) notFound();
+  if (recording) {
+    const published = data.recordings.find(value => value.id === recording && value.status === "published" && value.published_at);
+    if (!published) notFound();
+    return <RecordingPlayback classId={classId} recordingId={recording} title={data.session.title}/>;
+  }
+  return <ClassroomScreen data={data}/>;
 }

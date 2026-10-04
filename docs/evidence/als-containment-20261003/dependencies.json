@@ -1,0 +1,65 @@
+{
+  "at": "2026-10-03T07:03:56.075Z",
+  "project": "slghshcdaijbcjfoqerq",
+  "accountId": "c595e85a425e3e575b97d71c994f2e69",
+  "bucket": "als-live-poc-recordings",
+  "oldSfu": {
+    "id": "6306f9d5f836a1aa08b0d6bbde22f10b",
+    "name": "als-staging-sfu-containment-20261001"
+  },
+  "oldTurn": {
+    "id": "19951d8aa17f40210ffc756ba8c1ba3a",
+    "name": "als-staging-turn-containment-20261001"
+  },
+  "oldSupabaseKey": {
+    "id": "87d6c502-407c-4071-835d-5bed4e1fb811",
+    "name": "als_hostinger_staging_containment_2026_10_01",
+    "type": "secret"
+  },
+  "matchingLocalConsumers": [
+    {
+      "file": "ALS Learning Platform\\als-hostinger-staging\\.env.staging.local",
+      "labels": [
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ],
+      "stagingOnly": true,
+      "ignored": true
+    },
+    {
+      "file": "ALS Learning Platform\\als-hostinger-staging\\.env.hostinger.staging.local",
+      "labels": [
+        "ALS_STAGING_ACCESS_PHRASE",
+        "ALS_STAGING_COOKIE_SECRET"
+      ],
+      "stagingOnly": true,
+      "ignored": true
+    },
+    {
+      "file": "ALS Learning Platform\\als-hostinger-staging\\.env.hostinger.live.local",
+      "labels": [
+        "CF_REALTIME_APP_ID",
+        "CF_REALTIME_APP_SECRET",
+        "CF_TURN_KEY_ID",
+        "CF_TURN_KEY_API_TOKEN",
+        "R2_ACCESS_KEY_ID",
+        "R2_SECRET_ACCESS_KEY",
+        "ALS_STAGING_ACCESS_PHRASE",
+        "ALS_STAGING_COOKIE_SECRET"
+      ],
+      "stagingOnly": true,
+      "ignored": true
+    }
+  ],
+  "vaultConsumers": [
+    {
+      "name": "als_staging_cleanup_token",
+      "label": "ALS_STAGING_CLEANUP_TOKEN",
+      "id": "88731886-8d08-4999-ad18-6609fdca9721"
+    }
+  ],
+  "cronPaused": true,
+  "cronUsesVaultName": true,
+  "edgeFunctions": 0,
+  "productionSharedDependencyFound": false,
+  "uninspectedRemoteConsumers": "UNKNOWN"
+}

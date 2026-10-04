@@ -1,0 +1,77 @@
+{
+  "at": "2026-10-01T18:21:40.763Z",
+  "classId": "7385751c-3640-4db3-9a45-5348e682cffe",
+  "recordingId": "ea83d954-a4ef-45b6-b34c-8b80722f3b04",
+  "initial": {
+    "currentTime": 0,
+    "duration": 184.958,
+    "height": 720,
+    "muted": false,
+    "paused": true,
+    "readyState": 4,
+    "width": 1280
+  },
+  "playing": {
+    "currentTime": 21.384997,
+    "duration": 184.958,
+    "height": 720,
+    "muted": false,
+    "paused": false,
+    "readyState": 4,
+    "width": 1280
+  },
+  "middleTarget": 92.479,
+  "middleResume": {
+    "currentTime": 92.564873,
+    "duration": 184.958,
+    "height": 720,
+    "muted": false,
+    "paused": false,
+    "readyState": 4,
+    "width": 1280
+  },
+  "renewal": {
+    "at": "2026-10-01T18:19:17.484Z",
+    "newAuthorization": true,
+    "positionBefore": 108.674043,
+    "positionAfter": 121.333183,
+    "elapsedSeconds": 15.163,
+    "playingBefore": true,
+    "playingAfter": true,
+    "readyState": 4,
+    "duration": 184.958,
+    "width": 1280,
+    "height": 720
+  },
+  "nearEndTarget": {
+    "currentTime": 175.7101,
+    "duration": 184.958,
+    "height": 720,
+    "muted": false,
+    "paused": true,
+    "readyState": 1,
+    "width": 1280
+  },
+  "nearEndResume": {
+    "currentTime": 175.80948,
+    "duration": 184.958,
+    "height": 720,
+    "muted": false,
+    "paused": false,
+    "readyState": 4,
+    "width": 1280
+  },
+  "ended": {
+    "currentTime": 184.958,
+    "duration": 184.958,
+    "ended": true,
+    "height": 720,
+    "muted": false,
+    "paused": true,
+    "readyState": 4,
+    "width": 1280
+  },
+  "ownerRecordedAudioReviewConfirmed": true,
+  "expiredDiscoveryDenied": true,
+  "expiredDirectReplayPage": 404
+}

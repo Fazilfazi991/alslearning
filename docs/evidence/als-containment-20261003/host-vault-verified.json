@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-03T09:50:07.836Z",
+  "deploymentId": "01a10128-0437-733e-be6f-aa48ae9c8892",
+  "noCookieStatus": 307,
+  "oldCookieStatus": 307,
+  "oldPhraseStatus": 401,
+  "newPhraseStatus": 303,
+  "newLoginStatus": 200,
+  "newServerKeyStatus": 200,
+  "newCleanupStatus": 200,
+  "oldCleanupRejected": true,
+  "cleanupCandidates": 0,
+  "providerCalls": 0,
+  "mediaRowsChanged": 0,
+  "vaultEntryId": "88731886-8d08-4999-ad18-6609fdca9721",
+  "vaultReplacementVerified": true,
+  "cronPaused": true,
+  "cronMaxRunId": 72,
+  "globalZero": true,
+  "oldProviderResourcesRetained": true
+}

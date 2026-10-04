@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     ".local-qa/**",
     "Teachers ui/**",
     "admin ui/**",
+    // Generated from scripts/recording-hash.worker.entry.mjs.
+    "public/recording-hash.worker.js",
   ]),
 ]);
 

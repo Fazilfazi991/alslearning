@@ -1,0 +1,20 @@
+[
+  {
+    "role": "student",
+    "at": "2026-10-03T09:51:16.768Z",
+    "url": "https://darkgreen-camel-484366.hostingersite.com/student",
+    "normalLogin": true
+  },
+  {
+    "role": "teacher",
+    "at": "2026-10-03T09:51:30.456Z",
+    "url": "https://darkgreen-camel-484366.hostingersite.com/teacher",
+    "normalLogin": true
+  },
+  {
+    "role": "admin",
+    "at": "2026-10-03T09:54:37.743Z",
+    "url": "https://darkgreen-camel-484366.hostingersite.com/admin",
+    "normalLogin": true
+  }
+]

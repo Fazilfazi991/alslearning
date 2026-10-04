@@ -1,0 +1,12 @@
+
+ RUN  v5.0.0 C:/Users/USER/Desktop/Projects/ALS Learning Platform/als-staging-integration
+
+
+ Test Files  52 passed | 3 skipped (55)
+      Tests  327 passed | 13 skipped (340)
+   Start at  09:40:00
+   Duration  4.87s (import 45%, transform 37%, tests 15%, worker 3%)
+
+  Transform  transforming modules took 5.25s · 37% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns

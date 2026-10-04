@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T08:38:21.241Z",
+  "hostBaselineCount": 25,
+  "privateBaselineExact": true,
+  "replacementLabels": [
+    "CF_REALTIME_APP_ID",
+    "CF_REALTIME_APP_SECRET",
+    "CF_TURN_KEY_ID",
+    "CF_TURN_KEY_API_TOKEN",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "ALS_STAGING_ACCESS_PHRASE",
+    "ALS_STAGING_COOKIE_SECRET",
+    "ALS_STAGING_CLEANUP_TOKEN"
+  ],
+  "other15LabelsUnchanged": true,
+  "flagsDisabled": true,
+  "conservativeR2GuardUnchanged": true,
+  "oldResourcesRetained": true,
+  "hostUpdated": false,
+  "vaultUpdated": false,
+  "importFileIgnoredCheckPending": false,
+  "importFileIgnored": true,
+  "hostTabId": "2073612606",
+  "hostUrl": "https://hpanel.hostinger.com/websites/darkgreen-camel-484366.hostingersite.com/node/deployments/settings",
+  "needsOwnerCredentialEntry": true
+}

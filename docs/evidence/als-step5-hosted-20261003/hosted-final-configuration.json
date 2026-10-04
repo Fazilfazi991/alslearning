@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-03T10:32:15.787Z",
+  "deploymentId": "01a1014e-6b47-7206-8e9e-cae6604dc346",
+  "currentCompleted": true,
+  "completedObservedAt": "2026-10-03T10:32:09.778Z",
+  "all25PostContainmentValuesUnchanged": true,
+  "credentialsUnchanged": true,
+  "operationalBoundsRestored": true,
+  "liveDisabled": true,
+  "recordingDisabled": true,
+  "pocDisabled": true,
+  "productionUnchanged": true
+}

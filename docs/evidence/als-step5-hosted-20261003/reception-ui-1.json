@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-03T10:25:20.850Z",
+  "measurements": "MICROPHONE\n\nRX 66 · TX 0 kbps\n\nCAMERA\n\nRX 0 · TX 0 kbps\n\nSCREEN\n\nRX 0 · TX 0 kbps\n\nUNCLASSIFIED\n\nRX 0 · TX 0 kbps\n\nLOSS\n\n0\n\nRTT\n\n25 ms\n\nPATH\n\nprflx",
+  "audio": [
+    {
+      "currentTime": 93.560732,
+      "muted": false,
+      "paused": false,
+      "readyState": 4
+    }
+  ],
+  "studentReceiveOnly": true
+}

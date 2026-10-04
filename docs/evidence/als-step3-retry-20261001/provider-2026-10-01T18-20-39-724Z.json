@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-01T18:20:27.541Z",
+  "appId": "6306f9d5f836a1aa08b0d6bbde22f10b",
+  "sessions": [
+    {
+      "id": "355aeecdadfface27d0f854a88140063b5874c52335388d5360e9559326ce068",
+      "status": 410,
+      "errorCode": "session_error",
+      "tracks": null
+    },
+    {
+      "id": "dd3613c07e6b7fec75409c32c573bf0abd765949162a39f251cfa6b4c4e7aa96",
+      "status": 410,
+      "errorCode": "session_error",
+      "tracks": null
+    }
+  ]
+}

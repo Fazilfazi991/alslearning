@@ -1,4 +1,5 @@
 export type RecordStatus = "Draft" | "Active" | "Archived";
+export type BatchStatus = "Upcoming" | "Active" | "Completed" | "Archived";
 export type AcademicEntityKind = "program" | "exam" | "subject" | "chapter" | "topic" | "batch" | "video" | "material" | "question" | "test";
 
 export interface AcademicEntity {
@@ -7,7 +8,7 @@ export interface AcademicEntity {
   name: string;
   slug: string;
   parentId?: string;
-  status: RecordStatus;
+  status: RecordStatus | BatchStatus;
   order: number;
   description?: string;
   metadata?: Record<string, string | number | boolean | string[]>;

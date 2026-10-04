@@ -632,7 +632,8 @@ export function QuestionForm({
   save: (q: Question) => Promise<void>;
 }) {
   const [q, setQ] = useState(value),
-    [uploads, setUploads] = useState(0);
+    [uploads, setUploads] = useState(0),
+    [previewOpen, setPreviewOpen] = useState(false);
   const onBusy = (busy: boolean) => setUploads((n) => n + (busy ? 1 : -1));
   return (
     <form
@@ -829,6 +830,19 @@ export function QuestionForm({
         value={q.status}
         onChange={(v) => setQ({ ...q, status: v })}
       />
+      <button
+        type="button"
+        className="min-h-11 rounded-lg border border-line px-4 text-sm font-bold text-brand"
+        aria-expanded={previewOpen}
+        aria-controls="question-author-preview"
+        onClick={() => setPreviewOpen((open) => !open)}
+      >
+        {previewOpen ? "Close preview" : "Preview question"}
+      </button>
+      {previewOpen && <section id="question-author-preview" className="rounded-lg border border-line bg-surface p-3" aria-label="Question preview">
+        <p className="text-xs font-semibold text-muted">Author preview · answers and explanation are visible here only</p>
+        <QuestionPreview key={JSON.stringify(q)} question={q} />
+      </section>}
       <button disabled={busy || uploads > 0} className={`${button} w-full`}>
         {uploads ? "Uploading images…" : busy ? "Saving…" : "Save question"}
       </button>
