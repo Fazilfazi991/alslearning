@@ -10,7 +10,7 @@ import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
 import { terminalSessionStatus } from "@/lib/live-class/session-status";
 
 type Body = {
-  action?: "create" | "publish" | "subscribe" | "unsubscribe" | "renegotiate" | "close" | "heartbeat" | "leave" | "stats";
+  action?: "create" | "publish" | "ready" | "subscribe" | "unsubscribe" | "renegotiate" | "close" | "heartbeat" | "leave" | "stats";
   mode?: "poc" | "classroom";
   connectionId?: string;
   sessionDescription?: SdpDescription;
@@ -114,7 +114,7 @@ export async function GET(request: Request, context: RouteContext<"/api/live-cla
     }
     await authorizeLiveClass(db, auth.user.id, classId, "connect");
     const { data, error } = await db.from("live_published_tracks")
-      .select("id,owner_id,kind,created_at").eq("session_id", classId).eq("status", "active").order("created_at");
+      .select("id,owner_id,kind,created_at").eq("session_id", classId).eq("status", "active").eq("discovery_ready", true).order("created_at");
     if (error) throw error;
     return NextResponse.json({ tracks: data || [] }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
@@ -134,7 +134,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
   let body: Body;
   try { body = await request.json() as Body; } catch { return jsonError("Invalid JSON request", 400); }
   if (!body.action || !body.mode) return jsonError("Invalid media operation", 400);
-  if (["create", "publish", "subscribe"].includes(body.action) && !stagingTestWindowOpen()) return jsonError("Staging test window is closed", 403);
+  if (["create", "publish", "ready", "subscribe"].includes(body.action) && !stagingTestWindowOpen()) return jsonError("Staging test window is closed", 403);
 
   try {
     const configuration = assertLiveFeature(body.mode);
@@ -228,7 +228,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       const response = await cloudflareRealtime.publishTracks(publicationSessionId, body.sessionDescription, publications.map(value => ({ mid: value.mid, trackName: value.trackName })));
       const { error } = await db.from("live_published_tracks").insert(publications.map(value => ({
         id: value.id, session_id: classId, connection_id: connection.id, owner_id: auth.user.id, kind: value.kind,
-        provider_track_name: value.trackName, provider_mid: value.mid,
+        provider_track_name: value.trackName, provider_mid: value.mid, discovery_ready: false,
       })));
       if (error) {
         await cloudflareRealtime.closeTracks(publicationSessionId, publications.map(value => value.mid)).catch(() => undefined);
@@ -237,12 +237,30 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       return NextResponse.json({ sessionDescription: response.sessionDescription, tracks: publications.map(value => ({ id: value.id, kind: value.kind, mid: value.mid })) });
     }
 
+    if (body.action === "ready") {
+      const ids = [...new Set(body.trackIds || [])];
+      if (!ids.length || ids.length > 3 || ids.some(id => !uuid.test(id))) return jsonError("Invalid publication readiness", 400);
+      const { data, error } = await db.from("live_published_tracks").select("id,kind")
+        .eq("session_id", classId).eq("connection_id", connection.id).eq("owner_id", auth.user.id).eq("status", "active").in("id", ids);
+      if (error) throw error;
+      if (!data || data.length !== ids.length) throw new LiveAuthorizationError("Owned publications are unavailable");
+      const { data: participant } = await db.from("live_participants")
+        .select("audio_publish_allowed,presenter,screen_publish_allowed").eq("session_id", classId).eq("user_id", auth.user.id).maybeSingle();
+      if (data.some(track => !mayPublish(authorization, participant, track.kind as PublishedTrackKind))) {
+        throw new LiveAuthorizationError("Publishing is no longer granted");
+      }
+      const { error: readyError } = await db.from("live_published_tracks").update({ discovery_ready: true })
+        .eq("session_id", classId).eq("connection_id", connection.id).eq("owner_id", auth.user.id).eq("status", "active").in("id", ids);
+      if (readyError) throw readyError;
+      return NextResponse.json({ ready: ids });
+    }
+
     if (body.action === "subscribe") {
       const ids = [...new Set(body.trackIds || [])];
       if (!ids.length || ids.length > 64 || ids.some(id => !uuid.test(id))) return jsonError("Invalid track selection", 400);
       const { data } = await db.from("live_published_tracks")
         .select("id,session_id,owner_id,connection_id,kind,provider_track_name,provider_mid,status,live_media_connections!inner(provider_session_id,publisher_provider_session_id)")
-        .eq("session_id", classId).eq("status", "active").in("id", ids);
+        .eq("session_id", classId).eq("status", "active").eq("discovery_ready", true).in("id", ids);
       const tracks = (data || []) as unknown as Track[];
       if (tracks.length !== ids.length) throw new LiveAuthorizationError("A selected publication is unavailable");
       let receivingSessionId = connection.provider_session_id;
