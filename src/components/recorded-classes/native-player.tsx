@@ -22,6 +22,7 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const savingProgress = useRef(false);
+  const pendingProgress = useRef(false), lastSaveAttempt = useRef(0);
   const [progressError, setProgressError] = useState("");
   const interactions = useMemo(() => payload?.interactions ?? [], [payload]);
 
@@ -51,7 +52,9 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
   async function saveProgress(force = false) {
     const element = video.current; if (!element || !Number.isFinite(element.duration) || element.duration <= 0) return;
     if (!force && Math.abs(element.currentTime - lastSaved.current) < 15) return;
-    if (savingProgress.current) return;
+    if (savingProgress.current) { if (force) pendingProgress.current = true; return; }
+    if (!force && Date.now() - lastSaveAttempt.current < 5000) return;
+    lastSaveAttempt.current = Date.now();
     savingProgress.current = true; setSaving(true);
     const position = element.currentTime;
     try {
@@ -60,7 +63,10 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
       lastSaved.current = position; setProgressError("");
       setPayload(current => current ? { ...current, progress: result.data } : current);
     } catch { setProgressError("Your playback progress could not be saved. Please retry."); }
-    finally { savingProgress.current = false; setSaving(false); }
+    finally {
+      savingProgress.current = false; setSaving(false);
+      if (pendingProgress.current) { pendingProgress.current = false; void saveProgress(true); }
+    }
   }
   function checkCrossing(current: number, requiredOnly = false) {
     const item = nextUnansweredInteraction(interactions, answered, previousTime.current, current, requiredOnly);
