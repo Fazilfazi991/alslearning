@@ -117,7 +117,7 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
     {message && <p className="mt-5 rounded-xl border border-line bg-white p-4 text-sm" role="status">{message}</p>}
 
     <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
-      <form onSubmit={schedule} className="card grid gap-4 p-5 sm:grid-cols-2"><div className="sm:col-span-2"><h2 className="flex items-center gap-2 text-lg font-bold"><CalendarPlus className="text-brand" size={20}/>Schedule a class</h2><p className="mt-1 text-sm text-muted">Times are entered in {timeZone} and stored in UTC.</p></div>
+      <form onSubmit={schedule} className="card grid gap-x-5 gap-y-5 p-5 sm:grid-cols-2 sm:p-6"><div className="sm:col-span-2"><h2 className="flex items-center gap-2 text-lg font-bold"><CalendarPlus className="text-brand" size={20}/>Schedule a class</h2><p className="mt-2 text-sm text-muted">Times use {timeZone}. All fields are required except Expected receivers and Teacher recording.</p></div>
         <Field label="Class title"><input required name="title" maxLength={180} className="control"/></Field>
         <Field label="Program"><select required name="programId" value={programId} onChange={event => setProgramId(event.target.value)} className="control"><option value="">Select program</option>{programs.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
         <Field label="Subject"><select required name="subjectId" className="control"><option value="">Select subject</option>{subjects.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
@@ -143,5 +143,5 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
   </div>;
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="text-sm font-bold">{label}{children}</label>; }
+function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="block min-w-0 text-sm font-semibold">{label}{children}</label>; }
 function EstimateField({ label, value, set, step = "1" }: { label: string; value: number; set: (value: number) => void; step?: string }) { return <label className="text-xs font-bold text-muted">{label}<input type="number" min="0" step={step} value={value} onChange={event => set(Number(event.target.value) || 0)} className="mt-1 min-h-10 w-full rounded-lg border border-line px-2 text-sm text-ink"/></label>; }

@@ -36,7 +36,7 @@ export function NativeRecordedClassPlayer({ recordingId, title }: { recordingId:
       const value = await response.json() as Payload;
       setPayload(value); setAnswered(new Set(value.responses.map(item => item.interaction_id)));
       previousTime.current = Number(value.progress?.last_position_seconds ?? 0);
-    } catch { setError("This recording could not be authorized or loaded. Please retry."); }
+    } catch { setError("This class could not be authorized or loaded. Please retry."); }
     finally { setLoading(false); }
   }, [recordingId]);
 

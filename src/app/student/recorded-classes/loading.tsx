@@ -1,1 +1,1 @@
-export default function Loading() { return <p role="status" className="p-6 text-sm text-muted">Loading recorded classes…</p>; }
+export default function Loading() { return <p role="status" className="p-6 text-sm text-muted">Loading classes…</p>; }

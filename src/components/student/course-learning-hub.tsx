@@ -28,7 +28,7 @@ export function CourseLearningHub({ data, basePath }: { data: NonNullable<Awaite
             event.preventDefault();
             window.history.replaceState(null, "", `${basePath}?subject=${s.id}`);
           }} aria-current={selected?.id === s.id ? "page" : undefined} className={`flex min-h-11 shrink-0 flex-col justify-center rounded-xl border px-3 py-2 text-sm font-semibold ${selected?.id === s.id ? "border-brand bg-brand text-white" : "border-line bg-white text-ink hover:border-brand"}`}>
-            {s.name}<span className={`mt-0.5 text-xs font-normal ${selected?.id === s.id ? "text-white" : "text-muted"}`}>{count} {count === 1 ? "recording" : "recordings"}</span>
+            {s.name}<span className={`mt-0.5 text-xs font-normal ${selected?.id === s.id ? "text-white" : "text-muted"}`}>{count} {count === 1 ? "class" : "classes"}</span>
           </a>;
         })}
       </nav>
@@ -38,11 +38,11 @@ export function CourseLearningHub({ data, basePath }: { data: NonNullable<Awaite
       <div><h2 id="course-content" className="text-lg font-bold">Learning content</h2><p className="mt-1 text-sm text-muted">{selected.name}</p></div>
       {!courseHasContent(recordings, resources) ? <p role="status" className="rounded-xl border border-line bg-white p-5 text-sm text-muted">No learning content is available for this subject yet.</p> : <>
         <section aria-labelledby="course-recordings">
-          <div className="mb-2 flex items-center justify-between gap-3"><h3 id="course-recordings" className="font-bold">Recorded Classes</h3><span className="text-xs text-muted">{recordings.length} {recordings.length === 1 ? "video" : "videos"}</span></div>
+          <div className="mb-2 flex items-center justify-between gap-3"><h3 id="course-recordings" className="font-bold">Classes</h3><span className="text-xs text-muted">{recordings.length} {recordings.length === 1 ? "class" : "classes"}</span></div>
           {recordings.length ? <div className="divide-y divide-line rounded-xl border border-line bg-white px-3 sm:px-4">{recordings.map(r => <Link key={r.id} href={recordingHref(r.id)} prefetch={false} className="flex min-w-0 items-center gap-3 py-4">
             {r.provider_video_id ? <RecordingThumbnail videoId={r.provider_video_id}/> : <PlayCircle aria-hidden="true" className="shrink-0 text-brand"/>}
-            <div className="min-w-0 flex-1"><p className="text-xs text-muted">{r.topic_label || r.chapters?.name}</p>{r.subtopic && <p className="mt-1 text-xs font-semibold text-brand">{r.subtopic}</p>}<h4 className="mt-1 break-words text-sm font-bold">{r.title}</h4><p className="mt-1 text-xs font-semibold text-brand">Play recording{r.duration_seconds ? ` · ${Math.ceil(r.duration_seconds / 60)} min` : ""}</p></div>
-          </Link>)}</div> : <p className="text-sm text-muted">No recorded classes for this subject yet.</p>}
+            <div className="min-w-0 flex-1"><p className="text-xs text-muted">{r.topic_label || r.chapters?.name}</p>{r.subtopic && <p className="mt-1 text-xs font-semibold text-brand">{r.subtopic}</p>}<h4 className="mt-1 break-words text-sm font-bold">{r.title}</h4><p className="mt-1 text-xs font-semibold text-brand">Watch class{r.duration_seconds ? ` · ${Math.ceil(r.duration_seconds / 60)} min` : ""}</p></div>
+          </Link>)}</div> : <p className="text-sm text-muted">No classes for this subject yet.</p>}
         </section>
         <section aria-labelledby="course-resources"><div className="mb-2 flex items-center justify-between gap-3"><h3 id="course-resources" className="font-bold">Study Materials</h3><span className="text-xs text-muted">{resources.length} items</span></div>
           {resources.length ? <div className="divide-y divide-line rounded-xl border border-line bg-white px-3">{resources.map(r => <Link key={r.id} href={`/student/learn/${r.slug}`} prefetch={false} className="flex min-h-14 items-center gap-3 py-3 text-sm font-semibold"><FileText size={20} aria-hidden="true" className="shrink-0 text-brand"/><span className="break-words">{r.title}</span></Link>)}</div> : <p className="text-sm text-muted">No study materials for this subject yet.</p>}

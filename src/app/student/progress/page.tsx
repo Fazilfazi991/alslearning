@@ -36,14 +36,14 @@ export default async function Page() {
   const submitted = data.attempts.filter(item => item.status !== "in_progress");
   const average = submitted.length ? submitted.reduce((sum, item) => sum + Number(item.score || 0), 0) / submitted.length : null;
   return <div className="mx-auto max-w-[1220px]">
-    <PageHeader title="Progress" description="Published lessons and recordings available through your active enrollments." />
+    <PageHeader title="Progress" description="Published lessons and classes available through your active enrollments." />
     <section className="card p-6"><div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
       <Metric icon={BookOpen} value={String(programIds.length)} label="Enrolled programs" />
       <Metric icon={BookCheck} value={String(summary.completed)} label="Content completed" />
       <Metric icon={Target} value={String(submitted.length)} label="Tests attempted" />
       <Metric icon={Clock3} value={`${Math.floor(summary.seconds / 3600)}h ${Math.floor(summary.seconds % 3600 / 60)}m`} label="Tracked playback" />
     </div>{average !== null && <p className="mt-5 text-sm text-muted">Average recorded test score: <b>{average.toFixed(1)}</b></p>}</section>
-    <section className="card mt-6 p-6"><h2 className="text-lg font-bold">Program progress</h2><p className="mt-1 text-xs text-muted">Includes published learning resources and recorded classes.</p><div className="mt-6 space-y-6">
+    <section className="card mt-6 p-6"><h2 className="text-lg font-bold">Program progress</h2><p className="mt-1 text-xs text-muted">Includes published learning resources and classes.</p><div className="mt-6 space-y-6">
       {programIds.map(id => { const enrollment = data.enrollments.find(item => item.program_id === id)!;
         const program = Array.isArray(enrollment.programs) ? enrollment.programs[0] : enrollment.programs;
         const progress = programLearning(items, id);
