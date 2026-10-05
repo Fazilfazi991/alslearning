@@ -3,6 +3,8 @@ import { ArrowRight, BookOpen, CalendarDays, Clock3, Play, Target, Trophy } from
 import { getStudentPortalData } from "@/lib/student-data";
 import { formatAcademicDate } from "@/lib/live-class/date";
 import { formatWatchTime, one, summarizeStudentTests, summarizeWatchEvents } from "@/lib/student-dashboard";
+import { TestAction } from "@/components/student/test-action";
+import { Button } from "@/components/ui/button";
 
 export default async function Dashboard() {
   const data = await getStudentPortalData();
@@ -39,7 +41,7 @@ export default async function Dashboard() {
         <Stat icon={Target} value={String(tests.pending.length)} label="Tests to take" detail={tests.resume.length ? `${tests.resume.length} to resume` : undefined} />
         <Stat icon={Trophy} value={tests.percentage === null ? "No results yet" : `${tests.earned} / ${tests.possible}`} label="Visible marks earned / possible" detail={tests.percentage === null ? undefined : `${Math.round(tests.percentage)}%`} />
       </div>
-      <p className="mt-2 text-xs text-muted">Watch time covers native ALS lessons and recorded classes; it excludes YouTube and live connection time.</p>
+      <p className="mt-2 text-xs text-muted">Watch time covers native ALS lessons and classes; it excludes YouTube and live connection time.</p>
     </section>
     <section className="brand-gradient rounded-2xl p-5 text-white sm:p-7" aria-labelledby="next-learning-title">
       <p className="text-xs font-bold uppercase tracking-widest text-white/80">Your next step</p>
@@ -71,11 +73,11 @@ export default async function Dashboard() {
       </Section>
       <Section title="Tests to take" href="/student/exams" action="View all tests">
         {tests.resume.length || tests.pending.length ? <div className="space-y-3">
-          {[...tests.resume.map(test => ({ ...test, action: "Resume" })), ...tests.pending.map(test => ({ ...test, action: "Start" }))].slice(0, 4).map(test => <Link key={test.id} href={`/student/exams/${test.slug}`} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-line p-4 transition-colors hover:bg-surface"><span className="font-semibold">{test.title}</span><span className="shrink-0 text-xs font-bold text-brand">{test.action} <ArrowRight size={14} className="inline" aria-hidden="true" /></span></Link>)}
+          {[...tests.resume.map(test => ({ ...test, action: "Resume" })), ...tests.pending.map(test => ({ ...test, action: "Start" }))].slice(0, 4).map(test => <article key={test.id} className="flex min-w-0 items-center justify-between gap-4 rounded-xl border border-line p-4"><h3 className="min-w-0 break-words text-sm font-semibold">{test.title}</h3><TestAction href={`/student/exams/${test.slug}`} primary={test.action === "Start"}>{test.action}</TestAction></article>)}
         </div> : <Empty text="No tests are currently ready to take or resume." />}
       </Section>
       <Section title="Recent results" href="/student/exams" action="View results">
-        {tests.recent.length ? <div className="space-y-3">{tests.recent.map(result => <div key={result.id} className="flex items-center justify-between gap-3 rounded-xl border border-line p-4"><div><h3 className="font-semibold">{result.test_title || "Test"}</h3><p className="mt-1 text-xs text-muted">{formatAcademicDate(result.submitted_at)}</p></div><strong className="shrink-0 text-sm text-brand">{result.score} / {result.total_marks}</strong></div>)}</div> : <Empty text="No score-visible test results are available yet." />}
+        {tests.recent.length ? <div className="space-y-3">{tests.recent.map(result => <div key={result.id} className="flex min-w-0 items-center justify-between gap-4 rounded-xl border border-line p-4"><div className="min-w-0"><h3 className="break-words text-sm font-semibold">{result.test_title || "Test"}</h3><p className="mt-1 text-xs text-muted">{formatAcademicDate(result.submitted_at)}</p></div><strong className="shrink-0 text-sm text-brand">{result.score} / {result.total_marks}</strong></div>)}</div> : <Empty text="No score-visible test results are available yet." />}
       </Section>
     </div>
     {watch && watch.weeklyIntervals > 0 && <section className="card p-5 sm:p-6" aria-label="Weekly activity">
@@ -90,7 +92,7 @@ function Stat({ icon: Icon, value, label, detail }: { icon: typeof BookOpen; val
 }
 
 function Section({ title, href, action, children }: { title: string; href: string; action: string; children: React.ReactNode }) {
-  return <section className="card p-5 sm:p-6"><div className="mb-4 flex items-start justify-between gap-3"><h2 className="text-lg font-bold">{title}</h2><Link href={href} className="shrink-0 text-xs font-bold text-brand hover:underline">{action}</Link></div>{children}</section>;
+  return <section className="card p-5 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 className="min-w-0 text-lg font-bold">{title}</h2><Button href={href} variant="ghost" className="px-3! text-brand!">{action}<ArrowRight size={15} aria-hidden="true" /></Button></div>{children}</section>;
 }
 
 function Empty({ text }: { text: string }) { return <p className="py-4 text-sm text-muted">{text}</p>; }

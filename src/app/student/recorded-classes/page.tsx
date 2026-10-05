@@ -7,9 +7,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
   const { recordings, subjects, topics, teachers } = await studentRecordings();
   const visible = subject ? recordings.filter(r => r.subject_id === subject) : recordings;
   return <div className="mx-auto max-w-5xl space-y-5">
-    <div><Link href="/student/courses" className="text-sm font-semibold text-brand">← My Courses</Link><h1 className="mt-3 text-2xl font-bold">Recorded Classes</h1><p className="mt-1 text-sm text-muted">Revisit your lessons, organized by subject and topic.</p></div>
-    {subjects.length > 0 && <nav aria-label="Recording subjects" className="flex flex-wrap gap-2"><Link href="/student/recorded-classes" aria-current={!subject ? "page" : undefined} className={`rounded-lg border px-4 py-3 text-sm ${!subject ? "bg-brand text-white" : "bg-white"}`}>All subjects</Link>{subjects.map(s => <Link key={s.id} href={`?subject=${s.id}`} aria-current={subject === s.id ? "page" : undefined} className={`rounded-lg border px-4 py-3 text-sm ${subject === s.id ? "bg-brand text-white" : "bg-white"}`}>{s.name}</Link>)}</nav>}
-    {!visible.length && <div className="card p-6 text-sm text-muted">No recorded classes are available yet.</div>}
+    <div><Link href="/student/courses" className="text-sm font-semibold text-brand">← My Courses</Link><h1 className="mt-3 text-2xl font-bold">Classes</h1><p className="mt-1 text-sm text-muted">Revisit your lessons, organized by subject and topic.</p></div>
+    {subjects.length > 0 && <nav aria-label="Class subjects" className="flex flex-wrap gap-2"><Link href="/student/recorded-classes" aria-current={!subject ? "page" : undefined} className={`rounded-lg border px-4 py-3 text-sm ${!subject ? "bg-brand text-white" : "bg-white"}`}>All subjects</Link>{subjects.map(s => <Link key={s.id} href={`?subject=${s.id}`} aria-current={subject === s.id ? "page" : undefined} className={`rounded-lg border px-4 py-3 text-sm ${subject === s.id ? "bg-brand text-white" : "bg-white"}`}>{s.name}</Link>)}</nav>}
+    {!visible.length && <div className="card p-6 text-sm text-muted">No classes are available yet.</div>}
     {subjects.filter(s => visible.some(r => r.subject_id === s.id)).map(s => <section key={s.id} className="space-y-4"><h2 className="text-lg font-bold">{s.name}</h2>{topics.filter(t => visible.some(r => r.chapter_id === t.id && r.subject_id === s.id)).map(t => {
       const rows = visible.filter(r => r.chapter_id === t.id);
       const labels = [...new Set(rows.map(r => r.topic_label || t.name))];

@@ -40,3 +40,10 @@ export async function saveFaculty(member: {id: string | null; full_name: string;
   }
   return data as string;
 }
+
+export async function removeFaculty(id: string): Promise<"deleted" | "archived"> {
+  const { data, error } = await createClient().rpc("core_remove_faculty", { target_id: id });
+  if (error) throw new Error(error.message);
+  if (data?.id !== id || !["deleted", "archived"].includes(data?.action)) throw new Error("The faculty change could not be confirmed. Please refresh and retry.");
+  return data.action;
+}

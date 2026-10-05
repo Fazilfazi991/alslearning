@@ -4,7 +4,7 @@ import { ChevronDown, CircleHelp, Search } from "lucide-react";
 
 const faqs = [
   { q: "Where can I find my courses?", a: "Open My Courses to see the programs and subjects included in your active enrollment." },
-  { q: "Where can I find recorded classes?", a: "Recorded Classes lists the lessons available to your active program." },
+  { q: "Where can I find classes?", a: "Classes lists the lessons available to your active program." },
   { q: "Can I retake an assessment?", a: "The attempt limit and availability are shown with each assessment." },
   { q: "Where are my certificates?", a: "Certificates issued to your account will appear in the Certificates area. No certificate is shown until ALS has issued one." },
 ];

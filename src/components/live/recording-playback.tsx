@@ -37,7 +37,7 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
       setSegments(value.segments);
       setActive(current => Math.min(current, value.segments!.length - 1));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Recording playback is unavailable");
+      setError(reason instanceof Error ? reason.message : "Class playback is unavailable");
     } finally { setLoading(false); }
   }, [classId, recordingId, review]);
 
@@ -79,7 +79,7 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
   };
   return <div className="mx-auto max-w-5xl">
     {!review && <Link href="/student/live-classes" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand"><ChevronLeft size={18}/>Live classes</Link>}
-    <div className={`${review ? "" : "mt-4"} flex flex-wrap items-start justify-between gap-3`}><div><p className="eyebrow">{review ? "Admin verification preview" : "Published class recording"}</p><h1 className="mt-2 text-2xl font-bold">{title}</h1><p className="mt-2 text-sm text-muted">{review ? "Play every segment and check decoding, audio, seeking, and intended teaching content before approval." : "Private playback links expire automatically and are renewed while this page remains authorized."}</p></div><Button variant="secondary" onClick={() => void renew()} disabled={loading}><RefreshCw size={17}/>Renew playback</Button></div>
+    <div className={`${review ? "" : "mt-4"} flex flex-wrap items-start justify-between gap-3`}><div><p className="eyebrow">{review ? "Admin verification preview" : "Published class"}</p><h1 className="mt-2 text-2xl font-bold">{title}</h1><p className="mt-2 text-sm text-muted">{review ? "Play every segment and check decoding, audio, seeking, and intended teaching content before approval." : "Private playback links expire automatically and are renewed while this page remains authorized."}</p></div><Button variant="secondary" onClick={() => void renew()} disabled={loading}><RefreshCw size={17}/>Renew playback</Button></div>
     {error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-900">{error}</p>}
     <section className="card mt-5 overflow-hidden p-0">
       <div className="aspect-video bg-[#101a38]">
@@ -97,7 +97,7 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
           onError={() => void renew()}
         /> : <div className="grid h-full place-items-center p-6 text-center text-sm text-white">{loading ? "Authorizing private playback…" : "Playback unavailable"}</div>}
       </div>
-      {segments.length > 1 && <div className="flex flex-wrap gap-2 p-4" aria-label="Recording segments">{segments.map((value, index) => <button key={value.id} onClick={() => { resumeAtRef.current = 0; resumePlayingRef.current = false; setActive(index); }} className={`min-h-11 rounded-lg px-4 text-sm font-bold ${index === active ? "bg-brand text-white" : "border border-line bg-white"}`}>Part {value.segmentNumber}</button>)}</div>}
+      {segments.length > 1 && <div className="flex flex-wrap gap-2 p-4" aria-label={review ? "Recording segments" : "Class parts"}>{segments.map((value, index) => <button key={value.id} onClick={() => { resumeAtRef.current = 0; resumePlayingRef.current = false; setActive(index); }} className={`min-h-11 rounded-lg px-4 text-sm font-bold ${index === active ? "bg-brand text-white" : "border border-line bg-white"}`}>Part {value.segmentNumber}</button>)}</div>}
     </section>
   </div>;
 }
