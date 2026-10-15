@@ -15,7 +15,7 @@ type Segment = {
   expiresAt: string;
 };
 
-export function RecordingPlayback({ classId, recordingId, title, review = false }: { classId: string; recordingId: string; title: string; review?: boolean }) {
+export function RecordingPlayback({ classId, recordingId, title, review = false, embedded = false }: { classId: string; recordingId: string; title: string; review?: boolean; embedded?: boolean }) {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [active, setActive] = useState(0);
   const [error, setError] = useState("");
@@ -23,8 +23,17 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
   const videoRef = useRef<HTMLVideoElement>(null);
   const resumeAtRef = useRef(0);
   const resumePlayingRef = useRef(false);
+  const requestSequenceRef = useRef(0);
+
+  const revokePlayback = useCallback((message: string) => {
+    requestSequenceRef.current += 1;
+    videoRef.current?.pause();
+    resumeAtRef.current = 0; resumePlayingRef.current = false;
+    setSegments([]); setActive(0); setLoading(false); setError(message);
+  }, []);
 
   const renew = useCallback(async (preservePosition = true) => {
+    const sequence = ++requestSequenceRef.current;
     if (preservePosition && videoRef.current) {
       resumeAtRef.current = Number.isFinite(videoRef.current.currentTime) ? videoRef.current.currentTime : 0;
       resumePlayingRef.current = !videoRef.current.paused && !videoRef.current.ended;
@@ -33,13 +42,18 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
     try {
       const response = await fetch(`/api/live-classes/${classId}/recordings?recordingId=${recordingId}${review ? "&review=1" : ""}`, { cache: "no-store", referrerPolicy: "no-referrer" });
       const value = await response.json() as { segments?: Segment[]; error?: string };
+      if (sequence !== requestSequenceRef.current) return;
+      if ([401,403,404].includes(response.status)) {
+        revokePlayback(value.error || "This class is no longer available with your current access.");
+        return;
+      }
       if (!response.ok || !value.segments?.length) throw new Error(value.error || "No playable lesson segment is available");
       setSegments(value.segments);
       setActive(current => Math.min(current, value.segments!.length - 1));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Class playback is unavailable");
-    } finally { setLoading(false); }
-  }, [classId, recordingId, review]);
+      if (sequence === requestSequenceRef.current) setError(reason instanceof Error ? reason.message : "Class playback is unavailable");
+    } finally { if (sequence === requestSequenceRef.current) setLoading(false); }
+  }, [classId, recordingId, review, revokePlayback]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void renew(false), 0);
@@ -52,6 +66,24 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
     const timer = window.setTimeout(() => void renew(), delay);
     return () => window.clearTimeout(timer);
   }, [renew, segments]);
+  useEffect(() => {
+    if (!segments.length) return;
+    let cancelled = false, checking = false;
+    const checkAccess = async () => {
+      if (checking || cancelled) return;
+      checking = true;
+      try {
+        const response = await fetch(`/api/live-classes/${classId}/recordings?recordingId=${recordingId}&access=1${review ? "&review=1" : ""}`, { cache: "no-store", referrerPolicy: "no-referrer" });
+        if (!cancelled && [401,403,404].includes(response.status)) revokePlayback("This class is no longer available with your current access.");
+      } catch { /* A transient network failure does not grant or renew access. */ }
+      finally { checking = false; }
+    };
+    const checkVisible = () => { if (document.visibilityState === "visible") void checkAccess(); };
+    const timer = window.setInterval(() => void checkAccess(), 15_000);
+    document.addEventListener("visibilitychange", checkVisible);
+    window.addEventListener("focus", checkVisible);
+    return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", checkVisible); window.removeEventListener("focus", checkVisible); };
+  }, [classId, recordingId, review, segments.length, revokePlayback]);
 
   const segment = segments[active];
   const preparePlayback = (video: HTMLVideoElement) => {
@@ -78,8 +110,8 @@ export function RecordingPlayback({ classId, recordingId, title, review = false 
     video.currentTime = 24 * 60 * 60;
   };
   return <div className="mx-auto max-w-5xl">
-    {!review && <Link href="/student/live-classes" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand"><ChevronLeft size={18}/>Live classes</Link>}
-    <div className={`${review ? "" : "mt-4"} flex flex-wrap items-start justify-between gap-3`}><div><p className="eyebrow">{review ? "Admin verification preview" : "Published class"}</p><h1 className="mt-2 text-2xl font-bold">{title}</h1><p className="mt-2 text-sm text-muted">{review ? "Play every segment and check decoding, audio, seeking, and intended teaching content before approval." : "Private playback links expire automatically and are renewed while this page remains authorized."}</p></div><Button variant="secondary" onClick={() => void renew()} disabled={loading}><RefreshCw size={17}/>Renew playback</Button></div>
+    {!review && !embedded && <Link href="/student/live-classes" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand"><ChevronLeft size={18}/>Live classes</Link>}
+    <div className={`${review || embedded ? "" : "mt-4"} flex flex-wrap items-start justify-between gap-3`}><div>{!embedded&&<><p className="eyebrow">{review ? "Admin verification preview" : "Published class"}</p>{review?<h4 className="mt-2 text-2xl font-bold">{title}</h4>:<h1 className="mt-2 text-2xl font-bold">{title}</h1>}</>}<p className="mt-2 text-sm text-muted">{review ? "Play every segment and check decoding, audio, seeking, and intended teaching content before approval." : "Private playback links expire automatically and are renewed while this page remains authorized."}</p></div><Button variant="secondary" onClick={() => void renew()} disabled={loading}><RefreshCw size={17}/>Renew playback</Button></div>
     {error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-900">{error}</p>}
     <section className="card mt-5 overflow-hidden p-0">
       <div className="aspect-video bg-[#101a38]">
