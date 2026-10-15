@@ -8,9 +8,12 @@ import { academicLocalToUtc,utcToAcademicLocalInput } from "@/lib/live-class/dat
 export type StudentOptions={programs:{id:string;name:string}[];batches:{id:string;name:string;program_id:string;batch_code:string|null}[]};
 type Student={id:string;full_name:string;email:string;phone:string|null;is_active:boolean;student_code:string|null;admission_on:string|null};
 export const studentButton="min-h-11 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-50";
+export class StudentRequestError extends Error {
+  constructor(message:string,readonly fields:Record<string,string>={}) {super(message);}
+}
 export async function studentRequest(url:string,method="GET",body?:unknown) {
   const response=await fetch(url,{method,cache:"no-store",...(body?{headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}:{})});
-  const value=await response.json();if(!response.ok)throw new Error(value.error||"The operation failed.");return value;
+  const value=await response.json();if(!response.ok)throw new StudentRequestError(value.error||"The operation failed.",value.errors??{});return value;
 }
 export function StudentManager({onChanged}:{onChanged?:()=>void}) {
   const router=useRouter();
@@ -22,7 +25,7 @@ export function StudentManager({onChanged}:{onChanged?:()=>void}) {
   useEffect(()=>{if(adding)dialog.current?.showModal();else dialog.current?.close();},[adding]);
   const visible=students.filter(s=>`${s.full_name} ${s.email} ${s.student_code??""}`.toLowerCase().includes(query.trim().toLowerCase()) && (status==="all"||s.is_active===(status==="active")));
   return <section className="card mb-6 p-5" aria-label="Student admissions">
-    <header className="flex flex-wrap items-start justify-between gap-4"><div><h2 className="text-xl font-bold">Students</h2><p className="mt-1 text-sm text-muted">View a student’s details, admission and batch history.</p></div><button className={`${studentButton} bg-brand text-white`} onClick={()=>setAdding(true)}>Add student</button></header>
+    <header className="flex flex-wrap items-start justify-between gap-4"><div><h2 className="text-xl font-bold">Students</h2><p className="mt-1 text-sm text-muted">View a student’s details, admission and batch history.</p></div><button disabled={loading||!!error} className={`${studentButton} bg-brand text-white`} onClick={()=>setAdding(true)}>Add student</button></header>
     <div className="mt-5 grid gap-4 sm:grid-cols-[1fr_180px]"><label className="text-sm font-semibold">Search students<input className="control" type="search" placeholder="Name, email or Student Code" value={query} onChange={e=>setQuery(e.target.value)}/></label><label className="text-sm font-semibold">Account status<select className="control" value={status} onChange={e=>setStatus(e.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
     {error&&<p role="alert" className="mt-4 text-sm text-red-800">{error} <button className="underline" onClick={()=>void load()}>Retry</button></p>}
     <div className="mt-4 divide-y divide-line" aria-busy={loading}>{loading?<p role="status" className="py-6 text-muted">Loading students…</p>:!visible.length?<p className="py-6 text-muted">No students match your search.</p>:visible.map(s=><article key={s.id} className="relative flex flex-wrap items-center gap-4 rounded-lg px-3 py-5 hover:bg-surface focus-within:ring-2 focus-within:ring-brand/30">
@@ -46,7 +49,7 @@ export function StudentAdmissionForm({options,onCancel,onCreated}:{options:Stude
     const value={...form,access_starts_at:form.access_starts_at?academicLocalToUtc(form.access_starts_at,"Asia/Dubai"):"",access_expires_at:form.access_expires_at?academicLocalToUtc(form.access_expires_at,"Asia/Dubai"):null};
     const issues=createdId?{}:admissionErrors(value);if(photo && (photo.size>2*1024*1024 || !["image/jpeg","image/png","image/webp"].includes(photo.type)))issues.photo="Choose a JPEG, PNG or WebP up to 2 MB.";setErrors(issues);if(Object.keys(issues).length)return;
     saving.current=true;setBusy(true);setError("");
-    try{const created=createdId?{id:createdId}:await studentRequest("/api/admin/students","POST",value);setCreatedId(created.id);setForm(f=>({...f,password:""}));if(photo){const file=new FormData();file.set("photo",photo);const response=await fetch(`/api/admin/students/${created.id}/photo`,{method:"POST",body:file});if(!response.ok)throw Error("Student admitted successfully. Photo upload failed; retry the photo or open Student details without recreating the account.");}setForm(initialAdmission());onCreated(created.id);}catch(e){setError((e as Error).message);}finally{saving.current=false;setBusy(false);}
+    try{const created=createdId?{id:createdId}:await studentRequest("/api/admin/students","POST",value);setCreatedId(created.id);setForm(f=>({...f,password:""}));if(photo){const file=new FormData();file.set("photo",photo);const response=await fetch(`/api/admin/students/${created.id}/photo`,{method:"POST",body:file});if(!response.ok)throw Error("Student admitted successfully. Photo upload failed; retry the photo or open Student details without recreating the account.");}setForm(initialAdmission());onCreated(created.id);}catch(e){setError((e as Error).message);if(e instanceof StudentRequestError)setErrors(e.fields);}finally{saving.current=false;setBusy(false);}
   }
   function field(key:keyof StudentAdmission,label:string,type="text",required=false,maxLength=120){return <label className="block min-w-0 text-sm font-semibold">{label}<input className="control" type={type} required={required&&!createdId} maxLength={maxLength} value={String(form[key]??"")} disabled={busy} aria-invalid={!!errors[key]} onChange={e=>change(key,e.target.value as never)}/>{errors[key]&&<span className="mt-1 block text-xs text-red-800">{errors[key]}</span>}</label>;}
   const batch=options.batches.find(b=>b.id===form.batch_id);
