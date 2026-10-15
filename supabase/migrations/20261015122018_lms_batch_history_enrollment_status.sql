@@ -1,5 +1,7 @@
 -- A suspended/cancelled enrollment cannot retain a "Current" batch interval.
 -- Reactivation starts a fresh interval; permanent identity and old rows remain.
+-- Defense in depth: this private owner-only counter has no client policies.
+alter table private.student_code_counters enable row level security;
 create or replace function private.lms_enrollment_history() returns trigger
 language plpgsql security definer set search_path='' as $$
 declare at_time timestamptz; reason_value text; starts_interval boolean;
