@@ -1,5 +1,11 @@
 # ALS LMS maintenance — October 15, 2026
 
+**Current status: complete and verified on Vercel Production.** Application
+commit `01547bafdb68a28569e0c110fc2b1075fa9ea6c1`, deployment
+`dpl_42mxYuqVNeCu8kHDXKMCfcaXgFzG`, https://alslearning.vercel.app.
+Earlier sections retain chronological checkpoint evidence; the completed
+Production acceptance and cleanup below are the final state.
+
 ## Release scope and baseline
 
 - Branch: `fix/admin-student-recording-workflows`.
@@ -29,7 +35,7 @@
 
 ## Database changes
 
-Applied to staging; not yet applied to Production:
+Applied to both isolated staging and Production:
 
 1. `20261015080421_lms_student_admission_transfers_and_replay_catalog`
 2. `20261015083408_lms_admission_auth_metadata_transaction_guard`
@@ -37,6 +43,8 @@ Applied to staging; not yet applied to Production:
 4. `20261015090156_lms_active_assignment_uniqueness_for_return_transfers`
 5. `20261015092239_lms_reviewed_identity_backfill_report`
 6. `20261015101141_lms_admission_capacity_and_inactive_account_safety`
+7. `20261015104236_lms_student_auth_deactivation_transaction`
+8. `20261015122018_lms_batch_history_enrollment_status`
 
 Rollback transactions were checked before committing DDL. Auth metadata is
 written after Auth INSERT, within the same Auth transaction; the second
@@ -82,7 +90,7 @@ expired historical session (HTTP 410). Existing TURN key
 `4a9c6350cb91389b4fb912a16b316b3e` generated a 60-second credential (HTTP 201).
 Generated credentials and signed links are not retained in this report.
 
-## Remaining release gates
+## Release gates at the earlier staging checkpoint
 
 - Complete hosted staging frontend/browser, real recording publication and
   unpublication, replay, mobile/tablet, permissions and academic regression.
@@ -151,3 +159,27 @@ authorized release consistently. No destructive schema reversal is used.
 - All 40 pre-existing rows across 12 application tables retained every original field value before completing the migration release. All eight migrations are now recorded in Production.
 - The reviewed initial backfill report had only the owner-identified test user missing a batch. A compatible CRE test cohort was created and the normal transfer function retained its original enrollment/access dates. The next dry run was clean. Three remaining legacy codes were backfilled; four permanent codes are unique, one approved inactive outsider remains explicitly Unassigned, and a repeat dry run proposes zero assignments.
 - Responsive Admin list, read-only details and admission modal were visually inspected at the measured 631-pixel width without horizontal overflow. No 768-pixel viewport claim is made.
+
+## Completed Production acceptance
+
+- Complete focused branch was fast-forwarded to the latest verified Production main; no ERP source was integrated. Vercel built the whole release and the canonical Production URL resolves to the READY deployment identified above. The later report-only branch commit does not change deployed application code.
+- 480 local tests passed (476 Vitest plus four importer tests), with 13 pre-existing skips. TypeScript, lint, production build and the public-bundle scan passed. The deployed application source matches the tested source; subsequent changes were SQL migrations and evidence documentation.
+- **54 automated Production checks passed:** ten admission/Auth/detail/permission checks, five transfer/history/identity checks, 27 authenticated-page/anonymous-guard checks, seven publication/isolation/integrity checks, four revocation/history/audit checks, and one existing protected-recording range-delivery check.
+- Genuine browser Admin, Teacher and Student Logout redirected to the common `/login` route, and Back did not restore protected content. Anonymous direct protected routes and APIs were denied server-side.
+- Actual Production Auth admission created disposable Student `d68b800a-80e3-4522-b004-ea2bc29335f4`, code `ALS-QAMV9JDEGMA-001`. Real details/edit, separate password reset/login, duplicate-email rejection, deactivation/provider Auth denial and reactivation passed. The normal transfer dialog moved Batch A to compatible Batch B with the same enrollment and code; the Student profile showed the new batch after login. Cross-program transfer was rejected.
+- Actual Production class `7b4d1e7f-ed47-46c7-9d3d-7572b1d6366e` used the existing assigned Teacher and only the synthetic lesson screen plus microphone. There was one microphone control, no camera and receive-only Student media. Student microphone RX reached 65 kbps and screen RX 18 kbps.
+- Normal Teacher End click: **2026-10-15T13:01:02.046Z**. Completed: **13:01:03.635Z**. Teacher and Student showed ended without refresh. Both connections, microphone/screen publications, both subscriptions and both attendance intervals closed through the normal application operation. Provider reconciliation reported `confirmed_closed` and `confirmed_absent_or_expired`. Independent read-only GETs of both exact owned provider sessions later returned **410 / session_error**. Shared Cloudflare resources and credentials were not changed.
+- Real recording `6deb6428-1d64-40fb-871d-d9a86a918a59` is **1,344,502 bytes / 89.424 seconds / 1280×720**. Processing, completed validation and genuine Admin queue readiness were observed. Admin preview decoded both synthetic slides; metadata save, approval, publication, unpublication and rejection used the normal UI.
+- Published catalogue count changed **4 → 5 → 4**, and Student Pathology count **1 → 2 → 1**. The QA Class appeared under DHS Long Term → Pathology and once in Admin. Two repeated Publish requests preserved the row and publication timestamp. The real expired Student and Teacher publication request were denied.
+- Owner confirmed recorded Teacher voice and lesson video were clear and contained only synthetic slides. Middle seek was 44.711 seconds; near-end seek 84.950 seconds, with playback resuming and readyState 4. Active signed-link renewal changed the private source while preserving playback: 44.731 before, 50.408 afterward, still playing. No signed link is retained in this report.
+- Normal Unpublish automatically removed the already open Student video without a manual renewal. New playback issuance/access checks returned denial with no signed segments. The historical class, asset, segment and attendance rows remained, with an Admin audit of previous/new publication state.
+- All six original recorded-class rows remained unchanged. An eligible Student could discover all four original published classes, and an original protected native recording returned authorized playback plus HTTP 206 for a one-byte range. The original Internal Cohort had already expired on October 11; its existing Student remained denied under the unchanged batch expiry and enrollment dates. No existing customer access was extended.
+- Responsive browser inspection covered real narrow/mobile widths 375/390, widened 562/631 views and desktop 1280/1440. Production identity/current batch, Courses, replay and Admin header/controls were inspected at the measured widened width. Physical Android/iPhone tests were not performed.
+- A deployment-scoped recent 30-minute Vercel error/fatal scan returned no groups. Current Teacher/Student logs had no Production application errors. Chrome Admin retained asynchronous extension-channel messages without an application stack; older staging screen-capture/RSC and Vercel FedCM entries were separated by timestamp/origin, not misreported as current Production failures.
+
+## Final cleanup and safety
+
+- Production: two owned QA Students deactivated, their enrollments cancelled, two temporary batches archived and temporary Teacher batch links removed. Staging: eleven owned QA Students deactivated and four temporary batches archived. Codes and all class/attendance/result/audit/history rows remain; no valid ALS record was deleted. The owner-approved CRE test-user assignment remains as requested.
+- Both own recordings are unpublished/rejected. All five unrelated Production enrollments and ten unrelated staging enrollments were unchanged during cleanup; the two pre-existing staging recordings remain unchanged.
+- Both environments have **zero live classes, open/reconnecting connections, active/closing publications or subscriptions, open attendance and pending recording/upload work**. Staging cron remains paused and live/recording/POC entry disabled. Production retains its existing customer feature configuration.
+- No unresolved release blocker remains. Private fixture credentials and detailed non-public evidence are ignored under `.local-qa/maintenance`; no secret values, cookies or signed URLs belong in this report.
