@@ -36,6 +36,7 @@ Applied to staging; not yet applied to Production:
 3. `20261015084520_lms_identity_reporting_and_review_integrity`
 4. `20261015090156_lms_active_assignment_uniqueness_for_return_transfers`
 5. `20261015092239_lms_reviewed_identity_backfill_report`
+6. `20261015101141_lms_admission_capacity_and_inactive_account_safety`
 
 Rollback transactions were checked before committing DDL. Auth metadata is
 written after Auth INSERT, within the same Auth transaction; the second
@@ -47,7 +48,7 @@ can remain on its older additive schema during a release rollback.
 ## Staging evidence so far
 
 - Lint and typecheck passed before final build.
-- 462 Vitest tests passed; 13 existing skips; four importer tests passed.
+- 465 Vitest tests passed; 13 existing skips; four importer tests passed.
 - 13 initial real hosted Auth/API checks and nine extended integrity checks
   passed, including six concurrent admissions with unique codes, duplicate
   rejection, failed Auth rollback, transfer/return transfer, history/code/
@@ -91,3 +92,15 @@ Generated credentials and signed links are not retained in this report.
 
 Live, recording and POC entry remain disabled until a prepared bounded staging
 acceptance window. Production is unchanged at this checkpoint.
+
+## Hosted staging checkpoint
+
+- Complete source `1693abc1568f553a269bb0dae92d6b81a8730db0` is READY on the existing Vercel project, isolated alias `https://als-lms-maintenance-staging-faziils-projects.vercel.app`. Production and shared Preview variables were compared unchanged after branch-scoped staging configuration. Automatic maintenance-branch deployment is disabled; explicit Git-connected deployments preserve the verified author identity.
+- Real hosted UI created batch `4ea4caeb-2061-4dc3-b978-7e5ed492058b`, Student `4fdcff8f-f523-4858-97f5-aa85c5f04caf`, and permanent code `ALS-QAHMV9CWJRT-001`. Contact/guardian/access/history fields were verified.
+- Hosted Admin, Teacher and Student Logout plus browser Back passed.
+- Seven hosted integrity checks passed: full-batch field error without Auth creation, inactive admission and blocked login, concurrent one-seat capacity with no rejected Auth residue, private profile-photo signed preview, Student isolation, existing-session deactivation, and Teacher edit/publication denial. A malformed publication test request initially returned 400; the corrected normal request included classroom mode and returned the required 403.
+- The full existing staging batch caused a correctly rolled-back admission. A separate LMS capacity guard was added and observed rejecting over-capacity Auth admission, without changing any pre-existing non-LMS guard. No ERP source was merged. Final inactive status now commits atomically after admission initialization.
+- Existing staging R2 CORS rules were retained, adding only the exact authenticated maintenance staging origin. Public bucket access remains disabled.
+- One fresh class `e4ab3b0a-7771-4dd9-bd58-17d83095d7e4` is scheduled for the new QA batch and existing assigned Teacher. No recording asset was fabricated. Global live/recording/POC remain off; cron job 1 remains paused. Teacher, Student and synthetic lesson pages are prepared. Owner readiness for the native screen-share chooser is pending.
+- Production read-only compatibility report: no incompatible enrollments, no Batch Code proposal collisions. Suku is enrolled in CRE Crash Course, which has no existing compatible batch; the later authorized test assignment requires a clearly named QA batch in that same Program, preserving its enrollment ID and access dates. No production mutation has occurred.
+- The browser viewport override did not change measured Chrome CSS width (1280/1440) for a requested tablet size. Real narrow IAB/mobile and desktop views were inspected; tablet verification remains outstanding rather than being inferred from an ignored override. Overrides were reset.
