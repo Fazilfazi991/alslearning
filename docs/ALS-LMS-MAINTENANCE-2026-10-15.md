@@ -146,3 +146,8 @@ been removed so the caller owns the complete transaction. The release proceeds
 by verifying precisely the persisted schema and original data, testing only
 remaining migrations under a genuine rollback, then recording and applying the
 authorized release consistently. No destructive schema reversal is used.
+
+- The exact persisted footprint was migrations 1–4, zero assigned codes, five original enrollments and five seeded history rows. Remaining migrations 5–8 then passed a genuine rollback; their private Auth restriction table was confirmed absent afterward, with 54 original ledger rows.
+- All 40 pre-existing rows across 12 application tables retained every original field value before completing the migration release. All eight migrations are now recorded in Production.
+- The reviewed initial backfill report had only the owner-identified test user missing a batch. A compatible CRE test cohort was created and the normal transfer function retained its original enrollment/access dates. The next dry run was clean. Three remaining legacy codes were backfilled; four permanent codes are unique, one approved inactive outsider remains explicitly Unassigned, and a repeat dry run proposes zero assignments.
+- Responsive Admin list, read-only details and admission modal were visually inspected at the measured 631-pixel width without horizontal overflow. No 768-pixel viewport claim is made.
