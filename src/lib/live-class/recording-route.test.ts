@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/live-classes/[classId]/recordings/route";
 
-const mocks = vi.hoisted(() => ({ database: null as unknown, digest: vi.fn(), playback: vi.fn(), begin: vi.fn(), sign: vi.fn() }));
+const mocks = vi.hoisted(() => ({ database: null as unknown, verify: vi.fn(), digest: vi.fn(), playback: vi.fn(), begin: vi.fn(), sign: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => mocks.database }));
 vi.mock("@/lib/live-class/rate-limit", () => ({ consumeLiveRateLimit: () => ({ allowed: true }) }));
 vi.mock("@/lib/live-class/staging-window", () => ({ stagingTestWindowOpen: () => true }));
 vi.mock("@/lib/live-class/recording-storage", () => ({ r2RecordingStorage: {
-  digest: mocks.digest, playbackUrl: mocks.playback, begin: mocks.begin, signPart: mocks.sign,
+  verify: mocks.verify, digest: mocks.digest, playbackUrl: mocks.playback, begin: mocks.begin, signPart: mocks.sign,
 } }));
 
 type Row = Record<string, unknown>;
@@ -62,9 +62,22 @@ beforeEach(() => {
     live_sessions: [{ id: classId, faculty_id: "teacher", program_id: "program", batch_id: "batch", subject_id: "subject", status: "completed", ended_at: end, recording_enabled: true, provider: "cloudflare" }],
     enrollments: [{ id: "enrollment", student_id: "student", program_id: "program", batch_id: "batch", status: "active", access_expires_at: null, access_starts_at: null }],
     class_recordings: [{ id: recordingId, session_id: classId, owner_id: "teacher", status: "validating", client_validated_at: end, verified_at: null, published_at: null }],
-    live_recording_segments: [{ id: segmentId, recording_id: recordingId, session_id: classId, owner_id: "teacher", status: "validating", object_key: "existing-private-object", total_bytes: 4451838, object_sha256: checksum, client_validated_at: end, client_reported_duration_seconds: 184.958, started_at: new Date(Date.now() - 120_000).toISOString(), completed_at: end }],
+    live_recording_segments: [{ id: segmentId, recording_id: recordingId, session_id: classId, owner_id: "teacher", status: "validating", object_key: "recordings/2026/10/7385751c-3640-4db3-9a45-5348e682cffe/ea83d954-a4ef-45b6-b34c-8b80722f3b04/5d65817a-2a15-4013-9504-f81f8ece728c/teacher-composite.webm", total_bytes: 4451838, object_sha256: checksum, client_validated_at: end, client_reported_duration_seconds: 184.958, started_at: new Date(Date.now() - 120_000).toISOString(), completed_at: end }],
   };
-  mocks.database = { from: query, auth: { getUser: async () => ({ data: { user: { id: userId } } }) }, rpc: async () => ({ data: true, error: null }) };
+  mocks.database = { from: query, auth: { getUser: async () => ({ data: { user: { id: userId } } }) }, rpc: async (name:string,args:Row) => {
+    if(name!=="lms_recording_decision")return {data:true,error:null};
+    const r=rows.class_recordings.find(r=>r.id===args.target_recording && r.session_id===args.target_session);
+    if(!r)return {data:null,error:{message:"Recording not found"}};
+    if(args.decision==="review"){
+      Object.assign(r,{status:"ready",verified_at:new Date().toISOString(),duration_seconds:184.958});
+      rows.live_recording_segments.forEach(s=>Object.assign(s,{status:"ready"}));
+    }else if(args.decision==="publish"){
+      if(!["ready","published"].includes(String(r.status)) || !r.verified_at || r.rejected_at)return {data:null,error:{message:"Not approved"}};
+      Object.assign(r,{status:"published",published_at:new Date().toISOString(),published_by:userId});
+    }
+    return {data:{status:r.status},error:null};
+  } };
+  mocks.verify.mockResolvedValue({byteLength:4451838});
   mocks.digest.mockResolvedValue({ byteLength: 4451838, sha256: checksum });
   mocks.playback.mockImplementation(async () => ({ url: `https://storage.invalid/unit-test-${mocks.playback.mock.calls.length}`, expiresAt: "unit-test" }));
 });
@@ -87,8 +100,8 @@ describe("recording route with capture entry disabled", () => {
     await approveAndPublish();
     expect(recording()).toMatchObject({ status: "published", duration_seconds: 184.958, published_by: "admin" });
     expect(recording().verified_at).toBeTruthy(); expect(recording().published_at).toBeTruthy();
-    expect(segment()).toMatchObject({ status: "ready", object_key: "existing-private-object", object_sha256: checksum });
-    expect(mocks.digest).toHaveBeenCalledWith("existing-private-object");
+    expect(segment()).toMatchObject({ status: "ready", object_key: "recordings/2026/10/7385751c-3640-4db3-9a45-5348e682cffe/ea83d954-a4ef-45b6-b34c-8b80722f3b04/5d65817a-2a15-4013-9504-f81f8ece728c/teacher-composite.webm", object_sha256: checksum });
+    expect(mocks.digest).toHaveBeenCalledWith("recordings/2026/10/7385751c-3640-4db3-9a45-5348e682cffe/ea83d954-a4ef-45b6-b34c-8b80722f3b04/5d65817a-2a15-4013-9504-f81f8ece728c/teacher-composite.webm");
   });
   it("denies Student playback before publication and permits playback and fresh renewal afterward", async () => {
     identity("student"); expect((await get()).status).toBe(403);

@@ -8,9 +8,11 @@ import { reconcileMultipartState, validateMultipartCompletion, type Acknowledged
 import { consumeLiveRateLimit } from "@/lib/live-class/rate-limit";
 import { assertRecordingOwnerWindow, assertRecordingSegmentMutation } from "@/lib/live-class/recording-recovery-policy";
 import { stagingTestWindowOpen } from "@/lib/live-class/staging-window";
+import { recordingObjectBelongs } from "@/lib/live-class/recording-object";
 
 type Body = {
-  action?: "begin" | "stop" | "sign" | "acknowledge" | "reconcile" | "complete" | "validate" | "interrupt" | "abort" | "review" | "publish" | "unpublish";
+  action?: "begin" | "stop" | "sign" | "acknowledge" | "reconcile" | "complete" | "validate" | "interrupt" | "abort" | "review" | "publish" | "unpublish" | "reject" | "pending";
+  note?: string;
   recordingId?: string;
   segmentId?: string;
   contentType?: string;
@@ -39,6 +41,7 @@ async function ownedSegment(db: Awaited<ReturnType<typeof createClient>>, classI
   const { data } = await db.from("live_recording_segments").select("id,recording_id,session_id,owner_id,segment_number,status,object_key,upload_id,mime_type,part_size,total_bytes,object_sha256,started_at,completed_at,client_validated_at,client_reported_duration_seconds")
     .eq("id", segmentId).eq("session_id", classId).eq("owner_id", userId).maybeSingle();
   if (!data) throw new LiveAuthorizationError("Recording segment is unavailable", 404);
+  if(!recordingObjectBelongs(data.object_key,classId,data.recording_id,data.id))throw new LiveAuthorizationError("Recording object does not belong to this class",409);
   return data as Segment;
 }
 
@@ -60,11 +63,14 @@ export async function GET(request: Request, context: RouteContext<"/api/live-cla
     if (!authorization.isClassManager && (recording.status !== "published" || !recording.published_at)) throw new LiveAuthorizationError("Recording is not published");
     let segmentQuery = db.from("live_recording_segments")
       .select("id,segment_number,object_key,mime_type,duration_seconds,client_reported_duration_seconds,total_bytes")
-      .eq("recording_id", recordingId);
+      .eq("recording_id", recordingId).eq("session_id",classId);
     segmentQuery = review ? segmentQuery.in("status", ["validating", "ready"]) : segmentQuery.eq("status", "ready");
     const { data: segments, error } = await segmentQuery.order("segment_number");
     if (error || !segments?.length) throw new LiveAuthorizationError("No playable recording segment is ready", 409);
     const signed = await Promise.all(segments.map(async segment => {
+      if(!recordingObjectBelongs(segment.object_key,classId,recordingId,segment.id))throw new LiveAuthorizationError("Recording asset is unavailable",409);
+      const object=await r2RecordingStorage.verify(segment.object_key);
+      if(object.byteLength!==segment.total_bytes || object.byteLength<=0)throw new LiveAuthorizationError("Recording asset is incomplete",409);
       const playback = await r2RecordingStorage.playbackUrl(segment.object_key);
       return { id: segment.id, segmentNumber: segment.segment_number, mimeType: segment.mime_type, durationSeconds: segment.duration_seconds || segment.client_reported_duration_seconds, byteLength: segment.total_bytes, ...playback };
     }));
@@ -96,7 +102,7 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       assertLiveFeature(body.mode);
     }
     if (!configuration.r2Configured) return failure(`R2 is not configured (${configuration.missingR2.join(", ")})`, 503);
-    const managerAction = body.action === "review" || body.action === "publish" || body.action === "unpublish";
+    const managerAction = body.action === "review" || body.action === "publish" || body.action === "unpublish" || body.action === "reject" || body.action === "pending";
     const authorization = await authorizeLiveClass(db, auth.user.id, classId, managerAction ? "manage" : "record");
     assertClassroomMode(authorization.session, body.mode);
     if (!managerAction) assertRecordingOwnerWindow(authorization, body.action);
@@ -145,39 +151,27 @@ export async function POST(request: Request, context: RouteContext<"/api/live-cl
       if (segmentError || !segments?.length || segments.some(segment => segment.status !== "validating" || !segment.client_validated_at || !segment.client_reported_duration_seconds)) {
         return failure("Every uploaded segment needs Teacher playback evidence before Admin review", 409);
       }
+      if(segments.some(segment=>!recordingObjectBelongs(segment.object_key,classId,recording.id,segment.id)))return failure("Recording asset does not belong to this class",409);
       const verified = await Promise.all(segments.map(async segment => ({ segment, object: await r2RecordingStorage.digest(segment.object_key) })));
       if (verified.some(value => value.object.byteLength !== value.segment.total_bytes || value.object.sha256 !== value.segment.object_sha256)) return failure("Remote object bytes changed after upload validation", 409);
-      const at = new Date().toISOString();
-      await Promise.all(verified.map(value => db.from("live_recording_segments").update({
-        status: "ready",
-        verified_at: at,
-        duration_seconds: value.segment.client_reported_duration_seconds,
-        error_message: null,
-      }).eq("id", value.segment.id).eq("status", "validating")));
-      const { error: recordingError } = await db.from("class_recordings").update({
-        status: "ready",
-        verified_at: at,
-        duration_seconds: verified.reduce((sum, value) => sum + Number(value.segment.client_reported_duration_seconds || 0), 0),
-        total_bytes: verified.reduce((sum, value) => sum + value.object.byteLength, 0),
-        error_message: null,
-      }).eq("id", recording.id).eq("status", "validating");
-      if (recordingError) throw recordingError;
-      return NextResponse.json({ status: "ready", verifiedAt: at });
+      const approved = await db.rpc("lms_recording_decision", { target_session:classId,target_recording:recording.id,decision:"review",note:body.note||null });
+      if (approved.error) return failure("Recording approval could not be completed atomically",409);
+      return NextResponse.json(approved.data);
     }
 
-    if ((body.action === "publish" || body.action === "unpublish")) {
-      if (authorization.role !== "admin" || !body.recordingId || !uuid.test(body.recordingId)) throw new LiveAuthorizationError("Admin review is required to change publication");
-      if (body.action === "unpublish") {
-        const { error } = await db.from("class_recordings").update({ status: "ready", published_at: null, published_by: null }).eq("id", body.recordingId).eq("session_id", classId).eq("status", "published");
-        if (error) throw error;
-        return NextResponse.json({ status: "ready" });
+    if (["publish","unpublish","reject","pending"].includes(body.action)) {
+      if(authorization.role!=="admin" || !body.recordingId || !uuid.test(body.recordingId)) throw new LiveAuthorizationError("Admin review is required");
+      if(body.action==="publish") {
+        const recording=await db.from("class_recordings").select("id,status,verified_at,rejected_at").eq("id",body.recordingId).eq("session_id",classId).maybeSingle();
+        if(!recording.data?.verified_at || recording.data.rejected_at || !["ready","published"].includes(recording.data.status))return failure("Only an approved recording can be published",409);
+        const segments=await db.from("live_recording_segments").select("id,status,object_key,total_bytes").eq("recording_id",body.recordingId).eq("session_id",classId);
+        if(segments.error || !segments.data?.length || segments.data.some(g=>g.status!=="ready" || !recordingObjectBelongs(g.object_key,classId,body.recordingId!,g.id)))return failure("Recording asset is incomplete",409);
+        const objects=await Promise.all(segments.data.map(g=>r2RecordingStorage.verify(g.object_key)));
+        if(objects.some((object,i)=>object.byteLength!==segments.data![i].total_bytes || object.byteLength<=0))return failure("Recording asset is incomplete",409);
       }
-      const { data: recording } = await db.from("class_recordings").select("id,verified_at,status").eq("id", body.recordingId).eq("session_id", classId).maybeSingle();
-      if (!recording?.verified_at || recording.status !== "ready") return failure("Only a validated recording can be published", 409);
-      const at = new Date().toISOString();
-      const { error } = await db.from("class_recordings").update({ status: "published", published_at: at, published_by: auth.user.id }).eq("id", recording.id);
-      if (error) throw error;
-      return NextResponse.json({ status: "published", publishedAt: at });
+      const decision=await db.rpc("lms_recording_decision",{target_session:classId,target_recording:body.recordingId,decision:body.action,note:body.note||null});
+      if(decision.error) return failure("Publication decision was not accepted. Check the recording state and reason.",409);
+      return NextResponse.json(decision.data);
     }
 
     if (!body.segmentId) return failure("Recording segment is required", 400);

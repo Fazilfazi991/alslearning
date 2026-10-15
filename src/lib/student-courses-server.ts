@@ -27,12 +27,13 @@ export async function getStudentCourse(slug: string, requestedSubject?: string) 
   const selected = selectedCourseSubject(subjects, requestedSubject);
   const subjectIds = subjects.map(s => s.id);
   const [recordings, resources] = await Promise.all([
-    subjectIds.length ? db.from("recorded_classes")
-      .select("id,title,subject_id,chapter_id,topic_label,subtopic,provider_video_id,duration_seconds,chapters(name)")
+    subjectIds.length ? db.from("lms_class_catalog")
+      .select("id,title,subject_id,chapter_id,topic_label,subtopic,provider_video_id,duration_seconds,session_id,program_id,batch_id")
       .eq("status", "published").in("subject_id", subjectIds).order("sort_order").order("id") : { data: [], error: null },
     subjectIds.length ? db.from("learning_content").select("id,title,kind,slug,subject_id")
       .eq("status", "active").eq("program_id", program.id).in("subject_id", subjectIds).order("display_order") : { data: [], error: null },
   ]);
+  if (recordings.data) recordings.data = recordings.data.filter(r => !r.session_id || r.program_id === program.id);
   if (recordings.error || resources.error) throw new Error("Learning content could not be loaded. Please try again.");
   const counts = subjects.map(s => ({ subjectId: s.id, count: (recordings.data ?? []).filter(r => r.subject_id === s.id).length }));
   return { program, enrollment, subjects, selected, counts, recordings: (recordings.data ?? []) as unknown as CourseRecording[], resources: resources.data ?? [] };
@@ -40,7 +41,7 @@ export async function getStudentCourse(slug: string, requestedSubject?: string) 
 export async function studentRecordingCount() {
   await requireRole(["student"]);
   const db = await createClient();
-  const result = await db.from("recorded_classes").select("id", { head: true, count: "exact" }).eq("status", "published");
+  const result = await db.from("lms_class_catalog").select("id", { head: true, count: "exact" }).eq("status", "published");
   if (result.error) throw new Error("Recorded class count could not be loaded. Please try again.");
   return result.count ?? 0;
 }

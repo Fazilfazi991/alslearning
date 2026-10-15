@@ -13,9 +13,10 @@ export function LogoutButton({ className = "" }: { className?: string; redirectT
     setBusy(true);
     setError("");
     try {
-      const { error: browserError } = await createClient().auth.signOut({ scope: "local" });
       const response = await fetch("/auth/logout", { method: "POST", cache: "no-store" });
-      if (browserError || !response.ok) throw new Error("Sign-out failed");
+      if (!response.ok) throw new Error("Sign-out failed");
+      const { error: browserError } = await createClient().auth.signOut({ scope: "local" });
+      if (browserError) throw new Error("Sign-out failed");
       // A fresh document also discards the previous account's router cache.
       window.location.replace("/login");
     } catch {

@@ -7,14 +7,14 @@ vi.mock("./supabase/client", () => ({
     from: (table: string) => {
       if (table !== "enrollments") throw new Error(`Unexpected table: ${table}`);
       return {
-        insert: async (value: Record<string, unknown>) => {
+        insert: (value: Record<string, unknown>) => {
           writes.insert(value);
-          return { error: null };
+          return { select:()=>({single:async()=>({data:{id:"created"},error:null})}) };
         },
         update: (value: Record<string, unknown>) => ({
-          eq: async (field: string, id: string) => {
+          eq: (field: string, id: string) => {
             writes.update(value, field, id);
-            return { error: null };
+            return {select:()=>({single:async()=>({data:{id},error:null})})};
           },
         }),
       };

@@ -11,7 +11,7 @@ const metrics = [
   { label: "Subjects", table: "subjects", filter: null, href: "/admin/academic" },
   { label: "Active questions", table: "questions", filter: ["status", "active"], href: "/admin/questions" },
   { label: "Published tests", table: "tests", filter: ["status", "active"], href: "/admin/tests" },
-  { label: "Published recordings", table: "recorded_classes", filter: ["status", "published"], href: "/admin/recorded-classes" },
+  { label: "Published classes", table: "lms_class_catalog", filter: ["status", "published"], href: "/admin/recorded-classes" },
 ] as const;
 
 export function ConnectedDashboard() {
