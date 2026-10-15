@@ -61,6 +61,7 @@ export async function GET(request: Request, context: RouteContext<"/api/live-cla
       .select("id,status,published_at,mime_type,duration_seconds").eq("id", recordingId).eq("session_id", classId).maybeSingle();
     if (!recording) throw new LiveAuthorizationError("Recording is unavailable", 404);
     if (!authorization.isClassManager && (recording.status !== "published" || !recording.published_at)) throw new LiveAuthorizationError("Recording is not published");
+    if (parameters.get("access") === "1") return NextResponse.json({ allowed: true }, { headers: { "Cache-Control": "private, no-store" } });
     let segmentQuery = db.from("live_recording_segments")
       .select("id,segment_number,object_key,mime_type,duration_seconds,client_reported_duration_seconds,total_bytes")
       .eq("recording_id", recordingId).eq("session_id",classId);

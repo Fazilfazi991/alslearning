@@ -42,7 +42,7 @@ const context = () => ({ params: Promise.resolve({ classId }) });
 const post = (action: string, extra: Row = {}) => POST(new Request(`https://als.test/api/live-classes/${classId}/recordings`, {
   method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, mode: "classroom", recordingId, ...extra }),
 }), context());
-const get = (review = false) => GET(new Request(`https://als.test/api/live-classes/${classId}/recordings?recordingId=${recordingId}${review ? "&review=1" : ""}`), context());
+const get = (review = false, access = false) => GET(new Request(`https://als.test/api/live-classes/${classId}/recordings?recordingId=${recordingId}${review ? "&review=1" : ""}${access ? "&access=1" : ""}`), context());
 const recording = () => rows.class_recordings[0];
 const segment = () => rows.live_recording_segments[0];
 function identity(role: string) { userId = role; }
@@ -83,6 +83,20 @@ beforeEach(() => {
 });
 
 describe("recording route with capture entry disabled", () => {
+  it("checks continuing Student authorization without signing links or reading storage", async () => {
+    await approveAndPublish(); identity("student"); vi.clearAllMocks();
+    const response = await get(false,true);
+    expect(response.status).toBe(200); expect(await response.json()).toEqual({allowed:true});
+    expect(mocks.verify).not.toHaveBeenCalled(); expect(mocks.playback).not.toHaveBeenCalled();
+  });
+  it.each(["unpublished","expired","inactive"])("revokes continuing playback access when %s", async kind => {
+    await approveAndPublish(); identity("student"); vi.clearAllMocks();
+    if(kind==="unpublished"){recording().status="ready";recording().published_at=null;}
+    if(kind==="expired")rows.enrollments[0].access_expires_at=new Date(Date.now()-1).toISOString();
+    if(kind==="inactive")rows.profiles.find(p=>p.id==="student")!.is_active=false;
+    expect((await get(false,true)).status).toBe(kind==="inactive"?401:403);
+    expect(mocks.verify).not.toHaveBeenCalled();expect(mocks.playback).not.toHaveBeenCalled();
+  });
   it("denies new capture even with an open operational window and live class", async () => {
     identity("teacher"); rows.live_sessions[0].status = "live";
     const response = await post("begin", { contentType: "video/webm" });
