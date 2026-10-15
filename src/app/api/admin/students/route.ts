@@ -21,6 +21,18 @@ export async function POST(request:Request) {
   try{body=await request.json();if(!body || typeof body!=="object" || Array.isArray(body))throw Error();}catch{return NextResponse.json({error:"Invalid admission form."},{status:400});}
   const errors=admissionErrors(body);
   if(Object.keys(errors).length)return NextResponse.json({error:"Check the highlighted fields.",errors},{status:400});
+  if(!body.unassigned) {
+    const batch=await session.db!.from("batches").select("id,program_id,batch_code,status,max_students").eq("id",body.batch_id).maybeSingle();
+    if(batch.error)return NextResponse.json({error:"Batch availability could not be checked. Please retry."},{status:503});
+    if(!batch.data || batch.data.program_id!==body.program_id || batch.data.status!=="active" || !batch.data.batch_code) {
+      return NextResponse.json({error:"Select an active compatible batch with a Batch Code.",errors:{batch_id:"Select an active compatible batch with a Batch Code."}},{status:422});
+    }
+    if(batch.data.max_students!==null) {
+      const occupied=await session.db!.from("enrollments").select("id",{count:"exact",head:true}).eq("batch_id",batch.data.id).eq("status","active");
+      if(occupied.error)return NextResponse.json({error:"Batch availability could not be checked. Please retry."},{status:503});
+      if((occupied.count??0)>=batch.data.max_students)return NextResponse.json({error:"This batch is full. Choose another compatible batch.",errors:{batch_id:"This batch is full. Choose another compatible batch."}},{status:422});
+    }
+  }
   // The Auth DB trigger completes admission in the SAME transaction. A trigger
   // failure rolls back Auth too; no success message or orphan login is possible.
   const {password,email,...admission}=body;
