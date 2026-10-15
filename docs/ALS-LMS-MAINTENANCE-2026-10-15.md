@@ -134,3 +134,15 @@ acceptance window. Production is unchanged at this checkpoint.
 - Migration `20261015122018_lms_batch_history_enrollment_status` passed a transaction rollback check and was applied to staging. It closes history for inactive enrollments and starts a new interval upon reactivation. Five real authenticated database assertions passed: reconciliation, suspension closure, one new reactivation interval, retained old rows, and unchanged permanent code/enrollment identity/access dates.
 - The owner widened the in-app browser twice. Actual measured responsive widths were 562 and 631 CSS pixels; Student Courses and the removed-player state showed no horizontal overflow. These are recorded as measured widths, not as the ignored requested 768-pixel viewport.
 - Latest application source `3881a7babe8d86e5d283cbb3f85170d1238a2bbf` is READY in deployment `dpl_3ms3FqQPcXcYNuDaP9mK3DN6gLuX`; live/recording/POC entry remains disabled and cron paused.
+
+## Production migration transaction incident
+
+The intended combined rollback check included a nested BEGIN/COMMIT from migration
+`20261015090156`. Its COMMIT persisted migrations 1–4 before the outer rollback.
+The subsequent verification found the new identity column present with the
+original 54-row migration ledger. No identity backfill was executed. This is
+not reported as a successful rollback. The migration's transaction wrapper has
+been removed so the caller owns the complete transaction. The release proceeds
+by verifying precisely the persisted schema and original data, testing only
+remaining migrations under a genuine rollback, then recording and applying the
+authorized release consistently. No destructive schema reversal is used.
