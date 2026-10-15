@@ -1179,7 +1179,7 @@ export function NativeClassroom({
           </div>
            <div className="card flex flex-wrap items-center gap-2 p-3">
              {!connectionId ? <Button disabled={connectionState === "joining"} onClick={() => void join()}>{connectionState === "joining" ? <RefreshCw size={17}/> : <Radio size={17}/>}Join classroom</Button> : <span className="inline-flex min-h-11 items-center rounded-lg bg-green-50 px-4 text-sm font-bold text-green-800">{connectionState === "connected" ? "Connected" : connectionState === "reconnecting" ? "Reconnecting…" : "Connecting…"}</span>}
-             {manager && !preflightReady && <Button variant="secondary" onClick={() => void preflight()}><Mic size={17}/>Turn on microphone</Button>}
+             {manager && !connectionId && !preflightReady && <Button variant="secondary" onClick={() => void preflight()}><Mic size={17}/>Turn on microphone</Button>}
              {manager && <Button variant="secondary" onClick={() => void toggleCamera()}>{cameraOn ? <VideoOff size={17}/> : <Video size={17}/>} {cameraOn ? "Turn off camera" : "Camera optional"}</Button>}
              {preflightReady && <span className="min-w-24 text-xs font-semibold text-muted">Mic <span className="ml-1 inline-block h-2 rounded bg-brand align-middle" style={{ width: `${Math.max(4, micLevel)}px` }}/></span>}
              {connectionId && (manager || participant?.audio_publish_allowed) && !published.some(value => value.kind === "microphone") && <Button variant="secondary" onClick={() => void enableGrantedMicrophone()}><Mic size={17}/>Turn on microphone</Button>}

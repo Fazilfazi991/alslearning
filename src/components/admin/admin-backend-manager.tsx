@@ -3,6 +3,8 @@ import {localDateTime} from "@/lib/core-time";
 import {formatAcademicDate} from "@/lib/live-class/date";
 import { useEffect, useMemo, useState } from "react";
 import { AccountManager } from "./account-manager";
+import { StudentManager } from "./student-manager";
+import Link from "next/link";
 import {
   loadAdminData,
   deleteContent,
@@ -37,18 +39,21 @@ function Select({
   onChange,
   items,
   blank = "Select",
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   items: Row[];
   blank?: string;
+  disabled?: boolean;
 }) {
   return (
     <label className="text-xs font-bold uppercase text-muted">
       {label}
       <select
         aria-label={label}
+        disabled={disabled}
         className={`${input} mt-2`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -120,7 +125,7 @@ export function AdminBackendManager({ mode }: { mode: BackendManagerMode }) {
         </p>
       )}
       {mode === "enrollments" && (
-        <><AccountManager role="student" onChanged={() => void refresh()} /><Enrollments data={data} busy={busy} run={run} /></>
+        <><StudentManager onChanged={() => void refresh()} /><Enrollments data={data} busy={busy} run={run} /></>
       )}{" "}
       {mode === "faculty" && <><AccountManager role="teacher" onChanged={() => void refresh()} /><Faculty data={data} busy={busy} run={run} /></>}{" "}
       {mode === "content" && <Content data={data} busy={busy} run={run} />}{" "}
@@ -198,17 +203,19 @@ function Enrollments({ data, busy, run }: Props) {
         }}
       >
         <p className="text-sm text-muted">Each enrollment gives one Student access to one Program. Save another enrollment to add a second Program.</p>
-        {editing && <p role="note" className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Editing this enrollment. Changing Program and saving will replace its current Program. Use Add another program to keep this enrollment.</p>}
+        {editing && <p role="note" className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Edit access dates or status here. Program and Batch stay fixed. <Link className="font-bold underline" href={`/admin/students/${student}`}>Open Student details to transfer Batch</Link>, or use Add another program to add access.</p>}
         {saveNotice && <p role="status" className="rounded bg-green-50 p-3 text-sm text-green-800">{saveNotice}</p>}
         <Select
           label="Student"
+          disabled={!!editing}
           value={student}
           onChange={(value) => { setStudent(value); setSaveNotice(""); }}
-          items={students}
+          items={editing ? students.filter(x => x.id === student) : students}
         />
         <label className="text-xs font-bold uppercase text-muted">Enrollment date<input type="date" required className={`${input} mt-2`} value={enrolledOn} onChange={e=>setEnrolledOn(e.target.value)}/></label>
         <Select
           label="Program"
+          disabled={!!editing}
           value={program}
           onChange={(v) => {
             setProgram(v);
@@ -216,14 +223,15 @@ function Enrollments({ data, busy, run }: Props) {
             setSaveNotice("");
             if(!editing){const days=data.programs.find(p=>p.id===v)?.access_validity_days;setStart(localDateTime(new Date().toISOString()));setNoExpiry(!days);setExpiry(days?localDateTime(new Date(Date.now()+days*86400000).toISOString()):"")}
           }}
-          items={data.programs}
+          items={editing ? data.programs.filter(x => x.id === program) : data.programs}
         />
         <Select
           label="Batch"
+          disabled={!!editing}
           value={batch}
           onChange={setBatch}
-          items={data.batches.filter((x) => x.program_id === program)}
-          blank="No batch"
+          items={data.batches.filter((x) => x.program_id === program && (!editing || x.id === batch))}
+          blank={editing ? (batch ? "Batch fixed — use Transfer" : "Unassigned") : "Unassigned (no batch-specific access)"}
         />
         <label className="text-xs font-bold uppercase text-muted">
           Access starts
@@ -266,7 +274,7 @@ function Enrollments({ data, busy, run }: Props) {
         empty="No enrollments yet."
         rows={data.enrollments.map((x) => ({
           id: x.id,
-          primary: names.get(x.student_id) || "Student",
+          primary: <Link href={`/admin/students/${x.student_id}`} className="font-bold text-brand underline-offset-4 hover:underline">{names.get(x.student_id) || "Student"}</Link>,
           secondary: programs.get(x.program_id) || "Program",
           meta: `Enrollment: ${x.status} · ${x.access_expires_at ? `${Date.parse(x.access_expires_at) <= accessObservedAt ? "Access expired" : "Access until"} ${formatAcademicDate(x.access_expires_at)} (Asia/Dubai)` : "No expiry"}`,
           action: <div className="flex flex-wrap gap-2"><button disabled={busy} className="min-h-10 rounded border px-3 text-sm font-bold disabled:opacity-50" onClick={()=>{setEditing(x.id);setStudent(x.student_id);setProgram(x.program_id);setBatch(x.batch_id||"");setStatus(x.status);setEnrolledOn(x.enrolled_on);setStart(x.access_starts_at?localDateTime(x.access_starts_at):"");setExpiry(x.access_expires_at?localDateTime(x.access_expires_at):"");setNoExpiry(!x.access_expires_at);setValidation("");setSaveNotice("")}}>Edit</button><button disabled={busy} className={button} onClick={()=>void run(()=>saveEnrollment({...x,status:x.status==="active"?"suspended":"active"}))}>{x.status==="active"?"Suspend":"Reactivate"}</button></div>,
@@ -858,7 +866,7 @@ function Rows({
 }: {
   rows: Array<{
     id: string;
-    primary: string;
+    primary: React.ReactNode;
     secondary: string;
     meta: string;
     action?: React.ReactNode;

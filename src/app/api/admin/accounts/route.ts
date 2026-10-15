@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     if (session.response) return session.response;
     const body = await bodyOf(request);
     if (!body || !isManagedRole(body.role) || !validAccountName(body.full_name) || !validAccountEmail(body.email)) return failure("Enter a valid name, email and account role.", 400);
+    if(body.role==="student")return failure("Use Student admission to create a Student and assign access safely.",400);
     if (!validAccountPassword(body.password)) return failure(passwordHelp, 400);
     const root = createAuthAdminClient();
     const email = body.email.trim().toLowerCase(), name = body.full_name.trim();

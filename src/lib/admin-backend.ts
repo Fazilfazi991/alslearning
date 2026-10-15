@@ -105,8 +105,9 @@ export async function saveEnrollment(value: Record<string, unknown>) {
   const mutation = id
     ? db.from("enrollments").update(value).eq("id", id)
     : db.from("enrollments").insert(value);
-  const { error } = await mutation;
+  const { error, data } = await mutation.select("id").single();
   fail(error);
+  if (!data) throw new Error("Enrollment changes could not be confirmed.");
 }
 export async function setFacultyActive(id: string, is_active: boolean) {
   const { error } = await createClient()

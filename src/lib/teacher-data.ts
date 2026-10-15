@@ -5,6 +5,7 @@ import { currentUser } from "@/lib/auth";
 export type TeacherStudent = {
   id: string;
   student_id: string;
+  student_code?: string | null;
   name: string;
   email: string;
   program: string;

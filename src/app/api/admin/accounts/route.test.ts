@@ -37,12 +37,16 @@ describe("Admin account administration", () => {
     expect((await POST(request("POST", { ...payload, ...change }))).status).toBe(400);
     expect(mock.createUser).not.toHaveBeenCalled();
   });
-  it.each(["student", "teacher"])("creates one Auth-backed %s and verifies the canonical profile", async role => {
+  it.each(["teacher"])("creates one Auth-backed %s and verifies the canonical profile", async role => {
     mock.single.mockResolvedValueOnce({ data: { id: targetId, role, is_active: true, email: payload.email, full_name: payload.full_name }, error: null });
     const response = await POST(request("POST", { ...payload, email: " TEACHER@example.test ", role, app_metadata: { role: "admin" } }));
     expect(response.status).toBe(201);
     expect(mock.createUser).toHaveBeenCalledWith({ email: payload.email, password: payload.password, email_confirm: true, app_metadata: { role }, user_metadata: { full_name: payload.full_name } });
     expect(mock.deleteUser).not.toHaveBeenCalled();
+  });
+  it("requires the admission workflow instead of a partial Student login",async()=>{
+    expect((await POST(request("POST",{...payload,role:"student"}))).status).toBe(400);
+    expect(mock.createUser).not.toHaveBeenCalled();
   });
   it("reports duplicate email and never deletes an existing user", async () => {
     mock.createUser.mockResolvedValue({ data: { user: null }, error: { code: "email_exists", message: "private provider detail" } });

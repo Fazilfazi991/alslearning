@@ -65,11 +65,11 @@ export async function TeacherBackendPortal({ section = "dashboard", page = 0, se
       : <HonestState title="No assigned courses" body="An ALS administrator can assign a program and subjects to your Teacher account." />)}
     {section === "students" && <>
       <form className="mb-5 flex max-w-lg flex-wrap gap-2" action="/teacher/students"><label className="min-w-48 flex-1 text-sm font-semibold">Search assigned students
-        <input name="search" defaultValue={search} type="search" className="mt-1 min-h-11 w-full rounded-lg border border-line px-3" placeholder="Name, email or program" /></label>
+        <input name="search" defaultValue={search} type="search" className="mt-1 min-h-11 w-full rounded-lg border border-line px-3" placeholder="Name, email, Student Code or program" /></label>
         <button className="self-end rounded-lg bg-brand px-4 py-3 text-sm font-bold text-white">Search</button>{search&&<Link href="/teacher/students" className="inline-flex min-h-11 items-center self-end px-2 text-sm font-bold text-brand">Clear search</Link>}</form>
       <p className="mb-4 text-sm text-muted">{data.studentCount} {search?"matching":"scoped"} enrollment{data.studentCount===1?"":"s"}. A Student enrolled in two Programs appears once per Program.</p>
       {data.students.length ? <div className="space-y-3">{data.students.map((student: TeacherStudent) => <article className="card p-5" key={student.id}>
-        <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">{student.name}</h2><p className="mt-1 break-all text-xs text-muted">{student.email}</p>
+        <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold">{student.name}</h2><p className="mt-1 break-all text-xs text-muted">{student.email}</p>{student.student_code&&<p className="mt-1 text-xs font-semibold text-brand">{student.student_code}</p>}
           <p className="mt-2 text-sm font-semibold">{student.program}{student.batch ? ` · ${student.batch}` : " · Program-wide"}</p></div>
           <span className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${student.status==="active"?"bg-green-50 text-green-800":"bg-amber-50 text-amber-900"}`}>{student.status}</span></div>
         <p className="mt-3 text-sm text-muted">Access expires: {student.expires_at ? `${formatAcademicDate(student.expires_at,process.env.ALS_ACADEMIC_TIME_ZONE||"Asia/Dubai")} (${process.env.ALS_ACADEMIC_TIME_ZONE||"Asia/Dubai"})` : "No expiry set"}</p>

@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext } from "react";
-export type AuthorIdentity = {id:string;role:string};
+export type AuthorIdentity = {id:string;role:string;email?:string|null;full_name?:string|null};
 const Context = createContext<AuthorIdentity | undefined>(undefined);
 // UI identity from the existing server role guard. Database reads and writes
 // still authorize every request through the current session and RLS.
