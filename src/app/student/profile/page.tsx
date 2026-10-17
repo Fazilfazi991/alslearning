@@ -8,7 +8,7 @@ export default async function ProfilePage() {
   const user = await requireRole(["student"]);
   const db = await createClient();
   const { data: enrollments, error } = await db.from("enrollments")
-    .select("id,status,access_expires_at,programs(name),batches(name)")
+    .select("id,status,access_expires_at,programs(name),batches!enrollments_batch_program_fk(name)")
     .eq("student_id", user.id).eq("status", "active");
   if (error) throw new Error("Your profile could not be loaded.");
   const personal = await db.from("profiles").select("full_name,phone,avatar_path,student_code").eq("id",user.id).single();

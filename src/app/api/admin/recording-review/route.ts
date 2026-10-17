@@ -8,7 +8,7 @@ export async function GET(request:Request){
   const params=new URL(request.url).searchParams;const page=Math.max(0,Math.min(10000,Number.parseInt(params.get("page")||"0",10)||0));const view=params.get("view")||"pending";
   const s=await adminSession();if(s.response)return s.response;
   const id=params.get("id");if(id&&!validAccountId(id))return NextResponse.json({error:"Invalid recording."},{status:400});
-  let query=s.db!.from("class_recordings").select("id,session_id,status,duration_seconds,total_bytes,client_validated_at,verified_at,published_at,rejected_at,rejection_reason,error_message,review_title,review_description,live_sessions!inner(id,title,status,provider,starts_at,recording_enabled,programs(name),subjects(name),batches(name),profiles!live_sessions_faculty_id_fkey(full_name)),live_recording_segments(id,status,total_bytes,object_key)",{count:"exact"}).eq("live_sessions.recording_enabled",true).order("created_at",{ascending:false});
+  let query=s.db!.from("class_recordings").select("id,session_id,status,duration_seconds,total_bytes,client_validated_at,verified_at,published_at,rejected_at,rejection_reason,error_message,review_title,review_description,live_sessions!inner(id,title,status,provider,starts_at,recording_enabled,programs(name),subjects(name),batches!live_sessions_batch_program_fk(name),profiles!live_sessions_faculty_id_fkey(full_name)),live_recording_segments(id,status,total_bytes,object_key)",{count:"exact"}).eq("live_sessions.recording_enabled",true).order("created_at",{ascending:false});
   if(view==="published")query=query.eq("status","published");else if(view==="pending")query=query.neq("status","published");
   if(id)query=query.eq("id",id);
   const result=await query.range(page*20,page*20+19);

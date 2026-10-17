@@ -47,7 +47,7 @@ export async function getTeacherData(section = "dashboard", page = 0, search = "
     section === "dashboard" ? db.from("questions").select("id", { head: true, count: "exact" }).abortSignal(signal) : skip(),
     section === "dashboard" ? db.from("tests").select("id", { head: true, count: "exact" }).abortSignal(signal) : skip(),
     section === "dashboard" ? db.from("learning_content").select("id", { head: true, count: "exact" }).abortSignal(signal) : skip(),
-    section === "live-classes" ? db.from("live_sessions").select("id,title,starts_at,ends_at,join_opens_at,ended_at,status,provider,recording_enabled,programs(name),subjects(name),batches(name),class_recordings(id,status,published_at,total_bytes)").eq("faculty_id", user.id).order("starts_at", { ascending: false }).abortSignal(signal) : skip(),
+    section === "live-classes" ? db.from("live_sessions").select("id,title,starts_at,ends_at,join_opens_at,ended_at,status,provider,recording_enabled,programs(name),subjects(name),batches!live_sessions_batch_program_fk(name),class_recordings(id,status,published_at,total_bytes)").eq("faculty_id", user.id).order("starts_at", { ascending: false }).abortSignal(signal) : skip(),
   ]);
   const error = [assignments, batchLinks, roster, questions, tests, content, sessions].find((item) => item.error)?.error;
   if (error) throw new Error(error.message);

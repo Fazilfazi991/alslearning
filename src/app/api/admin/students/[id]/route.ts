@@ -11,8 +11,8 @@ export async function GET(_request:Request,context:RouteContext<"/api/admin/stud
   const db=s.db!;
   const [profile,enrollments,history,attendance,results,transfers]=await Promise.all([
     db.from("profiles").select("id,full_name,email,phone,avatar_path,role,is_active,student_code,admission_on,created_at,guardian_name,guardian_phone,guardian_relationship,address,internal_notes").eq("id",id).eq("role","student").single(),
-    db.from("enrollments").select("id,program_id,batch_id,status,enrolled_on,access_starts_at,access_expires_at,programs(name),batches(name,batch_code)").eq("student_id",id).order("created_at"),
-    db.from("student_batch_history").select("id,enrollment_id,effective_at,ended_at,reason,programs(name),batches(name,batch_code)").eq("student_id",id).order("effective_at",{ascending:false}),
+    db.from("enrollments").select("id,program_id,batch_id,status,enrolled_on,access_starts_at,access_expires_at,programs(name),batches!enrollments_batch_program_fk(name,batch_code)").eq("student_id",id).order("created_at"),
+    db.from("student_batch_history").select("id,enrollment_id,effective_at,ended_at,reason,programs(name),batches!student_history_batch_program_fk(name,batch_code)").eq("student_id",id).order("effective_at",{ascending:false}),
     db.from("live_attendance_intervals").select("id,session_id,started_at,ended_at").eq("user_id",id),
     db.from("test_attempts").select("id,status,score,submitted_at,tests(title)").eq("student_id",id).order("started_at",{ascending:false}),
     db.from("student_batch_transfers").select("id,effective_at,status,reason,failure_reason,batches!student_batch_transfers_to_batch_id_fkey(name,batch_code)").eq("student_id",id).order("effective_at",{ascending:false})

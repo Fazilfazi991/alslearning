@@ -12,7 +12,7 @@ export async function getStudentPortalData() {
       db
         .from("enrollments")
         .select(
-          "*,programs(id,name,slug,description,duration_days,status),batches(id,program_id,name,starts_on,ends_on,status,access_starts_at,access_expires_at,access_valid_until)",
+          "*,programs(id,name,slug,description,duration_days,status),batches!enrollments_batch_program_fk(id,program_id,name,starts_on,ends_on,status,access_starts_at,access_expires_at,access_valid_until)",
         )
         .eq("student_id", user.id)
         .order("created_at", { ascending: false }),
@@ -109,7 +109,7 @@ export async function getCourseDetail(slug: string) {
   if (error) return null;
   const { data: courseEnrollments, error: enrollmentError } = await db
     .from("enrollments")
-    .select("id,status,batch_id,access_starts_at,access_expires_at,batches(id)")
+    .select("id,status,batch_id,access_starts_at,access_expires_at,batches!enrollments_batch_program_fk(id)")
     .eq("student_id", user.id)
     .eq("program_id", program.id)
     .eq("status", "active");

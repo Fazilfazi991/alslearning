@@ -10,7 +10,7 @@ export const courseAccess = cache(async () => {
   const user = await requireRole(["student"]);
   const db = await createClient();
   const result = await db.from("enrollments")
-    .select("id,status,batch_id,access_starts_at,access_expires_at,batches(id,name),programs(id,name,slug)")
+    .select("id,status,batch_id,access_starts_at,access_expires_at,batches!enrollments_batch_program_fk(id,name),programs(id,name,slug)")
     .eq("student_id", user.id).eq("status", "active").order("created_at", { ascending: false });
   if (result.error) throw new Error("Your courses could not be loaded. Please try again.");
   return { db, enrollments: (result.data as unknown as CourseEnrollment[] ?? []).filter(e => activeCourseEnrollment(e)) };
