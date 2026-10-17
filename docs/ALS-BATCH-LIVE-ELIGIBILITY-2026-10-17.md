@@ -52,7 +52,7 @@ Scheduled full-batch failure also verified: the worker retained the previous ass
 
 ## Hosted candidate and additional checks
 
-Preview `dpl_7G24kj69zAC9PtbZ2HD6wdKocSvv` reached READY at commit `f83f8a021893ef151829d0bc77eb00e82fa54581` and was assigned only the existing isolated staging alias. Ten authenticated hosted page requests returned HTTP 200 without a server error across Admin, Teacher and Student; unauthorized Admin routes were rejected. This is HTTP/server verification, not browser interaction or media acceptance.
+Preview `dpl_7G24kj69zAC9PtbZ2HD6wdKocSvv` reached READY at commit `f83f8a021893ef151829d0bc77eb00e82fa54581` and was assigned only the existing isolated staging alias. Initial HTTP 200 checks were insufficient: later inspection found streamed React Server Component errors caused by the ambiguous joins described below. The corrected candidate is verified separately below. Unauthorized Admin routes were rejected. This is HTTP/server verification, not browser interaction or media acceptance.
 
 The final focused display correction passes the authorized session's join-window and ended timestamps to the classroom, refreshes the scheduled label, and keeps Admin's rescheduled join window current. A component test proves a future scheduled join window disappears after an actual early Live transition and Join becomes available. Thirty targeted tests passed, followed by the full 489-test suite, typecheck, lint and the production build.
 
@@ -68,4 +68,10 @@ Hosted admission returned 201, but its Student Details API returned 503. The new
 
 Eight exact joined queries passed against hosted staging using real Admin, Teacher and Student Auth, with nonempty enrollment/course/history data and three existing recording metadata rows. Full tests remain 489 passed plus 4 importer tests, with 13 pre-existing skips; typecheck and lint passed again. The current complete Preview is updated only after these checks and the production build.
 
-The owned API admission fixture was created once. Actual Supabase password login succeeded; full one-seat admission was rejected (422); after deactivation, duplicate Auth email was rejected (409), and the normal application password endpoint rejected the inactive account (401). Identity/history are retained. Its full Student Details API is retested after the corrected complete Preview is ready. No Production admission or schema change occurred.
+The owned API admission fixture was created once. Actual Supabase password login succeeded; full one-seat admission was rejected (422); after deactivation, duplicate Auth email was rejected (409), and the normal application password endpoint rejected the inactive account (401). Identity/history are retained. The corrected full Student Details API returned 200 with code, phone, guardian fields, one enrollment and one history interval intact; recording-review metadata returned 200. No Production admission or schema change occurred.
+
+## Current saved checkpoint — 08:11 UTC
+
+Complete source commit `6f202a1a58af9e1d1dcf62f3553b9ac3217d7f42` is READY in Preview `dpl_9vBjDrgAzAtnWWrtHF51ZvUdyqbF`, using only the existing isolated staging alias. Twelve authenticated page requests passed with HTTP 200 and no streamed RSC errors: Admin dashboard/academic/Students/Live/Recorded; Teacher dashboard/Live/new schedule; Student dashboard/Live/Courses/Profile. Eight joined-query probes and the real hosted admission/detail checks also pass. Browser interactions, responsive layouts and actual media still require the pending owner handoffs.
+
+At `2026-10-17T08:11:27.968Z`, staging has zero live classes, open/reconnecting connections, active/closing publications, active/closing subscriptions, open attendance, pending recording work and pending transfers. Live/recording configuration remains disabled. The new scoped R2 token is waiting on the owner's private credential entry; no replacement values have been saved or deployed. No Production schema migration/application deployment occurred.
