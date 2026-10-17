@@ -39,7 +39,7 @@ Preflight: Production 6 batches, 7 enrollments, 5 live-session records, 9 histor
 
 - 488 Vitest tests and 4 importer tests passed; 13 pre-existing skips.
 - Typecheck, ESLint and production build passed (39 static pages).
-- 25 hosted database assertions with real Supabase Auth: assigned/unassigned visibility, exact Batch scheduling, upcoming and early-live access, another-Batch direct denial, Student/Teacher transfer denial, same-Batch no-op, full-batch rollback, deactivation freeing a seat, reactivation capacity enforcement, transfer history/actor/reason, eligibility changes, immutable codes, terminal-state denial, concurrent one-seat race, and future-transfer non-early application.
+- 28 hosted database assertions with real Supabase Auth: assigned/unassigned visibility, exact Batch scheduling, upcoming and early-live access, another-Batch direct denial, Student/Teacher transfer denial, same-Batch no-op, full-batch rollback, deactivation freeing a seat, reactivation capacity enforcement, transfer history/actor/reason, eligibility changes, immutable codes, terminal-state denial, concurrent one-seat race, and future-transfer non-early application.
 - Scheduled transfer `5005de64-032f-43f4-9b7f-3f620718a7d3`: effective `07:18:53.801Z`, applied by Cron `07:19:00.058597Z`. No manual worker invocation.
 
 ## Remaining release gates
@@ -47,3 +47,5 @@ Preflight: Production 6 batches, 7 enrollments, 5 live-session records, 9 histor
 Complete hosted browser flows, responsive inspection, actual microphone publication/Student reception/transfer revocation/normal End and replay regression, then Production migrations, complete release and controlled Production acceptance. Staging R2 renewal for the existing bucket is approved; owner Cloudflare sign-in is pending. No new recording is planned. Existing SFU/TURN IDs are shared with Production and must not be rotated or globally cleaned.
 
 Private fixture IDs, original snapshots, credentials and SDK evidence are under ignored `.local-qa/batch-live/`; never publish private files or secrets.
+
+Scheduled full-batch failure also verified: the worker retained the previous assignment and code, and recorded a failed request. Admin cancellation and anonymous/Teacher/Student denial passed with actual Auth. The first Preview was blocked because the author’s legacy noreply email was unverified; the next maintenance checkpoint uses the same owner’s existing verified Vercel email, without changing team access or plans.
