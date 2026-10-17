@@ -1,5 +1,5 @@
 "use client";
-import {localDateTime} from "@/lib/core-time";
+import {academicLocalToUtc,utcToAcademicLocalInput} from "@/lib/live-class/date";
 
 import {Editor} from "./core-fields";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -163,7 +163,7 @@ function Structure({
         .filter(
           (x) =>
             x.kind === kind &&
-            `${x.name} ${x.slug}`.toLowerCase().includes(search.toLowerCase()),
+            `${x.name} ${x.slug} ${x.metadata?.batch_code || ""}`.toLowerCase().includes(search.toLowerCase()),
         )
         .sort((a, b) => a.order - b.order),
     [workspace, kind, search],
@@ -306,6 +306,7 @@ function Structure({
                       {item.name}
                     </button>
                     <p className="text-xs text-muted">/{item.slug}</p>
+                    {kind === "batch" && <><p className="mt-1 text-xs font-semibold">{String(item.metadata?.batch_code || "Code pending")} · {Number(item.metadata?.occupied || 0)} / {item.metadata?.max_students === "" || item.metadata?.max_students == null ? "Unlimited" : String(item.metadata.max_students)} students</p><p className="mt-1 text-xs text-muted">{((item.metadata?.teacherIds || []) as string[]).length} Teacher assignments · {((item.metadata?.batchSubjectIds || []) as string[]).length} subjects</p></>}
                     {kind === "program" && faculty && <p className="mt-1 text-xs text-muted">{facultyCounts(faculty).filter(count => ((item.metadata?.subjectIds || []) as string[]).includes(count.id)).map(count => `${count.name}: ${count.count} faculty`).join(" · ")}</p>}
                   </td>
                   <td className="p-3 text-muted">
@@ -347,6 +348,7 @@ function Structure({
         <EntityDialog
           entity={editing}
           choices={workspace.entities.filter((x) => x.id !== editing.id)}
+          teachers={workspace.teachers || []}
           onClose={() => setEditing(null)}
           onSave={async (entity) => {
             await saveAcademicEntity(entity, workspace.entities);
@@ -368,11 +370,13 @@ function Structure({
 function EntityDialog({
   entity,
   choices,
+  teachers,
   onClose,
   onSave,
 }: {
   entity: AcademicEntity;
   choices: AcademicEntity[];
+  teachers: {id:string;full_name:string}[];
   onClose: () => void;
   onSave: (x: AcademicEntity) => Promise<void>;
 }) {
@@ -436,9 +440,10 @@ function EntityDialog({
             <Field label="Parent / association">
               <select
                 className={input}
+                required={draft.kind === "batch"}
                 value={draft.parentId || ""}
                 onChange={(e) =>
-                  setDraft({ ...draft, parentId: e.target.value || undefined })
+                  setDraft({ ...draft, parentId: e.target.value || undefined, metadata: draft.kind === "batch" ? {...draft.metadata,batchSubjectIds:[],teacherIds:[]} : draft.metadata })
                 }
               >
                 <option value="">No parent</option>
@@ -475,7 +480,13 @@ function EntityDialog({
             {(['duration_days','access_validity_days'] as const).map(key=><Field key={key} label={key==='duration_days'?'Duration (days)':'Default access validity (days)'}><input type="number" min="1" className={input} value={Number(draft.metadata?.[key])||''} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,[key]:Number(e.target.value)}})}/></Field>)}
             <fieldset className="sm:col-span-2"><legend className="font-bold">Program subjects</legend>{choices.filter(x=>x.kind==='subject').map(x=><label key={x.id} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={((draft.metadata?.subjectIds||[]) as string[]).includes(x.id)} onChange={e=>{const ids=(draft.metadata?.subjectIds||[]) as string[];setDraft({...draft,metadata:{...draft.metadata,subjectIds:e.target.checked?[...ids,x.id]:ids.filter(id=>id!==x.id)}})}}/>{x.name}</label>)}</fieldset>
           </>}
-          {draft.kind==='batch'&&<><Field label="Batch Code"><input required pattern="[A-Z0-9]{2,16}" maxLength={16} className={input} value={String(draft.metadata?.batch_code||'')} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,batch_code:e.target.value.toUpperCase()}})}/><span className="mt-2 block text-xs text-muted">2–16 uppercase letters/numbers. Unique, permanent code used for new Student Codes.</span></Field>{(['starts_on','ends_on','access_starts_at','access_expires_at','class_timing'] as const).map(key=><Field key={key} label={({starts_on:'Start date',ends_on:'End date',access_starts_at:'Access starts',access_expires_at:'Access expires',class_timing:'Class timing'})[key]}><input className={input} type={key==='class_timing'?'text':key.endsWith('_on')?'date':'datetime-local'} value={key.includes('_at')?localDateTime(String(draft.metadata?.[key]||'')):String(draft.metadata?.[key]||'')} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,[key]:key.includes('_at')&&e.target.value?new Date(e.target.value).toISOString():e.target.value}})}/></Field>)}</>}
+          {draft.kind==='batch'&&<><Field label="Batch Code"><input required pattern="[A-Z0-9]{2,16}" maxLength={16} className={input} value={String(draft.metadata?.batch_code||'')} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,batch_code:e.target.value.toUpperCase()}})}/><span className="mt-2 block text-xs text-muted">2–16 uppercase letters/numbers. Unique, permanent code used for new Student Codes.</span></Field>{(['starts_on','ends_on','access_starts_at','access_expires_at','class_timing'] as const).map(key=><Field key={key} label={({starts_on:'Start date',ends_on:'End date',access_starts_at:'Access starts',access_expires_at:'Access expires',class_timing:'Class timing'})[key]}><input className={input} type={key==='class_timing'?'text':key.endsWith('_on')?'date':'datetime-local'} value={key.includes('_at')?utcToAcademicLocalInput(String(draft.metadata?.[key]||''),"Asia/Dubai"):String(draft.metadata?.[key]||'')} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,[key]:key.includes('_at')&&e.target.value?academicLocalToUtc(e.target.value,"Asia/Dubai"):e.target.value}})}/></Field>)}</>}
+          {draft.kind === "batch" && <>
+            <Field label="Student capacity"><input type="number" min="1" step="1" className={input} placeholder="Unlimited" value={String(draft.metadata?.max_students ?? "")} onChange={e=>setDraft({...draft,metadata:{...draft.metadata,max_students:e.target.value}})}/><span className="mt-2 block text-xs text-muted">{Number(draft.metadata?.occupied || 0)} current active students. Blank means Unlimited.</span></Field>
+            <p className="self-center text-xs text-muted">Access times use Asia/Dubai. Blank Access expires means No expiry.</p>
+            <fieldset className="sm:col-span-2"><legend className="font-bold">Assigned subjects</legend>{choices.filter(x=>x.kind==="subject" && ((choices.find(p=>p.id===draft.parentId)?.metadata?.subjectIds || []) as string[]).includes(x.id)).map(x=><label key={x.id} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={((draft.metadata?.batchSubjectIds||[]) as string[]).includes(x.id)} onChange={e=>{const ids=(draft.metadata?.batchSubjectIds||[]) as string[];setDraft({...draft,metadata:{...draft.metadata,batchSubjectIds:e.target.checked?[...ids,x.id]:ids.filter(id=>id!==x.id)}})}}/>{x.name}</label>)}</fieldset>
+            <fieldset className="sm:col-span-2"><legend className="font-bold">Assigned Teacher logins</legend><p className="mt-2 text-xs text-muted">Teachers also need the matching Program / Subject assignment in Teacher logins.</p>{teachers.map(x=><label key={x.id} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={((draft.metadata?.teacherIds||[]) as string[]).includes(x.id)} onChange={e=>{const ids=(draft.metadata?.teacherIds||[]) as string[];setDraft({...draft,metadata:{...draft.metadata,teacherIds:e.target.checked?[...ids,x.id]:ids.filter(id=>id!==x.id)}})}}/>{x.full_name}</label>)}</fieldset>
+          </>}
           <div className="sm:col-span-2">
             <Field label="Description">
               <textarea

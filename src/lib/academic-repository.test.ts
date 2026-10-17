@@ -5,8 +5,9 @@ const { updates, upserts } = vi.hoisted(() => ({ updates: vi.fn(), upserts: vi.f
 
 vi.mock("./supabase/client", () => ({
   createClient: () => ({
+    rpc: async (name:string,args:{value?:unknown}) => { if(name === "lms_save_batch")upserts("batches",args.value);return {data:[],error:null}; },
     from: (table: string) => ({
-      select: () => ({
+      select: () => {const chain={eq:()=>chain,then:(resolve:(value:unknown)=>unknown)=>Promise.resolve({data:[],error:null}).then(resolve),
         order: async () => ({
           data: table === "batches"
             ? [
@@ -16,7 +17,7 @@ vi.mock("./supabase/client", () => ({
             : [],
           error: null,
         }),
-      }),
+      };return chain;},
       update: (value: { status: string }) => ({
         eq: async (field: string, id: string) => {
           updates(table, value, field, id);

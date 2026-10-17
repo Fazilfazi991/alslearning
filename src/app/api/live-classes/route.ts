@@ -36,13 +36,16 @@ export async function POST(request: Request) {
   const [program, subject, batch, teacher, assignment] = await Promise.all([
     db.from("programs").select("id").eq("id", body.programId).eq("status", "active").maybeSingle(),
     db.from("program_subjects").select("program_id").eq("program_id", body.programId).eq("subject_id", body.subjectId).maybeSingle(),
-    db.from("batches").select("id").eq("id", body.batchId).eq("program_id", body.programId).maybeSingle(),
+    db.from("batches").select("id").eq("id", body.batchId).eq("program_id", body.programId).eq("status", "active").maybeSingle(),
     db.from("profiles").select("id").eq("id", body.teacherId).eq("role", "teacher").eq("is_active", true).maybeSingle(),
     db.from("faculty_assignments").select("id,program_id,subject_id").eq("faculty_id", body.teacherId),
   ]);
   const assigned = (assignment.data || []).some(value =>
     (!value.program_id || value.program_id === body.programId) && (!value.subject_id || value.subject_id === body.subjectId));
   if (!program.data || !subject.data || !batch.data || !teacher.data || !assigned) return error("Academic scope or authenticated Teacher assignment is invalid", 400);
+  const batchPermission = await db.rpc("teacher_can_schedule_batch", { target_batch: body.batchId, target_program: body.programId, target_subject: body.subjectId });
+  if (batchPermission.error) return error("Batch scheduling eligibility could not be checked. Please retry.", 503);
+  if (batchPermission.data !== true) return error("Select an active Batch assigned to you for this Subject. Ask Admin to check batch dates and assignments.", 403);
   const { data, error: insertError } = await db.from("live_sessions").insert({
     title: body.title.trim(), program_id: body.programId, subject_id: body.subjectId, batch_id: body.batchId,
     faculty_id: body.teacherId, starts_at: startsAt.toISOString(), ends_at: endsAt.toISOString(),

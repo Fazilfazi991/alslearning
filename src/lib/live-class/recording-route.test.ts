@@ -65,6 +65,10 @@ beforeEach(() => {
     live_recording_segments: [{ id: segmentId, recording_id: recordingId, session_id: classId, owner_id: "teacher", status: "validating", object_key: "recordings/2026/10/7385751c-3640-4db3-9a45-5348e682cffe/ea83d954-a4ef-45b6-b34c-8b80722f3b04/5d65817a-2a15-4013-9504-f81f8ece728c/teacher-composite.webm", total_bytes: 4451838, object_sha256: checksum, client_validated_at: end, client_reported_duration_seconds: 184.958, started_at: new Date(Date.now() - 120_000).toISOString(), completed_at: end }],
   };
   mocks.database = { from: query, auth: { getUser: async () => ({ data: { user: { id: userId } } }) }, rpc: async (name:string,args:Row) => {
+    if(name==="live_class_eligibility"){
+      const s=rows.live_sessions[0];const e=rows.enrollments.find(e=>e.student_id===userId&&e.program_id===s.program_id&&e.batch_id===s.batch_id&&e.status==="active"&&(!e.access_starts_at||Date.parse(String(e.access_starts_at))<=Date.now())&&(!e.access_expires_at||Date.parse(String(e.access_expires_at))>Date.now()));
+      return {data:!!e,error:null};
+    }
     if(name!=="lms_recording_decision")return {data:true,error:null};
     const r=rows.class_recordings.find(r=>r.id===args.target_recording && r.session_id===args.target_session);
     if(!r)return {data:null,error:{message:"Recording not found"}};

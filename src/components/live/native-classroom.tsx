@@ -1,4 +1,5 @@
 "use client";
+import { resolveLiveClassState,liveClassStateMessage } from "@/lib/live-class/state";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -164,12 +165,9 @@ export function NativeClassroom({
   } : null);
 
   const endpoint = `/api/live-classes/${session.id}`;
-  const applySessionStatus = useCallback((status: string) => {
-    if (terminalSessionStatus(classStatusRef.current)) return;
-    classStatusRef.current = status;
-    setClassStatus(status);
-    // Teacher End retains its existing recording stop and provider closure flow.
-    if (!terminalSessionStatus(status) || manager) return;
+  const [accessRevoked,setAccessRevoked]=useState(false);
+  const accessRevokedRef=useRef(false);
+  const stopStudentTransport=useCallback(() => {
     if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
     reconnectTimerRef.current = null;
     reconnectsRef.current = 0;
@@ -191,7 +189,12 @@ export function NativeClassroom({
     setConnectionId(null); setRemoteTracks([]); setPublished([]);
     setPreflightReady(false); setCameraOn(false); setScreenBusy(false);
     setConnectionState("ended"); setStats(emptyStats); setError(""); setNotice("");
-  }, [manager]);
+  }, []);
+  const applySessionStatus = useCallback((status: string) => {
+    if (terminalSessionStatus(classStatusRef.current)) return;
+    classStatusRef.current = status; setClassStatus(status);
+    if (terminalSessionStatus(status) && !manager) stopStudentTransport();
+  }, [manager,stopStudentTransport]);
 
   useEffect(() => {
     const observer = observeSessionStatus(createClient(), session.id, classStatusRef.current, applySessionStatus);
@@ -217,10 +220,13 @@ export function NativeClassroom({
     const value = await response.json().catch(() => ({})) as T & { error?: string };
     if (!response.ok) {
       if (response.status === 409 && value.error === "The class is not live") await refreshSessionRef.current();
+      if (!manager && (response.status === 401 || response.status === 403 || (response.status === 404 && value.error === "Classroom is unavailable"))) {
+        accessRevokedRef.current=true; setAccessRevoked(true); stopStudentTransport();
+      }
       throw new Error(value.error || `Classroom request failed (${response.status})`);
     }
     return value;
-  }, [endpoint, mode]);
+  }, [endpoint, mode, manager,stopStudentTransport]);
 
   const queue = useCallback(<T,>(operation: () => Promise<T>) => {
     const result = operationRef.current.then(operation, operation);
@@ -305,7 +311,7 @@ export function NativeClassroom({
       throw new Error(discovery.error || "Track discovery failed");
     }
     if (discovery.status && terminalSessionStatus(discovery.status)) applySessionStatus(discovery.status);
-    if (terminalSessionStatus(classStatusRef.current)) return;
+    if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) return;
     const activeIds = new Set((discovery.tracks || []).map(track => track.id));
     setRemoteTracks(current => current.filter(track => {
       if (activeIds.has(track.id)) return true;
@@ -323,7 +329,7 @@ export function NativeClassroom({
   }, [api, applySessionStatus, endpoint, lowData, mode, user.id]);
 
   const requestTrackRefresh = useCallback(() => {
-    if (terminalSessionStatus(classStatusRef.current) || !peerRef.current || !connectionId) return Promise.resolve();
+    if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current) || !peerRef.current || !connectionId) return Promise.resolve();
     trackRefreshPendingRef.current = true;
     if (trackRefreshPromiseRef.current) return trackRefreshPromiseRef.current;
     const operation = queue(async () => {
@@ -410,11 +416,11 @@ export function NativeClassroom({
   useEffect(() => {
     if (!connectionId) return;
     const heartbeat = window.setInterval(() => {
-      if (terminalSessionStatus(classStatusRef.current)) return;
+      if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) return;
       void api<{ status?: string }>("media", { action: "heartbeat", connectionId }).then(value => {
         if (value.status && terminalSessionStatus(value.status)) applySessionStatus(value.status);
       }).catch(() => {
-      if (!terminalSessionStatus(classStatusRef.current)) setConnectionState("reconnecting");
+      if (!(terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) setConnectionState("reconnecting");
       });
     }, 15_000);
     return () => window.clearInterval(heartbeat);
@@ -469,7 +475,7 @@ export function NativeClassroom({
     return () => {
     peer?.close();
     publisherPeer?.close();
-    if (connectionId && !terminalSessionStatus(classStatusRef.current)) void fetch(`${endpoint}/media`, {
+    if (connectionId && !(terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) void fetch(`${endpoint}/media`, {
       method: "POST", keepalive: true, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "leave", mode, connectionId }),
     });
@@ -560,7 +566,7 @@ export function NativeClassroom({
 
   async function join(recovery = false) {
     if (recovery) await refreshSessionRef.current();
-    if (terminalSessionStatus(classStatusRef.current) || !entryOpen || !configuration.realtimeConfigured || joinInFlightRef.current) return;
+    if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current) || !entryOpen || !configuration.realtimeConfigured || joinInFlightRef.current) return;
     joinInFlightRef.current = true;
     setConnectionState("joining"); setError("");
     let createdConnectionId: string | null = null;
@@ -575,7 +581,7 @@ export function NativeClassroom({
       }
       const created = await api<{ connectionId: string; iceServers: RTCIceServer[] }>("media", { action: "create" });
       createdConnectionId = created.connectionId;
-      if (terminalSessionStatus(classStatusRef.current)) throw new Error("The class is not live");
+      if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) throw new Error("The class is not live");
       const peerOptions: RTCConfiguration = {
         iceServers: created.iceServers,
         bundlePolicy: "max-bundle",
@@ -584,14 +590,14 @@ export function NativeClassroom({
       const peer = new RTCPeerConnection(peerOptions);
       const publisherPeer = new RTCPeerConnection(peerOptions);
       peer.ontrack = event => {
-        if (terminalSessionStatus(classStatusRef.current)) { event.track.stop(); return; }
+        if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) { event.track.stop(); return; }
         const identity = midMapRef.current.get(event.transceiver.mid || "");
         if (!identity) return;
         trackKindByIdentifierRef.current.set(event.track.id, identity.kind);
         setRemoteTracks(current => [...current.filter(value => value.id !== identity.id), { ...identity, stream: new MediaStream([event.track]) }]);
       };
       const handleConnectionState = () => {
-        if (terminalSessionStatus(classStatusRef.current)) return;
+        if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) return;
         const states = [peer.connectionState, publisherPeer.connectionState];
         if (states.some(state => ["disconnected", "failed"].includes(state)) && peerRef.current === peer) {
           setConnectionState("reconnecting"); reconnectsRef.current += 1;
@@ -607,7 +613,7 @@ export function NativeClassroom({
       publisherPeer.onconnectionstatechange = handleConnectionState;
       peerRef.current = peer; publisherPeerRef.current = publisherPeer; setConnectionId(created.connectionId);
       await queue(() => subscribeAvailable(peer, created.connectionId));
-      if (terminalSessionStatus(classStatusRef.current)) throw new Error("The class is not live");
+      if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) throw new Error("The class is not live");
       setConnectionState([peer.connectionState, publisherPeer.connectionState].includes("connected") ? "connected" : "joining");
       if (localStreamRef.current?.active && (manager || participant?.audio_publish_allowed)) {
         await queue(() => publishLocal(publisherPeer, created.connectionId, localStreamRef.current!.getTracks()));
@@ -622,7 +628,7 @@ export function NativeClassroom({
       localStreamRef.current = null; setPreflightReady(false); setCameraOn(false);
       if (createdConnectionId) void api("media", { action: "leave", connectionId: createdConnectionId }).catch(() => undefined);
       setConnectionId(null);
-      if (terminalSessionStatus(classStatusRef.current)) { setConnectionState("ended"); return; }
+      if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) { setConnectionState("ended"); return; }
       setConnectionState("failed");
       const message = reason instanceof Error ? reason.message : "Could not join classroom";
       setError(message.includes("Staging test window is closed") ? "The classroom testing window has ended. Return to classes and check for the next scheduled window." : message);
@@ -632,7 +638,7 @@ export function NativeClassroom({
 
   useEffect(() => {
     recoverReceiveRef.current = () => {
-      if (terminalSessionStatus(classStatusRef.current)) return;
+      if ((terminalSessionStatus(classStatusRef.current) || accessRevokedRef.current)) return;
       if (joinInFlightRef.current || reconnectTimerRef.current !== null) return;
       reconnectsRef.current += 1;
       if (reconnectsRef.current > 3) { setConnectionState("failed"); return; }
@@ -1143,6 +1149,8 @@ export function NativeClassroom({
     }
   }
 
+  const resolvedState = resolveLiveClassState({status:classStatus});
+  if (accessRevoked) return <section className="card mx-auto max-w-3xl p-6 sm:p-8" role="status"><h1 className="text-xl font-bold">Your classroom access has changed</h1><p className="mt-3 text-sm text-muted">This class is no longer available under your current enrollment. Your devices and classroom connection are closed.</p><div className="mt-6"><Button href="/student/live-classes" variant="secondary">Back to classes</Button></div></section>;
   const visual = remoteTracks.find(track => track.kind === "screen") || remoteTracks.find(track => track.kind === "camera");
   const classList = user.role === "student" ? "/student/live-classes" : "/teacher/live-classes";
   const publishedReplay = user.role === "student" ? recordings.find(value => value.status === "published" && value.published_at) : null;
@@ -1150,7 +1158,7 @@ export function NativeClassroom({
     const completed = classStatus === "completed" || classStatus === "cancelled";
     const unavailable = !entryOpen || !configuration.realtimeConfigured;
     return <div className="mx-auto max-w-3xl p-4 sm:p-8"><header className="mb-6 flex flex-wrap items-start justify-between gap-4"><div><p className="eyebrow">{first(session.subjects)?.name || "ALS live classroom"}</p><h1 className="mt-2 text-2xl font-bold">{session.title}</h1></div>{user.role === "teacher" && <LogoutButton className="min-h-11 rounded-xl border border-line bg-white px-4 text-sm font-bold"/>}</header>
-      <section className="card p-6 sm:p-8" role="status"><h2 className="text-xl font-bold">{completed ? "This class has ended." : unavailable ? "Classroom temporarily unavailable" : "Class scheduled"}</h2>
+      <section className="card p-6 sm:p-8" role="status"><h2 className="text-xl font-bold">{completed ? liveClassStateMessage(resolvedState) : unavailable ? "Classroom temporarily unavailable" : "Class scheduled"}</h2>
         <p className="mt-3 text-sm leading-6 text-muted">{completed ? "You can return to your classes and watch a replay once it has been reviewed and published." : unavailable ? "Live classroom access is outside the current testing window or temporarily unavailable. Check back near the scheduled class time." : "The classroom opens when the Teacher starts this class."}</p>
         {session.starts_at && !completed && <p className="mt-3 text-sm font-semibold">Scheduled for {formatAcademicDate(session.starts_at, timeZone)}</p>}
         {unavailable && !completed && <p className="mt-2 text-sm text-muted">{testingWindow.opensAt && testingWindow.closesAt ? `Testing access: ${formatAcademicDate(testingWindow.opensAt, timeZone)} to ${formatAcademicDate(testingWindow.closesAt, timeZone)}.` : "No classroom testing window is currently scheduled."}</p>}

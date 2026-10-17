@@ -6,13 +6,14 @@ import { isSameOriginRequest } from "@/lib/request-origin";
 const headers={"Cache-Control":"private, no-store"};
 export async function GET() {
   const session=await adminSession(); if(session.response)return session.response;
-  const [students,programs,batches]=await Promise.all([
+  const [students,programs,batches,occupancy]=await Promise.all([
     session.db!.from("profiles").select("id,full_name,email,phone,is_active,student_code,admission_on").eq("role","student").order("full_name"),
     session.db!.from("programs").select("id,name,status").eq("status","active").order("name"),
-    session.db!.from("batches").select("id,name,program_id,batch_code,status").eq("status","active").order("name")
+    session.db!.from("batches").select("id,name,program_id,batch_code,status").eq("status","active").order("name"),
+    session.db!.rpc("lms_batch_occupancy")
   ]);
-  if([students,programs,batches].some(r=>r.error))return NextResponse.json({error:"Student records could not be loaded."},{status:503});
-  return NextResponse.json({students:students.data,programs:programs.data,batches:batches.data},{headers});
+  if([students,programs,batches,occupancy].some(r=>r.error))return NextResponse.json({error:"Student records could not be loaded."},{status:503});
+  return NextResponse.json({students:students.data,programs:programs.data,batches:(batches.data || []).map(b=>({...b,...(occupancy.data || []).find((o:{batch_id:string})=>o.batch_id===b.id)}))},{headers});
 }
 export async function POST(request:Request) {
   if(!isSameOriginRequest(request))return NextResponse.json({error:"Invalid request."},{status:403});
@@ -28,9 +29,11 @@ export async function POST(request:Request) {
       return NextResponse.json({error:"Select an active compatible batch with a Batch Code.",errors:{batch_id:"Select an active compatible batch with a Batch Code."}},{status:422});
     }
     if(batch.data.max_students!==null) {
-      const occupied=await session.db!.from("enrollments").select("id",{count:"exact",head:true}).eq("batch_id",batch.data.id).eq("status","active");
+      const occupied=await session.db!.rpc("lms_batch_occupancy");
       if(occupied.error)return NextResponse.json({error:"Batch availability could not be checked. Please retry."},{status:503});
-      if((occupied.count??0)>=batch.data.max_students)return NextResponse.json({error:"This batch is full. Choose another compatible batch.",errors:{batch_id:"This batch is full. Choose another compatible batch."}},{status:422});
+      const count=(occupied.data || []).find((b:{batch_id:string;occupied:number})=>b.batch_id===batch.data!.id)?.occupied;
+      if(count===undefined)return NextResponse.json({error:"Batch availability could not be checked. Please retry."},{status:503});
+      if(count>=batch.data.max_students)return NextResponse.json({error:"This batch is full. Choose another compatible batch.",errors:{batch_id:"This batch is full. Choose another compatible batch."}},{status:422});
     }
   }
   // The Auth DB trigger completes admission in the SAME transaction. A trigger

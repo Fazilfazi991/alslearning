@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { admissionErrors,type StudentAdmission } from "@/lib/student-admission";
 import { passwordHelp } from "@/lib/account-validation";
 import { academicLocalToUtc,utcToAcademicLocalInput } from "@/lib/live-class/date";
-export type StudentOptions={programs:{id:string;name:string}[];batches:{id:string;name:string;program_id:string;batch_code:string|null}[]};
+export type StudentOptions={programs:{id:string;name:string}[];batches:{id:string;name:string;program_id:string;batch_code:string|null;occupied?:number;capacity?:number|null}[]};
 type Student={id:string;full_name:string;email:string;phone:string|null;is_active:boolean;student_code:string|null;admission_on:string|null};
 export const studentButton="min-h-11 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-50";
 export class StudentRequestError extends Error {

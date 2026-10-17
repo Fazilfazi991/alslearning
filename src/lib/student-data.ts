@@ -78,11 +78,9 @@ export async function getStudentPortalData() {
     fetchedAt,
     enrollments: eligibleEnrollments,
     content: content.data || [],
-    sessions: (sessions.data || []).filter(session => eligibleEnrollments.some(enrollment =>
-      (!session.program_id || session.program_id === enrollment.program_id) && (!session.batch_id || session.batch_id === enrollment.batch_id))).map(session => ({
-        ...session,
-        join_available: (!session.join_opens_at || Date.parse(session.join_opens_at) <= fetchedAt) && (!session.join_closes_at || Date.parse(session.join_closes_at) > fetchedAt),
-      })),
+    // RLS uses the shared database live_class_eligibility predicate. Filtering
+    // this again by current ENR would discard transferred historical classes.
+    sessions: (sessions.data || []).map(session => ({ ...session, join_available: session.status === "live" })),
     tests: (tests.data || []) as StudentTestSummary[],
     progress: progress.data || [],
     attempts: (attempts.data || []) as StudentAttempt[],

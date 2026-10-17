@@ -21,7 +21,7 @@ function database(profile: Record<string, unknown>, enrollment: Record<string, u
         return filter;
       } };
     },
-    rpc: async () => ({ data: assigned, error: null }),
+    rpc: async (name:string) => ({ data: name === "live_class_eligibility" ? !!enrollment && enrollment.status === "active" && (!enrollment.access_starts_at || Date.parse(String(enrollment.access_starts_at)) <= Date.now()) && (!enrollment.access_expires_at || Date.parse(String(enrollment.access_expires_at)) > Date.now()) : assigned, error: null }),
   };
 }
 
@@ -52,6 +52,10 @@ describe("authorizeLiveClass", () => {
   });
 });
 
+it("allows a manual start before the scheduled join window",async()=>{
+  const original=session.join_opens_at;session.join_opens_at=new Date(Date.now()+3600000).toISOString();
+  try {const value=await authorizeLiveClass(database({id:"student-1",role:"student",is_active:true},{status:"active"}),"student-1",session.id,"connect");expect(value.role).toBe("student");}finally{session.join_opens_at=original;}
+});
 describe("mayPublish", () => {
   const student = { role: "student" as const, isClassManager: false };
   it("keeps microphone and presenter grants independent", () => {

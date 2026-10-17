@@ -61,7 +61,7 @@ function entity(
     name: String(row.name ?? row.title),
     slug: String(row.slug),
     parentId,
-    metadata: {batch_code:String(row.batch_code||''),duration_days:Number(row.duration_days||0),access_validity_days:Number(row.access_validity_days||0),subjectIds:((row.program_subjects||[]) as {subject_id:string}[]).map(x=>x.subject_id),starts_on:String(row.starts_on||''),ends_on:String(row.ends_on||''),access_starts_at:String(row.access_starts_at||''),access_expires_at:String(row.access_expires_at||''),class_timing:Array.isArray(row.schedule)?String((row.schedule[0] as {label?:string})?.label||''):''},
+    metadata: {max_students:row.max_students == null ? '' : Number(row.max_students),occupied:Number(row.occupied || 0),teacherIds:((row.batch_faculty||[]) as {faculty_id:string}[]).map(x=>x.faculty_id),batchSubjectIds:((row.live_batch_subjects||[]) as {subject_id:string}[]).map(x=>x.subject_id),batch_code:String(row.batch_code||''),duration_days:Number(row.duration_days||0),access_validity_days:Number(row.access_validity_days||0),subjectIds:((row.program_subjects||[]) as {subject_id:string}[]).map(x=>x.subject_id),starts_on:String(row.starts_on||''),ends_on:String(row.ends_on||''),access_starts_at:String(row.access_starts_at||''),access_expires_at:String(row.access_expires_at||''),class_timing:Array.isArray(row.schedule)?String((row.schedule[0] as {label?:string})?.label||''):''},
     status: kind === "batch" ? batchStatus(row.status) : uiStatus(row.status),
     order: Number(row.display_order || 0),
     description: row.description ? String(row.description) : undefined,
@@ -83,14 +83,14 @@ export async function loadAcademicWorkspace(section: "structure" | "questions" |
     topics,
     batches,
     content,
-    questions,
+    questions, teachers, occupancy,
   ] = await Promise.all([
     db.from("entrance_exams").select("*").order("display_order"),
     db.from("programs").select("*,program_subjects(subject_id)").order("display_order"),
     db.from("subjects").select("*").order("display_order"),
     db.from("chapters").select("*").order("display_order"),
     db.from("topics").select("*").order("display_order"),
-    db.from("batches").select("*").order("created_at"),
+    db.from("batches").select("*,batch_faculty(faculty_id),live_batch_subjects(subject_id)").order("created_at"),
     section === "questions" ? db
       .from("learning_content")
       .select("*")
@@ -108,6 +108,8 @@ export async function loadAcademicWorkspace(section: "structure" | "questions" |
       .select("*,question_options!question_options_question_id_fkey(*),question_answer_keys(option_id)")
       .order("created_at", { ascending: false })
       .range(0, 24) : skip(),
+    section === "structure" ? db.from("profiles").select("id,full_name").eq("role","teacher").eq("is_active",true) : skip(),
+    section === "structure" ? db.rpc("lms_batch_occupancy") : skip(),
   ]);
   [
     exams,
@@ -117,7 +119,7 @@ export async function loadAcademicWorkspace(section: "structure" | "questions" |
     topics,
     batches,
     content,
-    questions,
+    questions, teachers, occupancy,
   ].forEach((x) => assert(x.error));
   const entities: AcademicEntity[] = [
     ...(exams.data || []).map((x) => entity(x, "exam")),
@@ -132,7 +134,7 @@ export async function loadAcademicWorkspace(section: "structure" | "questions" |
       entity(x, "topic", x.chapter_id || x.subject_id),
     ),
     ...(batches.data || []).map((x) =>
-      entity({ ...x, display_order: 0 }, "batch", x.program_id),
+      entity({ ...x, occupied:(occupancy.data || []).find((o: {batch_id:string;occupied:number})=>o.batch_id===x.id)?.occupied || 0, display_order: 0 }, "batch", x.program_id),
     ),
     ...(content.data || []).map((x) =>
       entity(
@@ -180,7 +182,7 @@ export async function loadAcademicWorkspace(section: "structure" | "questions" |
       };
     },
   );
-  return { entities, questions: mappedQuestions };
+  return { entities, questions: mappedQuestions, teachers:teachers.data || [] };
 }
 
 export async function saveAcademicEntity(
@@ -228,6 +230,7 @@ export async function saveAcademicEntity(
       slug: item.slug,
       name: item.name,
       program_id: item.parentId,
+      max_students: item.metadata?.max_students === "" || item.metadata?.max_students == null ? null : Number(item.metadata.max_students),
       batch_code: String(item.metadata?.batch_code || "").trim().toUpperCase(),
       starts_on:item.metadata?.starts_on||null,ends_on:item.metadata?.ends_on||null,
       access_starts_at:item.metadata?.access_starts_at||null,access_expires_at:item.metadata?.access_expires_at||null,
@@ -250,6 +253,10 @@ export async function saveAcademicEntity(
       chapter_id: parent?.kind === "chapter" ? parent.id : null,
       topic_id: parent?.kind === "topic" ? parent.id : null,
     };
+  }
+  if (item.kind === "batch") {
+    const result=await db.rpc("lms_save_batch",{value:payload,subject_ids:item.metadata?.batchSubjectIds || [],teacher_ids:item.metadata?.teacherIds || []});
+    assert(result.error); return;
   }
   const { error } = await db.from(tableFor(item.kind)).upsert(payload);
   assert(error);

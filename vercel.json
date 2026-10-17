@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "codex/hostinger-staging": false,
-      "fix/admin-student-recording-workflows": false
+      "fix/admin-student-recording-workflows": false,
+      "fix/batch-live-class-eligibility": false
     }
   }
 }

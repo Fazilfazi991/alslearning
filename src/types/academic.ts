@@ -40,5 +40,6 @@ export interface AcademicQuestion {
 
 export interface AcademicWorkspace {
   entities: AcademicEntity[];
+  teachers?: { id: string; full_name: string }[];
   questions: AcademicQuestion[];
 }

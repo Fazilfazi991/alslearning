@@ -1,4 +1,5 @@
 import "server-only";
+import { resolveLiveClassState } from "./state";
 import type { AppRole } from "@/lib/auth";
 
 export type LiveClassSession = {
@@ -77,30 +78,14 @@ export async function authorizeLiveClass(
   }
 
   if (profile.role === "student") {
-    let scoped = db.from("enrollments").select("id,status,access_starts_at,access_expires_at,program_id,batch_id")
-      .eq("student_id", userId);
-    if (session.program_id) scoped = scoped.eq("program_id", session.program_id);
-    if (session.batch_id) scoped = scoped.eq("batch_id", session.batch_id);
-    const enrollmentResult = await scoped.maybeSingle();
-    const enrollment = enrollmentResult.data as { status: string; access_starts_at: string | null; access_expires_at: string | null } | null;
-    const now = Date.now();
-    if (!enrollment || enrollment.status !== "active" ||
-      (enrollment.access_starts_at && Date.parse(enrollment.access_starts_at) > now) ||
-      (enrollment.access_expires_at && Date.parse(enrollment.access_expires_at) <= now)) {
-      throw new LiveAuthorizationError("Current enrollment does not permit this classroom");
-    }
-    if (purpose === "connect") {
-      const participantResult = await db.from("live_participants").select("removed_at").eq("session_id", classId).eq("user_id", userId).maybeSingle();
-      const participant = participantResult.data as { removed_at: string | null } | null;
-      if (participant?.removed_at) throw new LiveAuthorizationError("You were removed from this live class");
-    }
+    // The database owns access dates, effective membership, removals and state.
+    // The same predicate is used by the list RLS and attendance/transport writes.
+    const eligibility = await db.rpc("live_class_eligibility", { target_session: classId, operation: purpose === "connect" ? "connect" : purpose === "playback" ? "playback" : "view" });
+    if (eligibility.error) throw new LiveAuthorizationError("Classroom access could not be verified. Please retry.", 503);
+    if (eligibility.data !== true) throw new LiveAuthorizationError("Current enrollment does not permit this classroom");
   }
-
-  if (purpose === "connect") {
-    const now = Date.now();
-    if (session.status !== "live") throw new LiveAuthorizationError("The class is not live", 409);
-    if (session.join_opens_at && Date.parse(session.join_opens_at) > now) throw new LiveAuthorizationError("The class join window has not opened", 409);
-    if (session.join_closes_at && Date.parse(session.join_closes_at) <= now) throw new LiveAuthorizationError("The class join window has closed", 409);
+  if (purpose === "connect" && resolveLiveClassState(session) !== "live") {
+    throw new LiveAuthorizationError("The class is not live", 409);
   }
   if (purpose === "playback" && session.status === "cancelled") throw new LiveAuthorizationError("Cancelled classes do not have student playback");
   return { userId, role: profile.role, session, isClassManager };

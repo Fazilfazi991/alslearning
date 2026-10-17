@@ -1,8 +1,10 @@
+import { SessionListRefresh } from "@/components/live/session-list-refresh";
 import { TeacherShell } from "@/components/teacher/teacher-shell";
 import { ScheduleClass } from "@/components/live/schedule-class";
 import { getTeacherData } from "@/lib/teacher-data";
 import { createClient } from "@/lib/supabase/server";
 
+type SchedulingBatch = { id:string; name:string; program_id:string; batch_code:string; subject_ids:string[] };
 export default async function Page() {
   const data = await getTeacherData("courses");
   if (!data) return null;
@@ -11,7 +13,7 @@ export default async function Page() {
     db.from("programs").select("id,name").eq("status", "active"),
     db.from("subjects").select("id,name").eq("status", "active"),
     db.from("program_subjects").select("program_id,subject_id"),
-    db.from("batches").select("id,name,program_id").in("status", ["active", "upcoming"]),
+    db.rpc("live_scheduling_batches"),
   ]);
   if ([programs, subjects, mappings, batches].some(result => result.error)) throw new Error("Scheduling options could not be loaded");
   const scopes = (mappings.data || []).flatMap(mapping => {
@@ -20,5 +22,6 @@ export default async function Page() {
     const subject = subjects.data?.find(item => item.id === mapping.subject_id);
     return assigned && program && subject ? [{ programId: program.id, programName: program.name, subjectId: subject.id, subjectName: subject.name }] : [];
   });
-  return <TeacherShell title="Schedule live class"><h1 className="mb-6 text-2xl font-bold">Schedule live class</h1><ScheduleClass scopes={scopes} batches={batches.data || []} teacherId={data.user.id} timeZone={process.env.ALS_ACADEMIC_TIME_ZONE || "Asia/Dubai"} /></TeacherShell>;
+  const choices=((batches.data || []) as SchedulingBatch[]).map(b=>({...b,subjectIds:b.subject_ids}));
+  return <TeacherShell title="Schedule live class"><SessionListRefresh/><h1 className="mb-6 text-2xl font-bold">Schedule live class</h1><ScheduleClass scopes={scopes} batches={choices} teacherId={data.user.id} timeZone={process.env.ALS_ACADEMIC_TIME_ZONE || "Asia/Dubai"} /></TeacherShell>;
 }

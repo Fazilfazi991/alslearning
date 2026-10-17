@@ -98,7 +98,7 @@ describe("authoritative classroom completion", () => {
     await mount(); await act(async () => { emit("completed", "other"); emit("unknown"); emit("live"); });
     expect(button("Join classroom")).toBeDefined();
     await act(async () => { emit("cancelled"); emit("live", "class", "2026-10-03T00:00:00Z"); });
-    expect(text()).toContain("This class has ended."); expect(button("Join classroom")).toBeUndefined();
+    expect(text()).toContain("This class was cancelled."); expect(button("Join classroom")).toBeUndefined();
   });
   it.each(["focus", "online", "subscription"])("refetches a missed completion on %s", async boundary => {
     await mount(); await join(); mocks.row.status = "completed";
@@ -114,6 +114,16 @@ describe("authoritative classroom completion", () => {
     mocks.fetch.mockResolvedValue({ ok: false, status: 409, json: async () => ({ error: "The class is not live" }) });
     await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
     expect(text()).toContain("This class has ended."); expect(button("Join classroom")).toBeUndefined();
+  });
+  it.each([401,403,404])("closes transferred/revoked Student media on %s without claiming the class ended",async status=>{
+    await mount();const retainedJoin=button("Join classroom")!.props.onClick;await join();
+    mocks.fetch.mockResolvedValue({ok:false,status,json:async()=>({error:status===404?"Classroom is unavailable":"Current enrollment does not permit this classroom"})});
+    await act(async()=>{await vi.advanceTimersByTimeAsync(15_000);});
+    expect(text()).toContain("Your classroom access has changed");expect(text()).not.toContain("This class has ended.");
+    expect(FakePeer.all.every(peer=>peer.connectionState==="closed")).toBe(true);expect(button("Join classroom")).toBeUndefined();
+    const before=mocks.fetch.mock.calls.filter(([,options])=>options?.body&&JSON.parse(options.body).action==="create").length;
+    await act(async()=>{await retainedJoin();await vi.advanceTimersByTimeAsync(30_000);});
+    expect(mocks.fetch.mock.calls.filter(([,options])=>options?.body&&JSON.parse(options.body).action==="create").length).toBe(before);
   });
   it("preserves the normal Teacher End control request and local ended rendering", async () => {
     await mount("teacher"); await join();
