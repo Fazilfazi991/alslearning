@@ -1,5 +1,5 @@
 "use client";
-import { resolveLiveClassState,liveClassStateMessage } from "@/lib/live-class/state";
+import { resolveLiveClassState, liveClassStateLabel, liveClassStateMessage } from "@/lib/live-class/state";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -32,6 +32,7 @@ type Poll = {
 };
 type Session = {
   id: string; title: string; faculty_id: string; status: string; starts_at: string | null; ends_at: string | null;
+  join_opens_at?: string | null; ended_at?: string | null;
   recording_enabled: boolean; programs: { name: string } | { name: string }[] | null; batches: { name: string } | { name: string }[] | null;
   subjects: { name: string } | { name: string }[] | null; profiles: { full_name: string } | { full_name: string }[] | null;
 };
@@ -110,6 +111,12 @@ export function NativeClassroom({
   const [pollQuestion, setPollQuestion] = useState("");
   const [connectionId, setConnectionId] = useState<string | null>(null);
   const [classStatus, setClassStatus] = useState(session.status);
+  const [displayTime, setDisplayTime] = useState(Date.now);
+  useEffect(() => {
+    if (classStatus !== "scheduled") return;
+    const timer = window.setInterval(() => setDisplayTime(Date.now()), 15_000);
+    return () => window.clearInterval(timer);
+  }, [classStatus]);
   const classStatusRef = useRef(session.status);
   const refreshSessionRef = useRef<() => Promise<void>>(async () => undefined);
   const [connectionState, setConnectionState] = useState<"idle" | "joining" | "connected" | "reconnecting" | "failed" | "ended">("idle");
@@ -1149,7 +1156,7 @@ export function NativeClassroom({
     }
   }
 
-  const resolvedState = resolveLiveClassState({status:classStatus});
+  const resolvedState = resolveLiveClassState({ ...session, status: classStatus }, displayTime);
   if (accessRevoked) return <section className="card mx-auto max-w-3xl p-6 sm:p-8" role="status"><h1 className="text-xl font-bold">Your classroom access has changed</h1><p className="mt-3 text-sm text-muted">This class is no longer available under your current enrollment. Your devices and classroom connection are closed.</p><div className="mt-6"><Button href="/student/live-classes" variant="secondary">Back to classes</Button></div></section>;
   const visual = remoteTracks.find(track => track.kind === "screen") || remoteTracks.find(track => track.kind === "camera");
   const classList = user.role === "student" ? "/student/live-classes" : "/teacher/live-classes";
@@ -1158,8 +1165,9 @@ export function NativeClassroom({
     const completed = classStatus === "completed" || classStatus === "cancelled";
     const unavailable = !entryOpen || !configuration.realtimeConfigured;
     return <div className="mx-auto max-w-3xl p-4 sm:p-8"><header className="mb-6 flex flex-wrap items-start justify-between gap-4"><div><p className="eyebrow">{first(session.subjects)?.name || "ALS live classroom"}</p><h1 className="mt-2 text-2xl font-bold">{session.title}</h1></div>{user.role === "teacher" && <LogoutButton className="min-h-11 rounded-xl border border-line bg-white px-4 text-sm font-bold"/>}</header>
-      <section className="card p-6 sm:p-8" role="status"><h2 className="text-xl font-bold">{completed ? liveClassStateMessage(resolvedState) : unavailable ? "Classroom temporarily unavailable" : "Class scheduled"}</h2>
-        <p className="mt-3 text-sm leading-6 text-muted">{completed ? "You can return to your classes and watch a replay once it has been reviewed and published." : unavailable ? "Live classroom access is outside the current testing window or temporarily unavailable. Check back near the scheduled class time." : "The classroom opens when the Teacher starts this class."}</p>
+      <section className="card p-6 sm:p-8" role="status"><h2 className="text-xl font-bold">{completed ? liveClassStateMessage(resolvedState) : unavailable ? "Classroom temporarily unavailable" : liveClassStateLabel(resolvedState)}</h2>
+        <p className="mt-3 text-sm leading-6 text-muted">{completed ? "You can return to your classes and watch a replay once it has been reviewed and published." : unavailable ? "Live classroom access is outside the current testing window or temporarily unavailable. Check back near the scheduled class time." : liveClassStateMessage(resolvedState)}</p>
+        {resolvedState === "scheduled" && session.join_opens_at && !unavailable && <p className="mt-3 text-sm font-semibold">The join window opens at {formatAcademicDate(session.join_opens_at, timeZone)}.</p>}
         {session.starts_at && !completed && <p className="mt-3 text-sm font-semibold">Scheduled for {formatAcademicDate(session.starts_at, timeZone)}</p>}
         {unavailable && !completed && <p className="mt-2 text-sm text-muted">{testingWindow.opensAt && testingWindow.closesAt ? `Testing access: ${formatAcademicDate(testingWindow.opensAt, timeZone)} to ${formatAcademicDate(testingWindow.closesAt, timeZone)}.` : "No classroom testing window is currently scheduled."}</p>}
         <div className="mt-6 flex flex-wrap gap-3"><Button href={classList} variant="secondary">Back to classes</Button>{!completed && !unavailable && manager && <Button onClick={() => void lifecycle("start")}>Start class</Button>}{publishedReplay && <Button href={`/student/live-classes/${session.id}?recording=${publishedReplay.id}`}>Watch published replay</Button>}</div>

@@ -81,6 +81,20 @@ beforeEach(() => {
 afterEach(async () => { if (renderer) await act(async () => renderer.unmount()); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("authoritative classroom completion", () => {
+  it("shows the scheduled join window and permits a real early start without contradictory messages", async () => {
+    vi.setSystemTime(new Date("2026-10-17T08:00:00Z"));
+    mocks.row.status = "scheduled";
+    const scheduled = props();
+    await act(async () => { renderer = create(<NativeClassroom {...scheduled} session={{ ...scheduled.session,
+      status: "scheduled", join_opens_at: "2026-10-17T09:00:00Z" }} />); });
+    expect(text()).toContain("The join window opens at");
+    expect(button("Join classroom")).toBeUndefined();
+    mocks.row.status = "live";
+    await act(async () => { emit("live"); });
+    expect(button("Join classroom")).toBeDefined();
+    expect(text()).not.toContain("The join window opens at");
+    expect(text()).not.toContain("Waiting for the Teacher");
+  });
   it("ends an already-joined Student, removes Live/Join and clears receivers without reload", async () => {
     await mount(); const retainedJoin = button("Join classroom")!.props.onClick;
     await join(); expect(FakePeer.all).toHaveLength(2);

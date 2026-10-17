@@ -83,7 +83,10 @@ export function LiveClassesManager({ programs, subjects, batches, teachers, sess
       const response = await fetch(`/api/live-classes/${session.id}/control`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "reschedule", mode: "classroom", title, startsAt, endsAt }) });
       const value = await response.json() as { error?: string };
       if (!response.ok) throw new Error(value.error || "Class could not be updated");
-      setSessions(current => current.map(item => item.id === session.id ? { ...item, title, starts_at: startsAt, ends_at: endsAt } : item));
+      setSessions(current => current.map(item => item.id === session.id ? {
+        ...item, title, starts_at: startsAt, ends_at: endsAt,
+        join_opens_at: new Date(Date.parse(startsAt) - 15 * 60_000).toISOString(),
+      } : item));
       setEditing(""); setMessage("Class schedule updated in the academic timezone.");
     } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Class could not be updated"); }
     finally { setBusy(""); }

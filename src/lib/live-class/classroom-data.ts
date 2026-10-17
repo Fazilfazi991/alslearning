@@ -48,6 +48,8 @@ export async function getClassroomData(classId: string, mode: "poc" | "classroom
     authorization,
     session: {
       ...publicSession,
+      join_opens_at: authorization.session.join_opens_at,
+      ended_at: authorization.session.ended_at,
       programs: publicSession.program_name ? { name: publicSession.program_name } : null,
       batches: publicSession.batch_name ? { name: publicSession.batch_name } : null,
       subjects: publicSession.subject_name ? { name: publicSession.subject_name } : null,
