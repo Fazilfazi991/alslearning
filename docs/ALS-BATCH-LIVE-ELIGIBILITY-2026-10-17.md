@@ -60,7 +60,7 @@ Staging ledger verification at 07:57 UTC confirms all six migrations and academi
 
 Fresh canonical audit at `2026-10-17T07:56:38.038Z`: Production 6 batches/7 enrollments/5 sessions/9 history intervals; staging including owned QA 12 batches/25 enrollments/21 sessions/34 history intervals. Both have zero incompatible Program/Batch relations, duplicate active Student/Program enrollments, duplicate open history intervals, dangling Teacher/Batch links or upcoming/live classes missing a Batch UUID. Existing unassigned enrollments remain: Production 1 and staging 2. No legacy cohort/name/slug fields are used in the audited operational rows; no batch was inferred or assigned silently.
 
-Owner handoff pending: save the new scoped R2 Access Key ID/Secret Access Key into ignored `r2-renewal.env.local`, and sign the three isolated browser contexts into the existing QA accounts. Computer-use controls redact stored credential values; the in-app and second Chrome context also require the existing owner's Vercel sign-in. Temporary loopback credential-source server was stopped. Staging live/recording remain disabled. No new Production schema/application deployment has occurred.
+Remaining owner handoff: save the new scoped R2 Access Key ID/Secret Access Key into ignored `r2-renewal.env.local`. Browser credential copy is redacted by the connector. Existing local QA sign-ins and the staging access phrase are now handled privately by the agent, with Vercel's temporary authenticated staging access link; the owner no longer needs to enter them. Temporary loopback credential-source server was stopped. Staging live/recording remain disabled. No new Production schema/application deployment has occurred.
 
 ## Joined-query and admission regression caught before release
 
@@ -75,3 +75,17 @@ The owned API admission fixture was created once. Actual Supabase password login
 Complete source commit `6f202a1a58af9e1d1dcf62f3553b9ac3217d7f42` is READY in Preview `dpl_9vBjDrgAzAtnWWrtHF51ZvUdyqbF`, using only the existing isolated staging alias. Twelve authenticated page requests passed with HTTP 200 and no streamed RSC errors: Admin dashboard/academic/Students/Live/Recorded; Teacher dashboard/Live/new schedule; Student dashboard/Live/Courses/Profile. Eight joined-query probes and the real hosted admission/detail checks also pass. Browser interactions, responsive layouts and actual media still require the pending owner handoffs.
 
 At `2026-10-17T08:11:27.968Z`, staging has zero live classes, open/reconnecting connections, active/closing publications, active/closing subscriptions, open attendance, pending recording work and pending transfers. Live/recording configuration remains disabled. The new scoped R2 token is waiting on the owner's private credential entry; no replacement values have been saved or deployed. No Production schema migration/application deployment occurred.
+
+## Browser acceptance checkpoint — 08:41 UTC / 12:41 Dubai
+
+The agent completed all three existing QA sign-ins and the staging phrase without exposing passwords or signed links. The owner is needed only to copy the two newly generated R2 values into the designated ignored local file: the connector returns redacted values even from Cloudflare's normal Copy control.
+
+Normal Admin UI created Batch `23adc968-22d7-4315-9dc8-45c154b909f7`, code `BLMVC1Q2ULD`, DHS Long Term, capacity 2, Pathology and the existing Synthetic Staging Teacher. Native date editing persisted 17 October and Dubai midnight as `2026-10-16T20:00:00Z`, with No expiry. The new Batch appeared in the Teacher's compatible dropdown without another login.
+
+Normal Teacher UI scheduled class `08405874-40ef-49fe-bc76-400d445e5270` against that exact UUID, recording off, starts `09:13Z` / 13:13 Dubai and ends `09:58Z` / 13:58 Dubai. It remains scheduled; no SFU connection was opened.
+
+Normal Admin UI transferred owned Student `bd525f4f-6b1b-4a68-8a88-e21c5a1eacb6` from C to D, effective 08:29Z. History, access dates and permanent code `ALS-BLMVC1Q2ULA-001` remain intact. Same-Batch selection shows its precise no-op error; a full B target shows the real capacity error and retains D. Switching to Student three and back proves the modal does not retain another Student's identity. The eligible Student sees the newly scheduled D class and historical ended A class.
+
+Actual Chrome viewports at 390 × 844 were visually inspected for Student Live Classes, Teacher classroom/scheduling, Admin dashboard, Student transfer and Batch editing. Fields, lower assignment controls, save/cancel actions and logout remain accessible with no horizontal document overflow. Temporary viewport overrides were reset. Student and Admin logout plus Browser Back returned to Login; their existing sessions were restored for live acceptance.
+
+All three retained recording database rows are unchanged. At `2026-10-17T08:41:02.067Z`, staging again has zero live classes, open connections, active/closing publications/subscriptions, open attendance, pending recordings and pending transfers. The only pending owner action is the R2 local save. Actual media/replay and Production acceptance remain pending; no Production application/schema deployment occurred.
