@@ -38,6 +38,7 @@ for (const file of readdirSync("supabase/migrations").filter(file => file.endsWi
   catch (error) { throw new Error(`Migration ${file}: ${error.message}`); }
 }
 sql(readFileSync("supabase/tests/admission_enquiries.sql", "utf8"));
+sql(readFileSync("supabase/tests/admission_enquiry_hardening.sql", "utf8"));
 mkdirSync(".local-qa/admissions", { recursive: true });
 writeFileSync(".local-qa/admissions/sql-report.json", JSON.stringify({ host: "127.0.0.1", port, database, applied, passed: ["admissions permissions, validation, rate exhaustion, deduplication, CRM mutations, atomic conversion, code generation, duplicate conversion rollback", "existing batch deletion regression at its migration boundary"] }, null, 2));
 console.log(`PASS: ${applied.length} migrations replayed; admissions/security/conversion and batch deletion SQL regressions passed on disposable localhost PostgreSQL.`);

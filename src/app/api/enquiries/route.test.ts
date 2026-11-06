@@ -18,7 +18,22 @@ describe("public enquiry endpoint", () => {
   it("never reports success when persistence fails", async () => { rpc.mockResolvedValue({ data: null, error: { message: "database unavailable" } }); expect((await POST(request(body))).status).toBe(503); });
   it("ignores caller supplied IP headers unless the trusted proxy is configured", async () => {
     rpc.mockResolvedValue({ data: { duplicate: false }, error: null });
-    await POST(request(body)); const other = request(body); other.headers.set("cf-connecting-ip", "198.51.100.2"); await POST(other);
+    const first = await POST(request(body)); const other = request(body); other.headers.set("cf-connecting-ip", "198.51.100.2"); other.headers.set("cookie", first.headers.get("Set-Cookie")!.split(";")[0]); await POST(other);
     expect(rpc.mock.calls[0][1].p_ip_hash).toBe(rpc.mock.calls[1][1].p_ip_hash);
+  });
+  it("issues independent signed browser identities without a global default bucket", async () => {
+    rpc.mockResolvedValue({ data: { duplicate: false }, error: null });
+    const first = await POST(request(body)); const second = await POST(request(body));
+    expect(rpc.mock.calls[0][1].p_ip_hash).not.toBe(rpc.mock.calls[1][1].p_ip_hash);
+    expect(first.headers.get("Set-Cookie")).toContain("HttpOnly; SameSite=Lax; Secure");
+    expect(second.headers.get("Set-Cookie")).toContain("Max-Age=2592000");
+  });
+  it("persists the anonymous identity on throttled responses", async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: "rate_limit" } });
+    expect((await POST(request(body))).headers.get("Set-Cookie")).toContain("als_enquiry_browser=");
+  });
+  it("rejects oversized bodies without relying on a caller supplied length header", async () => {
+    expect((await POST(request({ ...body, message: "x".repeat(13000) }))).status).toBe(413);
+    expect(rpc).not.toHaveBeenCalled();
   });
 });
