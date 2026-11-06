@@ -9,11 +9,11 @@ export type StudentOptions={programs:{id:string;name:string}[];batches:{id:strin
 type Student={id:string;full_name:string;email:string;phone:string|null;is_active:boolean;student_code:string|null;admission_on:string|null};
 export const studentButton="min-h-11 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-50";
 export class StudentRequestError extends Error {
-  constructor(message:string,readonly fields:Record<string,string>={}) {super(message);}
+  constructor(message:string,readonly fields:Record<string,string>={},readonly recoveryId?:string) {super(message);}
 }
 export async function studentRequest(url:string,method="GET",body?:unknown) {
   const response=await fetch(url,{method,cache:"no-store",...(body?{headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}:{})});
-  const value=await response.json();if(!response.ok)throw new StudentRequestError(value.error||"The operation failed.",value.errors??{});return value;
+  const value=await response.json();if(!response.ok)throw new StudentRequestError(value.error||"The operation failed.",value.errors??{},value.recovery_id);return value;
 }
 export function StudentManager({onChanged}:{onChanged?:()=>void}) {
   const router=useRouter();
@@ -45,12 +45,13 @@ export function StudentAdmissionForm({options,onCancel,onCreated,enquiry,onBusyC
   const [form,setForm]=useState(() => ({...initialAdmission(),...(enquiry?{full_name:enquiry.full_name,phone:enquiry.phone,email:enquiry.email??"",program_id:enquiry.program_id}:{})})),[busy,setBusy]=useState(false),[errors,setErrors]=useState<Record<string,string>>({}),[error,setError]=useState(""),[show,setShow]=useState(false);
   const saving=useRef(false);
   const [photo,setPhoto]=useState<File|null>(null),[createdId,setCreatedId]=useState("");
+  const [recoveryId,setRecoveryId]=useState("");
   const change=<K extends keyof StudentAdmission>(key:K,value:StudentAdmission[K])=>setForm(f=>({...f,[key]:value}));
-  async function submit(event:React.FormEvent){event.preventDefault();if(saving.current)return;
+  async function submit(event:React.FormEvent){event.preventDefault();if(saving.current||recoveryId)return;
     const value={...form,...(enquiry?{enquiry_id:enquiry.enquiry_id}:{}),access_starts_at:form.access_starts_at?academicLocalToUtc(form.access_starts_at,"Asia/Dubai"):"",access_expires_at:form.access_expires_at?academicLocalToUtc(form.access_expires_at,"Asia/Dubai"):null};
     const issues=createdId?{}:admissionErrors(value);if(photo && (photo.size>2*1024*1024 || !["image/jpeg","image/png","image/webp"].includes(photo.type)))issues.photo="Choose a JPEG, PNG or WebP up to 2 MB.";setErrors(issues);if(Object.keys(issues).length)return;
     saving.current=true;setBusy(true);onBusyChange?.(true);setError("");
-    try{const created=createdId?{id:createdId}:await studentRequest("/api/admin/students","POST",value);setCreatedId(created.id);setForm(f=>({...f,password:""}));if(photo){const file=new FormData();file.set("photo",photo);const response=await fetch(`/api/admin/students/${created.id}/photo`,{method:"POST",body:file});if(!response.ok)throw Error("Student admitted successfully. Photo upload failed; retry the photo or open Student details without recreating the account.");}setForm(initialAdmission());onCreated(created.id);}catch(e){setError((e as Error).message);if(e instanceof StudentRequestError)setErrors(e.fields);}finally{saving.current=false;setBusy(false);onBusyChange?.(false);}
+    try{const created=createdId?{id:createdId}:await studentRequest("/api/admin/students","POST",value);setCreatedId(created.id);setForm(f=>({...f,password:""}));if(photo){const file=new FormData();file.set("photo",photo);const response=await fetch(`/api/admin/students/${created.id}/photo`,{method:"POST",body:file});if(!response.ok)throw Error("Student admitted successfully. Photo upload failed; retry the photo or open Student details without recreating the account.");}setForm(initialAdmission());onCreated(created.id);}catch(e){setError((e as Error).message);if(e instanceof StudentRequestError){setErrors(e.fields);if(e.recoveryId){setRecoveryId(e.recoveryId);setForm(f=>({...f,password:""}));}}}finally{saving.current=false;setBusy(false);onBusyChange?.(false);}
   }
   function field(key:keyof StudentAdmission,label:string,type="text",required=false,maxLength=120){return <label className="block min-w-0 text-sm font-semibold">{label}<input className="control" type={type} required={required&&!createdId} maxLength={maxLength} value={String(form[key]??"")} disabled={busy} aria-invalid={!!errors[key]} onChange={e=>change(key,e.target.value as never)}/>{errors[key]&&<span className="mt-1 block text-xs text-red-800">{errors[key]}</span>}</label>;}
   const batch=options.batches.find(b=>b.id===form.batch_id);
@@ -67,6 +68,6 @@ export function StudentAdmissionForm({options,onCancel,onCreated,enquiry,onBusyC
     <fieldset disabled={busy} className="grid gap-5 sm:grid-cols-2"><legend className="mb-4 font-bold">Guardian and contact</legend>{field("guardian_name","Guardian name")}{field("guardian_phone","Guardian phone","tel",false,32)}{field("guardian_relationship","Relationship","text",false,80)}{field("address","Address","text",false,1000)}</fieldset>
     <fieldset disabled={busy}><legend className="mb-4 font-bold">Authentication</legend>{field("password","Initial password",show?"text":"password",true,128)}<label className="mt-2 flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={show} onChange={e=>setShow(e.target.checked)}/>Show password</label><p className="mt-1 text-xs text-muted">{passwordHelp} Share it privately. It is never displayed after creation.</p></fieldset>
     {error&&<p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-    <footer className="flex flex-wrap justify-end gap-3 border-t border-line pt-5">{createdId&&<button type="button" className={studentButton} disabled={busy} onClick={()=>onCreated(createdId)}>Open admitted Student</button>}<button type="button" className={studentButton} disabled={busy} onClick={onCancel}>Cancel</button><button className={`${studentButton} bg-brand text-white`} disabled={busy}>{busy?"Completing admission…":createdId?"Retry photo upload":"Create student"}</button></footer>
+    <footer className="flex flex-wrap justify-end gap-3 border-t border-line pt-5">{recoveryId&&<Link className={`inline-flex items-center ${studentButton}`} href={`/admin/students/${recoveryId}`}>Review student record</Link>}{createdId&&<button type="button" className={studentButton} disabled={busy} onClick={()=>onCreated(createdId)}>Open admitted Student</button>}<button type="button" className={studentButton} disabled={busy} onClick={onCancel}>Cancel</button>{!recoveryId&&<button className={`${studentButton} bg-brand text-white`} disabled={busy}>{busy?"Completing admission…":createdId?"Retry photo upload":"Create student"}</button>}</footer>
   </form>;
 }

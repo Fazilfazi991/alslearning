@@ -26,8 +26,10 @@ export async function PATCH(request: Request, context: Context) {
   try {
     const session = await adminSession(); if (session.response) return session.response;
     const { id } = await context.params; if (!validAccountId(id)) return NextResponse.json({ error: "Enquiry not found." }, { status: 404 });
-    const body = await request.json();
+    let body;
+    try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid enquiry changes." }, { status: 400 }); }
     if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).some(key => !["status", "assigned_to", "notes"].includes(key))) return NextResponse.json({ error: "Invalid enquiry changes." }, { status: 400 });
+    if (!Object.keys(body).length) return NextResponse.json({ error: "No enquiry changes supplied." }, { status: 400 });
     if (body.status !== undefined && (!enquiryStatuses.includes(body.status) || body.status === "converted")) return NextResponse.json({ error: "Use Student admission to convert an enquiry." }, { status: 400 });
     if (body.assigned_to !== undefined && body.assigned_to !== null && !validAccountId(body.assigned_to)) return NextResponse.json({ error: "Choose an active administrator." }, { status: 400 });
     if (body.notes !== undefined && (typeof body.notes !== "string" || body.notes.length > 4000)) return NextResponse.json({ error: "Use up to 4,000 characters." }, { status: 400 });

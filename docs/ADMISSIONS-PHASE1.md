@@ -29,5 +29,18 @@ Repeat SQL verification against a disposable localhost cluster using `ALS_TEST_P
 
 1. Review and apply the additive migration to a separately approved staging Supabase project, then run hosted Auth admission acceptance. Production migration application requires owner approval.
 2. Configure the existing server-only `SUPABASE_SERVICE_ROLE_KEY`. Optional `ENQUIRY_RATE_LIMIT_SECRET` signs hashed rate identifiers (defaults to the service key).
-3. Set `ENQUIRY_TRUSTED_IP_HEADER` only when the ingress overwrites `cf-connecting-ip` or `x-real-ip` and direct-origin access is blocked. Otherwise rate limiting deliberately uses a shared 10-per-hour network bucket plus 3-per-hour per-phone bucket. No IP addresses are stored.
+3. Leave `ENQUIRY_TRUSTED_IP_HEADER` empty by default. Rate limiting uses a signed HttpOnly browser identity (10/hour) plus a durable phone quota (3/hour), so unrelated visitors never share a fallback bucket. Cookie clearing can reset browser fairness but cannot reset the phone quota. An optional canonical ingress header is accepted only when explicitly configured, valid, overwritten by the ingress and protected from direct-origin requests. No raw IP addresses are stored.
 4. No verified hosted staging preview is available from this run. Local QA URL: http://127.0.0.1:3100 (disposable test data).
+
+## PR review fixes — 6 November 2026
+
+- Replaced the global unknown-IP quota with signed browser fairness and persistent phone limits; spoofed caller IP headers are ignored by default.
+- Added narrow server-only program-picker grants after a real hosted check found `service_role` was denied program reads. Submission now uses a public invoker wrapper around a restricted private implementation.
+- Hardened direct RPC JSON/type/null validation, canonical active-Admin permissions, activity fields and immutable history. Historical inactive assignees remain readable without blocking contact, reassignment or admission.
+- Student creation checks the canonical admission handler and enabled Auth triggers before creating any identity. A verification transport failure after Auth success never deletes the student; the UI offers review instead of another Create.
+- Tablet course links now fit a two-column grid. Consent and message errors are associated with their fields.
+- Fresh localhost replay passes all 64 migrations and both admissions SQL suites, including real role grants, twelve independent browser/phone identities, durable phone limits across cookie resets, direct RPC denial, readiness drift, atomic conversion and existing batch-deletion regression.
+
+Owner approved isolated staging `slghshcdaijbcjfoqerq` and branch-scoped Preview in Vercel `alslearning`. Chrome preflight verified Healthy project, organization, 68 migration-history rows, 61 applicable prerequisites, exact canonical admission-handler match, both Auth triggers enabled and no active live classes. The unrelated production-only live-cleanup grant is intentionally not applied to staging. Baseline counts: profiles 27, programs 6, batches 13, enrollments 26, live sessions 22.
+
+Follow-up migration: `20261106030644_harden_enquiry_submission_and_rpc_validation.sql`. The restricted runner `scripts/admissions-staging-migrations.mjs` is read-only by default and refuses production or automatic prerequisite migration application. Hosted application and acceptance results will be recorded after verification.

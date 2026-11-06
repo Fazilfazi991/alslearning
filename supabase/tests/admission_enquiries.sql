@@ -48,8 +48,8 @@ do $$ begin
  if (select status from public.admission_enquiries where program_id='a0000000-0000-4000-8000-000000000001')<>'follow_up' then raise exception 'Follow-up status missing'; end if;
  if (select count(*) from public.enquiry_activities where note='Admin review')<>1 then raise exception 'Note not audited'; end if;
  if not public.enquiry_conversion_ready() then raise exception 'Active admin blocked'; end if;
- perform public.record_enquiry_activity((select id from public.admission_enquiries where program_id='a0000000-0000-4000-8000-000000000001'),jsonb_build_object('kind','follow_up','note','Discussed admission','follow_up_id',(select id from public.enquiry_follow_ups limit 1),'outcome','Interested'));
- if exists(select 1 from public.enquiry_follow_ups where completed_at is null) then raise exception 'Outcome not recorded'; end if;
+ perform public.record_enquiry_activity((select id from public.admission_enquiries where program_id='a0000000-0000-4000-8000-000000000001'),jsonb_build_object('kind','follow_up','note','Discussed admission','follow_up_id',(select id from public.enquiry_follow_ups where enquiry_id in (select id from public.admission_enquiries where program_id='a0000000-0000-4000-8000-000000000001') limit 1),'outcome','Interested'));
+ if exists(select 1 from public.enquiry_follow_ups where completed_at is null and enquiry_id in (select id from public.admission_enquiries where program_id='a0000000-0000-4000-8000-000000000001')) then raise exception 'Outcome not recorded'; end if;
 end $$;
 reset role;
 -- The request may be represented by the Auth createUser metadata insert/update;
