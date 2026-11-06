@@ -3,6 +3,7 @@ import { adminSession } from "@/lib/admin-session";
 import { createAuthAdminClient } from "@/lib/supabase/admin";
 import { admissionErrors, type StudentAdmission } from "@/lib/student-admission";
 import { isSameOriginRequest } from "@/lib/request-origin";
+import { validAccountId } from "@/lib/account-validation";
 const headers={"Cache-Control":"private, no-store"};
 export async function GET() {
   const session=await adminSession(); if(session.response)return session.response;
@@ -17,10 +18,20 @@ export async function GET() {
 export async function POST(request:Request) {
   if(!isSameOriginRequest(request))return NextResponse.json({error:"Invalid request."},{status:403});
   const session=await adminSession(); if(session.response)return session.response;
-  let body:StudentAdmission;
+  let body:StudentAdmission & {enquiry_id?:string};
   try{body=await request.json();if(!body || typeof body!=="object" || Array.isArray(body))throw Error();}catch{return NextResponse.json({error:"Invalid admission form."},{status:400});}
   const errors=admissionErrors(body);
   if(Object.keys(errors).length)return NextResponse.json({error:"Check the highlighted fields.",errors},{status:400});
+  if(body.enquiry_id !== undefined) {
+    if(!validAccountId(body.enquiry_id) || body.unassigned)return NextResponse.json({error:"Enquiry conversion requires a valid enquiry, Program and Batch."},{status:400});
+    // Fail closed during an application/database version mismatch, before Auth creation.
+    const ready=await session.db!.rpc("enquiry_conversion_ready");
+    if(ready.error || ready.data!==true)return NextResponse.json({error:"Enquiry conversion is unavailable until its database migration is installed."},{status:503});
+    const enquiry=await session.db!.from("admission_enquiries").select("id,status,student_id").eq("id",body.enquiry_id).maybeSingle();
+    if(enquiry.error)return NextResponse.json({error:"Enquiry could not be checked. Please retry."},{status:503});
+    if(!enquiry.data)return NextResponse.json({error:"Enquiry not found."},{status:404});
+    if(enquiry.data.status==="converted" || enquiry.data.student_id)return NextResponse.json({error:"This enquiry has already been converted. Open the linked student instead."},{status:409});
+  }
   if(!body.unassigned) {
     const batch=await session.db!.from("batches").select("id,program_id,batch_code,status,max_students").eq("id",body.batch_id).maybeSingle();
     if(batch.error)return NextResponse.json({error:"Batch availability could not be checked. Please retry."},{status:503});
