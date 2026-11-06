@@ -33,8 +33,14 @@ export function EnquiryDetail({ id }: { id: string }) {
   const [converting, setConverting] = useState(false), [options, setOptions] = useState<StudentOptions | null>(null);
   const [admitting, setAdmitting] = useState(false);
   const saving = useRef(false), dialog = useRef<HTMLDialogElement>(null);
+  const confirmedAdmission = useRef<{ enquiryId: string; studentId: string } | null>(null);
   const load = useCallback(async () => {
     const result: Detail = await enquiryRequest(`/api/admin/enquiries/${id}`);
+    // The successful admission response is authoritative even if a subsequent
+    // history refresh is delayed or briefly returns older enquiry information.
+    if (confirmedAdmission.current?.enquiryId === id) {
+      result.enquiry = { ...result.enquiry, status: "converted", student_id: confirmedAdmission.current.studentId };
+    }
     setData(result); setStatus(result.enquiry.status); setAssigned(result.enquiry.assigned_to ?? ""); return result;
   }, [id]);
   useEffect(() => {
@@ -71,7 +77,7 @@ export function EnquiryDetail({ id }: { id: string }) {
   return <>
     <Link href="/admin/enquiries" className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand"><ArrowLeft size={17} aria-hidden="true" />All enquiries</Link>
     {loading && <p role="status" className="rounded-xl border border-line bg-white p-8 text-muted">Loading enquiry…</p>}
-    {error && <div role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}{!data && <button className="ml-3 min-h-11 font-bold underline" onClick={() => { setLoading(true); setError(""); void load().catch(reason => setError((reason as Error).message)).finally(() => setLoading(false)); }}>Retry</button>}</div>}
+    {error && <div role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}<button disabled={loading || busy} className="ml-3 min-h-11 font-bold underline disabled:opacity-50" onClick={() => { setLoading(true); setError(""); void load().catch(reason => setError((reason as Error).message)).finally(() => setLoading(false)); }}>Retry</button></div>}
     {message && <p role="status" className="mb-5 flex items-center gap-2 rounded-xl bg-green-50 p-4 text-sm text-green-800"><Check size={18} aria-hidden="true" />{message}</p>}
     {data && enquiry && <>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -112,7 +118,13 @@ export function EnquiryDetail({ id }: { id: string }) {
       </div>
     </>}
     <dialog ref={dialog} onCancel={event => { if (admitting) event.preventDefault(); else setConverting(false); }} aria-labelledby="student-admission-title" className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-3xl overflow-y-auto rounded-2xl border border-line bg-white p-5 sm:p-7 backdrop:bg-black/40">
-      {converting && options && enquiry && <StudentAdmissionForm options={options} onBusyChange={setAdmitting} enquiry={{ enquiry_id: enquiry.id, full_name: enquiry.full_name, phone: enquiry.phone, email: enquiry.email, program_id: enquiry.program_id }} onCancel={() => setConverting(false)} onCreated={() => { setConverting(false); setMessage("Student admitted. The enquiry is converted and linked to the permanent student record."); void load().catch(reason => setError((reason as Error).message)); }} />}
+      {converting && options && enquiry && <StudentAdmissionForm options={options} onBusyChange={setAdmitting} enquiry={{ enquiry_id: enquiry.id, full_name: enquiry.full_name, phone: enquiry.phone, email: enquiry.email, program_id: enquiry.program_id }} onCancel={() => setConverting(false)} onCreated={studentId => {
+        confirmedAdmission.current = { enquiryId: id, studentId };
+        setData(current => current ? { ...current, enquiry: { ...current.enquiry, status: "converted", student_id: studentId } } : current);
+        setStatus("converted"); setConverting(false);
+        setMessage("Student admitted. The enquiry is converted and linked to the permanent student record.");
+        void load().catch(() => setError("Student admission is complete, but the latest enquiry history could not be refreshed. Retry to load the history."));
+      }} />}
     </dialog>
   </>;
 }
