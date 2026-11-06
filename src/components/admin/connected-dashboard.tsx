@@ -1,33 +1,43 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { ArrowUpRight, BookOpen, CalendarDays, CheckCircle2, ClipboardCheck, Clock3, GraduationCap, MessageSquare, Plus, Users } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { DashboardData } from "@/types/dashboard";
 
-const metrics = [
-  { label: "Students", table: "profiles", filter: ["role", "student"], href: "/admin/students" },
-  { label: "Faculty", table: "faculty_members", filter: null, href: "/admin/teachers" },
-  { label: "Teacher login accounts", table: "profiles", filter: ["role", "teacher"], href: "/admin/teacher-accounts" },
-  { label: "Active programs", table: "programs", filter: ["status", "active"], href: "/admin/academic" },
-  { label: "Subjects", table: "subjects", filter: null, href: "/admin/academic" },
-  { label: "Active questions", table: "questions", filter: ["status", "active"], href: "/admin/questions" },
-  { label: "Published tests", table: "tests", filter: ["status", "active"], href: "/admin/tests" },
-  { label: "Published classes", table: "lms_class_catalog", filter: ["status", "published"], href: "/admin/recorded-classes" },
-] as const;
-
-export function ConnectedDashboard() {
-  const [counts, setCounts] = useState<number[] | null>(null);
-  const [error, setError] = useState("");
-  useEffect(() => {
-    let active = true;
-    const db = createClient();
-    void Promise.all(metrics.map(async item => {
-      let query = db.from(item.table).select("id", { count: "exact", head: true });
-      if (item.filter) query = query.eq(item.filter[0], item.filter[1]);
-      const result = await query;
-      if (result.error || result.count === null) throw new Error("Unable to load current figures.");
-      return result.count;
-    })).then(values => { if (active) setCounts(values); }).catch(() => { if (active) setError("Current figures could not be loaded. Please try again."); });
-    return () => { active = false; };
-  }, []);
-  return <div className="mx-auto max-w-6xl"><header><p className="text-xs font-bold uppercase tracking-wider text-brand">ALS administration</p><h1 className="mt-2 text-3xl font-bold">Dashboard</h1><p className="mt-2 text-sm text-muted">Current academic and learning activity.</p></header>{error ? <div role="alert" className="card mt-6 p-6 text-red-800">{error}</div> : <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy={!counts}>{metrics.map((item,index) => <Link key={item.label} href={item.href} className="card min-h-32 p-5"><p className="text-sm text-muted">{item.label}</p>{counts ? <strong className="mt-4 block text-3xl">{counts[index]}</strong> : <div className="skeleton mt-5 h-9 w-20 rounded" aria-hidden="true"/>}</Link>)}</div>}</div>;
+const date = (value: string, time = false) => new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", ...(time ? { timeStyle: "short" as const } : {}), timeZone: "Asia/Kolkata" }).format(new Date(time ? value : `${value.slice(0, 10)}T12:00:00Z`));
+const status = (value: string) => value.replaceAll("_", " ");
+function Metric({ label, value, href, Icon, note }: { label: string; value: number | undefined; href: string; Icon: LucideIcon; note?: string }) {
+  return <Link href={href} className="group rounded-2xl border border-line bg-white p-5 hover:border-brand/40"><div className="flex items-center justify-between gap-2"><Icon size={20} className="text-brand" aria-hidden="true"/><ArrowUpRight size={16} className="text-muted group-hover:text-brand" aria-hidden="true"/></div><strong className="mt-5 block text-3xl font-bold tracking-tight tabular-nums">{value === undefined ? <span className="text-base text-muted">Unavailable</span> : value.toLocaleString("en-IN")}</strong><p className="mt-1 text-sm font-semibold">{label}</p>{note && <p className="mt-1 text-xs text-muted">{note}</p>}</Link>;
 }
+export function ConnectedDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState("");
+  const load = useCallback(async (signal?: AbortSignal) => {
+    setLoading(true); setError("");
+    try {
+      const response = await fetch("/api/admin/dashboard", { cache: "no-store", signal });
+      if (!response.ok) throw Error("Current figures could not be loaded. Please retry.");
+      const value = await response.json();
+      if (!signal?.aborted) setData(value);
+    } catch (e) { if (!signal?.aborted) setError((e as Error).message); }
+    finally { if (!signal?.aborted) setLoading(false); }
+  }, []);
+  useEffect(() => { const controller = new AbortController(); const timer = setTimeout(() => void load(controller.signal), 0); return () => { clearTimeout(timer); controller.abort(); }; }, [load]);
+  const academic = data?.academic, admissions = data?.admissions;
+  return <div className="mx-auto max-w-6xl"><header className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">ALS administration</p><h1 className="mt-2 text-3xl font-bold tracking-tight">Admissions & learning</h1><p className="mt-2 text-sm text-muted">From first enquiry to an active learning journey.</p></div><Link href="/admin/enquiries" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-bold text-white"><MessageSquare size={17} aria-hidden="true"/>Open enquiries</Link></header>
+    {error && <div role="alert" className="mt-6 rounded-xl border border-red-200 bg-white p-5 text-red-800">{error}<button onClick={() => void load()} className="ml-4 min-h-11 rounded-lg border px-4 font-semibold">Retry</button></div>}
+    {loading && !data ? <div role="status" className="mt-7"><p className="text-sm text-muted">Loading current database figures…</p><div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <div key={i} className="h-40 rounded-2xl border border-line bg-white" aria-hidden="true"/>)}</div></div> : data && <div aria-busy={loading}>
+      {(!academic || !admissions) && <div role="status" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><p>{!admissions ? "Admission figures are unavailable. Check that the admissions database migration is installed." : "Some learning figures are unavailable."} Counts are shown only when verified.</p><button className="min-h-11 rounded-lg border border-amber-300 px-4 font-semibold" onClick={() => void load()} disabled={loading}>Refresh</button></div>}
+      <section aria-label="Student and batch totals" className="mt-7 grid gap-4 sm:grid-cols-3"><Metric label="Total students" value={academic?.students} href="/admin/students" Icon={GraduationCap}/><Metric label="Active students" value={academic?.activeStudents} href="/admin/students" Icon={Users} note="Accounts enabled for learning"/><Metric label="Active batches" value={academic?.activeBatches} href="/admin/academic" Icon={BookOpen}/></section>
+      <section aria-labelledby="admissions-title" className="mt-8"><div className="mb-4 flex items-center justify-between gap-3"><h2 id="admissions-title" className="text-lg font-bold">Admissions pipeline</h2><Link href="/admin/enquiries" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand">View register<ArrowUpRight size={16} aria-hidden="true"/></Link></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Total enquiries" value={admissions?.total} href="/admin/enquiries" Icon={MessageSquare}/><Metric label="New enquiries" value={admissions?.new} href="/admin/enquiries?status=new" Icon={Plus}/><Metric label="Pending follow-ups" value={admissions?.pending} href="/admin/enquiries?pending=true" Icon={Clock3} note="Open scheduled follow-ups"/><Metric label="Converted enquiries" value={admissions?.converted} href="/admin/enquiries?status=converted" Icon={CheckCircle2}/></div></section>
+      <div className="mt-8 grid gap-5 xl:grid-cols-2"><section className="rounded-2xl border border-line bg-white p-5"><PanelTitle title="Recent admissions" href="/admin/students"/><ListState items={data.recentAdmissions} empty="No admissions recorded yet."/>{data.recentAdmissions?.map(student => <Link key={student.id} href={`/admin/students/${student.id}`} className="flex min-h-20 items-center justify-between gap-3 border-t border-line py-4 hover:text-brand"><div className="min-w-0"><p className="truncate font-semibold">{student.full_name}</p><p className="mt-1 text-xs text-muted">{student.student_code || "Awaiting course allocation"}</p></div><time className="shrink-0 text-xs text-muted" dateTime={student.admission_on}>{date(student.admission_on)}</time></Link>)}</section>
+      <section className="rounded-2xl border border-line bg-white p-5"><PanelTitle title="Recent enquiries" href="/admin/enquiries"/><ListState items={data.recentEnquiries} empty="New enquiries will appear here."/>{data.recentEnquiries?.map(enquiry => <Link key={enquiry.id} href={`/admin/enquiries/${enquiry.id}`} className="flex min-h-20 items-center justify-between gap-3 border-t border-line py-4 hover:text-brand"><div className="min-w-0"><p className="truncate font-semibold">{enquiry.full_name}</p><time className="mt-1 block text-xs text-muted" dateTime={enquiry.created_at}>{date(enquiry.created_at, true)}</time></div><span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold capitalize">{status(enquiry.status)}</span></Link>)}</section></div>
+      <section className="mt-5 rounded-2xl border border-line bg-white p-5"><PanelTitle title="Upcoming classes" href="/admin/live-classes"/><ListState items={data.upcomingClasses} empty="No upcoming classes scheduled."/>{data.upcomingClasses?.map(item => <Link key={item.id} href={`/admin/live-classes/${item.id}`} className="flex min-h-20 flex-wrap items-center gap-3 border-t border-line py-4 hover:text-brand"><CalendarDays size={20} className="text-brand" aria-hidden="true"/><p className="min-w-0 flex-1 font-semibold">{item.title}</p><time dateTime={item.starts_at} className="text-sm text-muted">{date(item.starts_at, true)} IST</time></Link>)}</section>
+      <section aria-labelledby="academic-title" className="mt-8"><h2 id="academic-title" className="mb-4 text-lg font-bold">Learning operations</h2><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{([
+        ["Faculty", academic?.faculty, "/admin/teachers", Users], ["Active programs", academic?.activePrograms, "/admin/academic", BookOpen], ["Active questions", academic?.questions, "/admin/questions", ClipboardCheck], ["Published tests", academic?.tests, "/admin/tests", ClipboardCheck], ["Published classes", academic?.recordings, "/admin/recorded-classes", BookOpen],
+      ] as const).map(([label, value, href, Icon]) => <Metric key={label} label={label} value={value} href={href} Icon={Icon}/>)}</div></section>
+    </div>}
+  </div>;
+}
+function PanelTitle({ title, href }: { title: string; href: string }) { return <div className="mb-2 flex items-center justify-between gap-3"><h2 className="text-lg font-bold">{title}</h2><Link href={href} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand">View all<ArrowUpRight size={16} aria-hidden="true"/></Link></div>; }
+function ListState({ items, empty }: { items: unknown[] | null; empty: string }) { return !items ? <p role="status" className="py-5 text-sm text-muted">Records could not be loaded. Refresh to retry.</p> : !items.length ? <p className="py-5 text-sm text-muted">{empty}</p> : null; }

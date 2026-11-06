@@ -3,7 +3,9 @@ import { adminSession } from "@/lib/admin-session";
 import { createAuthAdminClient } from "@/lib/supabase/admin";
 import { admissionErrors, type StudentAdmission } from "@/lib/student-admission";
 import { isSameOriginRequest } from "@/lib/request-origin";
+import { validAccountId } from "@/lib/account-validation";
 const headers={"Cache-Control":"private, no-store"};
+const recoveryResponse=(id:string)=>NextResponse.json({error:"The account was created, but admission could not be verified. Review the student record before retrying. No records were removed.",recovery_id:id},{status:503,headers});
 export async function GET() {
   const session=await adminSession(); if(session.response)return session.response;
   const [students,programs,batches]=await Promise.all([
@@ -17,10 +19,28 @@ export async function GET() {
 export async function POST(request:Request) {
   if(!isSameOriginRequest(request))return NextResponse.json({error:"Invalid request."},{status:403});
   const session=await adminSession(); if(session.response)return session.response;
-  let body:StudentAdmission;
+  let body:StudentAdmission & {enquiry_id?:string};
   try{body=await request.json();if(!body || typeof body!=="object" || Array.isArray(body))throw Error();}catch{return NextResponse.json({error:"Invalid admission form."},{status:400});}
+  const admissionFields=["full_name","email","password","phone","admission_on","program_id","batch_id","access_starts_at","access_expires_at","unassigned","is_active","guardian_name","guardian_phone","guardian_relationship","address","internal_notes","enquiry_id"];
+  if(Object.keys(body).some(key=>!admissionFields.includes(key)))return NextResponse.json({error:"Invalid admission fields."},{status:400});
   const errors=admissionErrors(body);
   if(Object.keys(errors).length)return NextResponse.json({error:"Check the highlighted fields.",errors},{status:400});
+  // Verify the canonical admission transaction before creating any identity,
+  // including ordinary admissions that do not originate from an enquiry.
+  try {
+    const ready=await session.db!.rpc("lms_admission_ready");
+    if(ready.error || ready.data!==true)return NextResponse.json({error:"Student admission is unavailable until its database migration is installed. No account was created."},{status:503,headers});
+  } catch { return NextResponse.json({error:"Student admission readiness could not be verified. No account was created."},{status:503,headers}); }
+  if(body.enquiry_id !== undefined) {
+    if(!validAccountId(body.enquiry_id) || body.unassigned)return NextResponse.json({error:"Enquiry conversion requires a valid enquiry, Program and Batch."},{status:400});
+    // Fail closed during an application/database version mismatch, before Auth creation.
+    const ready=await session.db!.rpc("enquiry_conversion_ready");
+    if(ready.error || ready.data!==true)return NextResponse.json({error:"Enquiry conversion is unavailable until its database migration is installed."},{status:503});
+    const enquiry=await session.db!.from("admission_enquiries").select("id,status,student_id").eq("id",body.enquiry_id).maybeSingle();
+    if(enquiry.error)return NextResponse.json({error:"Enquiry could not be checked. Please retry."},{status:503});
+    if(!enquiry.data)return NextResponse.json({error:"Enquiry not found."},{status:404});
+    if(enquiry.data.status==="converted" || enquiry.data.student_id)return NextResponse.json({error:"This enquiry has already been converted. Open the linked student instead."},{status:409});
+  }
   if(!body.unassigned) {
     const batch=await session.db!.from("batches").select("id,program_id,batch_code,status,max_students").eq("id",body.batch_id).maybeSingle();
     if(batch.error)return NextResponse.json({error:"Batch availability could not be checked. Please retry."},{status:503});
@@ -36,6 +56,7 @@ export async function POST(request:Request) {
   // The Auth DB trigger completes admission in the SAME transaction. A trigger
   // failure rolls back Auth too; no success message or orphan login is possible.
   const {password,email,...admission}=body;
+  let createdId:string|undefined;
   try {
     const root=createAuthAdminClient();
     const result=await root.auth.admin.createUser({email:email.trim().toLowerCase(),password,email_confirm:true,
@@ -44,13 +65,13 @@ export async function POST(request:Request) {
       const duplicate=/already|exists|registered/i.test(result.error?.code??"") || /already.*registered|already.*exists/i.test(result.error?.message??"");
       return NextResponse.json({error:duplicate?"An account already uses this email.":"Admission was not completed. Check Program, Batch Code and access dates; no partial admission was accepted."},{status:duplicate?409:422});
     }
+    createdId=result.data.user.id;
     const verified=await session.db!.from("profiles").select("id,student_code,phone,admission_on").eq("id",result.data.user.id).single();
     if(verified.error || !verified.data?.admission_on || (!body.unassigned && !verified.data.student_code)) {
-      // Defense against deploying the application before its required trigger.
-      // Only this newly created, unadmitted identity is eligible for compensation.
-      const removed=await root.auth.admin.deleteUser(result.data.user.id);
-      return NextResponse.json({error:removed.error?"Admission requires administrator recovery; do not retry creating another account for this email.":"Admission is unavailable until its database migration is installed. The incomplete new login was removed."},{status:503});
+      // Auth success may already have committed the complete admission. A failed
+      // read cannot prove that it is safe to delete the student's identity.
+      return recoveryResponse(createdId);
     }
     return NextResponse.json({id:result.data.user.id},{status:201,headers});
-  }catch{return NextResponse.json({error:"Admission is unavailable. Contact ALS support."},{status:503});}
+  }catch{return createdId?recoveryResponse(createdId):NextResponse.json({error:"Admission is unavailable. Contact ALS support."},{status:503});}
 }
