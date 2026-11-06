@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const state=vi.hoisted(()=>({calls:[] as {table:string;columns:string;filters:Record<string,unknown>;head:boolean}[],expired:false,fail:false}));
+const state=vi.hoisted(()=>({calls:[] as {table:string;columns:string;filters:Record<string,unknown>;head:boolean}[],expired:false,fail:false,compositeBatchRelationship:false}));
 vi.mock("server-only",()=>({}));
 vi.mock("react",()=>({cache:(fn:unknown)=>fn}));
 vi.mock("@/lib/auth",()=>({requireRole:vi.fn(async()=>({id:"student",role:"student"}))}));
@@ -7,15 +7,18 @@ vi.mock("@/lib/supabase/server",()=>({createClient:async()=>({from:(table:string
   const call={table,columns:"",filters:{} as Record<string,unknown>,head:false};state.calls.push(call);
   const q={select:(columns:string,options?:{head?:boolean})=>{call.columns=columns;call.head=!!options?.head;return q;},eq:(key:string,value:unknown)=>{call.filters[key]=value;return q;},in:(key:string,value:unknown[])=>{call.filters[key]=value;return q;},order:()=>q,
     then:(resolve:(value:unknown)=>unknown)=>{
+      // PostgREST rejects an unqualified embed when both the canonical and the
+      // staging Program/Batch compatibility foreign keys point at batches.
+      if(table==="enrollments" && state.compositeBatchRelationship && !call.columns.includes("batches:batches!enrollments_batch_id_fkey("))return Promise.resolve(resolve({data:null,error:{code:"PGRST201",message:"More than one relationship was found for enrollments and batches",details:[{constraint:"enrollments_batch_id_fkey"},{constraint:"enrollments_batch_program_fk"}]}}));
       let data:unknown[]=[];
-      if(table==="enrollments")data=[{id:"e",status:"active",batch_id:null,batches:null,access_starts_at:null,access_expires_at:state.expired?"2020-01-01":null,programs:{id:"p",slug:"program",name:"Program"}}];
+      if(table==="enrollments")data=[{id:"e",status:"active",batch_id:state.compositeBatchRelationship?"b":null,batches:state.compositeBatchRelationship?{id:"b",name:"Current batch"}:null,access_starts_at:null,access_expires_at:state.expired?"2020-01-01":null,programs:{id:"p",slug:"program",name:"Program"}}];
       if(table==="program_subjects")data=[{subjects:{id:"s",name:"Subject"}},{subjects:{id:"t",name:"Other"}}];
       if(table==="lms_class_catalog")data=[{id:"r",subject_id:"s",status:"published"},{id:"draft",subject_id:"s",status:"draft"},{id:"other",subject_id:"t",status:"published"}].filter(r=>Object.entries(call.filters).every(([k,v])=>Array.isArray(v)?v.includes(r[k as keyof typeof r]):r[k as keyof typeof r]===v));
       return Promise.resolve(resolve({data:call.head?null:data,count:call.head?data.length:null,error:state.fail&&table==="lms_class_catalog"?{message:"internal"}:null}));
     }};return q;
   }})}));
 import { getStudentCourse } from "./student-courses-server";
-beforeEach(()=>{state.calls=[];state.expired=false;state.fail=false;});
+beforeEach(()=>{state.calls=[];state.expired=false;state.fail=false;state.compositeBatchRelationship=false;});
 describe("course data requests",()=>{
   it("loads only all authorized Published recordings once and derives counts, without question/test/dashboard queries",async()=>{
     const data=await getStudentCourse("program","s");expect(data?.recordings.map(r=>r.id)).toEqual(["r","other"]);expect(data?.counts).toEqual([{subjectId:"t",count:1},{subjectId:"s",count:1}]);
@@ -25,5 +28,15 @@ describe("course data requests",()=>{
   it("keeps the same authorized payload for any selected subject",async()=>{const data=await getStudentCourse("program","t");expect(data?.recordings.map(r=>r.id)).toEqual(["r","other"]);expect(state.calls.find(c=>c.table==="learning_content")?.filters.subject_id).toEqual(["t","s"]);});
   it("refuses expired enrollment before fetching subject content",async()=>{state.expired=true;expect(await getStudentCourse("program","s")).toBeNull();expect(state.calls.map(c=>c.table)).toEqual(["enrollments"]);});
   it("does not mask query failure as zero content",async()=>{state.fail=true;await expect(getStudentCourse("program","s")).rejects.toThrow(/could not be loaded/);});
+  it("loads the assigned course and preserves batch shape when staging has a second batch foreign key",async()=>{
+    state.compositeBatchRelationship=true;
+    const result=await getStudentCourse("program","s");
+    expect(result?.program.id).toBe("p");
+    expect(result?.enrollment.batch_id).toBe("b");
+    expect(result?.enrollment.batches).toEqual({id:"b",name:"Current batch"});
+    expect(result?.recordings.map(recording=>recording.id)).toEqual(["r","other"]);
+    const enrollment=state.calls.find(call=>call.table==="enrollments");
+    expect(enrollment?.filters).toEqual({student_id:"student",status:"active"});
+  });
 });
 
