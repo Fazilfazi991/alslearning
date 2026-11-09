@@ -1,0 +1,81 @@
+{
+  "project": "slghshcdaijbcjfoqerq",
+  "organization": "oenarbsvxrmnsvugjdrz",
+  "approvedCommit": "442baa1bb2f0dcb2682c28bbb998b1b7f228721f",
+  "method": "Chrome SQL Editor; approved immutable public GitHub source; normalized source checksum checked before SPI EXECUTE; BEGIN/COMMIT and migration history ARRAY[source] in same transaction",
+  "migrations": [
+    {
+      "version": "20261106020602",
+      "name": "admission_enquiries",
+      "normalizedSqlMd5": "9b2ce1cd03db0aa8fdd83a8ecaa9155c",
+      "committedAndHistoryVerified": true
+    },
+    {
+      "version": "20261106030644",
+      "name": "harden_enquiry_submission_and_rpc_validation",
+      "normalizedSqlMd5": "76138d6fbe8e4328c9734574bb576441",
+      "committedAndHistoryVerified": true
+    }
+  ],
+  "failedAttemptBeforeApply": {
+    "reason": "Terminal newline normalization restored two final LF instead of approved one; checksum guard raised before DDL",
+    "observedRejectedMd5": "ccc77c7a721b3d8e60ffca52ab123b33",
+    "partialChanges": false
+  },
+  "postMigrationOwnerQuery": {
+    "profiles": 27,
+    "programs": 6,
+    "batches": 14,
+    "enrollments": 26,
+    "live_sessions": 22,
+    "active_live": 0,
+    "enquiries": 0,
+    "batchCountExplanation": "Root acceptance concurrently created one explicitly disposable Admissions Demo Batch; original 13 batches retained",
+    "migration_rows": 2,
+    "handler_md5": "527476645ea3d24e9dba92f4f3b725c7",
+    "rls": {
+      "admission_enquiries": true,
+      "enquiry_activities": true,
+      "enquiry_follow_ups": true,
+      "enquiry_rate_buckets": true,
+      "enquiry_requests": true
+    },
+    "anon_read": false,
+    "anon_insert": false,
+    "anon_submit": false,
+    "authenticated_submit": false,
+    "authenticated_direct_update": false,
+    "service_submit": true,
+    "public_submit_definer": false,
+    "program_column_grants": 5
+  },
+  "authenticatedReadiness": {
+    "current_role": "authenticated",
+    "admission_ready": true,
+    "conversion_ready": true,
+    "admin_enquiry_read_count": 0,
+    "sessionChangesRolledBack": true
+  },
+  "healthAdvisor": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "productionAccessed": false,
+  "secretsChanged": false,
+  "keysCreated": false,
+  "prerequisitesApplied": false,
+  "securityAdvisor": {
+    "errors": 0,
+    "warnings": 46,
+    "suggestions": 6,
+    "refreshed": true,
+    "admissionsMatches": 0,
+    "warningTypes": {
+      "authenticated_security_definer_function_executable": 45,
+      "auth_leaked_password_protection": 1
+    },
+    "scope": "Warnings refer to existing public LMS/live/core functions and existing Auth password protection setting; no enquiry or admission-readiness functions matched the exported warning list",
+    "observedAt": "2026-11-06T03:31:56.880Z"
+  }
+}
