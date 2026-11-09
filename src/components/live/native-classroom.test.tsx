@@ -81,6 +81,20 @@ beforeEach(() => {
 afterEach(async () => { if (renderer) await act(async () => renderer.unmount()); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("authoritative classroom completion", () => {
+  it("shows a scheduled Teacher's start error and clears it after a successful retry", async () => {
+    mocks.row.status = "scheduled";
+    const scheduled = props("teacher");
+    scheduled.session.status = "scheduled";
+    await act(async () => { renderer = create(<NativeClassroom {...scheduled} />); });
+    mocks.fetch.mockResolvedValueOnce({ ok: false, status: 502, json: async () => ({ error: "Classroom control failed" }) });
+    await act(async () => { button("Start class")!.props.onClick(); });
+    const alert = renderer.root.findByProps({ role: "alert" });
+    expect(content(alert)).toBe("Classroom control failed");
+    expect(text()).toContain("Class scheduled");
+    await act(async () => { button("Start class")!.props.onClick(); });
+    expect(text()).toContain("Class is now live.");
+    expect(text()).not.toContain("Classroom control failed");
+  });
   it("ends an already-joined Student, removes Live/Join and clears receivers without reload", async () => {
     await mount(); const retainedJoin = button("Join classroom")!.props.onClick;
     await join(); expect(FakePeer.all).toHaveLength(2);
