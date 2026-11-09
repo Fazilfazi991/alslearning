@@ -12,6 +12,17 @@ export async function GET(request:Request){
   if(view==="published")query=query.eq("status","published");else if(view==="pending")query=query.neq("status","published");
   if(id)query=query.eq("id",id);
   const result=await query.range(page*20,page*20+19);
+  // A queue can shrink while an administrator is on its last page. PostgREST
+  // responds with 416 for an offset beyond the remaining rows; report the
+  // actual total so the user can navigate back instead of showing a failure.
+  if(result.error?.code==="PGRST103" && page>0){
+    let countQuery=s.db!.from("class_recordings").select("id,live_sessions!inner(id,recording_enabled)",{count:"exact",head:true}).eq("live_sessions.recording_enabled",true);
+    if(view==="published")countQuery=countQuery.eq("status","published");else if(view==="pending")countQuery=countQuery.neq("status","published");
+    if(id)countQuery=countQuery.eq("id",id);
+    const countResult=await countQuery;
+    if(countResult.error || countResult.count===null)return NextResponse.json({error:"Recording review could not be loaded."},{status:503});
+    return NextResponse.json({recordings:[],total:countResult.count},{headers:{"Cache-Control":"private, no-store"}});
+  }
   if(result.error)return NextResponse.json({error:"Recording review could not be loaded."},{status:503});
   const recordings=await Promise.all((result.data??[]).map(async row=> {
     let asset_state="processing";
