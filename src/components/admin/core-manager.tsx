@@ -631,16 +631,33 @@ export function QuestionForm({
   busy: boolean;
   save: (q: Question) => Promise<void>;
 }) {
-  const [q, setQ] = useState(value),
+  const [q, setQ] = useState<Question>(() => ({
+      ...value,
+      options: value.type === "true_false" ? value.options : [
+        ...value.options,
+        ...Array.from({ length: Math.max(0, 4 - value.options.length) }, () => ({ content: "", correct: false })),
+      ],
+    })),
     [uploads, setUploads] = useState(0),
-    [previewOpen, setPreviewOpen] = useState(false);
+    [previewOpen, setPreviewOpen] = useState(false),
+    [optionError, setOptionError] = useState("");
   const onBusy = (busy: boolean) => setUploads((n) => n + (busy ? 1 : -1));
   return (
     <form
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        void save(q);
+        const options = q.options.filter((option) => option.content.trim());
+        if (options.length < 2) {
+          setOptionError("Enter at least two answer options.");
+          return;
+        }
+        if (q.options.some((option) => option.correct && !option.content.trim()) || !options.some((option) => option.correct)) {
+          setOptionError("Select a correct answer with text.");
+          return;
+        }
+        setOptionError("");
+        void save({ ...q, options });
       }}
     >
       <Section title="Question and answers" open>
@@ -664,7 +681,7 @@ export function QuestionForm({
                       { content: "True", correct: true },
                       { content: "False", correct: false },
                     ]
-                  : q.options.map((o, i) => ({
+                  : [...q.options, ...Array.from({length:Math.max(0,4-q.options.length)},()=>({content:"",correct:false}))].map((o, i) => ({
                       ...o,
                       correct: v === "multiple_mcq" ? o.correct : i === 0,
                     })),
@@ -708,6 +725,8 @@ export function QuestionForm({
             Options — select the correct answer
             {q.type === "multiple_mcq" ? "s" : ""}
           </legend>
+          <p className="text-xs text-muted">Enter at least two options; leave unused options blank.</p>
+          {optionError && <p role="alert" className="text-sm text-red-800">{optionError}</p>}
           {q.options.map((o, i) => (
             <div key={i} className="flex items-center gap-3">
               <input
