@@ -813,6 +813,7 @@ export function NativeClassroom({
   }
 
   async function lifecycle(action: "start" | "end" | "cancel") {
+    setError("");
     try {
       if (action === "end") recordingStopRef.current?.();
       const result = await api<{ status: string }>("control", { action });
@@ -1150,6 +1151,7 @@ export function NativeClassroom({
     const completed = classStatus === "completed" || classStatus === "cancelled";
     const unavailable = !entryOpen || !configuration.realtimeConfigured;
     return <div className="mx-auto max-w-3xl p-4 sm:p-8"><header className="mb-6 flex flex-wrap items-start justify-between gap-4"><div><p className="eyebrow">{first(session.subjects)?.name || "ALS live classroom"}</p><h1 className="mt-2 text-2xl font-bold">{session.title}</h1></div>{user.role === "teacher" && <LogoutButton className="min-h-11 rounded-xl border border-line bg-white px-4 text-sm font-bold"/>}</header>
+      {error && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-900">{error}</p>}
       <section className="card p-6 sm:p-8" role="status"><h2 className="text-xl font-bold">{completed ? "This class has ended." : unavailable ? "Classroom temporarily unavailable" : "Class scheduled"}</h2>
         <p className="mt-3 text-sm leading-6 text-muted">{completed ? "You can return to your classes and watch a replay once it has been reviewed and published." : unavailable ? "Live classroom access is outside the current testing window or temporarily unavailable. Check back near the scheduled class time." : "The classroom opens when the Teacher starts this class."}</p>
         {session.starts_at && !completed && <p className="mt-3 text-sm font-semibold">Scheduled for {formatAcademicDate(session.starts_at, timeZone)}</p>}
