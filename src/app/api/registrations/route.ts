@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       p_full_name: value.fullName, p_email: value.email, p_phone: value.phone,
       p_qualification: value.qualification, p_institution: value.institution,
       p_program_id: value.programId, p_preferred_batch_id: value.preferredBatchId,
-      p_notes: value.notes, p_request_id: value.requestId, p_ip_hash: identity.hash,
+      p_notes: value.notes, p_consent: value.consent, p_request_id: value.requestId, p_ip_hash: identity.hash,
       p_phone_hash: hash("phone", value.phone), p_email_hash: hash("email", value.email),
     });
     if (result.error) {

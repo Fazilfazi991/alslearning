@@ -18,6 +18,7 @@ describe("registration endpoint", () => {
     const response = await POST(request(body));
     expect(response.status).toBe(200); expect(await response.json()).toEqual({ success: true });
     expect(rpc.mock.calls[0][0]).toBe("submit_student_registration");
+    expect(rpc.mock.calls[0][1].p_consent).toBe(true);
     expect(rpc.mock.calls[0][1].p_ip_hash).toMatch(/^[a-f0-9]{64}$/);
     expect(rpc.mock.calls[0][1].p_phone_hash).toMatch(/^[a-f0-9]{64}$/);
     expect(rpc.mock.calls[0][1].p_email_hash).toMatch(/^[a-f0-9]{64}$/);
