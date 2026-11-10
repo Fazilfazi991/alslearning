@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarClock, Check, Mail, Phone, UserRoundPlus } from "luc
 import { academicLocalToUtc } from "@/lib/live-class/date";
 import { StudentAdmissionForm, type StudentOptions } from "./student-manager";
 import { EnquiryAction, EnquiryStatusBadge, enquiryDate, enquiryRequest, enquiryStatuses, statusLabels, type Enquiry, type EnquiryStaff, type EnquiryStatus } from "./enquiries-shared";
+import { EnquiryRegistrationLink } from "@/components/registration/enquiry-registration-link";
 
 type Activity = { id: string; kind: string; note: string; created_at: string; actor_id: string | null; metadata?: Record<string, unknown> };
 type FollowUp = { id: string; due_at: string; completed_at: string | null; outcome: string | null; created_at: string };
@@ -100,6 +101,7 @@ export function EnquiryDetail({ id }: { id: string }) {
           </section>
         </div>
         <div className="min-w-0 space-y-6">
+          {!isConverted && enquiry.status !== "closed" && <EnquiryRegistrationLink enquiryId={id} />}
           <section className="rounded-2xl border border-line bg-white p-5 sm:p-6" aria-labelledby="enquiry-manage-title">
             <h2 id="enquiry-manage-title" className="text-lg font-bold">Manage enquiry</h2>
             <form className="mt-5 space-y-4" onSubmit={event => { event.preventDefault(); void mutate(`/api/admin/enquiries/${id}`, "PATCH", { ...(!isConverted ? { status } : {}), assigned_to: assigned || null }, "Enquiry updated."); }}>

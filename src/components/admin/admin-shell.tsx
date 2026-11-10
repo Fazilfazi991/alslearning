@@ -12,6 +12,7 @@ const groups = [
   { label: "Admissions", items: [
     { href: "/admin/enquiries", label: "Enquiries", Icon: MessageSquare },
     { href: "/admin/students", label: "Students", Icon: Users },
+    { href: "/admin/registrations", label: "Registrations", Icon: ClipboardCheck },
   ] },
   { label: "Academics", items: [
     { href: "/admin/academic", label: "Programs & Batches", Icon: LibraryBig },
@@ -25,7 +26,7 @@ const groups = [
   ] },
   { label: "Account", items: [{ href: "/admin/profile", label: "Profile & Password", Icon: UserRound }] },
 ];
-const primary = [groups[0].items[0], ...groups[1].items, groups[2].items[0]];
+const primary = [groups[0].items[0], groups[1].items[0], groups[1].items[1], groups[2].items[0]];
 const isActive = (path: string, href: string) => href === "/admin" ? path === href : path === href || path.startsWith(`${href}/`);
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
