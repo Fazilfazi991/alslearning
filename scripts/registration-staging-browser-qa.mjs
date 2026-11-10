@@ -26,7 +26,7 @@ const tag = randomBytes(6).toString('hex');
 const name = `STAGING QA ${tag}`, email = `als-registration-qa-${tag}@example.invalid`;
 const phone = `+1202${String(Number.parseInt(tag.slice(0, 8), 16) % 10000000).padStart(7, '0')}`;
 const folder = `.local-qa/registration/staging-${tag}`; mkdirSync(folder, { recursive: true });
-const report = { target: 'als-live-staging', base: base.origin, checks: [], screenshots: [], noEmail: true };
+const report = { target: 'als-live-staging', base: base.origin, checks: [], screenshots: [], noEmail: true, fixture: { tag, name, email, phone, programId: program, batchId: batch } };
 const check = message => { report.checks.push(message); console.log(`PASS ${message}`); };
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -75,6 +75,9 @@ try {
   check('Unauthenticated admin API access denied');
   const login = await context.request.post(`${base.origin}/api/auth/password`, { headers: { Origin: base.origin }, data: { email: credentials.ALS_STAGE_ADMIN_EMAIL, password: credentials.ALS_STAGE_ADMIN_PASSWORD } });
   assert.equal(login.status(), 200, 'Staging admin login failed');
+  const studentsBefore = await context.request.get(`${base.origin}/api/admin/students`); assert.equal(studentsBefore.status(), 200);
+  const prior = await studentsBefore.json(); assert.ok(!prior.students.some(student => student.email?.toLowerCase() === email), 'A profile was created before approval');
+  check('No synthetic student profile exists before approval');
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${base.origin}/admin/registrations`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('heading', { name: 'Student registrations' }).waitFor();
@@ -94,12 +97,18 @@ try {
   const detail = await context.request.get(`${base.origin}/api/admin/registrations/${id}`); assert.equal(detail.status(), 200);
   const stored = await detail.json();
   assert.equal(stored.application.status, 'approved'); assert.equal(stored.application.invitation_status, 'not_sent'); assert.ok(stored.application.student_id);
+  const student = await context.request.get(`${base.origin}/api/admin/students/${stored.application.student_id}`); assert.equal(student.status(), 200);
+  const admission = await student.json();
+  assert.ok(admission.profile.student_code, 'Permanent Student Code missing');
+  assert.equal(admission.profile.email.toLowerCase(), email);
+  assert.ok(admission.enrollments.some(item => item.program_id === program && item.batch_id === batch && item.status === 'active'), 'Expected active program and batch enrollment missing');
+  check('Student Code and assigned program/batch persisted');
   const repeated = await context.request.post(`${base.origin}/api/admin/registrations/${id}/approve`, { headers: { Origin: base.origin }, data: { batch_id: batch } });
   assert.equal(repeated.status(), 409, 'Repeated approval must be rejected');
   await screenshot('admin-approved');
   check('Admin approval persists once and leaves setup link unsent');
   report.registrationId = id; report.studentId = stored.application.student_id;
-  report.notes = 'Synthetic records remain in staging for authorized verification and must be handled under the agreed cleanup plan.';
+  report.notes = 'Synthetic registration, account, profile, enrollment and audit records remain in staging for authorized verification. They are marked STAGING QA and listed above. Do not delete or alter them automatically; approved identity guards and enrollment history require an agreed administrator cleanup procedure.';
 } finally {
   writeFileSync(`${folder}/report.json`, JSON.stringify(report, null, 2));
   await browser.close();
