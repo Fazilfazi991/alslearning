@@ -1,6 +1,16 @@
 import type { ReactNode } from "react";
 
-export const statusLabels: Record<string, string> = { pending: "Pending", ready_for_approval: "Ready for approval", needs_information: "Needs information", approved: "Approved", rejected: "Rejected" };
+export const statusLabels: Record<string, string> = { pending: "Pending", ready_for_approval: "Ready for approval", needs_information: "Needs information", approved: "Approved", setup_pending: "Setup link pending", rejected: "Rejected" };
+export function setupStatus(status?: string | null) {
+  switch (status) {
+    case "not_sent": return "Setup link not sent";
+    case "failed": return "Setup link failed";
+    case "sending": return "Sending setup link";
+    case "sent": return "Setup link sent";
+    case "not_required": return "Existing student account";
+    default: return "Setup status unavailable";
+  }
+}
 export const actionStyle = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-2 text-sm font-bold text-ink hover:bg-surface focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
 export const primaryStyle = `${actionStyle} border-brand! bg-brand! text-white! hover:bg-brand-dark!`;
 export function Status({ value }: { value: string }) {

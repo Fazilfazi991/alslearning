@@ -20,7 +20,7 @@ class Query {
     if (state.fail === this.table) return Promise.resolve(resolve({ error: { message: "unavailable" } }));
     if (this.table === "student_registrations") {
       const needle = typeof this.filters.search === "string" ? this.filters.search.match(/full_name\.ilike\.%(.+?)%/)?.[1] : undefined;
-      const rows = state.rows.filter(row => !needle || String(row.full_name).toLowerCase().includes(needle.toLowerCase()));
+      const rows = state.rows.filter(row => (!needle || String(row.full_name).toLowerCase().includes(needle.toLowerCase())) && (!this.filters.status || row.status === this.filters.status) && (!Array.isArray(this.filters.invitation_status) || this.filters.invitation_status.includes(row.invitation_status)));
       return Promise.resolve(resolve({ data: rows.slice(this.start, this.end + 1), count: rows.length, error: null }));
     }
     if (this.table === "batches") return Promise.resolve(resolve({ data: [{ id: "batch", program_id: "program", status: "active", batch_code: "ALS", max_students: 30, registration_default: true }], error: null }));
@@ -71,4 +71,19 @@ it("fails closed when capacity or identity checks cannot be loaded", async () =>
   expect((await get("status=ready_for_approval")).status).toBe(503);
   state.fail = "profiles";
   expect((await get("status=ready_for_approval")).status).toBe(503);
+});
+it("finds approved applications whose setup link needs follow-up", async () => {
+  const sample = state.rows[0];
+  state.rows = [
+    { ...sample, id: "not-sent", status: "approved", invitation_status: "not_sent" },
+    { ...sample, id: "failed", status: "approved", invitation_status: "failed" },
+    { ...sample, id: "sent", status: "approved", invitation_status: "sent" },
+    { ...sample, id: "existing", status: "approved", invitation_status: "not_required" },
+    { ...sample, id: "pending", status: "pending", invitation_status: "not_sent" },
+  ];
+  const response = await get("status=setup_pending");
+  const body = await response.json();
+  expect(response.status).toBe(200);
+  expect(body.registrations.map((row: { id: string }) => row.id)).toEqual(["not-sent", "failed"]);
+  expect(body.count).toBe(2);
 });

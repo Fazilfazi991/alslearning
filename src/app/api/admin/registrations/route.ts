@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { adminSession } from "@/lib/admin-session";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const statuses = ["pending", "ready_for_approval", "needs_information", "approved", "rejected"];
+const statuses = ["pending", "ready_for_approval", "needs_information", "approved", "setup_pending", "rejected"];
 const headers = { "Cache-Control": "private, no-store" };
 type Candidate = { id: string; full_name: string; email: string; phone: string; qualification: string; institution: string; program_id: string; status: string; consent_at: string | null; created_at: string; student_id: string | null; programs: { id: string; name: string; status: string } | null };
 type Batch = { id: string; program_id: string; status: string; batch_code: string | null; max_students: number | null; registration_default: boolean };
@@ -64,8 +64,9 @@ export async function GET(request: Request) {
     const page = Number.isSafeInteger(rawPage) && rawPage > 0 ? Math.min(rawPage, 100000) : 1;
     const q = (params.get("q") || "").trim().slice(0, 120).replace(/[^\p{L}\p{N}@+ .-]/gu, "");
     if (status === "ready_for_approval") return NextResponse.json(await readyApplications(session.db!, q, page), { headers });
-    let query = session.db!.from("student_registrations").select("id,full_name,email,phone,program_id,status,created_at,student_id,programs(id,name)", { count: "exact" });
-    if (status) query = query.eq("status", status);
+    let query = session.db!.from("student_registrations").select("id,full_name,email,phone,program_id,status,created_at,student_id,invitation_status,programs(id,name)", { count: "exact" });
+    if (status === "setup_pending") query = query.eq("status", "approved").in("invitation_status", ["not_sent", "failed", "sending"]);
+    else if (status) query = query.eq("status", status);
     if (q) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
     const result = await query.order("created_at", { ascending: false }).order("id").range((page - 1) * 20, page * 20 - 1);
     if (result.error) throw Error();
