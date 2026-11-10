@@ -64,6 +64,7 @@ export default async function Home() {
         <div><span className={styles.stepNumber} aria-hidden="true">2</span><h3>Plan with admissions</h3><p>Discuss program details and batch availability, then complete your admission with the ALS team.</p></div>
         <div><span className={styles.stepNumber} aria-hidden="true">3</span><h3>Start your learning</h3><p>Sign in to your student account to access your assigned courses, classes and assessments.</p></div>
       </div></section>
+      <section className={styles.stories} id="student-stories" aria-labelledby="stories-title"><div className={`container-page ${styles.storiesGrid}`}><div><h2 id="stories-title">The journey, in our students’ words.</h2><p>Discover the experiences and perspectives of the people learning with ALS.</p><a href="#enquire" className={styles.textLink}>Start your own journey <ArrowRight size={16} aria-hidden="true" /></a></div><div className={styles.storyPlaceholder}><span className={styles.storyIcon}><BookOpen size={30} aria-hidden="true" /></span><div><h3>Student stories are coming soon</h3><p>We’ll share student experiences here as they become available.</p></div></div></div></section>
       <section className={styles.faq} id="faq" aria-labelledby="faq-title"><div className={`container-page ${styles.faqGrid}`}><div><h2 id="faq-title">Questions before you begin?</h2><p>Every learning journey starts somewhere. Our admissions team can help you find your next step.</p><a href="#enquire" className={styles.textLink}>Ask admissions <ArrowRight size={16} aria-hidden="true" /></a></div><div className={styles.faqList}>
         {[
           ["Who can join ALS programs?", "Eligibility can vary by program. Share your interests and background with admissions to discuss the right option for you."],
@@ -75,7 +76,8 @@ export default async function Home() {
       </div></div></section>
       <section className={styles.closing} id="contact" aria-labelledby="contact-title"><div className={`container-page ${styles.closingInner}`}><div><h2 id="contact-title">Your next chapter starts with a conversation.</h2><p>Have a question about studying with ALS? Start with an enquiry.</p></div><a href="#enquire" className={styles.primaryLink}>Contact admissions <ArrowRight size={18} aria-hidden="true" /></a></div></section>
     </main>
-    <footer className={styles.footer}><div className="container-page"><div className={styles.footerInner}><ALSLogo /><nav aria-label="Footer navigation" className={styles.footerLinks}><a href="#courses">Programs</a><a href="#about">Why ALS</a><a href="#how-it-works">How it works</a><a href="#faq">FAQs</a><a href="#enquire">Admissions enquiry</a><a href="/login">Student & staff sign in</a></nav></div><p className={styles.footerNote}>Academy for Laboratory Science · Learning resources and class access depend on your program and enrollment.</p></div></footer>
+    <footer className={styles.footer}><div className="container-page"><div className={styles.footerInner}><ALSLogo /><nav aria-label="Footer navigation" className={styles.footerLinks}><a href="#courses">Programs</a><a href="#about">Why ALS</a><a href="#how-it-works">How it works</a><a href="#student-stories">Student stories</a><a href="#faq">FAQs</a><a href="#enquire">Admissions enquiry</a><a href="/login">Student & staff sign in</a></nav></div><p className={styles.footerNote}>Academy for Laboratory Science · Learning resources and class access depend on your program and enrollment.</p></div></footer>
   </div>;
 }
+
 
