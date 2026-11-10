@@ -1,6 +1,7 @@
 import { act, create, type ReactTestInstance, type ReactTestRenderer } from "react-test-renderer";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { PublicRegistration } from "./public-registration";
+vi.mock("next/link", () => ({ default: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a> }));
 
 const program = { id: "b3548351-7268-4d05-87f8-f5804d333b5d", name: "Laboratory science", description: null };
 let renderer: ReactTestRenderer;
@@ -32,4 +33,21 @@ it("resolves an opaque link in a POST body and prepopulates only its approved de
   expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ token });
   expect(input("fullName").props.value).toBe("Test Student");
   expect(text(renderer.root)).toContain("Your enquiry details have been added");
+});
+it("retains only the request capability in the original tab after a successful submission", async () => {
+  const setItem = vi.fn();
+  vi.stubGlobal("window", { requestAnimationFrame: (callback: () => void) => callback(), location: { hash: "", pathname: "/register", search: "" }, history: { state: null, replaceState: vi.fn() }, sessionStorage: { getItem: () => null, setItem } });
+  const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+  vi.stubGlobal("fetch", fetchMock);
+  await act(async () => { renderer = create(<PublicRegistration programs={[program]} initialProgram={program.id} unavailable={false} />, { createNodeMock: () => ({ focus: vi.fn() }) }); });
+  await fill("fullName", "Test Student"); await fill("email", "student@example.test"); await fill("phone", "+919876543210");
+  await act(async () => { await submit(); }); await fill("qualification", "BSc MLT"); await fill("institution", "Test College");
+  await act(async () => { await submit(); }); await act(async () => { await submit(); });
+  const consent = renderer.root.findAllByType("input").find(node => node.props.type === "checkbox")!;
+  await act(async () => { consent.props.onChange({ target: { checked: true } }); });
+  await act(async () => { await submit(); });
+  const sent = JSON.parse(fetchMock.mock.calls[0][1].body);
+  expect(setItem).toHaveBeenCalledWith("als-registration-proof-request", sent.requestId);
+  expect(setItem.mock.calls[0][1]).not.toContain("student@example.test");
+  expect(text(renderer.root)).toContain("Already have an ALS student account?");
 });

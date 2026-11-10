@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { validateRegistration } from "@/lib/registration-validation";
 import type { EnquiryProgram } from "@/types/enquiries";
 import styles from "./public-registration.module.css";
+import { OwnershipProof, ownershipProofStorageKey } from "./ownership-proof";
 
 type Answers = { fullName: string; email: string; phone: string; qualification: string; institution: string; programId: string; preferredBatch: string; guardian: string; address: string; additional: string; consent: boolean };
 const labels = ["Personal", "Education", "Program", "Review"];
@@ -19,6 +20,7 @@ export function PublicRegistration({ programs, unavailable, initialProgram }: { 
   const [formError, setFormError] = useState("");
   const [pending, setPending] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [ownershipRequestId, setOwnershipRequestId] = useState<string | null>(null);
   const [linkLoading, setLinkLoading] = useState(true);
   const [linkFailed, setLinkFailed] = useState(false);
   const [linkMessage, setLinkMessage] = useState("");
@@ -70,14 +72,20 @@ export function PublicRegistration({ programs, unavailable, initialProgram }: { 
         setErrors(data.errors || {}); setFormError(data.error || "Your application could not be saved. Please try again.");
         const first = stepFields.findIndex(group => group.some(field => data.errors?.[field]));
         if (first >= 0) { setStep(first); window.requestAnimationFrame(() => heading.current?.focus()); }
-      } else { setSuccess(true); window.requestAnimationFrame(() => heading.current?.focus()); }
+      } else {
+        // Only the random request capability is retained, and only in this
+        // tab; personal application details and link tokens are not stored.
+        try { window.sessionStorage.setItem(ownershipProofStorageKey, requestId.current); } catch { /* The application itself was saved. */ }
+        setOwnershipRequestId(requestId.current); setSuccess(true); window.requestAnimationFrame(() => heading.current?.focus());
+      }
     } catch { setFormError("We couldn’t connect. Your answers are still here; please try again."); }
     finally { inFlight.current = false; setPending(false); }
   };
   const field = (key: keyof Answers, label: string, props: { type?: string; autoComplete?: string; placeholder?: string; maxLength?: number } = {}) => <label className={styles.field} htmlFor={`registration-${key}`}><span>{label}</span><input id={`registration-${key}`} value={String(answers[key])} disabled={linkLoading || pending} onChange={event => update(key, event.target.value)} aria-invalid={!!errors[key]} aria-describedby={errors[key] ? `error-${key}` : undefined} {...props} />{errors[key] && <small id={`error-${key}`}>{errors[key]}</small>}</label>;
-  if (success) return <section className={styles.panel} aria-live="polite"><CheckCircle2 className={styles.successIcon} aria-hidden="true" size={38} /><h2 ref={heading} tabIndex={-1}>Your application has been received.</h2><p>Thank you for your interest in ALS. Our admissions team will review your details and contact you about the next steps.</p><Link href="/" className={styles.secondary}>Return to the homepage <ArrowRight size={17} aria-hidden="true" /></Link></section>;
+  if (success) return <section className={styles.panel} aria-live="polite"><CheckCircle2 className={styles.successIcon} aria-hidden="true" size={38} /><h2 ref={heading} tabIndex={-1}>Your application has been received.</h2><p>Thank you for your interest in ALS. Our admissions team will review your details and contact you about the next steps.</p><OwnershipProof requestId={ownershipRequestId} /><Link href="/" className={styles.secondary}>Return to the homepage <ArrowRight size={17} aria-hidden="true" /></Link></section>;
   const program = programs.find(item => item.id === answers.programId)?.name || "Not selected";
   return <section className={styles.panel} aria-labelledby="registration-heading">
+    <OwnershipProof />
     <div className={styles.progressTop}><span>Student registration</span><span>Step {step + 1} of 4</span></div>
     <ol className={styles.progress} aria-label="Registration progress">{labels.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined} className={index <= step ? styles.active : undefined}><span>{index + 1}</span><small>{label}</small></li>)}</ol>
     <h2 id="registration-heading" ref={heading} tabIndex={-1}>{names[step]}</h2>
