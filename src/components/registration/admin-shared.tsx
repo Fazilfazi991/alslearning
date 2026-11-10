@@ -4,9 +4,9 @@ export const statusLabels: Record<string, string> = { pending: "Pending", ready_
 export function setupStatus(status?: string | null) {
   switch (status) {
     case "not_sent": return "Setup link not sent";
-    case "failed": return "Setup link failed";
-    case "sending": return "Sending setup link";
-    case "sent": return "Setup link sent";
+    case "failed": return "Setup email outcome unconfirmed";
+    case "sending": return "Setup email outcome pending or unconfirmed";
+    case "sent": return "Setup email requested; delivery not confirmed";
     case "not_required": return "Existing student account";
     default: return "Setup status unavailable";
   }
