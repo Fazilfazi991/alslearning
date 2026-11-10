@@ -60,15 +60,20 @@ try {
   await page.getByRole('button', { name: 'Continue' }).click();
   assert.ok(await page.getByText('Please check the highlighted fields.').isVisible());
   check('Mobile registration renders and required fields block advancement');
-  await page.getByLabel('Full name', { exact: true }).fill(name);
-  await page.getByLabel('Email address', { exact: true }).fill(email);
-  await page.getByLabel('Phone / WhatsApp', { exact: true }).fill(phone);
+  // Validation messages are nested in labels and change their accessible
+  // names; use the stable associated input IDs after the negative check.
+  await page.locator('#registration-fullName').fill(name);
+  await page.locator('#registration-email').fill(email);
+  await page.locator('#registration-phone').fill(phone);
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByLabel('Qualification', { exact: true }).fill('STAGING QA qualification');
-  await page.getByLabel('Institution', { exact: true }).fill('STAGING QA institution');
+  await page.getByRole('heading', { name: 'Your education' }).waitFor();
+  await page.locator('#registration-qualification').fill('STAGING QA qualification');
+  await page.locator('#registration-institution').fill('STAGING QA institution');
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByLabel('Program', { exact: true }).selectOption(program);
+  await page.getByRole('heading', { name: 'Choose your program' }).waitFor();
+  await page.locator('#registration-programId').selectOption(program);
   await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('heading', { name: 'Review your application' }).waitFor();
   await page.getByRole('checkbox').check();
   await screenshot('mobile-review');
   const submitted = page.waitForRequest(request => request.method() === 'POST' && new URL(request.url()).pathname === '/api/registrations');
@@ -152,6 +157,13 @@ try {
   assert.ok(!(await studentsAfter.json()).students.some(student => student.email?.toLowerCase() === secondEmail), 'Full batch approval left a student profile');
   await screenshot('admin-full-batch');
   check('Full batch is disabled and attempted approval rolls back');
+} catch (error) {
+  let message = error instanceof Error ? error.message : 'Unknown browser QA error';
+  for (const secret of [config.ALS_STAGING_ACCESS_PHRASE, credentials.ALS_STAGE_ADMIN_PASSWORD, protectedPreviewLink]) if (secret) message = message.replaceAll(secret, '[redacted]');
+  message = message.replace(/https?:\/\/[^\s"']+/g, '[url]').slice(0, 1200);
+  report.failure = message;
+  console.error(`QA_FAILURE ${message}`);
+  process.exitCode = 1;
 } finally {
   writeFileSync(`${folder}/report.json`, JSON.stringify(report, null, 2));
   await browser.close();
