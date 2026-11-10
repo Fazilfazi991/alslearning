@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { registrationPasswordSetupAvailable } from "@/lib/registration-setup-availability";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSameOriginRequest } from "@/lib/request-origin";
 import { passwordHelp, validAccountPassword } from "@/lib/account-validation";
 import { setupCookie, validSetupGrant } from "@/lib/registration-setup-grant";
 export async function POST(request: Request) {
+  if (!registrationPasswordSetupAvailable) return NextResponse.json({ error: "Account setup is temporarily unavailable. Please contact admissions." }, { status: 503, headers: { "Cache-Control": "private, no-store" } });
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Invalid request." }, { status: 403 });
   try {
     const data: unknown = await request.json().catch(() => null);

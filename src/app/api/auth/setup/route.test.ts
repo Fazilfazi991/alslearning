@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { makeSetupGrant } from "@/lib/registration-setup-grant";
 
-const state = vi.hoisted(() => ({ userId: "student-a", sessionId: "session-a", grant: "", role: "student", active: true, update: vi.fn(), signOut: vi.fn(), deleteCookie: vi.fn() }));
+const state = vi.hoisted(() => ({ available: true, userId: "student-a", sessionId: "session-a", grant: "", role: "student", active: true, update: vi.fn(), signOut: vi.fn(), deleteCookie: vi.fn() }));
+vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return state.available; } }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => state.grant ? { value: state.grant } : undefined, delete: state.deleteCookie }) }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({
   auth: {
@@ -19,11 +20,16 @@ function request(password = "Strong-pass123!") {
 }
 beforeEach(() => {
   vi.stubEnv("REGISTRATION_SETUP_SECRET", "test-secret-at-least-thirty-two-characters-long");
-  state.userId = "student-a"; state.sessionId = "session-a"; state.role = "student"; state.active = true;
+  state.available = true; state.userId = "student-a"; state.sessionId = "session-a"; state.role = "student"; state.active = true;
   state.grant = makeSetupGrant(state.userId, state.sessionId);
   state.update.mockReset().mockResolvedValue({ error: null }); state.signOut.mockReset().mockResolvedValue({ error: null }); state.deleteCookie.mockReset();
 });
 describe("registration password setup boundary", () => {
+  it("fails closed before Auth when setup is unavailable", async () => {
+    state.available = false;
+    expect((await POST(request())).status).toBe(503);
+    expect(state.update).not.toHaveBeenCalled();
+  });
   it("updates the intended active student and signs out after success", async () => {
     expect((await POST(request())).status).toBe(200);
     expect(state.update).toHaveBeenCalledOnce();

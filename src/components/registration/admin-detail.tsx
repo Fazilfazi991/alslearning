@@ -29,7 +29,7 @@ export function RegistrationDetail({ id }: { id: string }) {
     try {
       const result = await request(path, method, body);
       setNotice(result.invitation === "deferred"
-        ? "The application is approved, but email invitations are not enabled. No setup link was sent. Send one after email is configured."
+        ? "The application is approved, but account setup is not available. No setup email was requested. Contact admissions support before trying again."
         : result.invitation === "failed"
           ? "The setup email outcome could not be confirmed. Check delivery before retrying; the admission remains approved."
           : message);

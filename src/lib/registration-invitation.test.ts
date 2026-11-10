@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const gate = vi.hoisted(() => ({ available: true }));
+vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return gate.available; } }));
 const mock = vi.hoisted(() => ({ rpc: vi.fn(), getUserById: vi.fn(), inviteUserByEmail: vi.fn(), resetPasswordForEmail: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ rpc: mock.rpc, auth: { admin: { getUserById: mock.getUserById, inviteUserByEmail: mock.inviteUserByEmail }, resetPasswordForEmail: mock.resetPasswordForEmail } }) }));
 import { sendRegistrationInvitation } from "./registration-invitation";
 
 beforeEach(() => {
+  gate.available = true;
   vi.stubEnv("REGISTRATION_INVITATION_ENABLED", "true");
   vi.stubEnv("REGISTRATION_SETUP_SECRET", "a-secret-long-enough-for-test-only-0001");
   vi.stubEnv("REGISTRATION_SITE_URL", "https://als.example");
@@ -14,6 +17,12 @@ beforeEach(() => {
 });
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 describe("registration invitation recovery", () => {
+  it("defers without dispatch while password setup is unavailable", async () => {
+    gate.available = false;
+    expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("deferred");
+    expect(mock.rpc).not.toHaveBeenCalled();
+    expect(mock.inviteUserByEmail).not.toHaveBeenCalled();
+  });
   it("defers delivery without attempting an invitation when email is disabled", async () => {
     vi.stubEnv("REGISTRATION_INVITATION_ENABLED", "false");
     expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("deferred");
