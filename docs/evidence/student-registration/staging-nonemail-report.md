@@ -12,3 +12,16 @@ The registration feature was exercised against the protected staging deployment 
 Five screenshots of synthetic-only mobile and admin screens and a detailed private fixture report remain under the ignored local QA directory. Test fixtures were retained for the agreed cleanup procedure; no existing records were deleted. Hosted Auth-orphan verification for the second applicant remained pending when this report was written.
 
 Email delivery, invitation redemption, password setup, student login, and actual simultaneous hosted approvals were not tested in this non-email staging run. Local isolated tests do not replace those hosted checks.
+
+## Recheck after the reserved-seat safeguard
+
+The recheck used the same two synthetic applications after the third staging migration and updated preview. It did not create another application or Auth account, and sent no email. The protected preview's runtime target was independently matched to staging using its public program list.
+
+- Mobile required-field validation and denial of unauthenticated admin API access passed.
+- An exact retry of the existing pending application succeeded, a changed retry was rejected, and the admin search still showed one application.
+- The previously approved student retained the Student Code and assigned program/batch; the setup link remained unsent. The other application remained pending and unlinked.
+- Admin review showed the one-seat test batch as full with one seat reserved and disabled the option. A direct approval attempt returned 409 and left the applicant pending without a student profile.
+
+The initial short-lived enabled observation above cannot be causally explained by this recheck. Two synthetic-only recheck screenshots and a private fixture report are kept in the ignored local QA directory. The temporary test admin's global sessions were revoked, its Auth account re-banned, and a fresh login rejected. Its profile remains active because the staging service role lacks the required update grant; previously issued access JWTs may remain usable until expiry. Test applications, enrollment and batch remain labelled for a separate agreed cleanup.
+
+This recheck does not test real email, password setup, student login, hosted concurrent approvals or production configuration.
