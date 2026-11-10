@@ -58,6 +58,14 @@ it("applies search before readiness and returns no results for a full batch", as
   body = await (await get("status=ready_for_approval&q=Applicant%201")).json();
   expect(body.count).toBe(0);
 });
+it("counts across candidate scan pages before selecting the requested result page", async () => {
+  const sample = state.rows[0];
+  state.rows = Array.from({ length: 125 }, (_, index) => ({ ...sample, id: String(index), email: `person${index}@example.test` }));
+  const body = await (await get("status=ready_for_approval&page=6")).json();
+  expect(body.count).toBe(125);
+  expect(body.registrations).toHaveLength(20);
+  expect(body.registrations[0].id).toBe("100");
+});
 it("fails closed when capacity or identity checks cannot be loaded", async () => {
   state.fail = "enrollments";
   expect((await get("status=ready_for_approval")).status).toBe(503);
