@@ -35,7 +35,10 @@ const screenshot = async name => { await page.screenshot({ path: `${folder}/${na
 try {
   // A Vercel share URL and optional ALS staging gate are provided only in an
   // ignored env file; do not persist either token or browser storage state.
-  if (credentials.ALS_STAGE_VERCEL_SHARE_URL) await page.goto(credentials.ALS_STAGE_VERCEL_SHARE_URL, { waitUntil: 'domcontentloaded' });
+  if (credentials.ALS_STAGE_VERCEL_SHARE_URL) {
+    try { await page.goto(credentials.ALS_STAGE_VERCEL_SHARE_URL, { waitUntil: 'domcontentloaded' }); }
+    catch { throw new Error('Could not open the protected staging preview'); }
+  }
   await page.goto(`${base.origin}/register`, { waitUntil: 'domcontentloaded' });
   if (await page.getByLabel('Access phrase', { exact: true }).count()) {
     assert.ok(config.ALS_STAGING_ACCESS_PHRASE, 'Staging gate phrase missing');
