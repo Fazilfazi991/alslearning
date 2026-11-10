@@ -12,8 +12,8 @@ This feature is in draft PR #6 and is not yet ready for production. The public `
 
 ## Remaining release blockers
 
-1. The user has deferred email service setup. Staging has no custom SMTP and uses default templates; the invite and recovery flows need tested token-hash email templates, suitable SMTP delivery and an allowlisted callback URL. Corresponding invitation/recovery feature flags and secrets must be configured securely per environment.
-2. The shared staging window has not yet been coordinated with the Teacher security work. The registration preview branch has no confirmed staging-specific Supabase configuration. No staging schema or Auth settings have been changed.
-3. Verify the full deployed browser → submission → admin approval → real invitation/recovery → Next.js callback → password setup → login → authorized course flow in staging, including unauthorized and concurrent cases. Capture evidence and resolve any failures before merging or deploying.
+1. The user explicitly requested registration and admin approval first, with email invitations later. The admin interface reports setup as deferred; newly approved students cannot set a password or sign in until links are sent. SMTP, token-hash templates, allowlisted callback, feature flags and secrets remain prerequisites for enabling invitations or recovery.
+2. Teacher security reports it is not currently changing shared staging but cannot certify a registration test window; verify independent recovery and migration safeguards. Staging has six extra October 17 batch/live migrations and lacks one branch migration. It has no scheduled backups on its current plan. The registration branch has no confirmed staging-specific Supabase configuration. No staging schema or Auth settings have been changed.
+3. Verify non-email browser submission and admin approval in a coordinated, recoverable staging environment, including unauthorized and concurrent cases. Before enabling invitations later, separately verify real invitation/recovery → Next.js callback → password setup → login → authorized course access.
 
-Do not claim staging acceptance or enable production registration until these checks pass.
+Do not claim staging acceptance or enable production registration until the non-email staging checks pass.
