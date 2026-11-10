@@ -52,7 +52,7 @@ for(const migration of entries){
   sql(`begin;\n${content}\ncommit;`);
  }catch(error){throw Error(`${migration.file}: ${error.message}`);}
 }
-for(const test of ['docs/registration-prototype-test.sql','supabase/tests/registration_submission_conflicts.sql','supabase/tests/registration_identity_proof.sql','supabase/tests/registration_existing_approval.sql']){
+for(const test of ['docs/registration-prototype-test.sql','supabase/tests/registration_submission_conflicts.sql','supabase/tests/registration_identity_proof.sql','supabase/tests/registration_existing_approval.sql','supabase/tests/registration_reserved_capacity.sql','supabase/tests/registration_reserved_capacity_skew.sql','supabase/tests/registration_reserved_capacity_transfer.sql']){
  try{sql(readFileSync(test,'utf8'));}catch(error){throw Error(`${test}: ${error.message}`);}
 }
-console.log(`PASS: ${entries.length} local migrations replayed including six staging extras; ${absent} and hosted cron scheduling omitted; four registration SQL suites passed. Database ${database}. This does not establish hosted schema or data parity.`);
+console.log(`PASS: ${entries.length} local migrations replayed including six staging extras; ${absent} and hosted cron scheduling omitted; seven registration SQL suites passed. Database ${database}. This does not establish hosted schema or data parity.`);
