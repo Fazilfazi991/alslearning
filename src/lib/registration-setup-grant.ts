@@ -1,0 +1,20 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+export const setupCookie = "als_registration_setup";
+const maxAge = 600;
+function secret() { const value = process.env.REGISTRATION_SETUP_SECRET; if (!value || value.length < 32) throw new Error("Registration setup is not configured"); return value; }
+function signature(payload: string) { return createHmac("sha256", secret()).update(payload).digest("base64url"); }
+export function makeSetupGrant(userId: string, sessionId: string, now = Math.floor(Date.now() / 1000)) {
+  const payload = Buffer.from(JSON.stringify({ userId, sessionId, expires: now + maxAge })).toString("base64url");
+  return `${payload}.${signature(payload)}`;
+}
+export function validSetupGrant(value: string, userId: string, sessionId: string, now = Math.floor(Date.now() / 1000)) {
+  try {
+    const [payload, supplied, extra] = value.split("."); if (!payload || !supplied || extra) return false;
+    const expected = Buffer.from(signature(payload)), actual = Buffer.from(supplied);
+    if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return false;
+    const data: unknown = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (!data || typeof data !== "object") return false;
+    const grant = data as Record<string, unknown>;
+    return grant.userId === userId && grant.sessionId === sessionId && typeof grant.expires === "number" && grant.expires > now && grant.expires <= now + maxAge;
+  } catch { return false; }
+}
