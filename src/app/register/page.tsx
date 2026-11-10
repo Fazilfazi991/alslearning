@@ -5,7 +5,7 @@ import { getPublicEnquiryPrograms } from "@/lib/enquiries-server";
 import styles from "@/components/registration/public-registration.module.css";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Student registration | ALS Academy" };
+export const metadata = { title: "Student registration | ALS Academy", referrer: "no-referrer" as const };
 
 export default async function Register({ searchParams }: { searchParams: Promise<{ program?: string | string[] }> }) {
   const params = await searchParams;

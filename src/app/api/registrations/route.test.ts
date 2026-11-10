@@ -19,6 +19,7 @@ describe("registration endpoint", () => {
     expect(response.status).toBe(200); expect(await response.json()).toEqual({ success: true });
     expect(rpc.mock.calls[0][0]).toBe("submit_student_registration");
     expect(rpc.mock.calls[0][1].p_consent).toBe(true);
+    expect(rpc.mock.calls[0][1].p_link_hash).toBeNull();
     expect(rpc.mock.calls[0][1].p_ip_hash).toMatch(/^[a-f0-9]{64}$/);
     expect(rpc.mock.calls[0][1].p_phone_hash).toMatch(/^[a-f0-9]{64}$/);
     expect(rpc.mock.calls[0][1].p_email_hash).toMatch(/^[a-f0-9]{64}$/);
@@ -34,5 +35,12 @@ describe("registration endpoint", () => {
     const first = await POST(request(body)); const retry = request(body);
     retry.headers.set("cookie", first.headers.get("Set-Cookie")!.split(";")[0]);
     await POST(retry); expect(rpc.mock.calls[0][1].p_ip_hash).toBe(rpc.mock.calls[1][1].p_ip_hash);
+  });
+  it("hashes a supplied link before passing it to storage", async () => {
+    rpc.mockResolvedValue({ data: {}, error: null });
+    const token = "A".repeat(43);
+    expect((await POST(request({ ...body, linkToken: token }))).status).toBe(200);
+    expect(rpc.mock.calls[0][1].p_link_hash).toMatch(/^[a-f0-9]{64}$/);
+    expect(rpc.mock.calls[0][1].p_link_hash).not.toBe(token);
   });
 });
