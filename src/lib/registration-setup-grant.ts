@@ -18,3 +18,22 @@ export function validSetupGrant(value: string, userId: string, sessionId: string
     return grant.userId === userId && grant.sessionId === sessionId && typeof grant.expires === "number" && grant.expires > now && grant.expires <= now + maxAge;
   } catch { return false; }
 }
+
+// The provider's public recovery endpoint must not by itself activate this
+// application's setup flow. Only an administrator can request a link with
+// this signed, expiring authorization bound to the approved identity.
+export function makeRegistrationRecoveryGrant(registrationId: string, userId: string, now = Math.floor(Date.now() / 1000)) {
+  const payload = Buffer.from(JSON.stringify({ purpose: "registration-recovery", registrationId, userId, expires: now + 86400 })).toString("base64url");
+  return `${payload}.${signature(payload)}`;
+}
+export function validRegistrationRecoveryGrant(value: string, registrationId: string, userId: string, now = Math.floor(Date.now() / 1000)) {
+  try {
+    const [payload, supplied, extra] = value.split("."); if (!payload || !supplied || extra) return false;
+    const expected = Buffer.from(signature(payload)), actual = Buffer.from(supplied);
+    if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return false;
+    const data: unknown = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (!data || typeof data !== "object") return false;
+    const grant = data as Record<string, unknown>;
+    return grant.purpose === "registration-recovery" && grant.registrationId === registrationId && grant.userId === userId && typeof grant.expires === "number" && grant.expires > now && grant.expires <= now + 86400;
+  } catch { return false; }
+}
