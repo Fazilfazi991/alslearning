@@ -28,6 +28,11 @@ const state=sql(`select status||':'||student_id::text||':'||(select student_code
 assert.match(state,new RegExp(`^approved:${student}:ALS-GOTRUEQA-.*:1$`));
 const duplicate=await api('/admin/users',{email:'student@example.test',email_confirm:false,app_metadata:{role:'student',lms_admission:admission},user_metadata:{full_name:'Test Student'}});assert.notEqual(duplicate.status,200);
 const invite=await api('/invite?redirect_to=http%3A%2F%2F127.0.0.1%3A19422%2Fauth%2Fcallback',{email:'student@example.test'});assert.equal(invite.status,200,JSON.stringify(invite.data));assert.equal(invite.data.id,student);
+// Local-only cooldown manipulation avoids sleeping; resend must reuse the unconfirmed Auth identity.
+sql(`update auth.users set confirmation_sent_at=clock_timestamp()-interval '2 minutes' where id='${student}'`);
+const retry=await api('/invite?redirect_to=http%3A%2F%2F127.0.0.1%3A19422%2Fauth%2Fcallback',{email:'student@example.test'});
+assert.equal(retry.status,200,JSON.stringify(retry.data));assert.equal(retry.data.id,student);
+assert.equal(sql("select count(*) from auth.users where email='student@example.test'"),'1');
 let msg;for(let i=0;i<20;i++){msg=(await (await fetch('http://127.0.0.1:19425/api/v1/messages')).json()).messages?.[0];if(msg)break;await new Promise(r=>setTimeout(r,500));}assert.ok(msg);
 const detail=await (await fetch(`http://127.0.0.1:19425/api/v1/message/${msg.ID}`)).json();const link=(detail.Text||detail.HTML||'').match(/https?:\/\/[^\s"<>]+\/verify\?[^\s"<>]+/);assert.ok(link);
 const token=new URL(link[0].replaceAll('&amp;','&')).searchParams.get('token');assert.ok(token);
@@ -48,4 +53,4 @@ if(migrations.some(file=>file.endsWith('_student_registration_identity_proof.sql
  assert.equal(sql(`select invitation_status from public.student_registrations where id='${existing}'`),'not_required');
  assert.equal(sql("select count(*) from auth.users where lower(email)='student@example.test'"),'1');
 }
-console.log(JSON.stringify({pendingWithoutIdentity:true,approvalTransaction:true,studentCode:true,batchEnrollment:true,duplicateIdentityRejected:true,unconfirmedBeforeInvite:true,inviteReusedIdentity:true,tokenVerified:true,passwordLogin:true,existingStudentLinked:migrations.some(file=>file.endsWith('_student_registration_identity_proof.sql'))}));
+console.log(JSON.stringify({pendingWithoutIdentity:true,approvalTransaction:true,studentCode:true,batchEnrollment:true,duplicateIdentityRejected:true,unconfirmedBeforeInvite:true,inviteReusedIdentity:true,retryReusedIdentity:true,tokenVerified:true,passwordLogin:true,existingStudentLinked:migrations.some(file=>file.endsWith('_student_registration_identity_proof.sql'))}));

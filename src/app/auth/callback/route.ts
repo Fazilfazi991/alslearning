@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
+import { recordUncertainRegistrationRevocation } from "@/lib/registration-security-log";
 import { registrationPasswordSetupAvailable } from "@/lib/registration-setup-availability";
 import { createBufferedAuthClient } from "@/lib/supabase/buffered-auth";
 import { createAuthAdminClient } from "@/lib/supabase/admin";
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     if (db && verifiedSession) {
       let uncertain = false;
       try { uncertain = !!(await db.auth.signOut({ scope: "local" })).error; } catch { uncertain = true; }
-      if (uncertain) console.error(JSON.stringify({ event: "registration_session_revocation_uncertain", correlation_id: randomUUID(), user_id: verifiedUserId, occurred_at: new Date().toISOString() }));
+      if (uncertain && verifiedUserId) recordUncertainRegistrationRevocation(verifiedUserId);
     }
     return invalid();
   }
