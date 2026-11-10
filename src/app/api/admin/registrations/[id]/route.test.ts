@@ -1,6 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
 
+vi.mock("server-only", () => ({}));
 const state = vi.hoisted(() => ({ authorized: false, rpc: vi.fn(), sameOrigin: true }));
 vi.mock("@/lib/admin-session", () => ({ adminSession: async () => state.authorized ? { db: { rpc: state.rpc } } : { response: NextResponse.json({ error: "Administrator access required." }, { status: 403 }) } }));
 vi.mock("@/lib/request-origin", () => ({ isSameOriginRequest: () => state.sameOrigin }));

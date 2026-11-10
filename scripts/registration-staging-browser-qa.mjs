@@ -86,7 +86,14 @@ try {
   await applicationLink.waitFor(); await screenshot('admin-list');
   const href = await applicationLink.getAttribute('href'); assert.match(href ?? '', /^\/admin\/registrations\/[0-9a-f-]+$/i);
   const id = href.split('/').at(-1); assert.match(id, uuid);
+  // Record IDs as soon as they are known, even if a later assertion fails.
+  report.registrationId = id;
   await applicationLink.click(); await page.getByRole('heading', { name, exact: true }).waitFor();
+  const beforeDetail = await context.request.get(`${base.origin}/api/admin/registrations/${id}`); assert.equal(beforeDetail.status(), 200);
+  const beforeState = await beforeDetail.json(), fixtureBatch = beforeState.batches.find(item => item.id === batch);
+  assert.ok(fixtureBatch && /^REGISTRATION QA\b/i.test(fixtureBatch.name), 'Refusing to use a batch without the dedicated REGISTRATION QA label');
+  assert.equal(fixtureBatch.active_students, 0, 'Dedicated test batch must start empty');
+  assert.equal(fixtureBatch.max_students, 1, 'Dedicated test batch must have exactly one seat');
   await page.getByLabel('Assign batch').selectOption(batch);
   await screenshot('admin-review');
   const approval = page.waitForResponse(response => response.request().method() === 'POST' && new URL(response.url()).pathname === `/api/admin/registrations/${id}/approve`);
@@ -97,17 +104,21 @@ try {
   const detail = await context.request.get(`${base.origin}/api/admin/registrations/${id}`); assert.equal(detail.status(), 200);
   const stored = await detail.json();
   assert.equal(stored.application.status, 'approved'); assert.equal(stored.application.invitation_status, 'not_sent'); assert.ok(stored.application.student_id);
+  report.studentId = stored.application.student_id;
   const student = await context.request.get(`${base.origin}/api/admin/students/${stored.application.student_id}`); assert.equal(student.status(), 200);
   const admission = await student.json();
   assert.ok(admission.profile.student_code, 'Permanent Student Code missing');
   assert.equal(admission.profile.email.toLowerCase(), email);
   assert.ok(admission.enrollments.some(item => item.program_id === program && item.batch_id === batch && item.status === 'active'), 'Expected active program and batch enrollment missing');
   check('Student Code and assigned program/batch persisted');
+  const afterBatch = stored.batches.find(item => item.id === batch);
+  assert.equal(afterBatch?.active_students, 1, 'QA batch UI count did not increase from 0 to 1');
+  assert.equal(afterBatch?.max_students, 1);
+  check('Dedicated batch displays full after its last seat is assigned');
   const repeated = await context.request.post(`${base.origin}/api/admin/registrations/${id}/approve`, { headers: { Origin: base.origin }, data: { batch_id: batch } });
   assert.equal(repeated.status(), 409, 'Repeated approval must be rejected');
   await screenshot('admin-approved');
   check('Admin approval persists once and leaves setup link unsent');
-  report.registrationId = id; report.studentId = stored.application.student_id;
   report.notes = 'Synthetic registration, account, profile, enrollment and audit records remain in staging for authorized verification. They are marked STAGING QA and listed above. Do not delete or alter them automatically; approved identity guards and enrollment history require an agreed administrator cleanup procedure.';
 } finally {
   writeFileSync(`${folder}/report.json`, JSON.stringify(report, null, 2));

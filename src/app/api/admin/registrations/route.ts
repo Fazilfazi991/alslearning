@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminSession } from "@/lib/admin-session";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { registrationBatchOccupancy } from "@/lib/registration-batch-occupancy";
 
 const statuses = ["pending", "ready_for_approval", "needs_information", "approved", "setup_pending", "rejected"];
 const headers = { "Cache-Control": "private, no-store" };
@@ -28,15 +29,15 @@ async function readyApplications(db: SupabaseClient, q: string, page: number) {
       const resultBatches = await db.from("batches").select("id,program_id,status,batch_code,max_students,registration_default").in("program_id", programIds).eq("registration_default", true);
       if (resultBatches.error || !resultBatches.data) throw Error("Batch readiness could not be evaluated");
       const batches = (resultBatches.data || []) as Batch[];
-      await Promise.all(programIds.map(async programId => {
-        const eligible = batches.filter(batch => batch.program_id === programId && batch.status === "active" && batch.batch_code);
-        if (eligible.length !== 1) { availability.set(programId, false); return; }
+      const candidates = programIds.map(programId => ({ programId, eligible: batches.filter(batch => batch.program_id === programId && batch.status === "active" && batch.batch_code) }));
+      const limited = candidates.filter(item => item.eligible.length === 1 && item.eligible[0].max_students !== null).map(item => item.eligible[0].id);
+      const occupancy = await registrationBatchOccupancy(db, limited);
+      for (const { programId, eligible } of candidates) {
+        if (eligible.length !== 1) { availability.set(programId, false); continue; }
         const batch = eligible[0];
-        if (batch.max_students === null) { availability.set(programId, true); return; }
-        const occupied = await db.from("enrollments").select("id", { count: "exact", head: true }).eq("batch_id", batch.id).eq("status", "active");
-        if (occupied.error || occupied.count === null) throw Error("Batch capacity could not be evaluated");
-        availability.set(programId, occupied.count < batch.max_students);
-      }));
+        if (batch.max_students === null) { availability.set(programId, true); continue; }
+        availability.set(programId, occupancy.get(batch.id)! < batch.max_students);
+      }
     }
     // The admin profile query is deliberately exact and case-insensitive; it
     // cannot enumerate Auth-only identities, which approval must still check.
