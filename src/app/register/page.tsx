@@ -5,7 +5,7 @@ import { getPublicEnquiryPrograms } from "@/lib/enquiries-server";
 import styles from "@/components/registration/public-registration.module.css";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Registration preview | ALS Academy", robots: { index: false, follow: false } };
+export const metadata = { title: "Student registration | ALS Academy", referrer: "no-referrer" as const };
 
 export default async function Register({ searchParams }: { searchParams: Promise<{ program?: string | string[] }> }) {
   const params = await searchParams;
@@ -19,8 +19,8 @@ export default async function Register({ searchParams }: { searchParams: Promise
       <div className={styles.intro}>
         <Link href="/" className={styles.backLink}>← Back to ALS Academy</Link>
         <h1>Let’s begin your <span>learning journey.</span></h1>
-        <p>Explore the four-step registration experience and see how applicants will share their details with ALS admissions.</p>
-        <div className={styles.notice}><strong>Design preview only</strong><p>Please use sample details. Applications cannot be submitted or saved yet. Contact ALS admissions through the homepage for current enquiries.</p></div>
+        <p>Tell us a little about yourself and the program you’re interested in. Our admissions team will review your application and guide you through the next steps.</p>
+        <div className={styles.notice}><strong>Before you begin</strong><p>Have your contact and educational details ready. Submitting an application does not grant access to classes; the ALS team will contact you after review.</p></div>
       </div>
       <PublicRegistration programs={programs} unavailable={unavailable} initialProgram={preselected} />
     </main>

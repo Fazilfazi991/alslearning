@@ -1,0 +1,21 @@
+import {spawn,spawnSync} from 'node:child_process'; import assert from 'node:assert/strict';
+const exe=process.env.ALS_TEST_PSQL,port=process.env.ALS_TEST_PGPORT,db=process.env.ALS_CAPACITY_TEST_DB; assert.ok(exe,'Set ALS_TEST_PSQL'); assert.match(port||'',/^\d{4,5}$/,'Set ALS_TEST_PGPORT'); assert.match(db||'',/^[a-z0-9_]+$/,'Set ALS_CAPACITY_TEST_DB');
+const args=['-h','127.0.0.1','-p',port,'-U','postgres','-d',db,'-X','-q','-t','-A','-v','ON_ERROR_STOP=1'];
+function sql(text){const r=spawnSync(exe,args,{input:text,encoding:'utf8'});assert.equal(r.status,0,r.stderr);return r.stdout.trim();}
+assert.match(sql("select coalesce(shobj_description(oid,'pg_database'),'') from pg_database where datname=current_database()"),/^(als-registration-staging-drift:|als-batch-guard:|ALS registration QA disposable)/);
+let seed="insert into public.programs(id,slug,name,status) values('f6000000-0000-4000-8000-000000000001','qa-global-races','QA races','active');\n";
+for(let n=2;n<=5;n++)seed+=`insert into public.batches(id,program_id,slug,name,batch_code,status,max_students) values('f6000000-0000-4000-8000-00000000000${n}','f6000000-0000-4000-8000-000000000001','qa-global-race-${n}','QA race ${n}','RACE${n}','active',${n<4?1:2});\n`;
+for(let n=11;n<=20;n++)seed+=`insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data) values('f6000000-0000-4000-8000-0000000000${n}','global-race${n}@example.invalid',now(),'{"role":"student"}','{"full_name":"QA ${n}"}');\n`;
+seed+=`update public.profiles set is_active=false where id in ('f6000000-0000-4000-8000-000000000011','f6000000-0000-4000-8000-000000000013');
+insert into public.enrollments(student_id,program_id,batch_id,access_starts_at,status) values
+('f6000000-0000-4000-8000-000000000011','f6000000-0000-4000-8000-000000000001','f6000000-0000-4000-8000-000000000002',now()+interval '1 hour','active'),
+('f6000000-0000-4000-8000-000000000013','f6000000-0000-4000-8000-000000000001','f6000000-0000-4000-8000-000000000003',now()+interval '1 hour','active'),
+('f6000000-0000-4000-8000-000000000015','f6000000-0000-4000-8000-000000000001','f6000000-0000-4000-8000-000000000004',now(),'active'),
+('f6000000-0000-4000-8000-000000000017','f6000000-0000-4000-8000-000000000001','f6000000-0000-4000-8000-000000000005',now(),'active');`;
+sql(seed);
+function run(input){return new Promise((resolve,reject)=>{const child=spawn(exe,args,{stdio:['pipe','pipe','pipe']});let err='';child.stderr.on('data',x=>err+=x);child.on('error',reject);child.on('close',code=>resolve({code,err}));child.stdin.end(input);});}
+const enrol=(student,batch)=>`insert into public.enrollments(student_id,program_id,batch_id,access_starts_at,status) values('f6000000-0000-4000-8000-0000000000${student}','f6000000-0000-4000-8000-000000000001','f6000000-0000-4000-8000-00000000000${batch}',now(),'active')`;
+const activate=student=>`update public.profiles set is_active=true where id='f6000000-0000-4000-8000-0000000000${student}'`;
+const resize=batch=>`update public.batches set max_students=1 where id='f6000000-0000-4000-8000-00000000000${batch}'`;
+async function race(older,newer,label){const a=run(`begin; select now(); select pg_sleep(1.3); ${older}; commit;`);await new Promise(r=>setTimeout(r,500));const b=run(`begin; ${newer}; select pg_sleep(2); commit;`);const [x,y]=await Promise.all([a,b]);assert.equal(y.code,0,label+': newer '+y.err);assert.notEqual(x.code,0,label+': older must fail');assert.match(x.err,/unreserved seats|reserved student seats|batch is full|Capacity cannot be below/i,label);}
+(async()=>{await race(activate(11),enrol(12,2),'activation after enrollment');await race(enrol(14,3),activate(13),'enrollment after activation');await race(resize(4),enrol(16,4),'capacity reduction after enrollment');await race(enrol(18,5),resize(5),'enrollment after capacity reduction');for(let n=2;n<=5;n++){const x=sql(`select private.lms_reserved_capacity_count('f6000000-0000-4000-8000-00000000000${n}',clock_timestamp(),null)||':'||(select max_students from public.batches where id='f6000000-0000-4000-8000-00000000000${n}')`);const [occupied,capacity]=x.split(':').map(Number);assert.ok(occupied<=capacity,'Over-capacity batch '+n);}console.log('PASS global reactivation, direct enrollment and capacity-edit races in both orders');})().catch(e=>{console.error(e);process.exitCode=1});
