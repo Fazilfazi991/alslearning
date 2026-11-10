@@ -7,9 +7,10 @@ let provider=readFileSync('scripts/fixtures/helper-grants-provider.sql','utf8').
 sql(provider);
 sql(`create function storage.foldername(text) returns text[] language sql immutable as $$select (string_to_array($1,'/'))[1:greatest(array_length(string_to_array($1,'/'),1)-1,0)]$$;
 create publication supabase_realtime; create schema realtime; create table realtime.messages(id bigint generated always as identity,extension text);alter table realtime.messages enable row level security;create function realtime.topic() returns text language sql stable as $$select current_setting('realtime.topic',true)$$;grant usage on schema realtime to authenticated;grant select,insert on realtime.messages to authenticated;grant execute on function realtime.topic() to authenticated;`);
-for(const file of readdirSync('supabase/migrations').filter(x=>x.endsWith('.sql')).sort()){try{sql(`begin;\n${readFileSync(`supabase/migrations/${file}`,'utf8')}\ncommit;`);}catch(e){throw Error(`Migration ${file}: ${e.message}`)}}
-sql(readFileSync('docs/registration-schema-prototype.sql','utf8'));
-console.log('Migrations and prototype loaded into real GoTrue database');
+const migrations=readdirSync('supabase/migrations').filter(x=>x.endsWith('.sql')).sort();
+for(const file of migrations){try{sql(`begin;\n${readFileSync(`supabase/migrations/${file}`,'utf8')}\ncommit;`);}catch(e){throw Error(`Migration ${file}: ${e.message}`)}}
+if(!migrations.some(file=>file.endsWith('_student_registration.sql'))) sql(readFileSync('docs/registration-schema-prototype.sql','utf8'));
+console.log('Registration schema loaded into real GoTrue database');
 sql(`insert into public.programs(id,slug,name,status) values('b0000000-0000-4000-8000-000000000001','gotrue-qa','QA program','active');
 insert into public.batches(id,program_id,slug,name,batch_code,status,max_students) values('b0000000-0000-4000-8000-000000000002','b0000000-0000-4000-8000-000000000001','gotrue-qa','QA batch','GOTRUEQA','active',1);
 insert into auth.users(id,email,raw_app_meta_data,raw_user_meta_data) values('b0000000-0000-4000-8000-000000000010','admin@example.test','{"role":"admin"}','{"full_name":"QA Admin"}');

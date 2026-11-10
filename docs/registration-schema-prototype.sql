@@ -37,12 +37,33 @@ revoke all on public.student_registrations, public.student_registration_events f
 revoke all on private.registration_requests, private.registration_rate_buckets, private.registration_links from public,anon,authenticated;
 grant select on public.student_registrations, public.student_registration_events to authenticated;
 grant select on public.student_registrations to service_role;
-create policy registrations_admin_read on public.student_registrations for select to authenticated using(private.enquiry_admin());
-create policy registration_events_admin_read on public.student_registration_events for select to authenticated using(private.enquiry_admin());
+-- The Teacher security branch adds a session guard to tables existing at the
+-- time it runs. If it was installed first, apply the same guard to these new
+-- tables; if installed later its migration will add the policies itself.
+do $$ begin
+ if to_regprocedure('private.account_session_allowed()') is not null then
+   execute 'create policy account_session_guard on public.student_registrations as restrictive for all to authenticated using ((select private.account_session_allowed())) with check ((select private.account_session_allowed()))';
+   execute 'create policy account_session_guard on public.student_registration_events as restrictive for all to authenticated using ((select private.account_session_allowed())) with check ((select private.account_session_allowed()))';
+ end if;
+end $$;
+create function private.registration_admin() returns boolean language plpgsql volatile security definer set search_path='' as $$
+declare allowed boolean;
+begin
+ if not private.enquiry_admin() then return false; end if;
+ if to_regprocedure('private.account_session_allowed()') is not null then
+   execute 'select private.account_session_allowed()' into allowed;
+   return coalesce(allowed,false);
+ end if;
+ return true;
+end $$;
+revoke all on function private.registration_admin() from public,anon;
+grant execute on function private.registration_admin() to authenticated;
+create policy registrations_admin_read on public.student_registrations for select to authenticated using(private.registration_admin());
+create policy registration_events_admin_read on public.student_registration_events for select to authenticated using(private.registration_admin());
 
 create function private.create_registration_link(p_enquiry_id uuid,p_token_hash text,p_expires_at timestamptz) returns void language plpgsql security definer set search_path='' as $$
 begin
- if not private.enquiry_admin() then raise exception 'Administrator required'; end if;
+ if not private.registration_admin() then raise exception 'Administrator required'; end if;
  if p_token_hash is null or p_token_hash !~ '^[a-f0-9]{64}$' or p_expires_at is null or p_expires_at<=now() or p_expires_at>now()+interval '7 days' then raise exception 'Invalid link'; end if;
  if not exists(select 1 from public.admission_enquiries where id=p_enquiry_id and status not in ('closed','converted') and student_id is null) then raise exception 'Enquiry unavailable'; end if;
  insert into private.registration_links(token_hash,enquiry_id,created_by,expires_at) values(p_token_hash,p_enquiry_id,auth.uid(),p_expires_at);
@@ -124,7 +145,7 @@ create function private.review_student_registration(p_id uuid,p_action text,p_ch
 language plpgsql security definer set search_path='' as $$
 declare r public.student_registrations;
 begin
- if not private.enquiry_admin() then raise exception 'Administrator required'; end if;
+ if not private.registration_admin() then raise exception 'Administrator required'; end if;
  if p_id is null or p_action not in ('edit','needs_information','rejected') or p_changes is null or jsonb_typeof(p_changes)<>'object'
  or exists(select 1 from jsonb_object_keys(p_changes) k where k not in ('full_name','email','phone','qualification','institution','program_id','preferred_batch_id','notes','reason')) then raise exception 'Invalid review'; end if;
  if p_action='edit' and p_changes ? 'reason' then raise exception 'Invalid review'; end if;
@@ -186,7 +207,11 @@ begin
  actor := (admission->>'actor_id')::uuid;
  v_batch_id := (admission->>'batch_id')::uuid;
  select * into r from public.student_registrations where id=(admission->>'registration_id')::uuid for update;
- if not found or r.status<>'pending' or r.student_id is not null or r.consent_at is null
+ -- Hold the actor row until the transaction commits so deactivation cannot
+ -- race a successful approval after this authorization check.
+ perform 1 from public.profiles where id=actor and role='admin' and is_active for share;
+ if not found then raise exception 'Active admission Admin required'; end if;
+ if r.id is null or r.status<>'pending' or r.student_id is not null or r.consent_at is null
    or new.email_confirmed_at is not null or lower(new.email) is distinct from lower(r.email)
    or admission->>'full_name' is distinct from r.full_name or admission->>'phone' is distinct from r.phone
    or (admission->>'program_id')::uuid is distinct from r.program_id
@@ -208,7 +233,7 @@ create trigger z_finish_registration_admission after insert on auth.users for ea
 -- later UPDATE in the same transaction. Complete registration on both paths.
 create trigger z_finish_registration_admission_update after update of raw_app_meta_data on auth.users for each row when (new.raw_app_meta_data ? 'lms_admission') execute function private.finish_registration_admission();
 create function public.registration_admission_ready() returns boolean language sql stable security invoker set search_path='' as $$
- select private.lms_admission_ready() and exists(select 1 from pg_catalog.pg_trigger where tgrelid='auth.users'::regclass and tgname='z_finish_registration_admission' and tgfoid=to_regprocedure('private.finish_registration_admission()') and tgtype=5 and tgenabled in ('O','A'))
+ select private.registration_admin() and private.lms_admission_ready() and exists(select 1 from pg_catalog.pg_trigger where tgrelid='auth.users'::regclass and tgname='z_finish_registration_admission' and tgfoid=to_regprocedure('private.finish_registration_admission()') and tgtype=5 and tgenabled in ('O','A'))
  and exists(select 1 from pg_catalog.pg_trigger where tgrelid='auth.users'::regclass and tgname='z_finish_registration_admission_update' and tgfoid=to_regprocedure('private.finish_registration_admission()') and tgtype=17 and tgqual is not null and tgenabled in ('O','A'))
 $$;
 revoke all on function public.registration_admission_ready() from public,anon;
