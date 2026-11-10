@@ -109,7 +109,7 @@ try {
   const beforeDetail = await context.request.get(`${base.origin}/api/admin/registrations/${id}`); assert.equal(beforeDetail.status(), 200);
   const beforeState = await beforeDetail.json(), fixtureBatch = beforeState.batches.find(item => item.id === batch);
   assert.ok(fixtureBatch && /^REGISTRATION QA\b/i.test(fixtureBatch.name), 'Refusing to use a batch without the dedicated REGISTRATION QA label');
-  assert.equal(fixtureBatch.active_students, 0, 'Dedicated test batch must start empty');
+  assert.equal(fixtureBatch.reserved_seats, 0, 'Dedicated test batch must start empty');
   assert.equal(fixtureBatch.max_students, 1, 'Dedicated test batch must have exactly one seat');
   await page.getByLabel('Assign batch').selectOption(batch);
   await screenshot('admin-review');
@@ -129,7 +129,7 @@ try {
   assert.ok(admission.enrollments.some(item => item.program_id === program && item.batch_id === batch && item.status === 'active'), 'Expected active program and batch enrollment missing');
   check('Student Code and assigned program/batch persisted');
   const afterBatch = stored.batches.find(item => item.id === batch);
-  assert.equal(afterBatch?.active_students, 1, 'QA batch UI count did not increase from 0 to 1');
+  assert.equal(afterBatch?.reserved_seats, 1, 'QA batch UI count did not increase from 0 to 1');
   assert.equal(afterBatch?.max_students, 1);
   check('Dedicated batch displays full after its last seat is assigned');
   const repeated = await context.request.post(`${base.origin}/api/admin/registrations/${id}/approve`, { headers: { Origin: base.origin }, data: { batch_id: batch } });

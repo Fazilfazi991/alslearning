@@ -30,8 +30,10 @@ async function readyApplications(db: SupabaseClient, q: string, page: number) {
       if (resultBatches.error || !resultBatches.data) throw Error("Batch readiness could not be evaluated");
       const batches = (resultBatches.data || []) as Batch[];
       const candidates = programIds.map(programId => ({ programId, eligible: batches.filter(batch => batch.program_id === programId && batch.status === "active" && batch.batch_code) }));
-      const limited = candidates.filter(item => item.eligible.length === 1 && item.eligible[0].max_students !== null).map(item => item.eligible[0].id);
-      const occupancy = await registrationBatchOccupancy(db, limited);
+      // Even an unlimited batch requires the reservation RPC to exist; never
+      // offer approval if the database guard and application are out of sync.
+      const eligibleIds = candidates.filter(item => item.eligible.length === 1).map(item => item.eligible[0].id);
+      const occupancy = await registrationBatchOccupancy(db, eligibleIds);
       for (const { programId, eligible } of candidates) {
         if (eligible.length !== 1) { availability.set(programId, false); continue; }
         const batch = eligible[0];
