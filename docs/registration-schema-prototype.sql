@@ -204,8 +204,12 @@ begin
 end $$;
 revoke all on function private.finish_registration_admission() from public,anon,authenticated;
 create trigger z_finish_registration_admission after insert on auth.users for each row execute function private.finish_registration_admission();
+-- GoTrue can insert an identity first and attach trusted app metadata in a
+-- later UPDATE in the same transaction. Complete registration on both paths.
+create trigger z_finish_registration_admission_update after update of raw_app_meta_data on auth.users for each row when (new.raw_app_meta_data ? 'lms_admission') execute function private.finish_registration_admission();
 create function public.registration_admission_ready() returns boolean language sql stable security invoker set search_path='' as $$
  select private.lms_admission_ready() and exists(select 1 from pg_catalog.pg_trigger where tgrelid='auth.users'::regclass and tgname='z_finish_registration_admission' and tgfoid=to_regprocedure('private.finish_registration_admission()') and tgtype=5 and tgenabled in ('O','A'))
+ and exists(select 1 from pg_catalog.pg_trigger where tgrelid='auth.users'::regclass and tgname='z_finish_registration_admission_update' and tgfoid=to_regprocedure('private.finish_registration_admission()') and tgtype=17 and tgqual is not null and tgenabled in ('O','A'))
 $$;
 revoke all on function public.registration_admission_ready() from public,anon;
 grant execute on function public.registration_admission_ready() to authenticated;
