@@ -1,19 +1,19 @@
-# Student registration: draft integration checkpoint
+# Student registration: release checkpoint
 
-This branch is incomplete and must not be merged or deployed. It now includes the public registration wizard, admin review and approval screens, server endpoints, account-setup flow, and a database prototype. The SQL in `docs/registration-schema-prototype.sql` is deliberately **not a migration** and has not been applied to staging. Without the schema, endpoints fail closed.
+This feature is in draft PR #6 and is not yet ready for production. The public `/register` on the live site remains a design-only preview with submission disabled. The complete flow is implemented on this branch, including public registration, enquiry links, admin review and approval, new-student invitation and setup, and ownership-verified existing-student enrollment.
 
-## Verified locally
+## Database and local verification
 
-- Public submission is designed to create only a pending application. Admin approval uses unconfirmed, passwordless Auth creation and the existing admission triggers; an additional prototype trigger atomically records approval only after enrollment and Student Code creation.
-- A disposable PostgreSQL instance replayed all 64 existing migrations. Prototype SQL and a rolled-back fixture exercised submission deduplication, admin review, student-code creation, approval, invitation lease fencing, identity protection, and unauthorized application reads. This is not a real Supabase Auth or email test.
-- An isolated GoTrue/Postgres integration test replayed the ALS migrations and registration prototype, then verified pending/no identity, transactional admission, Student Code, batch enrollment, invite redemption and password login. The real provider test identified and corrected an Auth metadata update trigger issue. It does not verify the Next.js callback, course rendering or staging configuration.
-- Desktop and mobile screenshots in `docs/evidence/student-registration/` show the local form; they do not demonstrate persistence or account setup.
+- Two additive registration migrations were generated with the official Supabase CLI in a dedicated hosted Linux runner. They have not been applied to shared staging or production.
+- Local PostgreSQL checks cover RLS and admin-session compatibility with the Teacher security migrations in either order, identity proof, rejected or expired proof, full-batch rollback, duplicate applications and programs, and concurrent last-seat and same-application approvals.
+- A fresh isolated GoTrue/Postgres integration replay verified pending applications without Auth accounts, atomic approval, Student Code and batch enrollment, invitation redemption and password login. It also verified an existing student can prove ownership and receive a second course without changing their code, creating another account or sending a second invitation.
+- The existing-user path requires a verified signed-in identity. Matching an email in a public application alone is never sufficient.
+- The full application tests, lint, typecheck and production build passed locally. Desktop and mobile screenshots in `docs/evidence/student-registration/` are design evidence, not staging acceptance.
 
-## Release blockers
+## Remaining release blockers
 
-1. Complete review of the registration SQL, identity guard, concurrent approval and capacity cases; generate and verify an actual migration through an authorized supported Supabase CLI environment. The locally downloaded Windows CLI was blocked by Windows Application Control.
-2. Verify the real Supabase Auth invite, template, secure setup, email confirmation, login and authorized course access in an isolated environment. Invitations remain gated by `REGISTRATION_INVITATION_ENABLED`, `REGISTRATION_SITE_URL`, `REGISTRATION_SETUP_SECRET`, readiness checks and an appropriate allowlisted token-hash email template.
-3. Verify secure enquiry-linked registration links, the advisory ready-for-approval filter and remaining field requirements in staging. Review existing-identity handling and admission recovery; current behavior fails closed for conflicting identities.
-4. Coordinate compatibility and a safe staging window with the parallel Teacher security work. Run staging browser and database acceptance, including concurrency, full batch and unauthorized access, before any release.
+1. The user has deferred email service setup. Staging has no custom SMTP and uses default templates; the invite and recovery flows need tested token-hash email templates, suitable SMTP delivery and an allowlisted callback URL. Corresponding invitation/recovery feature flags and secrets must be configured securely per environment.
+2. The shared staging window has not yet been coordinated with the Teacher security work. The registration preview branch has no confirmed staging-specific Supabase configuration. No staging schema or Auth settings have been changed.
+3. Verify the full deployed browser → submission → admin approval → real invitation/recovery → Next.js callback → password setup → login → authorized course flow in staging, including unauthorized and concurrent cases. Capture evidence and resolve any failures before merging or deploying.
 
-Do not treat unit tests, the SQL prototype or local screenshots as staging acceptance.
+Do not claim staging acceptance or enable production registration until these checks pass.
