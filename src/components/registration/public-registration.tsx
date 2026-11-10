@@ -30,21 +30,24 @@ export function PublicRegistration({ programs, unavailable, initialProgram }: { 
   useEffect(() => {
     if (linkStarted.current) return;
     linkStarted.current = true;
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const token = fragment.get("link");
-    if (!token) { setLinkLoading(false); return; }
-    // Fragment tokens never reach server access logs; clear it from the address
-    // bar before any subsequent navigation and keep it only in this tab's memory.
-    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
-    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) { setLinkFailed(true); setLinkMessage("This link is invalid. Contact admissions for a new link."); setLinkLoading(false); return; }
-    void fetch("/api/registrations/link", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", referrerPolicy: "no-referrer", body: JSON.stringify({ token }) }).then(async response => {
+    async function loadLink() {
+      const token = new URLSearchParams(window.location.hash.slice(1)).get("link");
+      if (!token) return;
+      // Fragment tokens never reach server access logs; clear it from the address
+      // bar before any subsequent navigation and keep it only in this tab's memory.
+      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+      if (!/^[A-Za-z0-9_-]{43}$/.test(token)) throw new Error("This link is invalid. Contact admissions for a new link.");
+      const response = await fetch("/api/registrations/link", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", referrerPolicy: "no-referrer", body: JSON.stringify({ token }) });
       const data = await response.json();
-      if (!response.ok) { setLinkFailed(true); setLinkMessage(data.error || "This link is unavailable. Contact admissions for a new link."); return; }
+      if (!response.ok) throw new Error(data.error || "This link is unavailable. Contact admissions for a new link.");
       linkToken.current = token;
       setAnswers(previous => ({ ...previous, fullName: typeof data.fullName === "string" ? data.fullName : "", email: typeof data.email === "string" ? data.email : "", phone: typeof data.phone === "string" ? data.phone : "", programId: typeof data.programId === "string" && programs.some(program => program.id === data.programId) ? data.programId : "" }));
       setLinkMessage("Your enquiry details have been added. Review and complete them below; keep this tab open until you submit.");
-    }).catch(() => { setLinkFailed(true); setLinkMessage("Link details could not be loaded. Please reopen the link or contact admissions."); })
-      .finally(() => setLinkLoading(false));
+    }
+    void loadLink().catch((error: unknown) => {
+      setLinkFailed(true);
+      setLinkMessage(error instanceof Error && error.message !== "Failed to fetch" ? error.message : "Link details could not be loaded. Please reopen the link or contact admissions.");
+    }).finally(() => setLinkLoading(false));
   }, [programs]);
   const update = (key: keyof Answers, value: string | boolean) => { setAnswers(previous => ({ ...previous, [key]: value })); setErrors(previous => ({ ...previous, [key]: "" })); };
   const notes = [answers.preferredBatch && `Preferred batch: ${answers.preferredBatch.trim()}`, answers.guardian && `Guardian details: ${answers.guardian.trim()}`, answers.address && `Address: ${answers.address.trim()}`, answers.additional.trim()].filter(Boolean).join("\n");
