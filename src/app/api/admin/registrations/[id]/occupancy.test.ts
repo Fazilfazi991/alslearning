@@ -20,7 +20,7 @@ it("returns current database occupancy for application details", async () => {
   state.occupancyError = false;
   const response = await GET(new Request("https://example.test"), { params: Promise.resolve({ id: "e9661772-95ad-49d8-90c7-f4030bf0dccf" }) });
   expect(response.status).toBe(200);
-  expect((await response.json()).batches[0].active_students).toBe(2);
+  expect((await response.json()).batches[0].reserved_seats).toBe(2);
 });
 it("does not display misleading readiness when occupancy is unavailable", async () => {
   state.occupancyError = true;

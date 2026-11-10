@@ -4,7 +4,7 @@ export type RegistrationBatch = {
   status: string;
   batchCode: string | null;
   maxStudents: number | null;
-  activeStudents: number;
+  reservedSeats: number;
   approvedDefault: boolean;
 };
 
@@ -20,7 +20,7 @@ export type RegistrationReadinessInput = {
 
 /** Presentation-only preflight. Approval must recheck every condition atomically in the database. */
 export function registrationReadiness(input: RegistrationReadinessInput) {
-  const eligible = (batch: RegistrationBatch) => batch.programId === input.programId && batch.status === "active" && Boolean(batch.batchCode) && Number.isSafeInteger(batch.activeStudents) && batch.activeStudents >= 0 && (batch.maxStudents === null || (Number.isSafeInteger(batch.maxStudents) && batch.activeStudents < batch.maxStudents));
+  const eligible = (batch: RegistrationBatch) => batch.programId === input.programId && batch.status === "active" && Boolean(batch.batchCode) && Number.isSafeInteger(batch.reservedSeats) && batch.reservedSeats >= 0 && (batch.maxStudents === null || (Number.isSafeInteger(batch.maxStudents) && batch.reservedSeats < batch.maxStudents));
   const defaults = input.batches.filter(batch => batch.approvedDefault && eligible(batch));
   const proposedBatchId = input.programActive && defaults.length === 1 ? defaults[0].id : null;
   const selectedBatch = input.selectedBatchId ? input.batches.find(batch => batch.id === input.selectedBatchId) : undefined;

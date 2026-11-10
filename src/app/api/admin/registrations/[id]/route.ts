@@ -26,7 +26,7 @@ export async function GET(_request: Request, context: Context) {
     ]);
     if (batchRows.error || identity.error) throw Error();
     const occupancy = await registrationBatchOccupancy(db, (batchRows.data || []).map(batch => batch.id));
-    const batches = (batchRows.data || []).map(batch => ({ ...batch, active_students: occupancy.get(batch.id)! }));
+    const batches = (batchRows.data || []).map(batch => ({ ...batch, reserved_seats: occupancy.get(batch.id)! }));
     return NextResponse.json({ application: application.data, events: events.data, programs: programs.data, batches, identity_conflict: Boolean(identity.data?.length) }, { headers });
   } catch { return NextResponse.json({ error: "Application could not be loaded. Please retry." }, { status: 503, headers }); }
 }
