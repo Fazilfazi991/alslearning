@@ -1,4 +1,4 @@
--- LOCAL PROTOTYPE ONLY: ownership evidence does not grant learning access.
+-- Student registration identity proof; generated with Supabase CLI 3.1.0.
 -- One person may apply again after a prior admission; only open applications
 -- are deduplicated. Each application still has one immutable linked student.
 alter table public.student_registrations drop constraint student_registrations_student_id_key;
@@ -6,11 +6,16 @@ create index registration_student_history on public.student_registrations(studen
 drop index public.registration_open_email;
 drop index public.registration_open_phone;
 create unique index registration_open_email on public.student_registrations(lower(email)) where status in ('pending','needs_information');
-create unique index registration_open_phone on public.student_registrations(phone) where status in ('pending','needs_information');
+-- Family members may legitimately share a WhatsApp number; email is the
+-- identity boundary. Keep a non-unique phone index for review and lookups.
+create index registration_open_phone on public.student_registrations(phone) where status in ('pending','needs_information');
 create unique index registration_open_enquiry on public.student_registrations(enquiry_id) where enquiry_id is not null and status in ('pending','needs_information');
+-- A retry key binds to the complete normalized request. The private digest
+-- contains no raw application fields and is never returned to public callers.
+alter table private.registration_requests add column payload_digest bytea;
 create or replace function private.submit_student_registration(p_full_name text,p_email text,p_phone text,p_qualification text,p_institution text,p_program_id uuid,p_preferred_batch_id uuid,p_notes text,p_consent boolean,p_request_id uuid,p_ip_hash text,p_phone_hash text,p_email_hash text,p_link_hash text)
 returns jsonb language plpgsql security definer set search_path='' as $$
-declare application_id uuid; linked_enquiry uuid; bucket_key text; n integer; limit_n integer;
+declare application_id uuid; linked_enquiry uuid; bucket_key text; n integer; limit_n integer; request_digest bytea; saved_digest bytea; existing_application public.student_registrations;
 begin
  if p_full_name is null or length(btrim(p_full_name)) not between 2 and 120
  or p_email is null or length(p_email)>254 or p_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'
@@ -23,7 +28,12 @@ begin
  perform pg_advisory_xact_lock(hashtextextended('registration-request:'||p_request_id::text,0));
  perform pg_advisory_xact_lock(hashtextextended('registration-email:'||lower(btrim(p_email)),0));
  perform pg_advisory_xact_lock(hashtextextended('registration-phone:'||p_phone,0));
- if exists(select 1 from private.registration_requests where request_id=p_request_id) then return jsonb_build_object('accepted',true); end if;
+ request_digest := pg_catalog.sha256(pg_catalog.convert_to(jsonb_build_array(btrim(p_full_name),lower(btrim(p_email)),p_phone,btrim(p_qualification),btrim(p_institution),p_program_id,p_preferred_batch_id,nullif(btrim(p_notes),''),p_consent,p_link_hash)::text,'UTF8'));
+ select payload_digest into saved_digest from private.registration_requests where request_id=p_request_id;
+ if found then
+   if saved_digest is distinct from request_digest then return jsonb_build_object('accepted',false,'error','application_conflict'); end if;
+   return jsonb_build_object('accepted',true);
+ end if;
  if p_link_hash is not null then
    if p_link_hash !~ '^[a-f0-9]{64}$' then raise exception 'invalid_link'; end if;
    select l.enquiry_id into linked_enquiry from private.registration_links l join public.admission_enquiries e on e.id=l.enquiry_id where l.token_hash=p_link_hash and l.consumed_at is null and l.expires_at>now() and e.status not in ('closed','converted') and e.student_id is null for update of l;
@@ -39,7 +49,21 @@ begin
      window_start=case when registration_rate_buckets.window_start<now()-interval '1 hour' then now() else registration_rate_buckets.window_start end returning attempts into n;
    if n>limit_n then raise exception 'rate_limit'; end if;
  end loop;
- select id into application_id from public.student_registrations where status in ('pending','needs_information') and (lower(email)=lower(btrim(p_email)) or phone=p_phone) order by created_at limit 1;
+ select * into existing_application from public.student_registrations where status in ('pending','needs_information') and lower(email)=lower(btrim(p_email)) for update;
+ if found then
+   -- Never claim changed details or a different program were saved. Exact
+   -- duplicate requests remain harmless; conflicts have a generic response.
+   if existing_application.full_name is distinct from btrim(p_full_name)
+     or existing_application.phone is distinct from p_phone
+     or existing_application.qualification is distinct from btrim(p_qualification)
+     or existing_application.institution is distinct from btrim(p_institution)
+     or existing_application.program_id is distinct from p_program_id
+     or existing_application.preferred_batch_id is distinct from p_preferred_batch_id
+     or existing_application.notes is distinct from nullif(btrim(p_notes),'')
+     or (linked_enquiry is not null and existing_application.enquiry_id is not null and existing_application.enquiry_id<>linked_enquiry)
+   then return jsonb_build_object('accepted',false,'error','application_conflict'); end if;
+   application_id := existing_application.id;
+ end if;
  if linked_enquiry is not null and application_id is null and exists(select 1 from public.student_registrations where enquiry_id=linked_enquiry and status in ('pending','needs_information')) then raise exception 'invalid_link'; end if;
  if application_id is null then
    insert into public.student_registrations(full_name,email,phone,qualification,institution,program_id,preferred_batch_id,notes,enquiry_id)
@@ -50,7 +74,7 @@ begin
    if not found then raise exception 'invalid_link'; end if;
  end if;
  if linked_enquiry is not null then update private.registration_links set consumed_at=now(),registration_id=application_id where token_hash=p_link_hash; end if;
- insert into private.registration_requests values(p_request_id,application_id);
+ insert into private.registration_requests(request_id,registration_id,payload_digest) values(p_request_id,application_id,request_digest);
  return jsonb_build_object('accepted',true);
 end $$;
 

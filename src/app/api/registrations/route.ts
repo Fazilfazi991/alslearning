@@ -58,8 +58,11 @@ export async function POST(request: Request) {
       if (result.error.message.includes("invalid_program")) return respond({ error: "That program is no longer available.", errors: { programId: "Choose an available program." } }, 400);
       if (result.error.message.includes("invalid_batch")) return respond({ error: "That batch is no longer available.", errors: { preferredBatchId: "Choose another batch or leave it blank." } }, 400);
       if (result.error.message.includes("invalid_link")) return respond({ error: "This registration link has expired or has already been used. Contact admissions for a new link." }, 400);
+      if (result.error.message.includes("application_conflict")) return respond({ error: "Your application could not be accepted. Please contact admissions for assistance." }, 409);
       return respond({ error: "Your application could not be saved. Please try again shortly." }, 503);
     }
+    if (result.data?.error === "application_conflict" && result.data?.accepted === false) return respond({ error: "Your application could not be accepted. Please contact admissions for assistance." }, 409);
+    if (!result.data || result.data.accepted !== true) return respond({ error: "Your application could not be saved. Please try again shortly." }, 503);
     return respond({ success: true }, 200);
   } catch { return NextResponse.json({ error: "Your application could not be saved. Please try again shortly." }, { status: 503, headers: { "Cache-Control": "no-store" } }); }
 }
