@@ -4,10 +4,13 @@ import { createAuthAdminClient } from "@/lib/supabase/admin";
 import { makeRegistrationRecoveryGrant } from "@/lib/registration-setup-grant";
 
 /** Only call after the approved registration has been independently verified. */
-export async function sendRegistrationInvitation(registrationId: string, studentId: string, email: string): Promise<"sent" | "failed"> {
+export async function sendRegistrationInvitation(registrationId: string, studentId: string, email: string): Promise<"sent" | "failed" | "deferred"> {
   // Enable only after validating the invite template and identity immutability
   // guards in the target environment. Never fall back to a request Host header.
-  if (process.env.REGISTRATION_INVITATION_ENABLED !== "true" || (process.env.REGISTRATION_SETUP_SECRET?.length ?? 0) < 32) return "failed";
+  // No attempt is made when delivery is intentionally disabled. The database
+  // keeps its not_sent state so administrators can find and follow it up.
+  if (process.env.REGISTRATION_INVITATION_ENABLED !== "true") return "deferred";
+  if ((process.env.REGISTRATION_SETUP_SECRET?.length ?? 0) < 32) return "failed";
   let origin: URL;
   try { origin = new URL(process.env.REGISTRATION_SITE_URL ?? ""); if (origin.protocol !== "https:" || origin.pathname !== "/" || origin.search || origin.hash || origin.username || origin.password) return "failed"; }
   catch { return "failed"; }

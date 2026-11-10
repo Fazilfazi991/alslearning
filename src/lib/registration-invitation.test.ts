@@ -14,6 +14,12 @@ beforeEach(() => {
 });
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 describe("registration invitation recovery", () => {
+  it("defers delivery without attempting an invitation when email is disabled", async () => {
+    vi.stubEnv("REGISTRATION_INVITATION_ENABLED", "false");
+    expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("deferred");
+    expect(mock.rpc).not.toHaveBeenCalled();
+    expect(mock.inviteUserByEmail).not.toHaveBeenCalled();
+  });
   it("invites an unconfirmed approved identity", async () => {
     mock.getUserById.mockResolvedValue({ data: { user: { id: "student", email: "student@example.test", email_confirmed_at: null } }, error: null });
     expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("sent");
