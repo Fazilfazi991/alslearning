@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const exchange = vi.hoisted(() => vi.fn());
 const registration = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/supabase/server", () => ({ createClient: exchange }));
-vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: registration }) }) }) }) }) }));
+vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ from: () => { const query = { select: () => query, eq: () => query, limit: () => query, maybeSingle: registration }; return query; } }) }));
 import { GET } from "./route";
 import { makeRegistrationRecoveryGrant } from "@/lib/registration-setup-grant";
 afterEach(() => { vi.unstubAllEnvs(); exchange.mockReset(); registration.mockReset(); });
