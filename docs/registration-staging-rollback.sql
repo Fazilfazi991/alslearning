@@ -11,6 +11,12 @@
 -- For staging: quiesce registration traffic and coordinate the shared window.
 -- PostgreSQL RESTRICT is intentional; no CASCADE is permitted.
 begin;
+set local lock_timeout = '5s';
+-- Freeze writers while checking for data and removing the schema.
+lock table auth.users, public.profiles, public.batches, public.enrollments,
+  public.student_registrations, public.student_registration_events,
+  private.registration_requests, private.registration_rate_buckets,
+  private.registration_links, private.registration_identity_proofs in access exclusive mode;
 do $$
 begin
  if exists(select 1 from public.student_registrations)
@@ -23,8 +29,25 @@ begin
    raise exception 'Rollback refused: registration data, rate buckets, links, proof, or batch defaults exist';
  end if;
  if (select count(*) from supabase_migrations.schema_migrations where (version,name) in (('20261110062353','student_registration'),('20261110063116','student_registration_identity_proof')))<>2
-    or exists(select 1 from supabase_migrations.schema_migrations where version>'20261110063116') then
+    or exists(select 1 from supabase_migrations.schema_migrations where version>'20261110063116' and (version,name) <> ('20261110080919','student_registration_capacity_guard'))
+    or exists(select 1 from supabase_migrations.schema_migrations where version='20261110080919' and name <> 'student_registration_capacity_guard') then
    raise exception 'Rollback refused: migration history differs or later migrations exist';
+ end if;
+end $$;
+-- Exact names and RESTRICT fail closed when the optional third migration drifts.
+do $$ begin
+ if exists(select 1 from supabase_migrations.schema_migrations where version='20261110080919' and name='student_registration_capacity_guard') then
+  drop function public.registration_batch_occupancy();
+  drop function private.registration_batch_occupancy();
+  drop trigger z_als_reserved_capacity_batch on public.batches;
+  drop trigger z_als_reserved_capacity_reactivation on public.profiles;
+  drop trigger z_als_reserved_capacity_enrollment on public.enrollments;
+  drop function private.lms_reserved_capacity_batch_guard();
+  drop function private.lms_reserved_capacity_reactivation_guard();
+  drop function private.lms_reserved_capacity_enrollment_guard();
+  drop function private.lms_reserved_capacity_count(uuid,timestamptz,uuid);
+  drop function private.lms_capacity_legacy_row_mode();
+  drop index public.lms_reserved_capacity_active_batch_idx;
  end if;
 end $$;
 drop trigger z_finish_registration_admission on auth.users;
@@ -65,5 +88,5 @@ drop function private.registration_admin();
 drop index public.registration_one_default_per_program;
 alter table public.batches drop column registration_default;
 delete from supabase_migrations.schema_migrations
-where (version,name) in (('20261110062353','student_registration'),('20261110063116','student_registration_identity_proof'));
+where (version,name) in (('20261110062353','student_registration'),('20261110063116','student_registration_identity_proof'),('20261110080919','student_registration_capacity_guard'));
 commit;
