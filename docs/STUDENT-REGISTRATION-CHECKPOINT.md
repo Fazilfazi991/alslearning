@@ -1,6 +1,6 @@
 # Student registration: implementation checkpoint
 
-This branch is incomplete and must not be deployed. It contains only shared validation for the proposed public application payload and unit tests. It does not provide `/register`, `/admin/registrations`, storage, approval, invitations, or account setup.
+This branch is incomplete and must not be deployed. It contains shared validation for the proposed public application payload, a presentation-only approval preflight, and unit tests. It does not provide `/register`, `/admin/registrations`, storage, approval, invitations, or account setup.
 
 ## Existing contracts that the implementation must preserve
 
@@ -22,3 +22,7 @@ This branch is incomplete and must not be deployed. It contains only shared vali
 ## Local tooling
 
 The official Supabase CLI 3.1.0 archive was downloaded and checksum-verified, but Windows Application Control blocked execution of the CLI binary. No migration was generated or applied. A supported, permitted CLI installation or equivalent authorized environment is needed to create and test the migration under the project’s Supabase workflow.
+
+## Read-only staging inspection in Chrome
+
+Chrome can access the ALS staging project. A read-only query confirmed the current Auth admission-update trigger is enabled; the proposed `public.student_registrations` table is absent, and the batch schema has no `approved_default`, `is_default`, or `default_for_registration` column. This does not establish that any batch is approved as a registration default. No schema or Auth configuration was changed.
