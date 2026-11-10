@@ -20,7 +20,9 @@ function programImage(name: string) {
   return "/images/courses/medical-laboratory-technology.webp";
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ program?: string | string[] }> }) {
+  const params = await searchParams;
+  const initialProgram = typeof params.program === "string" ? params.program : "";
   let programs: Awaited<ReturnType<typeof getPublicEnquiryPrograms>> = [];
   let unavailable = false;
   try { programs = await getPublicEnquiryPrograms(); } catch { unavailable = true; }
@@ -31,12 +33,12 @@ export default async function Home() {
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={`container-page ${styles.heroGrid}`}>
           <div className={styles.heroCopy}>
-            <h1 id="home-title">Your next chapter in <span>laboratory science.</span></h1>
-            <p>Build your understanding. Prepare with purpose. Bring your learning together with ALS programs, live classes, recordings and exam practice.</p>
-            <div className={styles.heroActions}><a href="#courses" className={styles.primaryLink}>Explore programs <ArrowRight size={18} aria-hidden="true" /></a><a href="#enquire" className={styles.secondaryLink}>Enquire now</a></div><div className={styles.heroTrust}><span><Check size={15} aria-hidden="true" /> Guided learning</span><span><Check size={15} aria-hidden="true" /> Practice-led preparation</span></div>
+            <h1 id="home-title">Build your future in <span>laboratory science.</span></h1>
+            <p>Learn with purpose through focused programs, live classes, recordings and exam practice at ALS.</p>
+            <div className={styles.heroActions}><a href="#enquire" className={styles.primaryLink}>Enquire now <ArrowRight size={18} aria-hidden="true" /></a><a href="#courses" className={styles.secondaryLink}>Explore programs</a></div><div className={styles.heroTrust}><span><Check size={15} aria-hidden="true" /> Guided learning</span><span><Check size={15} aria-hidden="true" /> Practice-led preparation</span></div>
             <div className={styles.heroImage}><Image src="/images/als-editorial-student.webp" alt="Illustration of a laboratory science student working with a microscope" fill sizes="(max-width: 767px) 100vw, 52vw" preload /><div className={styles.imageCaption}><GraduationCap size={21} aria-hidden="true" />A closer look at learning <span> / </span> Illustrative image</div></div>
           </div>
-          <EnquiryForm programs={programs} unavailable={unavailable} />
+          <EnquiryForm programs={programs} unavailable={unavailable} initialProgram={initialProgram} />
         </div>
       </section>
       <section className={styles.highlights} aria-label="Your ALS learning experience"><div className={`container-page ${styles.highlightGrid}`}>
@@ -48,7 +50,7 @@ export default async function Home() {
         <div className={styles.sectionHeading}><div><h2 id="programs-title">Find a program for your goals.</h2><p>Explore the programs currently available at ALS. Ask our admissions team about course coverage, batch availability and the right starting point for you.</p></div><a href="#enquire" className={styles.textLink}>Talk to admissions <ArrowRight size={16} aria-hidden="true" /></a></div>
         {programs.length > 0 ? <div className={styles.programGrid}>{programs.map(program => <article key={program.id} className={styles.programCard}>
           <div className={styles.courseImage}><Image src={programImage(program.name)} alt="" fill sizes="(max-width: 767px) 100vw, 33vw" /></div>
-          <div className={styles.courseBody}><h3>{program.name}</h3><p>{program.description || "Discuss the syllabus, available batches and learning resources with ALS admissions."}</p><a href="#enquire" className={styles.textLink} aria-label={`Enquire about ${program.name}`}>Enquire about this program <ArrowRight size={16} aria-hidden="true" /></a></div>
+          <div className={styles.courseBody}><h3>{program.name}</h3><p>{program.description || "Discuss the syllabus, available batches and learning resources with ALS admissions."}</p><a href={`/?program=${encodeURIComponent(program.id)}#enquire`} className={styles.textLink} aria-label={`Enquire about ${program.name}`}>Enquire about this program <ArrowRight size={16} aria-hidden="true" /></a></div>
         </article>)}</div> : <p className={styles.emptyPrograms}>{unavailable ? "We couldn’t load the program list right now. Please refresh this page in a moment." : "Program information will appear here when admissions are available. Please check back for updates."}</p>}
       </section>
       <section className={styles.why} id="about" aria-labelledby="why-title"><div className={`container-page ${styles.whyGrid}`}>
@@ -60,9 +62,9 @@ export default async function Home() {
         </div>
       </div><div className={`container-page ${styles.labEditorial}`}><div className={styles.labImage}><Image src="/images/als-editorial-lab.webp" alt="Illustrative laboratory workbench with a microscope and study materials" loading="eager" fill sizes="(max-width: 767px) 100vw, 70vw" /></div><p>Curiosity is where<br /><strong>progress begins.</strong><span>Learning, with purpose.</span></p></div></section>
       <section className={`container-page ${styles.how}`} id="how-it-works" aria-labelledby="how-title"><h2 id="how-title">From your first question<br className="hidden sm:block" /> to your first class.</h2><div className={styles.steps}>
-        <div><span className={styles.stepNumber} aria-hidden="true">1</span><h3>Tell us your goals</h3><p>Send an enquiry with the program you’re interested in and any questions you have.</p></div>
-        <div><span className={styles.stepNumber} aria-hidden="true">2</span><h3>Plan with admissions</h3><p>Discuss program details and batch availability, then complete your admission with the ALS team.</p></div>
-        <div><span className={styles.stepNumber} aria-hidden="true">3</span><h3>Start your learning</h3><p>Sign in to your student account to access your assigned courses, classes and assessments.</p></div>
+        <div><span className={styles.stepNumber} aria-hidden="true">01</span><div><h3>Tell us your goals</h3><p>Choose a program and share any questions.</p></div></div>
+        <div><span className={styles.stepNumber} aria-hidden="true">02</span><div><h3>Connect with admissions</h3><p>Discuss program details and available batches with our team.</p></div></div>
+        <div><span className={styles.stepNumber} aria-hidden="true">03</span><div><h3>Start learning</h3><p>Sign in to access your assigned classes and resources.</p></div></div>
       </div></section>
       <section className={styles.stories} id="student-stories" aria-labelledby="stories-title"><div className={`container-page ${styles.storiesGrid}`}><div><h2 id="stories-title">The journey, in our students’ words.</h2><p>Discover the experiences and perspectives of the people learning with ALS.</p><a href="#enquire" className={styles.textLink}>Start your own journey <ArrowRight size={16} aria-hidden="true" /></a></div><article className={styles.storyCard}><div className={styles.storyVideo}><video controls preload="none" playsInline poster="/images/nayana-student-story.jpg" aria-label="Nayana’s student testimonial"><source src="/videos/nayana-student-story.mp4" type="video/mp4" />Your browser does not support video playback. <a href="/videos/nayana-student-story.mp4">Download Nayana’s video</a>.</video></div><div className={styles.storyDetails}><span>STUDENT STORY</span><h3>Meet Nayana.</h3><p>Hear Nayana share her experience in her own words.</p></div></article></div></section>
       <section className={styles.faq} id="faq" aria-labelledby="faq-title"><div className={`container-page ${styles.faqGrid}`}><div><h2 id="faq-title">Questions before you begin?</h2><p>Every learning journey starts somewhere. Our admissions team can help you find your next step.</p><a href="#enquire" className={styles.textLink}>Ask admissions <ArrowRight size={16} aria-hidden="true" /></a></div><div className={styles.faqList}>
