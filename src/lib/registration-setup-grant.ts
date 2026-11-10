@@ -26,14 +26,19 @@ export function makeRegistrationRecoveryGrant(registrationId: string, userId: st
   const payload = Buffer.from(JSON.stringify({ purpose: "registration-recovery", registrationId, userId, expires: now + 86400 })).toString("base64url");
   return `${payload}.${signature(payload)}`;
 }
-export function validRegistrationRecoveryGrant(value: string, registrationId: string, userId: string, now = Math.floor(Date.now() / 1000)) {
+export function readRegistrationRecoveryGrant(value: string, now = Math.floor(Date.now() / 1000)): { registrationId: string; userId: string } | null {
   try {
-    const [payload, supplied, extra] = value.split("."); if (!payload || !supplied || extra) return false;
+    const [payload, supplied, extra] = value.split("."); if (!payload || !supplied || extra) return null;
     const expected = Buffer.from(signature(payload)), actual = Buffer.from(supplied);
-    if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return false;
+    if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
     const data: unknown = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (!data || typeof data !== "object") return false;
+    if (!data || typeof data !== "object") return null;
     const grant = data as Record<string, unknown>;
-    return grant.purpose === "registration-recovery" && grant.registrationId === registrationId && grant.userId === userId && typeof grant.expires === "number" && grant.expires > now && grant.expires <= now + 86400;
-  } catch { return false; }
+    if (grant.purpose !== "registration-recovery" || typeof grant.registrationId !== "string" || typeof grant.userId !== "string" || typeof grant.expires !== "number" || grant.expires <= now || grant.expires > now + 86400) return null;
+    return { registrationId: grant.registrationId, userId: grant.userId };
+  } catch { return null; }
+}
+export function validRegistrationRecoveryGrant(value: string, registrationId: string, userId: string, now = Math.floor(Date.now() / 1000)) {
+  const grant = readRegistrationRecoveryGrant(value, now);
+  return grant?.registrationId === registrationId && grant.userId === userId;
 }
