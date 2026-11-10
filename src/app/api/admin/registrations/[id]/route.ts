@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminSession } from "@/lib/admin-session";
 import { validAccountId } from "@/lib/account-validation";
 import { isSameOriginRequest } from "@/lib/request-origin";
+import { registrationBatchOccupancy } from "@/lib/registration-batch-occupancy";
 
 const headers = { "Cache-Control": "private, no-store" };
 type Context = { params: Promise<{ id: string }> };
@@ -24,11 +25,8 @@ export async function GET(_request: Request, context: Context) {
       db.from("profiles").select("id").eq("email", application.data.email).limit(1),
     ]);
     if (batchRows.error || identity.error) throw Error();
-    const batches = await Promise.all((batchRows.data || []).map(async batch => {
-      const occupied = await db.from("enrollments").select("id", { count: "exact", head: true }).eq("batch_id", batch.id).eq("status", "active");
-      if (occupied.error) throw Error();
-      return { ...batch, active_students: occupied.count ?? 0 };
-    }));
+    const occupancy = await registrationBatchOccupancy(db, (batchRows.data || []).map(batch => batch.id));
+    const batches = (batchRows.data || []).map(batch => ({ ...batch, active_students: occupancy.get(batch.id)! }));
     return NextResponse.json({ application: application.data, events: events.data, programs: programs.data, batches, identity_conflict: Boolean(identity.data?.length) }, { headers });
   } catch { return NextResponse.json({ error: "Application could not be loaded. Please retry." }, { status: 503, headers }); }
 }

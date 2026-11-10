@@ -1,8 +1,9 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
 
-const state = vi.hoisted(() => ({ authorized: false, rows: [] as Record<string, unknown>[], profileConflict: "", full: false, fail: "" }));
-vi.mock("@/lib/admin-session", () => ({ adminSession: async () => state.authorized ? { db: { from: (table: string) => new Query(table) } } : { response: NextResponse.json({ error: "Administrator access required." }, { status: 403 }) } }));
+vi.mock("server-only", () => ({}));
+const state = vi.hoisted(() => ({ authorized: false, rows: [] as Record<string, unknown>[], profileConflict: "", full: false, fail: "", occupancy: "missing" }));
+vi.mock("@/lib/admin-session", () => ({ adminSession: async () => state.authorized ? { db: { from: (table: string) => new Query(table), rpc: async () => state.occupancy === "current" ? { data: [{ batch_id: "batch", occupied: 1 }], error: null } : { error: { code: state.occupancy === "error" ? "42501" : "PGRST202" } } } } : { response: NextResponse.json({ error: "Administrator access required." }, { status: 403 }) } }));
 class Query {
   private filters: Record<string, unknown> = {};
   private start = 0;
@@ -32,7 +33,7 @@ class Query {
 import { GET } from "./route";
 
 beforeEach(() => {
-  state.authorized = true; state.full = false; state.fail = ""; state.profileConflict = "";
+  state.authorized = true; state.full = false; state.fail = ""; state.profileConflict = ""; state.occupancy = "missing";
   state.rows = Array.from({ length: 25 }, (_, index) => ({ id: String(index), full_name: `Applicant ${index}`, email: `person${index}@example.test`, phone: "+919876543210", qualification: "Degree", institution: "College", program_id: "program", status: "pending", consent_at: "2026-01-01", student_id: null, created_at: "2026-01-01", programs: { id: "program", name: "ALS", status: "active" } }));
 });
 const get = (query: string) => GET(new Request(`https://example.test/api/admin/registrations?${query}`));
@@ -70,6 +71,12 @@ it("fails closed when capacity or identity checks cannot be loaded", async () =>
   state.fail = "enrollments";
   expect((await get("status=ready_for_approval")).status).toBe(503);
   state.fail = "profiles";
+  expect((await get("status=ready_for_approval")).status).toBe(503);
+});
+it("uses current occupancy on staging and fails closed on RPC errors", async () => {
+  state.full = true; state.occupancy = "current";
+  expect((await (await get("status=ready_for_approval")).json()).count).toBe(25);
+  state.occupancy = "error";
   expect((await get("status=ready_for_approval")).status).toBe(503);
 });
 it("finds approved applications whose setup link needs follow-up", async () => {
