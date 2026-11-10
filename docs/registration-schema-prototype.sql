@@ -27,20 +27,52 @@ create table public.student_registration_events (
 );
 create table private.registration_requests (request_id uuid primary key, registration_id uuid not null references public.student_registrations(id));
 create table private.registration_rate_buckets (bucket text primary key, window_start timestamptz not null, attempts integer not null);
+create table private.registration_links (token_hash text primary key check(token_hash ~ '^[a-f0-9]{64}$'), enquiry_id uuid not null references public.admission_enquiries(id), created_by uuid not null references public.profiles(id), expires_at timestamptz not null, consumed_at timestamptz, registration_id uuid references public.student_registrations(id), created_at timestamptz not null default now());
 alter table public.student_registrations enable row level security;
 alter table public.student_registration_events enable row level security;
 alter table private.registration_requests enable row level security;
 alter table private.registration_rate_buckets enable row level security;
+alter table private.registration_links enable row level security;
 revoke all on public.student_registrations, public.student_registration_events from public,anon,authenticated;
-revoke all on private.registration_requests, private.registration_rate_buckets from public,anon,authenticated;
+revoke all on private.registration_requests, private.registration_rate_buckets, private.registration_links from public,anon,authenticated;
 grant select on public.student_registrations, public.student_registration_events to authenticated;
 grant select on public.student_registrations to service_role;
 create policy registrations_admin_read on public.student_registrations for select to authenticated using(private.enquiry_admin());
 create policy registration_events_admin_read on public.student_registration_events for select to authenticated using(private.enquiry_admin());
 
-create function private.submit_student_registration(p_full_name text,p_email text,p_phone text,p_qualification text,p_institution text,p_program_id uuid,p_preferred_batch_id uuid,p_notes text,p_consent boolean,p_request_id uuid,p_ip_hash text,p_phone_hash text,p_email_hash text)
+create function private.create_registration_link(p_enquiry_id uuid,p_token_hash text,p_expires_at timestamptz) returns void language plpgsql security definer set search_path='' as $$
+begin
+ if not private.enquiry_admin() then raise exception 'Administrator required'; end if;
+ if p_token_hash is null or p_token_hash !~ '^[a-f0-9]{64}$' or p_expires_at is null or p_expires_at<=now() or p_expires_at>now()+interval '7 days' then raise exception 'Invalid link'; end if;
+ if not exists(select 1 from public.admission_enquiries where id=p_enquiry_id and status not in ('closed','converted') and student_id is null) then raise exception 'Enquiry unavailable'; end if;
+ insert into private.registration_links(token_hash,enquiry_id,created_by,expires_at) values(p_token_hash,p_enquiry_id,auth.uid(),p_expires_at);
+ insert into public.enquiry_activities(enquiry_id,actor_id,kind,note) values(p_enquiry_id,auth.uid(),'note','Registration link created');
+end $$;
+revoke all on function private.create_registration_link(uuid,text,timestamptz) from public,anon;
+grant execute on function private.create_registration_link(uuid,text,timestamptz) to authenticated;
+create function public.create_registration_link(p_enquiry_id uuid,p_token_hash text,p_expires_at timestamptz) returns void language sql security invoker set search_path='' as $$ select private.create_registration_link(p_enquiry_id,p_token_hash,p_expires_at) $$;
+revoke all on function public.create_registration_link(uuid,text,timestamptz) from public,anon;
+grant execute on function public.create_registration_link(uuid,text,timestamptz) to authenticated;
+
+create function private.get_registration_link(p_token_hash text,p_ip_hash text) returns jsonb language plpgsql security definer set search_path='' as $$
+declare n integer; result jsonb;
+begin
+ if coalesce(p_token_hash,'') !~ '^[a-f0-9]{64}$' or coalesce(p_ip_hash,'') !~ '^[a-f0-9]{64}$' then return null; end if;
+ insert into private.registration_rate_buckets values('lookup:'||p_ip_hash,now(),1)
+ on conflict(bucket) do update set attempts=case when registration_rate_buckets.window_start<now()-interval '1 hour' then 1 else registration_rate_buckets.attempts+1 end,window_start=case when registration_rate_buckets.window_start<now()-interval '1 hour' then now() else registration_rate_buckets.window_start end returning attempts into n;
+ if n>60 then return null; end if;
+ select jsonb_build_object('full_name',e.full_name,'email',e.email,'phone',e.phone,'program_id',e.program_id) into result from private.registration_links l join public.admission_enquiries e on e.id=l.enquiry_id where l.token_hash=p_token_hash and l.consumed_at is null and l.expires_at>now() and e.status not in ('closed','converted') and e.student_id is null;
+ return result;
+end $$;
+revoke all on function private.get_registration_link(text,text) from public,anon,authenticated;
+grant execute on function private.get_registration_link(text,text) to service_role;
+create function public.get_registration_link(p_token_hash text,p_ip_hash text) returns jsonb language sql security invoker set search_path='' as $$ select private.get_registration_link(p_token_hash,p_ip_hash) $$;
+revoke all on function public.get_registration_link(text,text) from public,anon,authenticated;
+grant execute on function public.get_registration_link(text,text) to service_role;
+
+create function private.submit_student_registration(p_full_name text,p_email text,p_phone text,p_qualification text,p_institution text,p_program_id uuid,p_preferred_batch_id uuid,p_notes text,p_consent boolean,p_request_id uuid,p_ip_hash text,p_phone_hash text,p_email_hash text,p_link_hash text)
 returns jsonb language plpgsql security definer set search_path='' as $$
-declare application_id uuid; bucket_key text; n integer; limit_n integer;
+declare application_id uuid; linked_enquiry uuid; bucket_key text; n integer; limit_n integer;
 begin
  if p_full_name is null or length(btrim(p_full_name)) not between 2 and 120
  or p_email is null or length(p_email)>254 or p_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'
@@ -54,6 +86,11 @@ begin
  perform pg_advisory_xact_lock(hashtextextended('registration-email:'||lower(btrim(p_email)),0));
  perform pg_advisory_xact_lock(hashtextextended('registration-phone:'||p_phone,0));
  if exists(select 1 from private.registration_requests where request_id=p_request_id) then return jsonb_build_object('accepted',true); end if;
+ if p_link_hash is not null then
+   if p_link_hash !~ '^[a-f0-9]{64}$' then raise exception 'invalid_link'; end if;
+   select l.enquiry_id into linked_enquiry from private.registration_links l join public.admission_enquiries e on e.id=l.enquiry_id where l.token_hash=p_link_hash and l.consumed_at is null and l.expires_at>now() and e.status not in ('closed','converted') and e.student_id is null for update of l;
+   if linked_enquiry is null then raise exception 'invalid_link'; end if;
+ end if;
  if not exists(select 1 from public.programs where id=p_program_id and status='active') then raise exception 'invalid_program'; end if;
  if p_preferred_batch_id is not null and not exists(select 1 from public.batches where id=p_preferred_batch_id and program_id=p_program_id and status='active') then raise exception 'invalid_batch'; end if;
  foreach bucket_key in array array['ip:'||p_ip_hash,'email:'||p_email_hash,'phone:'||p_phone_hash] loop
@@ -65,19 +102,23 @@ begin
  end loop;
  select id into application_id from public.student_registrations where status in ('pending','needs_information','approved') and (lower(email)=lower(btrim(p_email)) or phone=p_phone) order by created_at limit 1;
  if application_id is null then
-   insert into public.student_registrations(full_name,email,phone,qualification,institution,program_id,preferred_batch_id,notes)
-   values(btrim(p_full_name),lower(btrim(p_email)),p_phone,btrim(p_qualification),btrim(p_institution),p_program_id,p_preferred_batch_id,nullif(btrim(p_notes),'')) returning id into application_id;
+   insert into public.student_registrations(full_name,email,phone,qualification,institution,program_id,preferred_batch_id,notes,enquiry_id)
+   values(btrim(p_full_name),lower(btrim(p_email)),p_phone,btrim(p_qualification),btrim(p_institution),p_program_id,p_preferred_batch_id,nullif(btrim(p_notes),''),linked_enquiry) returning id into application_id;
    insert into public.student_registration_events(registration_id,kind) values(application_id,'submitted');
+ elsif linked_enquiry is not null then
+   update public.student_registrations set enquiry_id=linked_enquiry,updated_at=now() where id=application_id and status in ('pending','needs_information') and lower(email)=lower(btrim(p_email)) and phone=p_phone and (enquiry_id is null or enquiry_id=linked_enquiry);
+   if not found then raise exception 'invalid_link'; end if;
  end if;
+ if linked_enquiry is not null then update private.registration_links set consumed_at=now(),registration_id=application_id where token_hash=p_link_hash; end if;
  insert into private.registration_requests values(p_request_id,application_id);
  return jsonb_build_object('accepted',true);
 end $$;
-revoke all on function private.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text) from public,anon,authenticated;
-grant execute on function private.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text) to service_role;
-create function public.submit_student_registration(p_full_name text,p_email text,p_phone text,p_qualification text,p_institution text,p_program_id uuid,p_preferred_batch_id uuid,p_notes text,p_consent boolean,p_request_id uuid,p_ip_hash text,p_phone_hash text,p_email_hash text)
-returns jsonb language sql security invoker set search_path='' as $$ select private.submit_student_registration(p_full_name,p_email,p_phone,p_qualification,p_institution,p_program_id,p_preferred_batch_id,p_notes,p_consent,p_request_id,p_ip_hash,p_phone_hash,p_email_hash) $$;
-revoke all on function public.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text) from public,anon,authenticated;
-grant execute on function public.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text) to service_role;
+revoke all on function private.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text,text) from public,anon,authenticated;
+grant execute on function private.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text,text) to service_role;
+create function public.submit_student_registration(p_full_name text,p_email text,p_phone text,p_qualification text,p_institution text,p_program_id uuid,p_preferred_batch_id uuid,p_notes text,p_consent boolean,p_request_id uuid,p_ip_hash text,p_phone_hash text,p_email_hash text,p_link_hash text)
+returns jsonb language sql security invoker set search_path='' as $$ select private.submit_student_registration(p_full_name,p_email,p_phone,p_qualification,p_institution,p_program_id,p_preferred_batch_id,p_notes,p_consent,p_request_id,p_ip_hash,p_phone_hash,p_email_hash,p_link_hash) $$;
+revoke all on function public.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text,text) from public,anon,authenticated;
+grant execute on function public.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text,text) to service_role;
 
 create function private.review_student_registration(p_id uuid,p_action text,p_changes jsonb) returns void
 language plpgsql security definer set search_path='' as $$

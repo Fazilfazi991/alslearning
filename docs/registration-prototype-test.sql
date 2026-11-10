@@ -2,20 +2,20 @@
 begin;
 do $$ begin
  if has_table_privilege('anon','public.student_registrations','select') or has_table_privilege('authenticated','public.student_registrations','insert') then raise exception 'Application access exposed'; end if;
- if has_function_privilege('anon','public.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text)','execute') then raise exception 'Public submission RPC exposed'; end if;
+ if has_function_privilege('anon','public.submit_student_registration(text,text,text,text,text,uuid,uuid,text,boolean,uuid,text,text,text,text)','execute') then raise exception 'Public submission RPC exposed'; end if;
 end $$;
 insert into public.programs(id,slug,name,status) values('b0000000-0000-4000-8000-000000000001','registration-qa','QA program','active');
 insert into public.batches(id,program_id,slug,name,batch_code,status,max_students) values('b0000000-0000-4000-8000-000000000002','b0000000-0000-4000-8000-000000000001','registration-qa','QA batch','REGQA','active',1);
 set local role service_role;
 do $$ begin
  begin
-  perform public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,false,'b0000000-0000-4000-8000-000000000005',repeat('a',64),repeat('b',64),repeat('c',64));
+  perform public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,false,'b0000000-0000-4000-8000-000000000005',repeat('a',64),repeat('b',64),repeat('c',64),null);
   raise exception 'Missing consent accepted';
  exception when invalid_parameter_value then null; end;
 end $$;
-select public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000003',repeat('a',64),repeat('b',64),repeat('c',64));
-select public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000003',repeat('a',64),repeat('b',64),repeat('c',64));
-select public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000004',repeat('a',64),repeat('b',64),repeat('c',64));
+select public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000003',repeat('a',64),repeat('b',64),repeat('c',64),null);
+select public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000003',repeat('a',64),repeat('b',64),repeat('c',64),null);
+select public.submit_student_registration('Test Student','reg-qa@example.invalid','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000004',repeat('a',64),repeat('b',64),repeat('c',64),null);
 reset role;
 do $$ begin
  if (select count(*) from public.student_registrations where email='reg-qa@example.invalid')<>1 then raise exception 'Duplicate registration'; end if;
@@ -38,7 +38,7 @@ do $$ declare app uuid; begin
  if public.complete_registration_invitation(app,'b0000000-0000-4000-8000-000000000013',true) or not public.complete_registration_invitation(app,'b0000000-0000-4000-8000-000000000012',false) then raise exception 'Invitation fence failed'; end if;
  begin delete from auth.users where id='b0000000-0000-4000-8000-000000000011'; raise exception 'Identity deletion accepted'; exception when raise_exception then if sqlerrm<>'Approved registration identity is protected' then raise; end if; end;
 end $$;
-select public.submit_student_registration('Second Student','reg-second@example.invalid','+919876543211','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000014',repeat('a',64),repeat('d',64),repeat('e',64));
+select public.submit_student_registration('Second Student','reg-second@example.invalid','+919876543211','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000014',repeat('a',64),repeat('d',64),repeat('e',64),null);
 do $$ begin
  begin
    insert into auth.users(id,email,raw_app_meta_data,raw_user_meta_data)
@@ -47,6 +47,19 @@ do $$ begin
  exception when check_violation then null; end;
  if exists(select 1 from auth.users where id='b0000000-0000-4000-8000-000000000015') or not exists(select 1 from public.student_registrations where email='reg-second@example.invalid' and status='pending' and student_id is null) then raise exception 'Failed approval did not roll back'; end if;
 end $$;
+insert into public.admission_enquiries(id,full_name,phone,email,program_id) values('b0000000-0000-4000-8000-000000000020','Link Student','+919876543212','reg-link@example.invalid','b0000000-0000-4000-8000-000000000001');
+set local role authenticated;
+select public.create_registration_link('b0000000-0000-4000-8000-000000000020',repeat('f',64),now()+interval '1 day');
+reset role;
+set local role service_role;
+do $$ begin
+ if public.get_registration_link(repeat('f',64),repeat('a',64))->>'email' <> 'reg-link@example.invalid' then raise exception 'Link lookup failed'; end if;
+ perform public.submit_student_registration('Link Student','reg-link@example.invalid','+919876543212','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000021',repeat('a',64),repeat('f',64),repeat('b',64),repeat('f',64));
+ if public.get_registration_link(repeat('f',64),repeat('a',64)) is not null then raise exception 'Consumed link still readable'; end if;
+ perform public.submit_student_registration('Link Student','reg-link@example.invalid','+919876543212','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000021',repeat('a',64),repeat('f',64),repeat('b',64),repeat('f',64));
+end $$;
+reset role;
+do $$ begin if not exists(select 1 from public.student_registrations where email='reg-link@example.invalid' and enquiry_id='b0000000-0000-4000-8000-000000000020') then raise exception 'Enquiry link lost'; end if; end $$;
 set local role authenticated;
 select set_config('request.jwt.claims','{"role":"authenticated","sub":"b0000000-0000-4000-8000-000000000099"}',true);
 do $$ begin if exists(select 1 from public.student_registrations) or exists(select 1 from public.student_registration_events) then raise exception 'Unauthorized read'; end if; end $$;
