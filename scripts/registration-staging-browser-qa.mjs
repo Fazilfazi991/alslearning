@@ -2,7 +2,7 @@
 // verified to use als-live-staging. Creates clearly labelled synthetic records.
 // Do not run against production. No email is sent; new accounts remain unconfirmed.
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseEnv } from 'node:util';
 import { pathToFileURL } from 'node:url';
@@ -35,7 +35,7 @@ const tag = randomBytes(6).toString('hex');
 const name = `STAGING QA ${tag}`, email = `als-registration-qa-${tag}@example.invalid`;
 const phone = `+1202${String(Number.parseInt(tag.slice(0, 8), 16) % 10000000).padStart(7, '0')}`;
 const folder = `.local-qa/registration/staging-${tag}`; mkdirSync(folder, { recursive: true });
-const report = { target: 'als-live-staging', base: base.origin, checks: [], screenshots: [], noEmail: true, fixture: { tag, name, email, phone, programId: program, batchId: batch } };
+const report = { target: 'als-live-staging', base: base.origin, checks: [], screenshots: [], noEmail: true, fixture: { tag, name, email, phone, programId: program, batchId: batch }, notes: 'Synthetic registration, account, profile, enrollment and audit records may remain in staging. They are marked STAGING QA and listed here. Do not delete or alter them automatically; approved identity guards and enrollment history require an agreed administrator cleanup procedure.' };
 const check = message => { report.checks.push(message); console.log(`PASS ${message}`); };
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -131,7 +131,27 @@ try {
   assert.equal(repeated.status(), 409, 'Repeated approval must be rejected');
   await screenshot('admin-approved');
   check('Admin approval persists once and leaves setup link unsent');
-  report.notes = 'Synthetic registration, account, profile, enrollment and audit records remain in staging for authorized verification. They are marked STAGING QA and listed above. Do not delete or alter them automatically; approved identity guards and enrollment history require an agreed administrator cleanup procedure.';
+  const secondEmail = `als-registration-full-${tag}@example.invalid`, secondName = `STAGING QA FULL ${tag}`;
+  const secondBody = { ...body, fullName: secondName, email: secondEmail, phone: phone.replace('+1202', '+1203'), requestId: randomUUID() };
+  report.secondFixture = { name: secondName, email: secondEmail, phone: secondBody.phone, programId: program, batchId: batch };
+  const secondSubmission = await context.request.post(`${base.origin}/api/registrations`, { headers: { Origin: base.origin }, data: secondBody });
+  assert.equal(secondSubmission.status(), 200, 'Second synthetic application could not be saved');
+  const search = await context.request.get(`${base.origin}/api/admin/registrations?${new URLSearchParams({ q: secondEmail })}`);
+  assert.equal(search.status(), 200); const matched = (await search.json()).registrations;
+  assert.equal(matched.length, 1, 'Second synthetic application could not be uniquely identified');
+  const secondId = matched[0].id; assert.match(secondId, uuid); report.secondFixture.registrationId = secondId;
+  await page.goto(`${base.origin}/admin/registrations/${secondId}`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('heading', { name: secondName, exact: true }).waitFor();
+  assert.equal(await page.getByLabel('Assign batch').locator(`option[value="${batch}"]`).isDisabled(), true, 'Full batch should be disabled in admin review');
+  const fullAttempt = await context.request.post(`${base.origin}/api/admin/registrations/${secondId}/approve`, { headers: { Origin: base.origin }, data: { batch_id: batch } });
+  assert.ok([409, 422].includes(fullAttempt.status()), 'A full batch must reject approval');
+  const secondDetail = await context.request.get(`${base.origin}/api/admin/registrations/${secondId}`); assert.equal(secondDetail.status(), 200);
+  const secondStored = await secondDetail.json();
+  assert.equal(secondStored.application.status, 'pending'); assert.equal(secondStored.application.student_id, null);
+  const studentsAfter = await context.request.get(`${base.origin}/api/admin/students`); assert.equal(studentsAfter.status(), 200);
+  assert.ok(!(await studentsAfter.json()).students.some(student => student.email?.toLowerCase() === secondEmail), 'Full batch approval left a student profile');
+  await screenshot('admin-full-batch');
+  check('Full batch is disabled and attempted approval rolls back');
 } finally {
   writeFileSync(`${folder}/report.json`, JSON.stringify(report, null, 2));
   await browser.close();
