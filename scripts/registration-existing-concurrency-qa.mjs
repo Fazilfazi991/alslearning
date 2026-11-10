@@ -29,4 +29,11 @@ assert.equal(sql("select count(*) from public.enrollments where batch_id='e00000
 const same=app('race3@example.invalid');const [c,d]=await Promise.all([run(same,'e0000000-0000-4000-8000-000000000012'),run(same,'e0000000-0000-4000-8000-000000000012')]);
 assert.equal([c.code,d.code].filter(code=>code===0).length,1,'Exactly one approval of the same application must succeed');assert.match(c.err+d.err,/Application unavailable/);
 assert.equal(sql(`select count(*) from public.enrollments where student_id='e0000000-0000-4000-8000-000000000023' and status='active'`),'1');
-console.log('PASS concurrent last-seat and duplicate-application approvals');
+sql(`insert into public.admission_enquiries(id,full_name,phone,email,program_id) values('e0000000-0000-4000-8000-000000000041','Link prospect','+919876543254','link-race@example.invalid','e0000000-0000-4000-8000-000000000002');
+begin; set local role authenticated; select set_config('request.jwt.claims','{"role":"authenticated","sub":"b0000000-0000-4000-8000-000000000010","session_id":"b0000000-0000-4000-8000-000000000011"}',true);
+select public.create_registration_link('e0000000-0000-4000-8000-000000000041',repeat('d',64),now()+interval '1 day'); select public.create_registration_link('e0000000-0000-4000-8000-000000000041',repeat('e',64),now()+interval '1 day'); commit;`);
+function runLink(n,hash){return new Promise((resolve,reject)=>{const child=spawn(exe,args,{stdio:['pipe','pipe','pipe']});let err='';child.stderr.on('data',x=>err+=x);child.on('error',reject);child.on('close',code=>resolve({code,err}));child.stdin.end(`begin; set local role service_role; select public.submit_student_registration('Link ${n}','link${n}@example.invalid','+91987654325${n}','BSc','QA institution','e0000000-0000-4000-8000-000000000002',null,null,true,'e0000000-0000-4000-8000-00000000004${n}',repeat('a',64),repeat('${n}',64),repeat('${n}',64),repeat('${hash}',64)); select pg_sleep(1); commit;`);});}
+const [e,f]=await Promise.all([runLink(4,'d'),runLink(5,'e')]);
+assert.equal([e.code,f.code].filter(code=>code===0).length,1,'Exactly one registration per enquiry must succeed');assert.match(e.err+f.err,/invalid_link/);
+assert.equal(sql("select count(*) from public.student_registrations where enquiry_id='e0000000-0000-4000-8000-000000000041' and status='pending'"),'1');
+console.log('PASS concurrent last-seat, duplicate-application and same-enquiry registration races');

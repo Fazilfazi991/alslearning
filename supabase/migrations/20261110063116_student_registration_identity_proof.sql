@@ -7,6 +7,7 @@ drop index public.registration_open_email;
 drop index public.registration_open_phone;
 create unique index registration_open_email on public.student_registrations(lower(email)) where status in ('pending','needs_information');
 create unique index registration_open_phone on public.student_registrations(phone) where status in ('pending','needs_information');
+create unique index registration_open_enquiry on public.student_registrations(enquiry_id) where enquiry_id is not null and status in ('pending','needs_information');
 create or replace function private.submit_student_registration(p_full_name text,p_email text,p_phone text,p_qualification text,p_institution text,p_program_id uuid,p_preferred_batch_id uuid,p_notes text,p_consent boolean,p_request_id uuid,p_ip_hash text,p_phone_hash text,p_email_hash text,p_link_hash text)
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare application_id uuid; linked_enquiry uuid; bucket_key text; n integer; limit_n integer;
@@ -27,6 +28,7 @@ begin
    if p_link_hash !~ '^[a-f0-9]{64}$' then raise exception 'invalid_link'; end if;
    select l.enquiry_id into linked_enquiry from private.registration_links l join public.admission_enquiries e on e.id=l.enquiry_id where l.token_hash=p_link_hash and l.consumed_at is null and l.expires_at>now() and e.status not in ('closed','converted') and e.student_id is null for update of l;
    if linked_enquiry is null then raise exception 'invalid_link'; end if;
+   perform pg_advisory_xact_lock(hashtextextended('registration-enquiry:'||linked_enquiry::text,0));
  end if;
  if not exists(select 1 from public.programs where id=p_program_id and status='active') then raise exception 'invalid_program'; end if;
  if p_preferred_batch_id is not null and not exists(select 1 from public.batches where id=p_preferred_batch_id and program_id=p_program_id and status='active') then raise exception 'invalid_batch'; end if;
@@ -38,6 +40,7 @@ begin
    if n>limit_n then raise exception 'rate_limit'; end if;
  end loop;
  select id into application_id from public.student_registrations where status in ('pending','needs_information') and (lower(email)=lower(btrim(p_email)) or phone=p_phone) order by created_at limit 1;
+ if linked_enquiry is not null and application_id is null and exists(select 1 from public.student_registrations where enquiry_id=linked_enquiry and status in ('pending','needs_information')) then raise exception 'invalid_link'; end if;
  if application_id is null then
    insert into public.student_registrations(full_name,email,phone,qualification,institution,program_id,preferred_batch_id,notes,enquiry_id)
    values(btrim(p_full_name),lower(btrim(p_email)),p_phone,btrim(p_qualification),btrim(p_institution),p_program_id,p_preferred_batch_id,nullif(btrim(p_notes),''),linked_enquiry) returning id into application_id;
