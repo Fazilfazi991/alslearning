@@ -28,3 +28,37 @@
 @media(max-width:767px){.hero{padding:16px 0 36px}.heroGrid{grid-template-columns:1fr;gap:16px}.heroCopy{min-height:680px;padding:30px 24px}.heroCopy h1{font-size:clamp(3.1rem,12vw,4.2rem)}.heroCopy>p:not(.eyebrow){font-size:15px}.heroImage{position:absolute;height:auto;margin:0}.heroImage img{object-position:60% center}.heroImage:after{background:linear-gradient(180deg,rgba(28,16,34,.8),rgba(35,20,39,.48) 54%,rgba(25,18,33,.45))}.imageCaption{padding:0 24px 24px}.enquiry{padding:26px 22px}.highlight,.highlight:first-child{border-color:rgba(255,255,255,.16)}.sectionHeading h2,.why h2,.how h2,.faq h2{font-size:2.35rem}.programs,.how,.why,.faq{padding-block:72px}.labEditorial{grid-template-columns:1fr;margin-top:48px}.labImage{min-height:240px;border-radius:14px 14px 0 0}.labEditorial>p{border-radius:0 0 14px 14px;padding:30px;font-size:2rem}.steps>div,.steps>div+div{padding-block:22px}}
 @media(prefers-reduced-motion:reduce){.heroImage img{animation:none}.programCard img,.primaryLink,.secondaryLink,.submit,.textLink,.primaryLink svg,.textLink svg,.faqItem summary svg{transition:none}.programCard:hover img,.primaryLink:hover svg,.textLink:hover svg,.primaryLink:active,.secondaryLink:active,.submit:active{transform:none}}
 @media(max-width:767px){.imageCaption{gap:7px;font-size:10px;letter-spacing:.04em}.imageCaption span{display:none}}
+
+/* Scroll-linked accents are progressive enhancements; content stays visible
+   when view timelines are unavailable or motion is reduced. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .programCard {
+      animation: program-approach linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 85%;
+    }
+    .labImage img {
+      animation: lab-focus linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 42%;
+    }
+    .stepNumber {
+      animation: journey-mark linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+@keyframes program-approach {
+  from { opacity: .78; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes lab-focus {
+  from { transform: scale(1.06); }
+  to { transform: scale(1); }
+}
+@keyframes journey-mark {
+  from { opacity: .7; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
