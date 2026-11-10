@@ -38,6 +38,15 @@ do $$ declare app uuid; begin
  if public.complete_registration_invitation(app,'b0000000-0000-4000-8000-000000000013',true) or not public.complete_registration_invitation(app,'b0000000-0000-4000-8000-000000000012',false) then raise exception 'Invitation fence failed'; end if;
  begin delete from auth.users where id='b0000000-0000-4000-8000-000000000011'; raise exception 'Identity deletion accepted'; exception when raise_exception then if sqlerrm<>'Approved registration identity is protected' then raise; end if; end;
 end $$;
+select public.submit_student_registration('Second Student','reg-second@example.invalid','+919876543211','BSc','Test institution','b0000000-0000-4000-8000-000000000001',null,null,true,'b0000000-0000-4000-8000-000000000014',repeat('a',64),repeat('d',64),repeat('e',64));
+do $$ begin
+ begin
+   insert into auth.users(id,email,raw_app_meta_data,raw_user_meta_data)
+   select 'b0000000-0000-4000-8000-000000000015',email,jsonb_build_object('role','student','lms_admission',jsonb_build_object('actor_id','b0000000-0000-4000-8000-000000000010','registration_id',id,'full_name',full_name,'phone',phone,'admission_on','2026-11-10','program_id',program_id,'batch_id','b0000000-0000-4000-8000-000000000002','access_starts_at','2026-11-10T00:00:00Z','unassigned',false,'is_active',true)),jsonb_build_object('full_name',full_name) from public.student_registrations where email='reg-second@example.invalid';
+   raise exception 'Full batch accepted';
+ exception when check_violation then null; end;
+ if exists(select 1 from auth.users where id='b0000000-0000-4000-8000-000000000015') or not exists(select 1 from public.student_registrations where email='reg-second@example.invalid' and status='pending' and student_id is null) then raise exception 'Failed approval did not roll back'; end if;
+end $$;
 set local role authenticated;
 select set_config('request.jwt.claims','{"role":"authenticated","sub":"b0000000-0000-4000-8000-000000000099"}',true);
 do $$ begin if exists(select 1 from public.student_registrations) or exists(select 1 from public.student_registration_events) then raise exception 'Unauthorized read'; end if; end $$;
