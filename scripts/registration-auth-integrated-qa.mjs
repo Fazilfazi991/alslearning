@@ -34,4 +34,18 @@ const token=new URL(link[0].replaceAll('&amp;','&')).searchParams.get('token');a
 const verified=await api('/verify',{token_hash:token,type:'invite'});assert.equal(verified.status,200,JSON.stringify(verified.data));assert.equal(verified.data.user.id,student);assert.ok(verified.data.user.email_confirmed_at);
 const password='Local-Password-123!';const set=await fetch(base+'/user',{method:'PUT',headers:{Authorization:`Bearer ${verified.data.access_token}`,'Content-Type':'application/json'},body:JSON.stringify({password})});assert.equal(set.status,200,await set.text());
 const login=await api('/token?grant_type=password',{email:'student@example.test',password},'');assert.equal(login.status,200,JSON.stringify(login.data));assert.equal(login.data.user.id,student);
-console.log(JSON.stringify({pendingWithoutIdentity:true,approvalTransaction:true,studentCode:true,batchEnrollment:true,duplicateIdentityRejected:true,unconfirmedBeforeInvite:true,inviteReusedIdentity:true,tokenVerified:true,passwordLogin:true}));
+if(migrations.some(file=>file.endsWith('_student_registration_identity_proof.sql'))){
+ const previousCode=sql(`select student_code from public.profiles where id='${student}'`);
+ sql(`insert into public.programs(id,slug,name,status) values('b0000000-0000-4000-8000-000000000041','gotrue-qa-existing','Second program','active');
+ insert into public.batches(id,program_id,slug,name,batch_code,status,max_students) values('b0000000-0000-4000-8000-000000000042','b0000000-0000-4000-8000-000000000041','gotrue-qa-existing','Second batch','GOTRUEQB','active',1);
+ select public.submit_student_registration('Test Student','student@example.test','+919876543210','BSc','Test institution','b0000000-0000-4000-8000-000000000041',null,null,true,'b0000000-0000-4000-8000-000000000043',repeat('a',64),repeat('b',64),repeat('c',64),null);`);
+ assert.equal(sql(`select public.record_registration_identity_proof('b0000000-0000-4000-8000-000000000043','${student}','student@example.test')`),'t');
+ const existing=sql("select id from public.student_registrations where email='student@example.test' and status='pending'");
+ assert.ok(existing);assert.equal(sql(`select count(*) from public.enrollments where student_id='${student}' and program_id='b0000000-0000-4000-8000-000000000041'`),'0');
+ sql(`begin; set local role authenticated; select set_config('request.jwt.claims','{"role":"authenticated","sub":"b0000000-0000-4000-8000-000000000010"}',true); select public.approve_existing_registration('${existing}','b0000000-0000-4000-8000-000000000042'); commit;`);
+ assert.equal(sql(`select count(*) from public.enrollments where student_id='${student}' and program_id='b0000000-0000-4000-8000-000000000041' and status='active'`),'1');
+ assert.equal(sql(`select student_code from public.profiles where id='${student}'`),previousCode);
+ assert.equal(sql(`select invitation_status from public.student_registrations where id='${existing}'`),'not_required');
+ assert.equal(sql("select count(*) from auth.users where lower(email)='student@example.test'"),'1');
+}
+console.log(JSON.stringify({pendingWithoutIdentity:true,approvalTransaction:true,studentCode:true,batchEnrollment:true,duplicateIdentityRejected:true,unconfirmedBeforeInvite:true,inviteReusedIdentity:true,tokenVerified:true,passwordLogin:true,existingStudentLinked:migrations.some(file=>file.endsWith('_student_registration_identity_proof.sql'))}));
