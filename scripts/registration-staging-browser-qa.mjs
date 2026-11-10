@@ -6,6 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseEnv } from 'node:util';
 import { pathToFileURL } from 'node:url';
+import { createInterface } from 'node:readline';
 
 const required = key => { const value = process.env[key]; assert.ok(value, `Missing ${key}`); return value; };
 assert.equal(required('ALS_REGISTRATION_QA_STAGING_CONFIRMED'), 'approved-window', 'Staging window must be explicitly confirmed');
@@ -18,6 +19,14 @@ const config = parseEnv(readFileSync(required('ALS_REGISTRATION_QA_STAGING_ENV')
 assert.equal(new URL(config.NEXT_PUBLIC_SUPABASE_URL).hostname, 'slghshcdaijbcjfoqerq.supabase.co', 'Wrong staging env');
 const credentials = parseEnv(readFileSync(required('ALS_REGISTRATION_QA_ACCOUNTS_ENV'), 'utf8'));
 assert.ok(credentials.ALS_STAGE_ADMIN_EMAIL && credentials.ALS_STAGE_ADMIN_PASSWORD, 'Dedicated staging admin credentials required');
+let protectedPreviewLink = credentials.ALS_STAGE_VERCEL_SHARE_URL;
+if (process.env.ALS_REGISTRATION_QA_SHARE_STDIN === 'true') {
+  if (process.stdin.isTTY) process.stdin.setRawMode(true);
+  const lines = createInterface({ input: process.stdin, terminal: false });
+  protectedPreviewLink = await new Promise(resolve => lines.once('line', resolve));
+  lines.close();
+}
+if (protectedPreviewLink) assert.equal(new URL(protectedPreviewLink).origin, base.origin, 'Protected access link must match the verified preview');
 const program = required('ALS_REGISTRATION_QA_PROGRAM_ID'), batch = required('ALS_REGISTRATION_QA_BATCH_ID');
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 assert.match(program, uuid); assert.match(batch, uuid);
@@ -35,8 +44,8 @@ const screenshot = async name => { await page.screenshot({ path: `${folder}/${na
 try {
   // A Vercel share URL and optional ALS staging gate are provided only in an
   // ignored env file; do not persist either token or browser storage state.
-  if (credentials.ALS_STAGE_VERCEL_SHARE_URL) {
-    try { await page.goto(credentials.ALS_STAGE_VERCEL_SHARE_URL, { waitUntil: 'domcontentloaded' }); }
+  if (protectedPreviewLink) {
+    try { await page.goto(protectedPreviewLink, { waitUntil: 'domcontentloaded' }); }
     catch { throw new Error('Could not open the protected staging preview'); }
   }
   await page.goto(`${base.origin}/register`, { waitUntil: 'domcontentloaded' });
