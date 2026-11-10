@@ -14,7 +14,7 @@ describe("registration endpoint", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
   it("submits only through the service RPC with hashed rate identifiers and generic response", async () => {
-    rpc.mockResolvedValue({ data: { duplicate: true }, error: null });
+    rpc.mockResolvedValue({ data: { accepted: true }, error: null });
     const response = await POST(request(body));
     expect(response.status).toBe(200); expect(await response.json()).toEqual({ success: true });
     expect(rpc.mock.calls[0][0]).toBe("submit_student_registration");
@@ -30,14 +30,21 @@ describe("registration endpoint", () => {
     expect((await POST(request(body))).status).toBe(503);
     const limited = await POST(request(body)); expect(limited.status).toBe(429); expect(limited.headers.get("Retry-After")).toBe("3600");
   });
+  it("returns a generic conflict and never claims success without storage confirmation", async () => {
+    rpc.mockResolvedValueOnce({ data: { accepted: false, error: "application_conflict" }, error: null }).mockResolvedValueOnce({ data: null, error: null });
+    const conflict = await POST(request(body));
+    expect(conflict.status).toBe(409);
+    expect(await conflict.json()).toEqual({ error: "Your application could not be accepted. Please contact admissions for assistance." });
+    expect((await POST(request(body))).status).toBe(503);
+  });
   it("retains the signed anonymous rate identity across retries", async () => {
-    rpc.mockResolvedValue({ data: {}, error: null });
+    rpc.mockResolvedValue({ data: { accepted: true }, error: null });
     const first = await POST(request(body)); const retry = request(body);
     retry.headers.set("cookie", first.headers.get("Set-Cookie")!.split(";")[0]);
     await POST(retry); expect(rpc.mock.calls[0][1].p_ip_hash).toBe(rpc.mock.calls[1][1].p_ip_hash);
   });
   it("hashes a supplied link before passing it to storage", async () => {
-    rpc.mockResolvedValue({ data: {}, error: null });
+    rpc.mockResolvedValue({ data: { accepted: true }, error: null });
     const token = "A".repeat(43);
     expect((await POST(request({ ...body, linkToken: token }))).status).toBe(200);
     expect(rpc.mock.calls[0][1].p_link_hash).toMatch(/^[a-f0-9]{64}$/);
