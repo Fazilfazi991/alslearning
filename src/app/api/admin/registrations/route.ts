@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminSession } from "@/lib/admin-session";
 
-const statuses = ["pending", "ready_for_approval", "needs_information", "approved", "rejected"];
+const statuses = ["pending", "needs_information", "approved", "rejected"];
 const headers = { "Cache-Control": "private, no-store" };
 
 export async function GET(request: Request) {
