@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { randomBytes } from "node:crypto";
+const syntheticRef = "a".repeat(20);
+vi.mock("./staging-project-identity", () => ({ isApprovedStagingProject: (value: string) => value === "a".repeat(20) }));
 
 const fixture = vi.hoisted(() => ({ failures: 0, reads: 0, writes: vi.fn() }));
 vi.mock("@supabase/supabase-js", () => ({
@@ -27,7 +30,7 @@ vi.mock("@supabase/supabase-js", () => ({
 vi.mock("./transport-reconciliation", () => ({ reconcileClassTransport: vi.fn() }));
 import { POST } from "@/app/api/internal/live-cleanup/route";
 
-const token = "REDACTED_TEST_CREDENTIAL";
+const token = randomBytes(32).toString("hex");
 const request = (authorized = true) => new Request("https://staging.example.test/api/internal/live-cleanup", {
   method: "POST", headers: authorized ? { Authorization: `Bearer ${token}` } : {},
 });
@@ -35,9 +38,9 @@ const request = (authorized = true) => new Request("https://staging.example.test
 beforeEach(() => {
   vi.useFakeTimers();
   vi.stubEnv("ALS_STAGING_MODE", "true");
-  vi.stubEnv("SUPABASE_PROJECT_REF", "redacted-staging-project");
-  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://redacted-staging-project.supabase.co");
-  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "REDACTED_TEST_CREDENTIAL");
+  vi.stubEnv("SUPABASE_PROJECT_REF", syntheticRef);
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", `https://${syntheticRef}.supabase.co`);
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", randomBytes(32).toString("hex"));
   vi.stubEnv("ALS_STAGING_CLEANUP_TOKEN", token);
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -69,6 +72,19 @@ describe("guarded staging cleanup failure state", () => {
     expect(await response.json()).toEqual({ expiredClasses: 0, closedOrphanAttendance: 0, inspectedClasses: 0, results: [] });
     expect(fixture.reads).toBe(2);
     expect(console.warn).toHaveBeenLastCalledWith("Staging cleanup authentication", expect.objectContaining({ outcome: "recovered", attempt: 2 }));
+  });
+
+  it.each([
+    ["SUPABASE_PROJECT_REF", "b".repeat(20), 500],
+    ["SUPABASE_PROJECT_REF", "invalid", 500],
+    ["NEXT_PUBLIC_SUPABASE_URL", "https://other.example.test", 500],
+    ["SUPABASE_SERVICE_ROLE_KEY", "", 500],
+    ["ALS_STAGING_MODE", "false", 404],
+  ])("rejects invalid staging configuration: %s", async (name, value, status) => {
+    vi.stubEnv(name, value);
+    expect((await POST(request())).status).toBe(status);
+    expect(fixture.reads).toBe(0);
+    expect(fixture.writes).not.toHaveBeenCalled();
   });
 
   it("does not enter the database or retry loop when the caller lacks the endpoint bearer", async () => {

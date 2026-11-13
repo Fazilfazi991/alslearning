@@ -1,20 +1,21 @@
 import "server-only";
+import { isApprovedStagingProject } from "./staging-project-identity";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { reconcileClassTransport } from "./transport-reconciliation";
 import { readStagingCleanup } from "./staging-cleanup-read";
 
-const STAGING_REF = "redacted-staging-project";
-const STAGING_URL = `https://${STAGING_REF}.supabase.co`;
 const MAX_ROWS = 500;
 
 function stagingDatabase() {
+  const ref = process.env.SUPABASE_PROJECT_REF || "";
+  const stagingUrl = `https://${ref}.supabase.co`;
   if (process.env.ALS_STAGING_MODE !== "true"
-    || process.env.SUPABASE_PROJECT_REF !== STAGING_REF
-    || process.env.NEXT_PUBLIC_SUPABASE_URL !== STAGING_URL
+    || !isApprovedStagingProject(ref)
+    || process.env.NEXT_PUBLIC_SUPABASE_URL !== stagingUrl
     || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error("Staging cleanup is not configured for the isolated ALS staging project");
   }
-  return createClient(STAGING_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+  return createClient(stagingUrl, process.env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 }
