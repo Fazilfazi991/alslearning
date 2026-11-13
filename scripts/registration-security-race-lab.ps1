@@ -9,7 +9,10 @@ git -C $security diff --quiet HEAD -- supabase/migrations
 if ($LASTEXITCODE -ne 0) { throw 'Security migrations differ from the committed candidate' }
 git diff --quiet HEAD -- supabase/migrations
 if ($LASTEXITCODE -ne 0) { throw 'Registration migrations differ from the committed baseline' }
-$db='als-registration-race-committed-pg'; $api='als-registration-race-committed-api'; $net='als-registration-race-committed-net'; $port='38129'
+$suffix = if ($env:ALS_REGISTRATION_LAB_SUFFIX) { $env:ALS_REGISTRATION_LAB_SUFFIX } else { 'committed' }
+$port = if ($env:ALS_REGISTRATION_LAB_PORT) { $env:ALS_REGISTRATION_LAB_PORT } else { '38129' }
+if ($suffix -notmatch '^[a-z0-9-]{1,35}$' -or $port -notmatch '^\d{4,5}$') { throw 'Invalid disposable lab name or port' }
+$db="als-registration-race-$suffix-pg"; $api="als-registration-race-$suffix-api"; $net="als-registration-race-$suffix-net"
 foreach ($name in @($db,$api)) { if ((docker ps -a --format '{{.Names}}') -contains $name) { throw "Container already exists: $name" } }
 if ((docker network ls --format '{{.Name}}') -contains $net) { throw 'Lab network already exists' }
 docker network create --internal $net | Out-Null
@@ -35,11 +38,14 @@ $fixture | docker exec -i $db psql -X -U postgres -d postgres -v ON_ERROR_STOP=1
 if($LASTEXITCODE -ne 0){throw 'Synthetic fixture failed'}
 'grant select on public.profiles, public.enrollments to authenticated;' | docker exec -i $db psql -X -U postgres -d postgres -v ON_ERROR_STOP=1 -q
 if($LASTEXITCODE -ne 0){throw 'Synthetic fixture grants failed'}
-docker run -d --name $api --network $net -p "127.0.0.1:${port}:3000" -e PGRST_DB_URI=postgres://postgres@checkpoint2-db/postgres -e PGRST_DB_SCHEMAS=public -e PGRST_DB_ANON_ROLE=anon -e PGRST_JWT_SECRET=REMOVED_TEST_SIGNING_KEY public.ecr.aws/supabase/postgrest:v16.5 | Out-Null
+$jwtBytes = New-Object byte[] 32
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+try { $rng.GetBytes($jwtBytes); $env:ALS_REGISTRATION_RACE_JWT_SECRET = [BitConverter]::ToString($jwtBytes).Replace('-', '') } finally { $rng.Dispose() }
+docker run -d --name $api --network $net -p "127.0.0.1:${port}:3000" -e PGRST_DB_URI=postgres://postgres@checkpoint2-db/postgres -e PGRST_DB_SCHEMAS=public -e PGRST_DB_ANON_ROLE=anon -e "PGRST_JWT_SECRET=$env:ALS_REGISTRATION_RACE_JWT_SECRET" public.ecr.aws/supabase/postgrest:v16.5 | Out-Null
 if($LASTEXITCODE -ne 0){throw 'PostgREST start failed'}
 docker network connect bridge $api
 if($LASTEXITCODE -ne 0){throw 'PostgREST bridge failed'}
 $env:ALS_REGISTRATION_RACE_LAB='1'; $env:ALS_REGISTRATION_RACE_CONTAINER=$db; $env:ALS_REGISTRATION_RACE_API="http://127.0.0.1:$port"
-pnpm exec vitest run src/app/api/auth/setup/registration-race.lab.test.ts --reporter=verbose
+pnpm exec vitest run src/app/api/auth/setup/registration-race.lab.test.ts --reporter=verbose --testTimeout=30000 --hookTimeout=30000
 if($LASTEXITCODE -ne 0){throw 'Route tests failed'}
 'PASS: exact migration union in timestamp order with synthetic Postgres/PostgREST. Auth calls are simulated.'

@@ -1,5 +1,8 @@
 # Disposable local provider test. Never reads staging or production credentials.
 $ErrorActionPreference = 'Stop'
+$credentialBytes = New-Object byte[] 32
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+try { $rng.GetBytes($credentialBytes); $env:ALS_LOCAL_DB_PASSWORD = [BitConverter]::ToString($credentialBytes).Replace('-', ''); $rng.GetBytes($credentialBytes); $env:ALS_LOCAL_JWT_SECRET = [BitConverter]::ToString($credentialBytes).Replace('-', '') } finally { $rng.Dispose() }
 $project = 'als-registration-auth-qa'
 $compose = 'scripts/fixtures/registration-auth/compose.yml'
 $existing = docker ps -a --filter "name=^${project}-" --format '{{.Names}}'
@@ -28,4 +31,5 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'Local provider checks failed.' }
 } finally {
   docker compose -p $project -f $compose down
+  Remove-Item Env:ALS_LOCAL_DB_PASSWORD,Env:ALS_LOCAL_JWT_SECRET -ErrorAction SilentlyContinue
 }

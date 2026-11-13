@@ -35,7 +35,15 @@ export async function PATCH(request:Request,context:RouteContext<"/api/admin/stu
   for(const [key,max] of Object.entries({guardian_name:120,guardian_phone:32,guardian_relationship:80,address:1000,internal_notes:4000}))if(body[key]!==undefined && (typeof body[key]!=="string" || (body[key] as string).length>max))return NextResponse.json({error:`Invalid ${key.replaceAll("_"," ")}.`},{status:400});
   const current=await s.db!.from("profiles").select("id,is_active").eq("id",id).eq("role","student").single();
   if(!current.data)return NextResponse.json({error:"Student not found."},{status:404});
-  const updated=await s.db!.from("profiles").update({...body,updated_at:new Date().toISOString()}).eq("id",id).eq("role","student").select("id").single();
-  if(updated.error || !updated.data)return NextResponse.json({error:"Student changes were not saved."},{status:422});
+  const {is_active,...changes}=body;
+  let updated;
+  try {
+    updated=typeof is_active==="boolean"
+      ? await s.db!.rpc("admin_update_managed_profile",{target:id,expected_role:"student",desired:is_active,changes})
+      : await s.db!.from("profiles").update({...changes,updated_at:new Date().toISOString()}).eq("id",id).eq("role","student").select("id").single();
+  } catch {
+    return NextResponse.json({error:"Student changes could not be confirmed. Review the record before retrying."},{status:503});
+  }
+  if(updated.error || !updated.data)return NextResponse.json({error:"Student changes could not be confirmed. Review the record before retrying."},{status:422});
   return NextResponse.json({success:true},{headers});
 }

@@ -1,15 +1,16 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 const state = vi.hoisted(() => ({ approved: true, incoming: [] as {name: string; value: string}[] }));
 vi.mock("@/lib/registration-setup-availability", () => ({ registrationPasswordSetupAvailable: true }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: () => state.incoming }) }));
 vi.mock("@/lib/supabase/config", () => ({ supabaseConfig: () => ({ url: "https://auth.example", key: "public-test-key" }) }));
-vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ from: () => { const q = { select: () => q, eq: () => q, limit: () => q, maybeSingle: async () => ({ data: state.approved ? { id: "registration" } : null, error: null }) }; return q; } }) }));
+vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ rpc: async () => ({ data: true, error: null }), from: () => { const q = { select: () => q, eq: () => q, limit: () => q, maybeSingle: async () => ({ data: state.approved ? { id: "registration" } : null, error: null }) }; return q; } }) }));
 vi.mock("@/lib/supabase/buffered-auth", async importOriginal => {
   const real = await importOriginal<typeof import("@/lib/supabase/buffered-auth")>();
   return { createBufferedAuthClient: async () => {
     const result = await real.createBufferedAuthClient();
-    vi.spyOn(result.db.auth, "getClaims").mockResolvedValue({ data: { claims: { session_id: "session" }, header: {}, signature: new Uint8Array() }, error: null } as never);
+    vi.spyOn(result.db.auth, "getClaims").mockResolvedValue({ data: { claims: { sub: "student", session_id: "session" }, header: {}, signature: new Uint8Array() }, error: null } as never);
     vi.spyOn(result.db, "from").mockReturnValue({ select: () => ({ eq: () => ({ single: async () => ({ data: { role: "student", is_active: true }, error: null }) }) }) } as never);
     return result;
   } };
@@ -19,7 +20,8 @@ const b64 = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("bas
 const jwt = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: "student", exp: 4102444800, session_id: "session" })}.signature`;
 beforeEach(() => {
   state.approved = true; state.incoming = [];
-  vi.stubEnv("REGISTRATION_SETUP_SECRET", "REMOVED_TEST_SECRET");
+  vi.stubEnv("REGISTRATION_SETUP_SECRET", randomBytes(32).toString("hex"));
+  vi.stubEnv("REGISTRATION_SITE_URL", "https://als.example");
   vi.stubGlobal("fetch", vi.fn(async input => String(input).includes("logout") ? new Response(null, { status: 204 }) : Response.json({ access_token: jwt, token_type: "bearer", expires_in: 3600, refresh_token: "REDACTED_TEST_CREDENTIAL", user: { id: "student", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: { fixture: "x".repeat(9000) }, created_at: "2026-01-01T00:00:00Z" } })));
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });

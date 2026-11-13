@@ -1,14 +1,16 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const gate = vi.hoisted(() => ({ available: true }));
 vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return gate.available; } }));
 const exchange = vi.hoisted(() => vi.fn());
 const registration = vi.hoisted(() => vi.fn());
+const rpc = vi.hoisted(() => vi.fn(async () => ({ data: true, error: null })));
 vi.mock("@/lib/supabase/buffered-auth", () => ({ createBufferedAuthClient: async () => ({ db: await exchange(), publish: () => {} }) }));
-vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ from: () => { const query = { select: () => query, eq: () => query, limit: () => query, maybeSingle: registration }; return query; } }) }));
+vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ rpc, from: () => { const query = { select: () => query, eq: () => query, limit: () => query, maybeSingle: registration }; return query; } }) }));
 import { GET, POST } from "./route";
 function submit(query: string) { const params = new URLSearchParams(query); return POST(new Request("https://alslearning.vercel.app/auth/callback", { method: "POST", headers: { origin: "https://alslearning.vercel.app", "content-type": "application/x-www-form-urlencoded" }, body: params })); }
 import { makeRegistrationRecoveryGrant } from "@/lib/registration-setup-grant";
-afterEach(() => { gate.available = true; vi.restoreAllMocks(); vi.unstubAllEnvs(); exchange.mockReset(); registration.mockReset(); });
+beforeEach(() => vi.stubEnv("REGISTRATION_SITE_URL", "https://alslearning.vercel.app"));
+afterEach(() => { gate.available = true; vi.restoreAllMocks(); vi.unstubAllEnvs(); exchange.mockReset(); registration.mockReset(); rpc.mockClear(); });
 
 describe("retired email callback", () => {
   it.each(["?code=old", "?token_hash=old&type=magiclink", "?token_hash=old&type=email", "?next=https://evil.example", ""])("routes old links to password login without establishing a session: %s", async query => {
@@ -29,7 +31,7 @@ describe("approved student invite", () => {
     const response = await GET(new Request("https://alslearning.vercel.app/auth/callback?token_hash=one-time&type=invite"));
     expect(response.status).toBe(200);
     expect(await response.text()).toContain("Continue to account setup");
-    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(response.headers.get("referrer-policy")).toBe("strict-origin");
     expect(exchange).not.toHaveBeenCalled();
   });
   it("rejects cross-origin submissions before token verification", async () => {
@@ -37,11 +39,27 @@ describe("approved student invite", () => {
     expect(response.status).toBe(303);
     expect(exchange).not.toHaveBeenCalled();
   });
+  it("rejects a null Origin and preserves no-referrer on the redirect", async () => {
+    const response = await POST(new Request("https://alslearning.vercel.app/auth/callback", { method: "POST", headers: { origin: "null", "content-type": "application/x-www-form-urlencoded" }, body: "token_hash=one-time&type=invite" }));
+    expect(response.headers.get("location")).toContain("/login?error=invalid-link");
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(exchange).not.toHaveBeenCalled();
+  });
+  it("rejects a spoofed host and origin without redirecting to the spoofed host", async () => {
+    const response = await POST(new Request("https://evil.example/auth/callback", { method: "POST", headers: { origin: "https://evil.example", host: "evil.example", "content-type": "application/x-www-form-urlencoded" }, body: "token_hash=one-time&type=invite" }));
+    expect(response.headers.get("location")).toBe("https://alslearning.vercel.app/login?error=invalid-link");
+    expect(exchange).not.toHaveBeenCalled();
+  });
+  it("fails closed when the configured origin is malformed", async () => {
+    vi.stubEnv("REGISTRATION_SITE_URL", "https://alslearning.vercel.app/not-an-origin");
+    expect((await submit("token_hash=one-time&type=invite")).status).toBe(503);
+    expect(exchange).not.toHaveBeenCalled();
+  });
   it("redeems only an invitation token and issues a secure setup grant", async () => {
     vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
     registration.mockResolvedValue({data:{id:"registration"},error:null});
     const verifyOtp=vi.fn().mockResolvedValue({data:{user:{id:"student"}},error:null});
-    exchange.mockResolvedValue({auth:{verifyOtp,getClaims:vi.fn().mockResolvedValue({data:{claims:{session_id:"session"}},error:null})},from:()=>({select:()=>({eq:()=>({single:async()=>({data:{role:"student",is_active:true},error:null})})})})});
+    exchange.mockResolvedValue({auth:{verifyOtp,getClaims:vi.fn().mockResolvedValue({data:{claims:{sub:"student",session_id:"session"}},error:null})},from:()=>({select:()=>({eq:()=>({single:async()=>({data:{role:"student",is_active:true},error:null})})})})});
     const response=await submit("token_hash=one-time&type=invite");
     expect(verifyOtp).toHaveBeenCalledWith({token_hash:"one-time",type:"invite"});
     expect(response.headers.get("location")).toBe("https://alslearning.vercel.app/auth/setup");
@@ -53,7 +71,7 @@ describe("approved student invite", () => {
     vi.stubEnv("REGISTRATION_RECOVERY_ENABLED", "true");
     registration.mockResolvedValue({data:{id:"registration"},error:null});
     const verifyOtp=vi.fn().mockResolvedValue({data:{user:{id:"student"}},error:null});
-    exchange.mockResolvedValue({auth:{verifyOtp,getClaims:vi.fn().mockResolvedValue({data:{claims:{session_id:"session"}},error:null})},from:()=>({select:()=>({eq:()=>({single:async()=>({data:{role:"student",is_active:true},error:null})})})})});
+    exchange.mockResolvedValue({auth:{verifyOtp,getClaims:vi.fn().mockResolvedValue({data:{claims:{sub:"student",session_id:"session"}},error:null})},from:()=>({select:()=>({eq:()=>({single:async()=>({data:{role:"student",is_active:true},error:null})})})})});
     const grant=makeRegistrationRecoveryGrant("registration","student");
     const response=await submit(`token_hash=one-time&type=recovery&registration_recovery=${encodeURIComponent(grant)}`);
     expect(verifyOtp).toHaveBeenCalledWith({token_hash:"one-time",type:"recovery"});
@@ -65,6 +83,17 @@ describe("approved student invite", () => {
     const response=await submit("token_hash=one-time&type=recovery");
     expect(response.headers.get("location")).toContain("/login?error=invalid-link");
     expect(exchange).not.toHaveBeenCalled();
+  });
+  it("binds a verified replacement proof to its authorized operation", async () => {
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_RECOVERY_ENABLED", "true");
+    registration.mockResolvedValue({ data: { id: "registration" }, error: null });
+    exchange.mockResolvedValue({ auth: { verifyOtp: vi.fn().mockResolvedValue({ data: { user: { id: "student" } }, error: null }), getClaims: vi.fn().mockResolvedValue({ data: { claims: { sub: "student", session_id: "session" } }, error: null }) }, from: () => ({ select: () => ({ eq: () => ({ single: async () => ({ data: { role: "student", is_active: true }, error: null }) }) }) }) });
+    const recoveryId = "7f7122cb-39e8-470b-bc17-afcaed947233";
+    const grant = makeRegistrationRecoveryGrant("registration", "student", undefined, recoveryId);
+    const response = await submit(`token_hash=one-time&type=recovery&registration_recovery=${encodeURIComponent(grant)}`);
+    expect(response.headers.get("location")).toContain("/auth/setup");
+    expect(rpc).toHaveBeenCalledWith("issue_registration_setup_replacement", expect.objectContaining({ p_registration: "registration", p_student: "student", p_session: "session", p_recovery: recoveryId }));
   });
   it("rejects signed recovery for a different approved identity", async () => {
     vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");

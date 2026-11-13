@@ -1,13 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeSetupGrant } from "@/lib/registration-setup-grant";
+import { randomBytes } from "node:crypto";
+const testPassword = `Aa1!${randomBytes(24).toString("hex")}`;
 
-const state = vi.hoisted(() => ({ available: true, currentError: false, currentThrows: false, userId: "student-a", sessionId: "session-a", grant: "", role: "student", active: true, update: vi.fn(), signOut: vi.fn(), deleteCookie: vi.fn() }));
+
+const state = vi.hoisted(() => ({ available: true, currentError: false, currentThrows: false, claimSub: "student-a", userId: "student-a", sessionId: "session-a", grant: "", role: "student", active: true, claimStatus: "claimed", claimOverride: undefined as unknown, update: vi.fn(), signOut: vi.fn(), deleteCookie: vi.fn() }));
 vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return state.available; } }));
+vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ rpc: async (name: string) => name === "claim_registration_setup_with_status" ? { data: state.claimOverride !== undefined ? state.claimOverride : state.userId === "student-a" && state.sessionId === "session-a" ? state.claimStatus === "claimed" ? { status: "claimed", operation_id: "10000000-0000-4000-8000-000000000001" } : { status: state.claimStatus } : { status: "invalid" }, error: null } : { data: "provider_confirmed", error: null } }) }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => state.grant ? { value: state.grant } : undefined, delete: state.deleteCookie }) }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({
   auth: {
     getUser: async () => ({ data: { user: { id: state.userId } }, error: null }),
-    getClaims: async () => ({ data: { claims: { session_id: state.sessionId } }, error: null }),
+    getClaims: async () => ({ data: { claims: { sub: state.claimSub, session_id: state.sessionId } }, error: null }),
     updateUser: state.update,
     signOut: state.signOut,
   },
@@ -15,13 +18,13 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({
 }) }));
 import { POST } from "./route";
 
-function request(password = "REMOVED_TEST_PASSWORD") {
+function request(password = testPassword) {
   return new Request("https://als.example/api/auth/setup", { method: "POST", headers: { "Content-Type": "application/json", origin: "https://als.example", host: "als.example" }, body: JSON.stringify({ password }) });
 }
 beforeEach(() => {
-  vi.stubEnv("REGISTRATION_SETUP_SECRET", "REMOVED_TEST_SECRET");
-  state.available = true; state.currentError = false; state.currentThrows = false; state.userId = "student-a"; state.sessionId = "session-a"; state.role = "student"; state.active = true;
-  state.grant = makeSetupGrant(state.userId, state.sessionId);
+  vi.stubEnv("REGISTRATION_SETUP_SECRET", randomBytes(32).toString("hex"));
+  state.available = true; state.currentError = false; state.currentThrows = false; state.claimSub = "student-a"; state.userId = "student-a"; state.sessionId = "session-a"; state.role = "student"; state.active = true; state.claimStatus = "claimed"; state.claimOverride = undefined;
+  state.grant = "A".repeat(43);
   state.update.mockReset().mockResolvedValue({ error: null }); state.signOut.mockReset().mockResolvedValue({ error: null }); state.deleteCookie.mockReset();
 });
 describe("registration password setup boundary", () => {
@@ -33,7 +36,7 @@ describe("registration password setup boundary", () => {
   it("updates the intended active student and signs out after success", async () => {
     expect((await POST(request())).status).toBe(200);
     expect(state.update).toHaveBeenCalledOnce();
-    expect(state.update).toHaveBeenCalledWith({ password: "REMOVED_TEST_PASSWORD" });
+    expect(state.update).toHaveBeenCalledWith({ password: testPassword });
     expect(state.signOut).toHaveBeenCalledWith({ scope: "global" });
     expect(state.deleteCookie).toHaveBeenCalledOnce();
   });
@@ -85,8 +88,38 @@ describe("registration password setup boundary", () => {
       expect(String(log.mock.calls[0][0])).not.toContain("private provider detail");
     } finally { log.mockRestore(); }
   });
+  it("rejects a verified claims subject that differs from the Auth user", async () => {
+    state.claimSub = "student-b";
+    expect((await POST(request())).status).toBe(401);
+    expect(state.update).not.toHaveBeenCalled();
+  });
+  it("does not claim expiry when a cleared grant could follow an uncertain write", async () => {
+    state.grant = "";
+    const response = await POST(request());
+    expect(response.status).toBe(401);
+    const body = await response.json();
+    expect(body.error).toContain("may have changed");
+    expect(body.error).not.toContain("has expired");
+    expect(state.update).not.toHaveBeenCalled();
+  });
+  it.each(["invalid", "unavailable", "unresolved", "used", "expired"])("keeps %s diagnostics out of public errors", async status => {
+    state.claimStatus = status;
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
+    try {
+      const response = await POST(request());
+      expect(response.status).toBe(401);
+      expect((await response.json()).error).toBe("This setup link is unavailable or has already been used. If you submitted a password, it may have changed. Contact admissions before trying again.");
+      expect(JSON.parse(String(log.mock.calls[0][0]))).toEqual({ event: "registration_setup_claim_denied", classification: status });
+      expect(state.update).not.toHaveBeenCalled();
+    } finally { log.mockRestore(); }
+  });
+  it.each([null, [], { status: "unexpected" }, { status: "claimed" }, { status: "claimed", operation_id: "not-a-uuid" }])("fails closed on malformed claim result %#", async result => {
+    state.claimOverride = result;
+    expect((await POST(request())).status).toBe(503);
+    expect(state.update).not.toHaveBeenCalled();
+  });
   it("rejects a grant issued to a different account", async () => {
-    state.userId = "student-b";
+    state.userId = "student-b"; state.claimSub = "student-b";
     expect((await POST(request())).status).toBe(401);
     expect(state.update).not.toHaveBeenCalled();
   });
