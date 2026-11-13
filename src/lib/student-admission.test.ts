@@ -1,6 +1,8 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "Aa1!" + Array.from(fixtureRandomBytes(14), byte => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"[byte % 63]).join("");
 import {describe,it,expect} from "vitest";
 import {admissionErrors,type StudentAdmission} from "./student-admission";
-const form:StudentAdmission={full_name:"Test Student",email:"qa@example.test",password:"REDACTED_TEST_CREDENTIAL",phone:"+971 500 000000",admission_on:"2026-10-15",program_id:"03f9163c-8642-41cc-a96e-83ffebaafce4",batch_id:"9980aeeb-c22d-4323-a837-69712fbb782c",access_starts_at:"2026-10-15T08:00:00Z",access_expires_at:null,unassigned:false,is_active:true,guardian_name:"",guardian_phone:"",guardian_relationship:"",address:"",internal_notes:""};
+const form:StudentAdmission={full_name:"Test Student",email:"qa@example.test",password:generatedFixtureCredential1,phone:"+971 500 000000",admission_on:"2026-10-15",program_id:"03f9163c-8642-41cc-a96e-83ffebaafce4",batch_id:"9980aeeb-c22d-4323-a837-69712fbb782c",access_starts_at:"2026-10-15T08:00:00Z",access_expires_at:null,unassigned:false,is_active:true,guardian_name:"",guardian_phone:"",guardian_relationship:"",address:"",internal_notes:""};
 describe("student admission validation",()=>{
   it("accepts a complete coded admission and explicit no expiry",()=>expect(admissionErrors(form)).toEqual({}));
   it("requires program and batch together for admission",()=>expect(admissionErrors({...form,program_id:"",batch_id:""})).toMatchObject({program_id:expect.any(String),batch_id:expect.any(String)}));

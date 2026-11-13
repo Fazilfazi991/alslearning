@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a1-" + Array.from(fixtureRandomBytes(36), byte => "abcdefghijklmnopqrstuvwxyz0123456789-"[byte % 37]).join("");
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const gate = vi.hoisted(() => ({ available: true }));
 vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return gate.available; } }));
@@ -9,7 +11,7 @@ import { sendRegistrationInvitation } from "./registration-invitation";
 beforeEach(() => {
   gate.available = true;
   vi.stubEnv("REGISTRATION_INVITATION_ENABLED", "true");
-  vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+  vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
   vi.stubEnv("REGISTRATION_SITE_URL", "https://als.example");
   mock.rpc.mockImplementation(async name => ({ data: name === "registration_setup_recovery_for_invitation" ? null : true, error: null }));
   mock.resetPasswordForEmail.mockResolvedValue({ error: null });

@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(9), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const rpc = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/enquiries-server", () => ({ enquiryService: () => ({ rpc }) }));
@@ -5,7 +7,7 @@ import { POST } from "./route";
 const body = { fullName: "Test Student", email: "student@example.test", phone: "+919876543210", qualification: "BSc MLT", institution: "Test College", programId: "b3548351-7268-4d05-87f8-f5804d333b5d", preferredBatchId: null, notes: "", consent: true, requestId: "30435434-6d02-43bc-a93e-4c1b638af675", website: "" };
 function request(value: unknown, origin = "https://als.example") { return new Request("https://als.example/api/registrations", { method: "POST", headers: { "content-type": "application/json", origin, host: "als.example" }, body: JSON.stringify(value) }); }
 describe("registration endpoint", () => {
-  beforeEach(() => { rpc.mockReset(); vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "REDACTED_TEST_CREDENTIAL"); vi.stubEnv("ENQUIRY_TRUSTED_IP_HEADER", ""); });
+  beforeEach(() => { rpc.mockReset(); vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", generatedFixtureCredential1); vi.stubEnv("ENQUIRY_TRUSTED_IP_HEADER", ""); });
   it("rejects invalid, cross-origin, honeypot and oversized submissions before calling storage", async () => {
     expect((await POST(request(body, "https://elsewhere.example"))).status).toBe(403);
     expect((await POST(request({ ...body, consent: false }))).status).toBe(400);

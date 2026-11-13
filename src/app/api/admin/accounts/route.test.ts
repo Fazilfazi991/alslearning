@@ -1,10 +1,13 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "Aa1-" + Array.from(fixtureRandomBytes(8), byte => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-"[byte % 63]).join("");
+const generatedFixtureCredential2 = "a1-" + Array.from(fixtureRandomBytes(18), byte => "abcdefghijklmnopqrstuvwxyz0123456789-"[byte % 37]).join("");
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mock = vi.hoisted(() => ({ getUser: vi.fn(), single: vi.fn(), select: vi.fn(), eq: vi.fn(), order: vi.fn(), update: vi.fn(), createUser: vi.fn(), deleteUser: vi.fn(), updateUserById: vi.fn(), adminClient: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser: mock.getUser }, from: () => ({ select: mock.select, update: mock.update }) }) }));
 vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: mock.adminClient }));
 import { GET, POST, PATCH } from "./route";
 const targetId = "e9e32ed8-f751-4a5c-86c6-cc3dc5f61f74";
-const payload = { role: "teacher", email: "teacher@example.test", full_name: "Test Teacher", password: "REDACTED_TEST_CREDENTIAL" };
+const payload = { role: "teacher", email: "teacher@example.test", full_name: "Test Teacher", password: generatedFixtureCredential1 };
 const request = (method: string, body?: unknown, origin = "https://alslearning.vercel.app") => new Request("https://alslearning.vercel.app/api/admin/accounts?role=teacher", { method, headers: { origin, host: "alslearning.vercel.app", "content-type": "application/json" }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
 
 describe("Admin account administration", () => {
@@ -33,7 +36,7 @@ describe("Admin account administration", () => {
     expect((await POST(request("POST", { ...payload, role }))).status).toBe(400);
     expect(mock.adminClient).not.toHaveBeenCalled();
   });
-  it.each([{ email: "invalid" }, { full_name: " " }, { password: "short" }, { password: "REDACTED_TEST_CREDENTIAL" }])("validates required input %j", async change => {
+  it.each([{ email: "invalid" }, { full_name: " " }, { password: "short" }, { password: generatedFixtureCredential2 }])("validates required input %j", async change => {
     expect((await POST(request("POST", { ...payload, ...change }))).status).toBe(400);
     expect(mock.createUser).not.toHaveBeenCalled();
   });

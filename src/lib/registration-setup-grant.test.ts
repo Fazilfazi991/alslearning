@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a1-" + Array.from(fixtureRandomBytes(36), byte => "abcdefghijklmnopqrstuvwxyz0123456789-"[byte % 37]).join("");
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { assertRegistrationSetupConfigured, makeRegistrationRecoveryGrant, newSetupCapability, readRegistrationRecoveryGrant, setupCapabilityDigest, validRegistrationRecoveryGrant } from "./registration-setup-grant";
 describe("registration setup credentials", () => {
@@ -11,7 +13,7 @@ describe("registration setup credentials", () => {
   });
   it("fails closed with a missing secret",()=>{vi.stubEnv("REGISTRATION_SETUP_SECRET","");expect(()=>assertRegistrationSetupConfigured()).toThrow();});
   it("expires and binds the recovery grant to registration and student", () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     const grant=makeRegistrationRecoveryGrant("registration","student",1000);
     expect(validRegistrationRecoveryGrant(grant,"registration","student",1001)).toBe(true);
     expect(validRegistrationRecoveryGrant(grant,"registration","other",1001)).toBe(false);
@@ -20,7 +22,7 @@ describe("registration setup credentials", () => {
     expect(setupCapabilityDigest(grant)).toBeNull();
   });
   it("binds an authorized replacement to the signed recovery proof", () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     const recoveryId = "7f7122cb-39e8-470b-bc17-afcaed947233";
     const grant = makeRegistrationRecoveryGrant("registration", "student", 1000, recoveryId);
     expect(readRegistrationRecoveryGrant(grant, 1001)).toEqual({ registrationId: "registration", userId: "student", recoveryId });

@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(44), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ run: vi.fn() }));
@@ -6,7 +8,7 @@ vi.mock("@/lib/live-class/staging-cleanup", () => ({ runStagingCleanup: mocks.ru
 import { POST } from "./route";
 
 const url = "https://als-staging.example.test/api/internal/live-cleanup";
-const token = "REDACTED_TEST_CREDENTIAL";
+const token = generatedFixtureCredential1;
 
 describe("staging cleanup machine endpoint", () => {
   beforeEach(() => {

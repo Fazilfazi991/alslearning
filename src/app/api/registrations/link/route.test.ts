@@ -1,10 +1,12 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(9), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { beforeEach, expect, it, vi } from "vitest";
 const rpc = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/enquiries-server", () => ({ enquiryService: () => ({ rpc }) }));
 import { POST } from "./route";
 const token = "A".repeat(43);
 const request = (body: unknown, origin = "https://als.example") => new Request("https://als.example/api/registrations/link", { method: "POST", headers: { host: "als.example", origin, "content-type": "application/json" }, body: JSON.stringify(body) });
-beforeEach(() => { rpc.mockReset(); vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "REDACTED_TEST_CREDENTIAL"); vi.stubEnv("ENQUIRY_TRUSTED_IP_HEADER", ""); });
+beforeEach(() => { rpc.mockReset(); vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", generatedFixtureCredential1); vi.stubEnv("ENQUIRY_TRUSTED_IP_HEADER", ""); });
 it("rejects cross-origin, malformed and oversized requests", async () => {
   expect((await POST(request({ token }, "https://elsewhere.example"))).status).toBe(403);
   expect((await POST(request({ token: "short" }))).status).toBe(400);

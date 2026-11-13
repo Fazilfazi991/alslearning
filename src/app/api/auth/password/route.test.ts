@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(16), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mock = vi.hoisted(() => ({
   signInWithPassword: vi.fn(), signOut: vi.fn(), single: vi.fn(), eq: vi.fn(),
@@ -14,7 +16,7 @@ import { POST } from "./route";
 const request = (body: unknown, origin = "https://alslearning.vercel.app") => new Request("https://alslearning.vercel.app/api/auth/password", {
   method: "POST", headers: { "content-type": "application/json", origin, host: "alslearning.vercel.app" }, body: JSON.stringify(body),
 });
-const credentials = { email: "person@example.test", password: "REDACTED_TEST_CREDENTIAL" };
+const credentials = { email: "person@example.test", password: generatedFixtureCredential1 };
 
 describe("password login", () => {
   beforeEach(() => {

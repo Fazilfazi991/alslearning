@@ -1,10 +1,13 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "Aa1!" + Array.from(fixtureRandomBytes(10), byte => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"[byte % 63]).join("");
+const generatedFixtureCredential2 = "Aa1!" + Array.from(fixtureRandomBytes(10), byte => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"[byte % 63]).join("");
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mock = vi.hoisted(() => ({ getUser: vi.fn(), single: vi.fn(), signInWithPassword: vi.fn(), updateUser: vi.fn(), temporarySignOut: vi.fn(), signOut: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser: mock.getUser, signOut: mock.signOut }, from: () => ({ select: () => ({ eq: () => ({ single: mock.single }) }) }) }) }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({ auth: { signInWithPassword: mock.signInWithPassword, updateUser: mock.updateUser, signOut: mock.temporarySignOut } }) }));
 vi.mock("@/lib/supabase/config", () => ({ supabaseConfig: () => ({ url: "https://example.supabase.co", key: "test-public-key" }) }));
 import { POST } from "./route";
-const body = { current_password: "REDACTED_TEST_CREDENTIAL", password: "REDACTED_TEST_CREDENTIAL" };
+const body = { current_password: generatedFixtureCredential1, password: generatedFixtureCredential2 };
 const request = (value: unknown = body, origin = "https://alslearning.vercel.app") => new Request("https://localhost:3000/api/account/password", { method: "POST", headers: { origin, host: "alslearning.vercel.app", "content-type": "application/json" }, body: JSON.stringify(value) });
 describe("self-service password changes", () => {
   beforeEach(() => {

@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a1-" + Array.from(fixtureRandomBytes(36), byte => "abcdefghijklmnopqrstuvwxyz0123456789-"[byte % 37]).join("");
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const gate = vi.hoisted(() => ({ available: true }));
 vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return gate.available; } }));
@@ -56,7 +58,7 @@ describe("approved student invite", () => {
     expect(exchange).not.toHaveBeenCalled();
   });
   it("redeems only an invitation token and issues a secure setup grant", async () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     registration.mockResolvedValue({data:{id:"registration"},error:null});
     const verifyOtp=vi.fn().mockResolvedValue({data:{user:{id:"student"}},error:null});
     exchange.mockResolvedValue({auth:{verifyOtp,getClaims:vi.fn().mockResolvedValue({data:{claims:{sub:"student",session_id:"session"}},error:null})},from:()=>({select:()=>({eq:()=>({single:async()=>({data:{role:"student",is_active:true},error:null})})})})});
@@ -67,7 +69,7 @@ describe("approved student invite", () => {
     expect(response.headers.get("set-cookie")).toContain("Secure");
   });
   it("accepts recovery only with an admin-signed grant for the approved student", async () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     vi.stubEnv("REGISTRATION_RECOVERY_ENABLED", "true");
     registration.mockResolvedValue({data:{id:"registration"},error:null});
     const verifyOtp=vi.fn().mockResolvedValue({data:{user:{id:"student"}},error:null});
@@ -78,14 +80,14 @@ describe("approved student invite", () => {
     expect(response.headers.get("location")).toBe("https://alslearning.vercel.app/auth/setup");
   });
   it("rejects a public recovery link without an admin grant before redeeming the token", async () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     vi.stubEnv("REGISTRATION_RECOVERY_ENABLED", "true");
     const response=await submit("token_hash=one-time&type=recovery");
     expect(response.headers.get("location")).toContain("/login?error=invalid-link");
     expect(exchange).not.toHaveBeenCalled();
   });
   it("binds a verified replacement proof to its authorized operation", async () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     vi.stubEnv("REGISTRATION_RECOVERY_ENABLED", "true");
     registration.mockResolvedValue({ data: { id: "registration" }, error: null });
     exchange.mockResolvedValue({ auth: { verifyOtp: vi.fn().mockResolvedValue({ data: { user: { id: "student" } }, error: null }), getClaims: vi.fn().mockResolvedValue({ data: { claims: { sub: "student", session_id: "session" } }, error: null }) }, from: () => ({ select: () => ({ eq: () => ({ single: async () => ({ data: { role: "student", is_active: true }, error: null }) }) }) }) });
@@ -96,7 +98,7 @@ describe("approved student invite", () => {
     expect(rpc).toHaveBeenCalledWith("issue_registration_setup_replacement", expect.objectContaining({ p_registration: "registration", p_student: "student", p_session: "session", p_recovery: recoveryId }));
   });
   it("rejects signed recovery for a different approved identity", async () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     vi.stubEnv("REGISTRATION_RECOVERY_ENABLED", "true");
     registration.mockResolvedValue({data:{id:"registration"},error:null});
     const signOut=vi.fn().mockResolvedValue({error:null});
@@ -107,7 +109,7 @@ describe("approved student invite", () => {
     expect(signOut).toHaveBeenCalledWith({scope:"local"});
   });
   it("signs out the verified session when claims cannot be obtained", async () => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     registration.mockResolvedValue({ data: { id: "registration" }, error: null });
     const signOut = vi.fn().mockResolvedValue({ error: null });
     exchange.mockResolvedValue({ auth: { verifyOtp: vi.fn().mockResolvedValue({ data: { user: { id: "student" } }, error: null }), getClaims: vi.fn().mockResolvedValue({ data: null, error: {} }), signOut } });
@@ -116,7 +118,7 @@ describe("approved student invite", () => {
     expect(signOut).toHaveBeenCalledWith({ scope: "local" });
   });
   it.each(["returned", "thrown"])("records uncertain revocation for %s errors without disclosing credentials", async mode => {
-    vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
     registration.mockResolvedValue({ data: null, error: null });
     const signOut = mode === "returned" ? vi.fn().mockResolvedValue({ error: { message: "private detail" } }) : vi.fn().mockRejectedValue(new Error("private detail"));
     exchange.mockResolvedValue({ auth: { verifyOtp: vi.fn().mockResolvedValue({ data: { user: { id: "student" } }, error: null }), signOut } });

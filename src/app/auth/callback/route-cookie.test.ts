@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(15), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
@@ -22,7 +24,7 @@ beforeEach(() => {
   state.approved = true; state.incoming = [];
   vi.stubEnv("REGISTRATION_SETUP_SECRET", randomBytes(32).toString("hex"));
   vi.stubEnv("REGISTRATION_SITE_URL", "https://als.example");
-  vi.stubGlobal("fetch", vi.fn(async input => String(input).includes("logout") ? new Response(null, { status: 204 }) : Response.json({ access_token: jwt, token_type: "bearer", expires_in: 3600, refresh_token: "REDACTED_TEST_CREDENTIAL", user: { id: "student", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: { fixture: "x".repeat(9000) }, created_at: "2026-01-01T00:00:00Z" } })));
+  vi.stubGlobal("fetch", vi.fn(async input => String(input).includes("logout") ? new Response(null, { status: 204 }) : Response.json({ access_token: jwt, token_type: "bearer", expires_in: 3600, refresh_token: generatedFixtureCredential1, user: { id: "student", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: { fixture: "x".repeat(9000) }, created_at: "2026-01-01T00:00:00Z" } })));
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 const submit = () => POST(new Request("https://als.example/auth/callback", { method: "POST", headers: { origin: "https://als.example", "content-type": "application/x-www-form-urlencoded" }, body: "token_hash=synthetic&type=invite" }));

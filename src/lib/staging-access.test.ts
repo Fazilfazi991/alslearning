@@ -1,3 +1,7 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(28), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
+const generatedFixtureCredential2 = "a-" + Array.from(fixtureRandomBytes(12), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
+const generatedFixtureCredential3 = "a-" + Array.from(fixtureRandomBytes(52), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stagingAccessResponse } from "./staging-access";
@@ -8,8 +12,8 @@ describe("staging access gate", () => {
   beforeEach(() => {
     vi.stubEnv("ALS_STAGING_MODE", "true");
     vi.stubEnv("ALS_STAGING_ORIGIN", origin);
-    vi.stubEnv("ALS_STAGING_ACCESS_PHRASE", "REDACTED_TEST_CREDENTIAL");
-    vi.stubEnv("ALS_STAGING_COOKIE_SECRET", "REDACTED_TEST_CREDENTIAL");
+    vi.stubEnv("ALS_STAGING_ACCESS_PHRASE", generatedFixtureCredential1);
+    vi.stubEnv("ALS_STAGING_COOKIE_SECRET", generatedFixtureCredential3);
   });
   afterEach(() => vi.unstubAllEnvs());
 
@@ -46,7 +50,7 @@ describe("staging access gate", () => {
     expect(nonce).toMatch(/^[A-Za-z0-9_-]{32}$/);
     const formCookie = (page?.headers.get("set-cookie") || "").split(";")[0];
     expect(formCookie).toContain("als_staging_form=");
-    const body = new URLSearchParams({ password: "REDACTED_TEST_CREDENTIAL", csrf: nonce! });
+    const body = new URLSearchParams({ password: generatedFixtureCredential1, csrf: nonce! });
     const crossOrigin = await stagingAccessResponse(new NextRequest(`${origin}/_staging-access`, {
       method: "POST", headers: { origin: "https://other.example.test" }, body,
     }));
@@ -71,7 +75,7 @@ describe("staging access gate", () => {
     const formCookie = (page?.headers.get("set-cookie") || "").split(";")[0];
     const wrong = await stagingAccessResponse(new NextRequest(`${origin}/_staging-access`, {
       method: "POST", headers: { cookie: formCookie },
-      body: new URLSearchParams({ password: "REDACTED_TEST_CREDENTIAL", csrf: nonce! }),
+      body: new URLSearchParams({ password: generatedFixtureCredential2, csrf: nonce! }),
     }));
     expect(wrong?.status).toBe(401);
     expect(await wrong?.text()).toContain("Access phrase not accepted.");
@@ -82,7 +86,7 @@ describe("staging access gate", () => {
     const page = await stagingAccessResponse(new NextRequest(`${origin}/_staging-access`));
     const nonce = (await page!.text()).match(/name="csrf" value="([A-Za-z0-9_-]+)"/)?.[1];
     const formCookie = (page?.headers.get("set-cookie") || "").split(";")[0];
-    const body = new URLSearchParams({ password: "REDACTED_TEST_CREDENTIAL", csrf: nonce! });
+    const body = new URLSearchParams({ password: generatedFixtureCredential1, csrf: nonce! });
     const tampered = await stagingAccessResponse(new NextRequest(`${origin}/_staging-access`, {
       method: "POST", headers: { cookie: `${formCookie}x` }, body,
     }));
