@@ -4,6 +4,8 @@ import {createHash} from 'node:crypto';
 import {query,QA,PRODUCTION} from './helper-grants-lib.mjs';
 import {productionImportClients} from './production-import-client.mjs';
 const stage=process.argv[2]||'before';
+const adminId=process.env.ALS_PERFORMANCE_ADMIN_ID || '';
+if(stage==='before' && !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(adminId)) throw new Error('Provide ALS_PERFORMANCE_ADMIN_ID for the read-only profile measurement.');
 const contentSql=['questions','question_options','question_answer_keys','question_media','subjects','chapters'].map(t=>`select '${t}' name,count(*) count,md5(coalesce(string_agg(to_jsonb(r)::text,'' order by to_jsonb(r)::text),'')) hash from public.${t} r`).join(' union all ');
 const fingerprints={};
 for(const ref of [QA,PRODUCTION]) fingerprints[ref]={content:await query(ref,contentSql),counts:await query(ref,`select s.name,q.status,count(*) from public.questions q join public.subjects s on s.id=q.subject_id group by s.name,q.status order by s.name,q.status`)};
@@ -15,7 +17,7 @@ const {admin}=await productionImportClients();
 const measurements=[];
 async function time(name,work){const start=performance.now();const result=await work();if(result.error)throw result.error;measurements.push({name,ms:Math.round(performance.now()-start),rows:Array.isArray(result.data)?result.data.length:undefined,bytes:Buffer.byteLength(JSON.stringify(result.data)),count:result.count});return result.data;}
 await time('auth/getUser',()=>admin.auth.getUser());
-await time('profile',()=>admin.from('profiles').select('role,is_active').eq('id','REDACTED_ADMIN_ID').single());
+await time('profile',()=>admin.from('profiles').select('role,is_active').eq('id',adminId).single());
 await Promise.all(['subjects','chapters','entrance_exams','programs','topics','batches','faculty_assignments','program_subjects'].map(t=>time(t,()=>admin.from(t).select('*'))));
 await time('unrelated tests',()=>admin.from('tests').select('*,test_questions(question_id),test_batches(batch_id)'));
 await time('unrelated learning content',()=>admin.from('learning_content').select('*,content_batch_access(batch_id)'));
