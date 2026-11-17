@@ -1,7 +1,9 @@
 import "server-only";
+import { registrationPasswordSetupAvailable } from "@/lib/registration-setup-availability";
 import { randomUUID } from "node:crypto";
 import { createAuthAdminClient } from "@/lib/supabase/admin";
 import { makeRegistrationRecoveryGrant } from "@/lib/registration-setup-grant";
+import { registrationSiteOrigin } from "@/lib/registration-site-origin";
 
 /** Only call after the approved registration has been independently verified. */
 export async function sendRegistrationInvitation(registrationId: string, studentId: string, email: string): Promise<"sent" | "failed" | "deferred"> {
@@ -9,15 +11,16 @@ export async function sendRegistrationInvitation(registrationId: string, student
   // guards in the target environment. Never fall back to a request Host header.
   // No attempt is made when delivery is intentionally disabled. The database
   // keeps its not_sent state so administrators can find and follow it up.
-  if (process.env.REGISTRATION_INVITATION_ENABLED !== "true") return "deferred";
+  if (!registrationPasswordSetupAvailable || process.env.REGISTRATION_INVITATION_ENABLED !== "true") return "deferred";
   if ((process.env.REGISTRATION_SETUP_SECRET?.length ?? 0) < 32) return "failed";
-  let origin: URL;
-  try { origin = new URL(process.env.REGISTRATION_SITE_URL ?? ""); if (origin.protocol !== "https:" || origin.pathname !== "/" || origin.search || origin.hash || origin.username || origin.password) return "failed"; }
-  catch { return "failed"; }
+  const origin = registrationSiteOrigin();
+  if (!origin) return "failed";
   const root = createAuthAdminClient(), attemptId = randomUUID();
   try {
     const ready = await root.rpc("registration_invitation_ready");
     if (ready.error || ready.data !== true) return "failed";
+    const available = await root.rpc("registration_setup_invitation_available", { p_registration: registrationId, p_student: studentId });
+    if (available.error || available.data !== true) return "deferred";
     const claim = await root.rpc("claim_registration_invitation", { p_registration_id: registrationId, p_attempt_id: attemptId });
     if (claim.error || claim.data !== true) return "failed";
     let sent = false;
@@ -32,9 +35,11 @@ export async function sendRegistrationInvitation(registrationId: string, student
           // template. A signed parameter prevents public provider recovery
           // requests from being accepted as administrator-authorized setup.
           const redirect = new URL("/auth/callback", origin);
-          redirect.searchParams.set("registration_recovery", makeRegistrationRecoveryGrant(registrationId, studentId));
-          const recovery = await root.auth.resetPasswordForEmail(email, { redirectTo: redirect.toString() });
-          sent = !recovery.error;
+          const recovery = await root.rpc("registration_setup_recovery_for_invitation", { p_registration: registrationId, p_student: studentId });
+          if (recovery.error || (recovery.data !== null && typeof recovery.data !== "string")) throw new Error("Recovery unavailable");
+          redirect.searchParams.set("registration_recovery", makeRegistrationRecoveryGrant(registrationId, studentId, undefined, recovery.data ?? undefined));
+          const dispatched = await root.auth.resetPasswordForEmail(email, { redirectTo: redirect.toString() });
+          sent = !dispatched.error;
         }
       }
     } catch { sent = false; }

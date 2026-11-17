@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:17
     environment:
-      POSTGRES_PASSWORD: REMOVED_TEST_DATABASE_PASSWORD
+      POSTGRES_PASSWORD: ${ALS_LOCAL_DB_PASSWORD:?Local database password required}
       POSTGRES_DB: gotrue
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d gotrue"]
@@ -25,14 +25,15 @@ services:
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: http://127.0.0.1:19421
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://postgres:REMOVED_TEST_DATABASE_PASSWORD@db:5432/gotrue?search_path=auth
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${ALS_LOCAL_DB_PASSWORD:?Local database password required}@db:5432/gotrue?search_path=auth
       GOTRUE_SITE_URL: http://127.0.0.1:19422
       GOTRUE_URI_ALLOW_LIST: http://127.0.0.1:19422/**
       GOTRUE_DISABLE_SIGNUP: "false"
-      GOTRUE_JWT_SECRET: REMOVED_TEST_SIGNING_KEY
+      GOTRUE_JWT_SECRET: ${ALS_LOCAL_JWT_SECRET:?Local JWT secret required}
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       GOTRUE_JWT_EXP: 3600
+      GOTRUE_PASSWORD_MIN_LENGTH: ${ALS_LOCAL_PASSWORD_MIN_LENGTH:-6}
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
       GOTRUE_MAILER_AUTOCONFIRM: "false"
       GOTRUE_SMTP_HOST: mail
@@ -40,3 +41,17 @@ services:
       GOTRUE_SMTP_ADMIN_EMAIL: noreply@example.test
       GOTRUE_SMTP_SENDER_NAME: Local Test
       GOTRUE_MAILER_URLPATHS_INVITE: /verify
+      GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: ${ALS_LOCAL_HOOK_ENABLED:-false}
+      GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: pg-functions://postgres/public/als_active_account_auth_hook
+  rest:
+    image: public.ecr.aws/supabase/postgrest:v16.5
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:19423:3000"
+    environment:
+      PGRST_DB_URI: postgres://postgres:${ALS_LOCAL_DB_PASSWORD:?Local database password required}@db:5432/gotrue
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${ALS_LOCAL_JWT_SECRET:?Local JWT secret required}

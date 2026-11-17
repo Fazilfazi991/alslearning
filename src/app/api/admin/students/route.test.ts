@@ -1,3 +1,5 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "Aa1!" + Array.from(fixtureRandomBytes(13), byte => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"[byte % 63]).join("");
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mock=vi.hoisted(()=>({batch:vi.fn(),occupied:vi.fn(),createUser:vi.fn(),ready:vi.fn(),enquiry:vi.fn(),profile:vi.fn(),deleteUser:vi.fn()}));
 vi.mock("@/lib/admin-session",()=>({adminSession:async()=>({user:{id:"admin"},db:{rpc:mock.ready,from:(table:string)=>{
@@ -6,7 +8,7 @@ vi.mock("@/lib/admin-session",()=>({adminSession:async()=>({user:{id:"admin"},db
 vi.mock("@/lib/supabase/admin",()=>({createAuthAdminClient:()=>({auth:{admin:{createUser:mock.createUser,deleteUser:mock.deleteUser}}})}));
 import { POST } from "./route";
 const program="10000000-0000-4000-8000-000000000001",batch="10000000-0000-4000-8000-000000000002";
-const admission={full_name:"Synthetic Student",email:"student@example.test",password:"REDACTED_TEST_CREDENTIAL",phone:"",admission_on:"2026-10-15",program_id:program,batch_id:batch,access_starts_at:"2026-10-15T00:00:00Z",access_expires_at:null,unassigned:false,is_active:true,guardian_name:"",guardian_phone:"",guardian_relationship:"",address:"",internal_notes:""};
+const admission={full_name:"Synthetic Student",email:"student@example.test",password:generatedFixtureCredential1,phone:"",admission_on:"2026-10-15",program_id:program,batch_id:batch,access_starts_at:"2026-10-15T00:00:00Z",access_expires_at:null,unassigned:false,is_active:true,guardian_name:"",guardian_phone:"",guardian_relationship:"",address:"",internal_notes:""};
 const request=(changes:Record<string,unknown>={})=>new Request("https://als.example/api/admin/students",{method:"POST",headers:{origin:"https://als.example",host:"als.example","Content-Type":"application/json"},body:JSON.stringify({...admission,...changes})});
 describe("admission batch preflight",()=>{
   beforeEach(()=>{vi.resetAllMocks();mock.ready.mockResolvedValue({data:true,error:null});mock.batch.mockResolvedValue({data:{id:batch,program_id:program,batch_code:"DHLT26A",status:"active",max_students:3},error:null});mock.occupied.mockReturnValue({count:3,error:null});});

@@ -1,0 +1,16 @@
+services:
+  auth:
+    image: public.ecr.aws/supabase/gotrue@sha256:1736a63078f5922b198c4cbe50f80ab9a2d3b54fe8b7b6cfb2e9dc5dbbc12c6b
+    environment:
+      GOTRUE_MAILER_TEMPLATES_INVITE: http://template:8080/invite
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: http://template:8080/recovery
+  template:
+    image: node:24-bookworm-slim
+    volumes:
+      - ./browser-template.mjs:/browser-template.mjs:ro
+    command: ["node", "/browser-template.mjs"]
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.244.197.0/24

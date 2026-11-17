@@ -1,24 +1,42 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a1-" + Array.from(fixtureRandomBytes(36), byte => "abcdefghijklmnopqrstuvwxyz0123456789-"[byte % 37]).join("");
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const gate = vi.hoisted(() => ({ available: true }));
+vi.mock("@/lib/registration-setup-availability", () => ({ get registrationPasswordSetupAvailable() { return gate.available; } }));
 const mock = vi.hoisted(() => ({ rpc: vi.fn(), getUserById: vi.fn(), inviteUserByEmail: vi.fn(), resetPasswordForEmail: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase/admin", () => ({ createAuthAdminClient: () => ({ rpc: mock.rpc, auth: { admin: { getUserById: mock.getUserById, inviteUserByEmail: mock.inviteUserByEmail }, resetPasswordForEmail: mock.resetPasswordForEmail } }) }));
 import { sendRegistrationInvitation } from "./registration-invitation";
 
 beforeEach(() => {
+  gate.available = true;
   vi.stubEnv("REGISTRATION_INVITATION_ENABLED", "true");
-  vi.stubEnv("REGISTRATION_SETUP_SECRET", "REDACTED_TEST_CREDENTIAL");
+  vi.stubEnv("REGISTRATION_SETUP_SECRET", generatedFixtureCredential1);
   vi.stubEnv("REGISTRATION_SITE_URL", "https://als.example");
-  mock.rpc.mockResolvedValue({ data: true, error: null });
+  mock.rpc.mockImplementation(async name => ({ data: name === "registration_setup_recovery_for_invitation" ? null : true, error: null }));
   mock.resetPasswordForEmail.mockResolvedValue({ error: null });
   mock.inviteUserByEmail.mockResolvedValue({ data: { user: { id: "student" } }, error: null });
 });
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 describe("registration invitation recovery", () => {
+  it("defers without dispatch while password setup is unavailable", async () => {
+    gate.available = false;
+    expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("deferred");
+    expect(mock.rpc).not.toHaveBeenCalled();
+    expect(mock.inviteUserByEmail).not.toHaveBeenCalled();
+  });
   it("defers delivery without attempting an invitation when email is disabled", async () => {
     vi.stubEnv("REGISTRATION_INVITATION_ENABLED", "false");
     expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("deferred");
     expect(mock.rpc).not.toHaveBeenCalled();
     expect(mock.inviteUserByEmail).not.toHaveBeenCalled();
+  });
+  it("does not dispatch a resend while setup is unresolved", async () => {
+    mock.rpc.mockImplementation(async name => name === "registration_setup_invitation_available" ? { data: false, error: null } : { data: true, error: null });
+    expect(await sendRegistrationInvitation("registration", "student", "student@example.test")).toBe("deferred");
+    expect(mock.inviteUserByEmail).not.toHaveBeenCalled();
+    expect(mock.resetPasswordForEmail).not.toHaveBeenCalled();
+    expect(mock.rpc.mock.calls.some(([name]) => name === "claim_registration_invitation")).toBe(false);
   });
   it("invites an unconfirmed approved identity", async () => {
     mock.getUserById.mockResolvedValue({ data: { user: { id: "student", email: "student@example.test", email_confirmed_at: null } }, error: null });

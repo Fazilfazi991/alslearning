@@ -1,0 +1,13 @@
+# Registration setup containment and coordination
+
+This draft is not a release-ready onboarding flow. `registrationPasswordSetupAvailable` is hard-coded false. It prevents invitation dispatch and registration callback/setup execution in this application, regardless of the email flag. It does not restrict direct Supabase Auth operations. Do not enable it until the ordering and acceptance gates below are met.
+
+## Shared contract for joint design
+
+The existing security candidate uses the account advisory lock and session epoch for database transactions. Those cannot serialize an already-dispatched managed Auth password update. A second read is not an atomic barrier. The registration and security owners must demonstrate a supported mechanism that orders password update against deactivation, session revocation, epoch changes and independent Auth bans, including a worker crash and a lost response. No database transaction may be held open across the network call. If this cannot be demonstrated, setup stays disabled; an operation journal alone is not proof that a late update was prevented.
+
+Any proposal must specify: the authorization check and current session/epoch binding; which component owns deactivation and independent bans; the point at which dispatch becomes irrevocable; how an unknown external outcome is quarantined and reconciled; and how access remains denied throughout deactivation. It must provide deterministic tests for both deactivation orderings, session revocation, stale grants after reactivation, an independent ban, process termination and lost provider response. Joint review is required before any shared contract change.
+
+The callback buffers SSR Auth cookie writes and publishes them only after its local checks. A failed post-verification sign-out emits a structured event with a correlation ID and verified user ID, without token, session secret, password, email or URL. This is a best-effort operational log, not a durable queue or proof of revocation. Log retention/access and a session-specific reconciliation mechanism remain unverified. Existing browser cookies are preserved on failed verification; newly buffered cookies are discarded. The guard currently prevents reaching this draft verification path in production code.
+
+The proposed GET/POST split protects against scanners that only follow links, not scanners that submit forms. It also depends on an approved Auth template linking directly to the callback with the token hash, rather than first consuming a Supabase confirmation URL. Hosted template, proxy origin, real delivery and fresh-device redemption must be tested in a coordinated staging window with an approved synthetic inbox. Canonical production origin remains unverified.

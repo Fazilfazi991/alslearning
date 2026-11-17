@@ -1,6 +1,8 @@
+import { randomBytes as fixtureRandomBytes } from "node:crypto";
+const generatedFixtureCredential1 = "a-" + Array.from(fixtureRandomBytes(30), byte => "abcdefghijklmnopqrstuvwxyz-"[byte % 27]).join("");
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { enquiryRateIdentity } from "./enquiries-rate-limit";
-const secret = "REDACTED_TEST_CREDENTIAL";
+const secret = generatedFixtureCredential1;
 const now = 1793930400;
 function request(cookie?: string, address?: string) { return new Request("https://als.example/api/enquiries", { headers: { ...(cookie ? { cookie } : {}), ...(address ? { "cf-connecting-ip": address } : {}) } }); }
 const cookieOf = (cookie: string | null) => cookie!.split(";")[0];
